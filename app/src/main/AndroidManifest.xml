@@ -12,6 +12,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MD_02_DATN">
         <activity
+            android:name=".MainActivityTEST"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
         <activity
