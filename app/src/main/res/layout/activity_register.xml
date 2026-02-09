@@ -1,10 +1,173 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".RegisterActivity">
+    android:background="#0E1620">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Back -->
+        <ImageView
+            android:layout_marginTop="20dp"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:src="@drawable/ic_back"
+            android:tint="@android:color/white"/>
+
+        <TextView
+
+            android:id="@+id/tvBack"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Register"
+            android:textColor="@android:color/white"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginTop="-24dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Create Account"
+            android:textColor="@android:color/white"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:layout_marginTop="40dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Join Core-Tech for the best electronics deals."
+            android:textColor="#9AA7B2"
+            android:textSize="14sp"
+            android:layout_marginTop="6dp"/>
+
+        <!-- Full name -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Full Name"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="30dp"/>
+
+        <EditText
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/edt_email"
+            android:hint="Enter your full name"
+            android:padding="14dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="#7F8C99"/>
+
+        <!-- Email -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="30dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/edt_email"
+            android:hint="example@coretech.com"
+            android:inputType="textEmailAddress"
+            android:padding="14dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="#7F8C99"/>
+
+        <!-- Phone -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Phone Number"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="30dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/edt_email"
+            android:hint="+1 (555) 000-0000"
+            android:inputType="phone"
+            android:padding="14dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="#7F8C99"
+            android:layout_marginTop="10dp"/>
+
+        <!-- Password -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Password"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="30dp"/>
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@drawable/edt_email"
+            android:hint="Create a strong password"
+            android:inputType="textPassword"
+            android:padding="14dp"
+            android:textColor="@android:color/white"
+            android:textColorHint="#7F8C99"
+            android:layout_marginTop="10dp"
+            android:drawableEnd="@drawable/ic_eye"/>
+
+        <!-- Confirm -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Confirm Password"
+            android:textColor="@android:color/white"
+            android:layout_marginTop="30dp"/>
+
+        <EditText
+            android:layout_marginTop="10dp"
+            android:id="@+id/edtPassword"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:drawableEnd="@drawable/ic_eye"
+            android:drawablePadding="10dp"
+            android:paddingEnd="16dp"
+            android:background="@drawable/edt_email"
+            android:textColor="@android:color/white"
+            android:textColorHint="#7F8C99"/>
+
+
+        <!-- Checkbox -->
+        <CheckBox
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="I agree to the Terms of Service and Privacy Policy."
+            android:textColor="#9AA7B2"
+            android:layout_marginTop="30dp"/>
+
+        <!-- Register button -->
+        <androidx.appcompat.widget.AppCompatButton
+
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Register"
+            android:textColor="@android:color/white"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:background="@drawable/btn_login"
+            android:layout_marginTop="24dp">
+
+        </androidx.appcompat.widget.AppCompatButton>
+
+
+    </LinearLayout>
+</ScrollView>

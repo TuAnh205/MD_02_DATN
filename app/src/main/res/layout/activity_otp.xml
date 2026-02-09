@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0E1620"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- Back -->
+        <ImageView
+            android:layout_marginTop="20dp"
+            android:id="@+id/btnBack"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:src="@drawable/ic_back"
+            android:tint="@android:color/white"/>
+
+        <!-- Image -->
+        <ImageView
+            android:layout_width="140dp"
+            android:layout_height="140dp"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center"
+            android:src="@drawable/otp"/>
+
+        <!-- Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="32dp"
+            android:text="Verify Your Identity"
+            android:textSize="28sp"
+            android:layout_gravity="center"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"/>
+
+        <!-- Desc -->
+        <TextView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="Enter the 6-digit code sent to your email"
+            android:textColor="#9AA7B2"
+            android:textSize="14sp"/>
+
+        <!-- OTP boxes -->
+        <LinearLayout
+            android:layout_marginTop="42dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:weightSum="6">
+
+            <EditText
+                android:id="@+id/otp1"
+                style="@style/OtpBox"/>
+
+            <EditText
+                android:id="@+id/otp2"
+                style="@style/OtpBox"/>
+
+            <EditText
+                android:id="@+id/otp3"
+                style="@style/OtpBox"/>
+
+            <EditText
+                android:id="@+id/otp4"
+                style="@style/OtpBox"/>
+
+            <EditText
+                android:id="@+id/otp5"
+                style="@style/OtpBox"/>
+
+            <EditText
+                android:id="@+id/otp6"
+                style="@style/OtpBox"/>
+
+        </LinearLayout>
+
+        <!-- Button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:layout_marginTop="300dp"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="Verify"
+            android:textStyle="bold"
+            android:textColor="@android:color/white"
+            android:background="@drawable/btn_login"/>
+
+        <!-- Resend -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:layout_gravity="center"
+            android:text="Didn’t receive code?"
+            android:textColor="#9AA7B2"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tvResend"
+            android:layout_gravity="center"
+            android:text="Resend OTP"
+            android:textColor="#1E88E5"
+            android:textStyle="bold"/>
+
+    </LinearLayout>
+</ScrollView>

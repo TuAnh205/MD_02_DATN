@@ -1,10 +1,191 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".LoginActivity">
+    android:background="#0B1C2D">
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="24dp">
+
+        <!-- Header -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="CORE-TECH"
+            android:textColor="#FFFFFF"
+            android:textStyle="bold"
+            android:textSize="16sp"
+            android:layout_marginTop="20dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Welcome -->
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Welcome to CORE-\nTECH"
+            android:textColor="#FFFFFF"
+            android:textSize="32sp"
+            android:textStyle="bold"/>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Your gateway to the next generation of electronics."
+            android:textColor="#9AA7B2"
+            android:textSize="14sp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="32dp"/>
+
+        <!-- Email -->
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Email or Phone Number"
+            android:textColor="#FFFFFF"
+            android:textSize="14sp"/>
+
+        <EditText
+            android:id="@+id/edt_Email"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Enter your email"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#7A8896"
+            android:background="@drawable/edt_email"
+            android:padding="16dp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Password title -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="20dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Password"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp"/>
+
+            <TextView
+                android:id="@+id/tvResetPass"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Forgot Password?"
+                android:textColor="#2F80FF"
+                android:textSize="13sp"/>
+        </LinearLayout>
+
+        <!-- Password input -->
+        <EditText
+            android:id="@+id/edt_Pass"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Enter your password"
+            android:inputType="textPassword"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#7A8896"
+            android:background="@drawable/edt_email"
+            android:padding="16dp"
+            android:layout_marginTop="8dp"/>
+
+        <!-- Login button -->
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btn_login"
+            android:text="Login"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@null"
+            android:stateListAnimator="@null"
+            android:textColor="#FFFFFF"
+
+            android:background="@drawable/btn_login"
+            android:layout_marginTop="32dp"
+            android:layout_width="match_parent"
+            android:layout_height="56dp">
+
+        </androidx.appcompat.widget.AppCompatButton>
+
+
+        <!-- OR -->
+        <TextView
+
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="OR CONTINUE WITH"
+            android:textColor="#7A8896"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_marginTop="52dp"
+            android:layout_marginBottom="16dp"/>
+
+        <!-- Social -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="52dp"
+            >
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="  Google"
+                android:textColor="#FFFFFF"
+                android:layout_margin="10dp"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:background="@drawable/btn_ggfb"/>
+
+            <androidx.appcompat.widget.AppCompatButton
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1"
+                android:text="  FaceBook"
+                android:textColor="#FFFFFF"
+                android:layout_margin="10dp"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:background="@drawable/btn_ggfb"/>
+
+
+        </LinearLayout>
+
+        <!-- Sign up -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_marginTop="50dp"
+            android:orientation="horizontal">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Don’t have an account?"
+                android:textColor="#9AA7B2"
+                android:textSize="14sp"
+                android:gravity="center"
+              />
+            <TextView
+                android:id="@+id/tvSignUp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Sign Up"
+                android:textColor="#034DFF"
+                android:textSize="14sp"
+                android:gravity="center"
+               />
+        </LinearLayout>
+
+
+    </LinearLayout>
+</ScrollView>
