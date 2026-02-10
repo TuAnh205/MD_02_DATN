@@ -96,7 +96,8 @@
             android:textColorHint="#7A8896"
             android:background="@drawable/edt_email"
             android:padding="16dp"
-            android:layout_marginTop="8dp"/>
+            android:layout_marginTop="8dp"
+            android:drawableEnd="@drawable/ic_eye"/>
 
         <!-- Login button -->
         <androidx.appcompat.widget.AppCompatButton

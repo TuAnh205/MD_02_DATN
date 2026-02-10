@@ -55,7 +55,9 @@
             android:textColor="@android:color/white"
             android:layout_marginTop="30dp"/>
 
+
         <EditText
+            android:id="@+id/edtFullName"
             android:layout_marginTop="10dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"
@@ -74,6 +76,7 @@
             android:layout_marginTop="30dp"/>
 
         <EditText
+            android:id="@+id/edtEmail"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:layout_marginTop="10dp"
@@ -93,6 +96,7 @@
             android:layout_marginTop="30dp"/>
 
         <EditText
+            android:id="@+id/edtPhoneNumber"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@drawable/edt_email"
@@ -112,6 +116,7 @@
             android:layout_marginTop="30dp"/>
 
         <EditText
+            android:id="@+id/edtPass1"
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:background="@drawable/edt_email"
@@ -133,7 +138,7 @@
 
         <EditText
             android:layout_marginTop="10dp"
-            android:id="@+id/edtPassword"
+            android:id="@+id/edtPass2"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:hint="Password"
@@ -148,6 +153,7 @@
 
         <!-- Checkbox -->
         <CheckBox
+            android:id="@+id/checkRegis"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="I agree to the Terms of Service and Privacy Policy."
@@ -156,7 +162,7 @@
 
         <!-- Register button -->
         <androidx.appcompat.widget.AppCompatButton
-
+            android:id="@+id/btnRegister"
             android:layout_width="match_parent"
             android:layout_height="56dp"
             android:text="Register"
