@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
+import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.dbhelper.DBHelper;
 import com.anhnvt_ph55017.md_02_datn.models.Category;
 
@@ -22,14 +23,14 @@ public class CategoryDAO {
         List<Category> list = new ArrayList<>();
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery("SELECT * FROM category", null);
+        Cursor c = db.rawQuery("SELECT id,name,image FROM categories", null);
 
         if (c.moveToFirst()) {
             do {
                 list.add(new Category(
-                        c.getInt(c.getColumnIndexOrThrow("id")),
-                        c.getString(c.getColumnIndexOrThrow("name")),
-                        c.getInt(c.getColumnIndexOrThrow("icon"))
+                        c.getInt(0),
+                        c.getString(1),
+                        c.getInt(2)
                 ));
             } while (c.moveToNext());
         }

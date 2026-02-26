@@ -1,21 +1,23 @@
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    android:orientation="horizontal"
-    android:padding="10dp"
-    android:background="@drawable/bg_category">
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:background="@drawable/bg_category"
+    android:layout_marginEnd="12dp">
 
     <ImageView
         android:id="@+id/imgCategoryIcon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:tint="@color/white"/>
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:tint="@android:color/white"/>
 
     <TextView
         android:id="@+id/tvCategoryName"
+        android:layout_marginTop="6dp"
+        android:textColor="@android:color/white"
+        android:textSize="14sp"
+        android:textStyle="bold"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="@color/white"
-        android:layout_marginStart="8dp"/>
+        android:layout_height="wrap_content"/>
 </LinearLayout>

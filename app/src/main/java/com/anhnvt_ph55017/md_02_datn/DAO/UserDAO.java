@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 
 import com.anhnvt_ph55017.md_02_datn.dbhelper.DBHelper;
+import com.anhnvt_ph55017.md_02_datn.models.User;
 
 public class UserDAO {
 
@@ -15,7 +16,7 @@ public class UserDAO {
         dbHelper = new DBHelper(context);
     }
 
-    // Đăng ký
+    // REGISTER
     public boolean register(String fullname, String email, String phone, String password) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
@@ -29,28 +30,30 @@ public class UserDAO {
         return result != -1;
     }
 
-    // Kiểm tra đăng nhập
+    // LOGIN
     public boolean login(String email, String password) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
         Cursor cursor = db.rawQuery(
-                "SELECT * FROM users WHERE email = ? AND password = ?",
+                "SELECT id FROM users WHERE email = ? AND password = ?",
                 new String[]{email, password}
         );
 
-        boolean ok = cursor.getCount() > 0;
+        boolean ok = cursor.moveToFirst();
         cursor.close();
         return ok;
     }
 
-    // Check email tồn tại chưa
+    // CHECK EMAIL
     public boolean checkEmailExists(String email) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
+
         Cursor cursor = db.rawQuery(
-                "SELECT * FROM users WHERE email = ?",
+                "SELECT id FROM users WHERE email = ?",
                 new String[]{email}
         );
-        boolean exists = cursor.getCount() > 0;
+
+        boolean exists = cursor.moveToFirst();
         cursor.close();
         return exists;
     }

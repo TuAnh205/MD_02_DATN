@@ -20,14 +20,9 @@ import com.anhnvt_ph55017.md_02_datn.models.Product;
 
 
 import java.util.List;
-
 public class HomeFragment extends Fragment {
 
     RecyclerView rvCategory, rvProduct;
-
-    public HomeFragment() {
-        // Required empty public constructor
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,25 +30,23 @@ public class HomeFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-        // ÁNH XẠ
         rvCategory = view.findViewById(R.id.rvCategory);
         rvProduct  = view.findViewById(R.id.rvProduct);
 
-        // ===== CATEGORY (HORIZONTAL) =====
         CategoryDAO categoryDAO = new CategoryDAO(getContext());
-        List<Category> categoryList = categoryDAO.getAll();
+        ProductDAO productDAO   = new ProductDAO(getContext());
 
         rvCategory.setLayoutManager(
-                new LinearLayoutManager(getContext(), LinearLayoutManager.HORIZONTAL, false)
+                new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false)
         );
-        rvCategory.setAdapter(new CategoryAdapter(categoryList));
-
-        // ===== PRODUCT (GRID 2 CỘT) =====
-        ProductDAO productDAO = new ProductDAO(getContext());
-        List<Product> productList = productDAO.getAll();
+        rvCategory.setAdapter(
+                new CategoryAdapter(categoryDAO.getAll())
+        );
 
         rvProduct.setLayoutManager(new GridLayoutManager(getContext(), 2));
-        rvProduct.setAdapter(new ProductAdapter(productList));
+        rvProduct.setAdapter(
+                new ProductAdapter(productDAO.getAll())
+        );
 
         return view;
     }

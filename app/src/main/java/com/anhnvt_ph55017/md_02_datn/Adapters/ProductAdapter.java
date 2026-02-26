@@ -39,6 +39,25 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.tvName.setText(product.getName());
         holder.tvPrice.setText("$" + product.getPrice());
         holder.imgProduct.setImageResource(product.getImage());
+        // ❤️ set icon theo trạng thái
+        holder.imgFavorite.setImageResource(
+                product.isFavorite()
+                        ? R.drawable.heart_solid_full
+                        : R.drawable.heart_regular_full
+        );
+
+        // ❤️ CLICK TIM
+        holder.imgFavorite.setOnClickListener(v -> {
+            product.setFavorite(!product.isFavorite());
+
+            holder.imgFavorite.setImageResource(
+                    product.isFavorite()
+                            ? R.drawable.heart_solid_full
+                            : R.drawable.heart_regular_full
+            );
+        });
+// ⭐ demo rating cứng (sau này lấy từ DB)
+        holder.tvRating.setText("4.8 (210)");
     }
 
     @Override
@@ -48,15 +67,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
-        ImageView imgProduct;
-        TextView tvName, tvPrice;
+        ImageView imgProduct, imgFavorite;
+        TextView tvName, tvPrice, tvRating;
         ImageButton btnAdd;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             imgProduct = itemView.findViewById(R.id.imgProduct);
+            imgFavorite = itemView.findViewById(R.id.imgFavorite);
             tvName = itemView.findViewById(R.id.tvProductName);
             tvPrice = itemView.findViewById(R.id.tvProductPrice);
+            tvRating = itemView.findViewById(R.id.tvRating);
             btnAdd = itemView.findViewById(R.id.btnAdd);
         }
     }
