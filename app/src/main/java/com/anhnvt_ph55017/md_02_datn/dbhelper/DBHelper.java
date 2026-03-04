@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 6; // 🔥 tăng version
+    private static final int DB_VERSION = 7; // 🔥 tăng version
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -22,7 +22,7 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "CREATE TABLE users (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
-                        "fullname TEXT," +               // ✅ ĐỔI name -> fullname
+                        "fullname TEXT," +
                         "email TEXT UNIQUE," +
                         "password TEXT," +
                         "phone TEXT," +
@@ -55,13 +55,30 @@ public class DBHelper extends SQLiteOpenHelper {
                         "categoryId INTEGER," +
                         "name TEXT," +
                         "price REAL," +
-                        "image INTEGER,"+
+                        "oldPrice REAL," +
+                        "image INTEGER," +
                         "description TEXT," +
                         "stock INTEGER," +
+                        "rating REAL DEFAULT 0," +
+                        "reviewCount INTEGER DEFAULT 0," +
+                        "isFavorite INTEGER DEFAULT 0," +
                         "status INTEGER DEFAULT 1," +
                         "createdAt TEXT," +
                         "updatedAt TEXT," +
                         "FOREIGN KEY(categoryId) REFERENCES categories(id)" +
+                        ")"
+        );
+        //-------------------review
+        db.execSQL(
+                "CREATE TABLE reviews (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "productId INTEGER," +
+                        "userId INTEGER," +
+                        "rating REAL," +
+                        "comment TEXT," +
+                        "createdAt TEXT," +
+                        "FOREIGN KEY(productId) REFERENCES products(id)," +
+                        "FOREIGN KEY(userId) REFERENCES users(id)" +
                         ")"
         );
         // ===== DATA MẪU =====
@@ -71,10 +88,11 @@ public class DBHelper extends SQLiteOpenHelper {
                 "('Headphone'," + R.drawable.ic_headphone + ")"
         );
 
-        db.execSQL("INSERT INTO products(categoryId,name,price,image,stock) VALUES " +
-                "(1,'MacBook Pro',2500," + R.drawable.anh1 + ",10)," +
-                "(2,'iPhone 15',1200," + R.drawable.anh2   + ",20)," +
-                "(3,'Sony WH-1000XM5',500," + R.drawable.anh3 + ",15)"
+        db.execSQL(
+                "INSERT INTO products(categoryId,name,price,oldPrice,image,stock,rating,reviewCount,isFavorite) VALUES " +
+                        "(1,'MacBook Pro',2500,3000," + R.drawable.anh1 + ",10,4.8,120,0)," +
+                        "(2,'iPhone 15',1200,1400," + R.drawable.anh2 + ",20,4.6,95,0)," +
+                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh3 + ",15,4.9,210,0)"
         );
 
         /* ================= CARTS ================= */
@@ -162,6 +180,8 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL("DROP TABLE IF EXISTS cart_items");
         db.execSQL("DROP TABLE IF EXISTS carts");
         db.execSQL("DROP TABLE IF EXISTS products");
+        db.execSQL("DROP TABLE IF EXISTS reviews");
+
         db.execSQL("DROP TABLE IF EXISTS categories");
         db.execSQL("DROP TABLE IF EXISTS users");
         onCreate(db);

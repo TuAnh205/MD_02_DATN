@@ -45,7 +45,7 @@ public class HomeFragment extends Fragment {
 
         rvProduct.setLayoutManager(new GridLayoutManager(getContext(), 2));
         rvProduct.setAdapter(
-                new ProductAdapter(productDAO.getAll())
+                new ProductAdapter(getContext(),productDAO.getAll())
         );
 
         return view;

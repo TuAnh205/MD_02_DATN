@@ -1,9 +1,10 @@
-package com.anhnvt_ph55017.md_02_datn;
+package com.anhnvt_ph55017.md_02_datn.screens;
 
 import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BrowseFragment;
 import com.anhnvt_ph55017.md_02_datn.fragments.HomeFragment;
 import com.anhnvt_ph55017.md_02_datn.fragments.OrdersFragment;

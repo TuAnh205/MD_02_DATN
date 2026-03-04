@@ -14,22 +14,23 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.MD_02_DATN">
         <activity
-            android:name=".OTP_Activity"
+            android:name=".screens.DetailActivity"
             android:exported="false" />
         <activity
-            android:name=".ResetPass"
+            android:name=".screens.OTP_Activity"
             android:exported="false" />
         <activity
-            android:name=".LoadingActivity"
-            android:exported="true">
-
-        </activity>
+            android:name=".screens.ResetPass"
+            android:exported="false" />
+        <activity
+            android:name=".screens.LoadingActivity"
+            android:exported="true"></activity>
         <activity
             android:name=".MainActivityTEST"
             android:exported="false" />
         <activity
-            android:name=".MainActivity"
-            android:exported="true" >
+            android:name=".screens.MainActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -46,10 +47,10 @@
             android:name=".HomeActivity"
             android:exported="false" />
         <activity
-            android:name=".RegisterActivity"
+            android:name=".screens.RegisterActivity"
             android:exported="false" />
         <activity
-            android:name=".LoginActivity"
+            android:name=".screens.LoginActivity"
             android:exported="false" />
         <activity
             android:name=".Welcome"

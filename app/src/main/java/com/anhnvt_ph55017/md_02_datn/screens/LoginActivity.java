@@ -1,4 +1,4 @@
-package com.anhnvt_ph55017.md_02_datn;
+package com.anhnvt_ph55017.md_02_datn.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
+import com.anhnvt_ph55017.md_02_datn.R;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -44,22 +45,22 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login() {
-        String email = edtEmail.getText().toString().trim().toLowerCase();
-        String password = edtPass.getText().toString().trim();
-
-        if (email.isEmpty() || password.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ email và mật khẩu", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        boolean success = userDAO.login(email, password);
-
-        if (success) {
-            Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+//        String email = edtEmail.getText().toString().trim().toLowerCase();
+//        String password = edtPass.getText().toString().trim();
+//
+//        if (email.isEmpty() || password.isEmpty()) {
+//            Toast.makeText(this, "Vui lòng nhập đầy đủ email và mật khẩu", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//
+//        boolean success = userDAO.login(email, password);
+//
+//        if (success) {
+//            Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
             startActivity(new Intent(this, MainActivity.class));
             finish();
-        } else {
-            Toast.makeText(this, "Sai email hoặc mật khẩu", Toast.LENGTH_SHORT).show();
-        }
+//        } else {
+//            Toast.makeText(this, "Sai email hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+//        }
     }
 }

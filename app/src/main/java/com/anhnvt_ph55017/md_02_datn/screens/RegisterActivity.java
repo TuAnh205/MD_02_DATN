@@ -1,4 +1,4 @@
-package com.anhnvt_ph55017.md_02_datn;
+package com.anhnvt_ph55017.md_02_datn.screens;
 
 import android.os.Bundle;
 import android.text.InputType;
@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.AppCompatButton;
 
 import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
+import com.anhnvt_ph55017.md_02_datn.R;
 
 public class RegisterActivity extends AppCompatActivity {
 

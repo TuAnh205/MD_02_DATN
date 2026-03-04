@@ -5,12 +5,33 @@ public class Product {
     String name;
     double price;
     int image;
+    String description;
+    int stock;
     boolean isFavorite = false;
-    public Product(int id, String name, double price, int image) {
+    public Product(int id, String name, double price, int image,
+                   String description, int stock) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.image = image;
+        this.description = description;
+        this.stock = stock;
+    }
+
+    public int getStock() {
+        return stock;
+    }
+
+    public void setStock(int stock) {
+        this.stock = stock;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public int getId() { return id; }
