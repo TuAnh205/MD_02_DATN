@@ -1,20 +1,32 @@
 package com.anhnvt_ph55017.md_02_datn.screens;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
+import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
+import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.DAO.ProductDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
-
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+
+import java.util.List;
 
 public class DetailActivity extends AppCompatActivity {
 
     ImageView imgProduct;
-    TextView tvName, tvPrice, tvDesc, tvStock;
+    TextView tvName, tvPrice, tvRating, tvDesc;
+    Button btnAddCart;
+    CartDAO cartDAO;
+    RecyclerView rvRelated;
+    ProductDAO productDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,20 +36,46 @@ public class DetailActivity extends AppCompatActivity {
         imgProduct = findViewById(R.id.imgProduct);
         tvName = findViewById(R.id.tvName);
         tvPrice = findViewById(R.id.tvPrice);
+        tvRating = findViewById(R.id.tvRating);
         tvDesc = findViewById(R.id.tvDesc);
-        tvStock = findViewById(R.id.tvStock);
+        rvRelated = findViewById(R.id.rvRelated);
+        btnAddCart = findViewById(R.id.btnAddCart);
 
-        int id = getIntent().getIntExtra("id", -1);
+        Intent intent = getIntent();
 
-        ProductDAO productDAO = new ProductDAO(this);
-        Product product = productDAO.getById(id);
+        cartDAO = new CartDAO(this);
 
-        if (product != null) {
-            imgProduct.setImageResource(product.getImage());
-            tvName.setText(product.getName());
-            tvPrice.setText("$" + product.getPrice());
-            tvDesc.setText(product.getDescription());
-            tvStock.setText("Stock: " + product.getStock());
-        }
+// lấy id sản phẩm
+        int productId = intent.getIntExtra("id",0);
+
+        btnAddCart.setOnClickListener(v -> {
+
+            cartDAO.addToCart(1, productId); // userId tạm = 1
+
+            Toast.makeText(DetailActivity.this,
+                    "Added to cart",
+                    Toast.LENGTH_SHORT).show();
+
+        });
+
+
+
+        imgProduct.setImageResource(intent.getIntExtra("image",0));
+        tvName.setText(intent.getStringExtra("name"));
+        tvPrice.setText("$" + intent.getDoubleExtra("price",0));
+        tvDesc.setText(intent.getStringExtra("desc"));
+
+        float rating = intent.getFloatExtra("rating",4.5f);
+        int review = intent.getIntExtra("reviewCount",100);
+
+        tvRating.setText("⭐ " + rating + " (" + review + " reviews)");
+
+        /* RELATED PRODUCTS */
+
+        productDAO = new ProductDAO(this);
+        List<Product> list = productDAO.getAll();
+
+        rvRelated.setLayoutManager(new GridLayoutManager(this,2));
+        rvRelated.setAdapter(new ProductAdapter(this,list));
     }
 }

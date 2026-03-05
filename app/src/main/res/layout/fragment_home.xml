@@ -36,6 +36,7 @@
                 android:layout_weight="1"/>
 
             <ImageView
+                android:id="@+id/imgCart"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
                 android:src="@drawable/ic_cart"
@@ -50,7 +51,7 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Search tech, brands..."
-            android:textColor="@android:color/white"
+            android:textColor="@color/black"
             android:textColorHint="#7A8896"
             android:padding="12dp"
             android:background="@drawable/bg_search"/>

@@ -21,7 +21,7 @@ import java.util.List;
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
     List<Product> list;
-    Context context;   // 🔥 thêm context
+    Context context;
 
     public ProductAdapter(Context context, List<Product> list) {
         this.context = context;
@@ -31,9 +31,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View v = LayoutInflater.from(context)
+
+        View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_product, parent, false);
-        return new ViewHolder(v);
+
+        return new ViewHolder(view);
     }
 
     @Override
@@ -45,29 +47,45 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.tvPrice.setText("$" + product.getPrice());
         holder.imgProduct.setImageResource(product.getImage());
 
-        // ❤️ set icon theo trạng thái
-        holder.imgFavorite.setImageResource(
-                product.isFavorite()
-                        ? R.drawable.heart_solid_full
-                        : R.drawable.heart_regular_full
-        );
+        // ⭐ rating
+        holder.tvRating.setText(product.getRating() + " (" + product.getReviewCount() + ")");
 
-        // ❤️ CLICK TIM
+        // ❤️ favorite icon
+        if(product.isFavorite()){
+            holder.imgFavorite.setImageResource(R.drawable.heart_solid_full);
+        }else{
+            holder.imgFavorite.setImageResource(R.drawable.heart_regular_full);
+        }
+
+        // ❤️ click tim
         holder.imgFavorite.setOnClickListener(v -> {
+
             product.setFavorite(!product.isFavorite());
-            notifyItemChanged(position);
+            notifyItemChanged(holder.getAdapterPosition());
+
         });
 
-        // 🔥 CLICK ITEM → chỉ truyền ID
+        // 🔥 click item → mở detail
         holder.itemView.setOnClickListener(v -> {
+
             Intent intent = new Intent(context, DetailActivity.class);
+
             intent.putExtra("id", product.getId());
+            intent.putExtra("name", product.getName());
+            intent.putExtra("price", product.getPrice());
+            intent.putExtra("image", product.getImage());
+            intent.putExtra("desc", product.getDescription());
+            intent.putExtra("rating", product.getRating());
+            intent.putExtra("reviewCount", product.getReviewCount());
+
             context.startActivity(intent);
+
         });
-
-        holder.tvRating.setText("4.8 (210)");
     }
-
+    public void setData(List<Product> list){
+        this.list = list;
+        notifyDataSetChanged();
+    }
     @Override
     public int getItemCount() {
         return list.size();

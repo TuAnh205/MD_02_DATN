@@ -6,6 +6,8 @@ public class Product {
     double price;
     int image;
     String description;
+    float rating;
+    int reviewCount;
     int stock;
     boolean isFavorite = false;
     public Product(int id, String name, double price, int image,
@@ -17,7 +19,13 @@ public class Product {
         this.description = description;
         this.stock = stock;
     }
+    public float getRating() {
+        return rating;
+    }
 
+    public int getReviewCount() {
+        return reviewCount;
+    }
     public int getStock() {
         return stock;
     }

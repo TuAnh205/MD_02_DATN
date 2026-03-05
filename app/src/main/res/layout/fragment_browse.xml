@@ -1,14 +1,127 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragments.BrowseFragment">
+    android:background="#0B1A2B">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="2" />
+        android:layout_height="wrap_content">
 
-</FrameLayout>
+        <!-- SEARCH BAR -->
+
+        <EditText
+            android:id="@+id/edtSearch"
+            android:hint="Search tech, brands..."
+            android:textColor="#000000"
+            android:padding="12dp"
+            android:background="@drawable/bg_search"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+        <!-- Recent -->
+
+        <TextView
+            android:text="Recent Searches"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#fff"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Gaming Laptops 2024"
+                android:textColor="#ccc"
+                android:padding="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Wireless Noise Cancelling"
+                android:textColor="#ccc"
+                android:padding="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="Mechanical Keyboards"
+                android:textColor="#ccc"
+                android:padding="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+
+        <!-- Trending -->
+
+        <TextView
+            android:text="Trending Categories"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#fff"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <GridLayout
+            android:columnCount="2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <Button
+                android:text="Gaming"
+                android:layout_margin="6dp"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="Smart Home"
+                android:layout_margin="6dp"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="Wearables"
+                android:layout_margin="6dp"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_height="wrap_content"/>
+
+            <Button
+                android:text="Audio"
+                android:layout_margin="6dp"
+                android:layout_width="0dp"
+                android:layout_columnWeight="1"
+                android:layout_height="wrap_content"/>
+
+        </GridLayout>
+
+        <!-- PRODUCT LIST -->
+
+        <TextView
+            android:text="Recommended for you"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="#fff"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSearchProducts"
+            android:layout_marginTop="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
+
+</ScrollView>

@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 7; // 🔥 tăng version
+    private static final int DB_VERSION = 9; // 🔥 tăng version
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -89,10 +89,13 @@ public class DBHelper extends SQLiteOpenHelper {
         );
 
         db.execSQL(
-                "INSERT INTO products(categoryId,name,price,oldPrice,image,stock,rating,reviewCount,isFavorite) VALUES " +
-                        "(1,'MacBook Pro',2500,3000," + R.drawable.anh1 + ",10,4.8,120,0)," +
-                        "(2,'iPhone 15',1200,1400," + R.drawable.anh2 + ",20,4.6,95,0)," +
-                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh3 + ",15,4.9,210,0)"
+                "INSERT INTO products(categoryId,name,price,oldPrice,image,description,stock,rating,reviewCount,isFavorite) VALUES " +
+
+                        "(1,'MacBook Pro',2500,3000," + R.drawable.anh1 + ",'Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators.',10,4.8,120,0)," +
+                        "(1,'Laptop Pro',2500,3000," + R.drawable.laptop2 + ",'Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators.',10,4.8,120,0)," +
+                        "(2,'iPhone 15',1200,1400," + R.drawable.anh2 + ",'Latest Apple smartphone with A17 chip, dynamic island, improved cameras and all-day battery life.',20,4.6,95,0)," +
+                        "(2,'SamSung s25',1200,1400," + R.drawable.phone2 + ",'Latest Apple smartphone with A17 chip, dynamic island, improved cameras and all-day battery life.',20,4.6,95,0)," +
+                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh3 + ",'Industry leading noise cancelling headphones with crystal clear sound and 30 hours battery life.',15,4.9,210,0)"
         );
 
         /* ================= CARTS ================= */

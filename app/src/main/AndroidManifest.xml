@@ -41,7 +41,7 @@
             android:name=".SettingActivity"
             android:exported="false" />
         <activity
-            android:name=".CartActivity"
+            android:name=".screens.CartActivity"
             android:exported="false" />
         <activity
             android:name=".HomeActivity"
