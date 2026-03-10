@@ -19,8 +19,14 @@ export default function Header() {
         </Link>
 
         <nav className="flex items-center gap-8">
-          <Link to="/products" className="text-dark hover:text-primary transition">
-            Sản Phẩm
+          <Link to="/" className="text-dark hover:text-primary transition">
+            Trang Chủ
+          </Link>
+          <Link to="/cart" className="text-dark hover:text-primary transition">
+            🛒 Giỏ Hàng
+          </Link>
+          <Link to="/orders" className="text-dark hover:text-primary transition">
+            📦 Đơn Hàng
           </Link>
 
           {user ? (

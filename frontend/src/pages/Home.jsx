@@ -15,7 +15,7 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       const response = await api.get('/products?limit=10&page=1');
-      setProducts(response.data.products || []);
+      setProducts(response.data.data || []);
     } catch (err) {
       console.error('Error fetching products:', err);
     } finally {
@@ -54,9 +54,9 @@ export default function Home() {
             {products.map((product) => (
               <Link key={product._id} to={`/products/${product._id}`}>
                 <div className="card hover:shadow-lg cursor-pointer">
-                  {product.image && (
+                  {(product.image || product.images?.[0]) && (
                     <img
-                      src={product.image}
+                      src={product.image || product.images?.[0]}
                       alt={product.name}
                       className="w-full h-48 object-cover rounded mb-4"
                     />

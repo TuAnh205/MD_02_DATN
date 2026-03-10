@@ -1,0 +1,43 @@
+import api from './api';
+
+export const orderService = {
+  createOrder: async (orderData) => {
+    try {
+      const response = await api.post('/orders', orderData);
+      return response.data;
+    } catch (err) {
+      console.error('Error creating order:', err);
+      throw err;
+    }
+  },
+
+  getOrders: async () => {
+    try {
+      const response = await api.get('/orders');
+      return response.data;
+    } catch (err) {
+      console.error('Error getting orders:', err);
+      throw err;
+    }
+  },
+
+  getOrderById: async (orderId) => {
+    try {
+      const response = await api.get(`/orders/${orderId}`);
+      return response.data;
+    } catch (err) {
+      console.error('Error getting order:', err);
+      throw err;
+    }
+  },
+
+  markPaid: async (orderId) => {
+    try {
+      const response = await api.patch(`/orders/${orderId}/mark-paid`);
+      return response.data;
+    } catch (err) {
+      console.error('Error marking order as paid:', err);
+      throw err;
+    }
+  }
+};

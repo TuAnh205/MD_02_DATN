@@ -3,17 +3,69 @@ const Order = require('../models/Order');
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { items, total, address, payment } = req.body;
-        if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ message: 'items required' });
-        if (total === undefined) return res.status(400).json({ message: 'total required' });
+        const { items, subtotal, total, payment, shipping } = req.body;
+        
+        console.log('Creating order with data:', { userId, items, subtotal, total, payment, shipping });
+        
+        if (!Array.isArray(items) || items.length === 0) {
+            return res.status(400).json({ message: 'items required and must be non-empty array' });
+        }
+        
+        if (total === undefined || total === null) {
+            return res.status(400).json({ message: 'total is required' });
+        }
+        
+        if (!shipping || !shipping.address) {
+            return res.status(400).json({ message: 'shipping address is required' });
+        }
 
-        const order = new Order({ user: userId, items, total, address, payment });
-        // If payment.paid true, set paidAt
-        if (payment && payment.paid) order.payment.paidAt = new Date();
+        const orderData = {
+            orderNumber: 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
+            user: userId,
+            items: items.map(item => ({
+                product: item.product,
+                name: item.name || 'Unknown Product',
+                price: item.price || 0,
+                qty: item.qty || 1,
+                image: item.image || '',
+                sku: item.sku || ''
+            })),
+            subtotal: subtotal || total || 0,
+            total: total || 0,
+            shipping: {
+                address: {
+                    name: shipping.address.name || '',
+                    phone: shipping.address.phone || '',
+                    address: shipping.address.address || '',
+                    city: shipping.address.city || 'N/A',
+                    district: shipping.address.district || 'N/A',
+                    ward: shipping.address.ward || 'N/A'
+                },
+                method: shipping.method || 'standard',
+                fee: shipping.fee || 0
+            },
+            payment: {
+                method: payment?.method || 'cod',
+                status: payment?.status || 'pending'
+            }
+        };
+
+        console.log('Order data prepared:', orderData);
+
+        const order = new Order(orderData);
         await order.save();
+        
+        console.log('Order created successfully:', order._id);
+        
         res.status(201).json(order);
     } catch (err) {
-        res.status(500).json({ message: 'Server error', error: err.message });
+        console.error('Error creating order:', err.message);
+        console.error('Full error:', err);
+        res.status(500).json({ 
+            message: 'Server error', 
+            error: err.message,
+            details: err.errors ? Object.keys(err.errors).map(k => `${k}: ${err.errors[k].message}`) : []
+        });
     }
 };
 
