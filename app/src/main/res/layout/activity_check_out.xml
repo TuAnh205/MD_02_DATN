@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="#0B1A2B"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- TITLE -->
+
+        <TextView
+            android:text="Checkout"
+            android:textColor="#FFFFFF"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        <!-- SHIPPING ADDRESS -->
+
+        <TextView
+            android:text="Shipping Address"
+            android:textColor="#A0A0A0"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:background="@drawable/bg_card"
+            android:padding="16dp"
+            android:layout_marginTop="8dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="Alex Johnson"
+                android:textColor="#FFFFFF"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="+1 (555) 012-3456"
+                android:textColor="#BBBBBB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="123 Tech Lane, Silicon District"
+                android:textColor="#BBBBBB"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+
+        <!-- PAYMENT METHOD -->
+
+        <TextView
+            android:text="Payment Method"
+            android:textColor="#A0A0A0"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        <RadioGroup
+            android:id="@+id/paymentGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/payMomo"
+                android:text="Momo Wallet"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#2F80FF"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/payZalo"
+                android:text="ZaloPay"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#2F80FF"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/payCard"
+                android:text="Credit Card"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#2F80FF"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"/>
+
+            <RadioButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/payCOD"
+                android:text="Cash On Delivery"
+                android:textColor="#FFFFFF"
+                android:buttonTint="#2F80FF"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginTop="8dp"/>
+
+        </RadioGroup>
+
+
+        <!-- VOUCHER -->
+
+        <TextView
+            android:text="Voucher"
+            android:textColor="#A0A0A0"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <EditText
+            android:id="@+id/edVoucher"
+            android:hint="Enter voucher code"
+            android:textColor="#FFFFFF"
+            android:textColorHint="#888"
+            android:background="@drawable/bg_card"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+
+        <!-- TOTAL -->
+
+        <TextView
+            android:id="@+id/tvTotal"
+            android:text="Total: $1249"
+            android:textColor="#2F80FF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+
+        <Button
+            android:id="@+id/btnOrder"
+            android:text="Place Order"
+            android:textColor="#fff"
+            android:textSize="16sp"
+            android:background="@drawable/bg_button"
+            android:layout_marginTop="16dp"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"/>
+
+
+    </LinearLayout>
+
+</ScrollView>

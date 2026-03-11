@@ -7,14 +7,31 @@
 
     <!-- TITLE -->
 
-    <TextView
-        android:text="Shopping Cart"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="#FFFFFF"
+    <LinearLayout
+        android:orientation="horizontal"
         android:padding="16dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:gravity="center_vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:text="Shopping Cart"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF"
+            android:layout_weight="1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"/>
+
+        <CheckBox
+            android:id="@+id/cbAll"
+            android:text="All"
+            android:textColor="#FFFFFF"
+            android:buttonTint="#2F80FF"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+    </LinearLayout>
 
     <!-- LIST CART -->
 
@@ -56,15 +73,22 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <Button
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCheckOut"
             android:text="Proceed to Checkout"
-            android:textColor="#fff"
-            android:background="@drawable/bg_btn_blue"
-            android:layout_marginTop="10dp"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="@null"
+            android:stateListAnimator="@null"
+            android:textColor="#FFFFFF"
+
+            android:background="@drawable/btn_login"
+            android:layout_marginTop="32dp"
             android:layout_width="match_parent"
-            android:layout_height="50dp"/>
+            android:layout_height="56dp">
+        </androidx.appcompat.widget.AppCompatButton>
 
     </LinearLayout>
 
 </LinearLayout>
-

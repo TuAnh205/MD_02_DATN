@@ -1,6 +1,7 @@
 package com.anhnvt_ph55017.md_02_datn.models;
 
 public class Product {
+
     int id;
     String name;
     double price;
@@ -10,6 +11,10 @@ public class Product {
     int reviewCount;
     int stock;
     boolean isFavorite = false;
+
+    int qty = 1;
+    boolean selected = true;
+
     public Product(int id, String name, double price, int image,
                    String description, int stock) {
         this.id = id;
@@ -19,6 +24,7 @@ public class Product {
         this.description = description;
         this.stock = stock;
     }
+
     public float getRating() {
         return rating;
     }
@@ -26,6 +32,7 @@ public class Product {
     public int getReviewCount() {
         return reviewCount;
     }
+
     public int getStock() {
         return stock;
     }
@@ -43,14 +50,36 @@ public class Product {
     }
 
     public int getId() { return id; }
+
     public String getName() { return name; }
+
     public double getPrice() { return price; }
+
     public int getImage() { return image; }
+
     public boolean isFavorite() {
         return isFavorite;
     }
 
     public void setFavorite(boolean favorite) {
         isFavorite = favorite;
+    }
+
+    // ===== thêm =====
+
+    public int getQty() {
+        return qty;
+    }
+
+    public void setQty(int qty) {
+        this.qty = qty;
+    }
+
+    public boolean isSelected() {
+        return selected;
+    }
+
+    public void setSelected(boolean selected) {
+        this.selected = selected;
     }
 }

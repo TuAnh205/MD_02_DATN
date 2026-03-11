@@ -8,10 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.DetailActivity;
@@ -47,17 +49,17 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.tvPrice.setText("$" + product.getPrice());
         holder.imgProduct.setImageResource(product.getImage());
 
-        // ⭐ rating
+        // rating
         holder.tvRating.setText(product.getRating() + " (" + product.getReviewCount() + ")");
 
-        // ❤️ favorite icon
+        // favorite icon
         if(product.isFavorite()){
             holder.imgFavorite.setImageResource(R.drawable.heart_solid_full);
         }else{
             holder.imgFavorite.setImageResource(R.drawable.heart_regular_full);
         }
 
-        // ❤️ click tim
+        // click favorite
         holder.imgFavorite.setOnClickListener(v -> {
 
             product.setFavorite(!product.isFavorite());
@@ -65,7 +67,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         });
 
-        // 🔥 click item → mở detail
+        // click item → mở detail
         holder.itemView.setOnClickListener(v -> {
 
             Intent intent = new Intent(context, DetailActivity.class);
@@ -81,14 +83,29 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             context.startActivity(intent);
 
         });
+
+        // ADD TO CART
+        holder.btnAdd.setOnClickListener(v -> {
+
+            CartDAO cartDAO = new CartDAO(context);
+
+            cartDAO.addToCart(1, product.getId()); // userId tạm = 1
+
+            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show();
+
+        });
+
     }
-    public void setData(List<Product> list){
-        this.list = list;
-        notifyDataSetChanged();
-    }
+
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    // dùng cho search filter
+    public void setData(List<Product> list){
+        this.list = list;
+        notifyDataSetChanged();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

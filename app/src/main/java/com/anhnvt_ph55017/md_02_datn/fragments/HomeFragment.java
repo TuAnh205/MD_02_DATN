@@ -2,6 +2,7 @@ package com.anhnvt_ph55017.md_02_datn.fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -24,6 +25,8 @@ public class HomeFragment extends Fragment {
     RecyclerView rvCategory, rvProduct;
     ImageView imgCart;
 
+    ProductDAO productDAO;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -31,31 +34,42 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         rvCategory = view.findViewById(R.id.rvCategory);
-        rvProduct  = view.findViewById(R.id.rvProduct);
+        rvProduct = view.findViewById(R.id.rvProduct);
         imgCart = view.findViewById(R.id.imgCart);
 
-        imgCart.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        imgCart.setOnClickListener(v -> {
 
-                Intent intent = new Intent(getActivity(), CartActivity.class);
-                startActivity(intent);
+            Intent intent = new Intent(getActivity(), CartActivity.class);
+            startActivity(intent);
 
-            }
         });
-        CategoryDAO categoryDAO = new CategoryDAO(getContext());
-        ProductDAO productDAO   = new ProductDAO(getContext());
 
+        CategoryDAO categoryDAO = new CategoryDAO(getContext());
+        productDAO = new ProductDAO(getContext());
+
+        // Recycler category
         rvCategory.setLayoutManager(
                 new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false)
         );
+
         rvCategory.setAdapter(
-                new CategoryAdapter(categoryDAO.getAll())
+                new CategoryAdapter(categoryDAO.getAll(), selectedCategory -> {
+
+                    rvProduct.setAdapter(
+                            new ProductAdapter(
+                                    getContext(),
+                                    productDAO.getByCategories(selectedCategory)
+                            )
+                    );
+
+                })
         );
 
-        rvProduct.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        // Recycler product
+        rvProduct.setLayoutManager(new GridLayoutManager(getContext(),2));
+
         rvProduct.setAdapter(
-                new ProductAdapter(getContext(),productDAO.getAll())
+                new ProductAdapter(getContext(), productDAO.getAll())
         );
 
         return view;
