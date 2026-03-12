@@ -6,15 +6,42 @@ import { useAuth } from '../context/AuthContext';
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterCategory, setFilterCategory] = useState('');
+  const [categories, setCategories] = useState([]);
   const { user } = useAuth();
 
   useEffect(() => {
-    fetchProducts();
+    fetchCategories();
   }, []);
 
-  const fetchProducts = async () => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetchProducts(searchQuery, filterCategory);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, filterCategory]);
+
+  const fetchCategories = async () => {
     try {
-      const response = await api.get('/products?limit=10&page=1');
+      const response = await api.get('/products/categories');
+      setCategories(response.data || []);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+    }
+  };
+
+  const fetchProducts = async (query = '', category = '') => {
+    try {
+      setLoading(true);
+      let qs = '/products?limit=20&page=1';
+      if (query) {
+        qs += `&q=${encodeURIComponent(query)}`;
+      }
+      if (category) {
+        qs += `&category=${encodeURIComponent(category)}`;
+      }
+      const response = await api.get(qs);
       setProducts(response.data.data || []);
     } catch (err) {
       console.error('Error fetching products:', err);
@@ -39,7 +66,44 @@ export default function Home() {
 
       {/* Products Section */}
       <div className="max-w-6xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-dark mb-8">Sản Phẩm Nổi Bật</h2>
+        <h2 className="text-2xl font-bold text-dark mb-4">Sản Phẩm Nổi Bật</h2>
+
+        {/* Search Input */}
+        <div className="mb-6">
+          <input
+            type="text"
+            placeholder="Tìm kiếm sản phẩm (máy tính, điện thoại, tai nghe...)"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-6">
+          <p className="text-sm font-semibold text-gray-600 mb-3">Lọc theo danh mục:</p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              className={`px-4 py-2 rounded text-sm font-medium transition-all ${
+                filterCategory === '' ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
+              onClick={() => setFilterCategory('')}
+            >
+              Tất cả
+            </button>
+            {categories.map((cat) => (
+              <button
+                key={cat}
+                className={`px-4 py-2 rounded text-sm font-medium transition-all ${
+                  filterCategory === cat ? 'bg-primary text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                }`}
+                onClick={() => setFilterCategory(cat)}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-12">

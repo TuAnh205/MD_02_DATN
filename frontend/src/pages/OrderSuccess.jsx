@@ -51,17 +51,36 @@ export default function OrderSuccess() {
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
       <div className="max-w-2xl mx-auto">
-        {/* Success Message */}
+        {/* Success / cancellation Message */}
         <div className="bg-white rounded-lg shadow p-8 text-center mb-8">
           <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-              <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-              </svg>
-            </div>
+            {order.status === 'cancelled' ? (
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm-3-9l6 6m0-6l-6 6" clipRule="evenodd" />
+                </svg>
+              </div>
+            ) : (
+              <div className="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+                <svg className="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                </svg>
+              </div>
+            )}
           </div>
-          <h1 className="text-3xl font-bold text-dark mb-2">Đặt hàng thành công!</h1>
-          <p className="text-gray-600 mb-4">Cảm ơn bạn đã mua hàng</p>
+          {order.status === 'cancelled' ? (
+            <>
+              <h1 className="text-3xl font-bold text-red-600 mb-2">Đơn hàng đã bị hủy</h1>
+              {order.cancellationReason && (
+                <p className="text-gray-600 mb-4">Lý do: {order.cancellationReason}</p>
+              )}
+            </>
+          ) : (
+            <>
+              <h1 className="text-3xl font-bold text-dark mb-2">Đặt hàng thành công!</h1>
+              <p className="text-gray-600 mb-4">Cảm ơn bạn đã mua hàng</p>
+            </>
+          )}
           <p className="text-lg font-semibold text-primary mb-6">
             Mã đơn hàng: {order.orderNumber}
           </p>
@@ -174,6 +193,26 @@ export default function OrderSuccess() {
           >
             Xem đơn hàng của tôi
           </button>
+          {(order.status === 'pending' || order.status === 'confirmed') && (
+            <button
+              onClick={async () => {
+                const ok = window.confirm('Bạn có chắc muốn hủy đơn hàng này?');
+                if (!ok) return;
+                const reason = window.prompt('Lý do hủy (tùy chọn):');
+                try {
+                  await orderService.cancelOrder(order._id, reason || '');
+                  // reload order so UI updates
+                  fetchOrder();
+                } catch (err) {
+                  alert('Không thể hủy đơn hàng');
+                  console.error(err);
+                }
+              }}
+              className="flex-1 border border-red-600 text-red-600 py-3 rounded font-semibold hover:bg-red-50"
+            >
+              Hủy đơn hàng
+            </button>
+          )}
         </div>
       </div>
     </div>

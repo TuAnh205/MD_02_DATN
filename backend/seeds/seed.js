@@ -66,7 +66,7 @@ const seedProducts = async () => {
       {
         name: 'Laptop Dell XPS 13',
         price: 1299000,
-        category: 'Electronics',
+        category: 'Máy tính',
         description: 'Laptop siêu mỏng, hiệu năng cao',
         image: 'https://via.placeholder.com/300x200?text=Laptop+XPS',
         stock: 15,
@@ -76,7 +76,7 @@ const seedProducts = async () => {
       {
         name: 'iPhone 15 Pro',
         price: 999000,
-        category: 'Electronics',
+        category: 'Điện thoại',
         description: 'Điện thoại thông minh mới nhất',
         image: 'https://via.placeholder.com/300x200?text=iPhone+15',
         stock: 25,
@@ -86,7 +86,7 @@ const seedProducts = async () => {
       {
         name: 'Samsung Galaxy Watch',
         price: 299000,
-        category: 'Electronics',
+        category: 'Đồng hồ',
         description: 'Đồng hồ thông minh cao cấp',
         image: 'https://via.placeholder.com/300x200?text=Galaxy+Watch',
         stock: 30,
@@ -96,7 +96,7 @@ const seedProducts = async () => {
       {
         name: 'Sony WH-1000XM5 Headphones',
         price: 349000,
-        category: 'Electronics',
+        category: 'Tai nghe',
         description: 'Tai nghe khử tiếng ồn tuyệt vời',
         image: 'https://via.placeholder.com/300x200?text=Sony+Headphones',
         stock: 20,
@@ -106,7 +106,7 @@ const seedProducts = async () => {
       {
         name: 'iPad Air',
         price: 599000,
-        category: 'Electronics',
+        category: 'Máy tính bảng',
         description: 'Máy tính bảng mạnh mẽ',
         image: 'https://via.placeholder.com/300x200?text=iPad+Air',
         stock: 18,
@@ -116,7 +116,7 @@ const seedProducts = async () => {
       {
         name: 'MacBook Pro M3',
         price: 1999000,
-        category: 'Electronics',
+        category: 'Máy tính',
         description: 'Máy tính xách tay chuyên nghiệp',
         image: 'https://via.placeholder.com/300x200?text=MacBook+Pro',
         stock: 10,
@@ -126,7 +126,7 @@ const seedProducts = async () => {
       {
         name: 'Google Pixel 8',
         price: 799000,
-        category: 'Electronics',
+        category: 'Điện thoại',
         description: 'Điện thoại camera tốt nhất',
         image: 'https://via.placeholder.com/300x200?text=Google+Pixel',
         stock: 22,
@@ -136,7 +136,7 @@ const seedProducts = async () => {
       {
         name: 'AirPods Pro Max',
         price: 549000,
-        category: 'Electronics',
+        category: 'Tai nghe',
         description: 'Tai nghe over-ear cao cấp từ Apple',
         image: 'https://via.placeholder.com/300x200?text=AirPods+Max',
         stock: 12,

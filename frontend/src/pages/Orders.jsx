@@ -111,6 +111,9 @@ export default function Orders() {
                     <span className={`inline-block px-3 py-1 rounded text-sm font-semibold ${getStatusColor(order.status)}`}>
                       {getStatusText(order.status)}
                     </span>
+                    {order.status === 'cancelled' && order.cancellationReason && (
+                      <p className="text-xs text-red-600 mt-1">Lý do: {order.cancellationReason}</p>
+                    )}
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Thanh toán</p>
@@ -141,7 +144,21 @@ export default function Orders() {
                     Xem chi tiết
                   </button>
                   {order.status === 'pending' && (
-                    <button className="text-red-600 hover:text-red-800 font-semibold text-sm">
+                    <button
+                      onClick={async () => {
+                        const ok = window.confirm('Bạn có chắc muốn hủy đơn hàng này?');
+                        if (!ok) return;
+                        const reason = window.prompt('Lý do hủy (tùy chọn):');
+                        try {
+                          await orderService.cancelOrder(order._id, reason || '');
+                          fetchOrders();
+                        } catch (err) {
+                          setError('Không thể hủy đơn hàng');
+                          console.error(err);
+                        }
+                      }}
+                      className="text-red-600 hover:text-red-800 font-semibold text-sm"
+                    >
                       Hủy đơn hàng
                     </button>
                   )}

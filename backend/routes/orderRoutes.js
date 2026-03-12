@@ -9,5 +9,7 @@ router.get('/', ctrl.getOrders);
 router.get('/:id', ctrl.getOrderById);
 router.patch('/:id/status', ctrl.updateStatus); // admin
 router.patch('/:id/mark-paid', ctrl.markPaid);
+// allow user to cancel their own order when not yet shipped/delivered
+router.patch('/:id/cancel', ctrl.cancelOrder);
 
 module.exports = router;
