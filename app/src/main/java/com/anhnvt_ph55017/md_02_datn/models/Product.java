@@ -1,6 +1,8 @@
 package com.anhnvt_ph55017.md_02_datn.models;
 
-public class Product {
+import java.io.Serializable;
+
+public class Product implements Serializable {
 
     int id;
     String name;

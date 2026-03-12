@@ -76,7 +76,7 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnCheckOut"
-            android:text="Proceed to Checkout"
+            android:text="Đặt Hàng"
             android:textSize="16sp"
             android:textStyle="bold"
             android:backgroundTint="@null"

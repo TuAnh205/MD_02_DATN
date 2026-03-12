@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 9; // 🔥 tăng version
+    private static final int DB_VERSION = 10; // 🔥 tăng version
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -91,11 +91,17 @@ public class DBHelper extends SQLiteOpenHelper {
         db.execSQL(
                 "INSERT INTO products(categoryId,name,price,oldPrice,image,description,stock,rating,reviewCount,isFavorite) VALUES " +
 
-                        "(1,'MacBook Pro',2500,3000," + R.drawable.anh1 + ",'Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators.',10,4.8,120,0)," +
-                        "(1,'Laptop Pro',2500,3000," + R.drawable.laptop2 + ",'Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators.',10,4.8,120,0)," +
+                        "(1,'MacBook Pro M3',2500,3000," + R.drawable.anh1 + ",'Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators.',10,4.8,120,0)," +
+                        "(1,'Dell XPS 15',2400,2800," + R.drawable.laptop2 + ",'High-end Windows laptop with powerful performance, premium design and stunning display.',10,4.7,110,0)," +
+
                         "(2,'iPhone 15',1200,1400," + R.drawable.anh2 + ",'Latest Apple smartphone with A17 chip, dynamic island, improved cameras and all-day battery life.',20,4.6,95,0)," +
-                        "(2,'SamSung s25',1200,1400," + R.drawable.phone2 + ",'Latest Apple smartphone with A17 chip, dynamic island, improved cameras and all-day battery life.',20,4.6,95,0)," +
-                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh3 + ",'Industry leading noise cancelling headphones with crystal clear sound and 30 hours battery life.',15,4.9,210,0)"
+                        "(2,'Samsung Galaxy S25',1250,1450," + R.drawable.phone2 + ",'Flagship Samsung phone with powerful processor, advanced camera system and beautiful AMOLED display.',20,4.7,100,0)," +
+
+                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh3 + ",'Industry leading noise cancelling headphones with crystal clear sound and 30 hours battery life.',15,4.9,210,0)," +
+                        "(3,'AirPods Pro 2',450,550," + R.drawable.anh1 + ",'Premium Apple wireless earbuds with active noise cancellation and spatial audio.',18,4.8,180,0)," +
+
+                        "(2,'Google Pixel 8 Pro',1100,1300," + R.drawable.anh2 + ",'Google flagship phone with AI camera features and pure Android experience.',22,4.6,90,0)," +
+                        "(3,'JBL Tune 760NC',300,400," + R.drawable.anh3 + ",'Wireless headphones with active noise cancelling and deep bass sound.',25,4.5,75,0)"
         );
 
         /* ================= CARTS ================= */

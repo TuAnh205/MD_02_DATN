@@ -49,27 +49,30 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         holder.img.setImageResource(p.getImage());
 
         holder.tvQty.setText(String.valueOf(p.getQty()));
+        // compute and display line total
+        holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
 
         holder.btnPlus.setOnClickListener(v -> {
-
             p.setQty(p.getQty() + 1);
             holder.tvQty.setText(String.valueOf(p.getQty()));
-
+            holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
+            if(updateTotal != null) updateTotal.run();
         });
 
         holder.btnMinus.setOnClickListener(v -> {
-
             if (p.getQty() > 1) {
                 p.setQty(p.getQty() - 1);
                 holder.tvQty.setText(String.valueOf(p.getQty()));
+                holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
+                if(updateTotal != null) updateTotal.run();
             }
-
         });
 
         holder.tvRemove.setOnClickListener(v -> {
 
             list.remove(position);
             notifyDataSetChanged();
+            if(updateTotal != null) updateTotal.run();
 
         });
         holder.cbItem.setChecked(p.isSelected());
@@ -93,7 +96,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView img;
-        TextView tvName, tvPrice, tvQty, tvRemove;
+        TextView tvName, tvPrice, tvLineTotal, tvQty, tvRemove;
         Button btnPlus, btnMinus;
         CheckBox cbItem;
 
@@ -104,6 +107,7 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             img = itemView.findViewById(R.id.imgProduct);
             tvName = itemView.findViewById(R.id.tvName);
             tvPrice = itemView.findViewById(R.id.tvPrice);
+            tvLineTotal = itemView.findViewById(R.id.tvLineTotal);
             tvQty = itemView.findViewById(R.id.tvQty);
             tvRemove = itemView.findViewById(R.id.tvRemove);
             cbItem = itemView.findViewById(R.id.cbItem);

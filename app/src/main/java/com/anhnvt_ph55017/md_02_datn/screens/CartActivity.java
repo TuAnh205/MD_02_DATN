@@ -38,9 +38,16 @@ public class CartActivity extends AppCompatActivity {
         cbAll = findViewById(R.id.cbAll);
 
         cartList = new ArrayList<>();
-        btnCheckOut.setOnClickListener(v ->
-                startActivity(new Intent(this, CheckOutActivity.class))
-        );
+        btnCheckOut.setOnClickListener(v -> {
+            // only send items the user has selected
+            ArrayList<com.anhnvt_ph55017.md_02_datn.models.Product> selected = new ArrayList<>();
+            for(com.anhnvt_ph55017.md_02_datn.models.Product p : cartList){
+                if(p.isSelected()) selected.add(p);
+            }
+            Intent intent = new Intent(this, CheckOutActivity.class);
+            intent.putExtra("cart", selected);
+            startActivity(intent);
+        });
         cartList.add(new Product(1,"MacBook Pro",2500,R.drawable.anh1,"",10));
         cartList.add(new Product(2,"iPhone 15",1200,R.drawable.anh2,"",10));
 
@@ -70,8 +77,8 @@ public class CartActivity extends AppCompatActivity {
         double tax = subtotal * 0.1;
         double total = subtotal + tax;
 
-        tvSubtotal.setText("Subtotal: $" + subtotal);
-        tvTax.setText("Tax: $" + tax);
-        tvTotal.setText("Order Total: $" + total);
+        tvSubtotal.setText(String.format("Subtotal: $%.2f", subtotal));
+        tvTax.setText(String.format("Tax: $%.2f", tax));
+        tvTotal.setText(String.format("Order Total: $%.2f", total));
     }
 }

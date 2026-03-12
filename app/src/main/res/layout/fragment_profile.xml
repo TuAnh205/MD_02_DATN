@@ -6,67 +6,362 @@
 
     <LinearLayout
         android:orientation="vertical"
-        android:gravity="center_horizontal"
-        android:padding="20dp"
+        android:padding="16dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <!-- Avatar -->
+        <!-- header -->
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
 
-        <ImageView
-            android:src="@drawable/ic_user"
-            android:layout_width="100dp"
-            android:layout_height="100dp"/>
+            <ImageView
+                android:id="@+id/imgAvatar"
+                android:src="@drawable/ic_user"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:background="@drawable/bg_circle_blue"
+                android:padding="4dp"/>
+
+            <ImageView
+                android:id="@+id/imgEdit"
+                android:src="@drawable/ic_edit"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_gravity="bottom|end"
+                android:background="@drawable/bg_circle_blue"
+                android:padding="4dp"/>
+        </FrameLayout>
 
         <TextView
-            android:text="hihihi hihi"
-            android:textColor="#fff"
+            android:id="@+id/tvName"
+            android:text="Alex Johnson"
+            android:textColor="#FFFFFF"
             android:textSize="20sp"
-            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <TextView
-            android:text="hihihi@gmail.com"
-            android:textColor="#aaa"
+            android:id="@+id/tvEmail"
+            android:text="alex.johnson@coretech.io"
+            android:textColor="#AAAAAA"
+            android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <!-- Menu -->
+        <!-- stats boxes -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="16dp">
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="12dp"
+                android:gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="ORDERS"
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/tvOrderCount"
+                    android:text="24"
+                    android:textColor="#2F80FF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="12dp"
+                android:gravity="center"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:text="WISHLIST"
+                    android:textColor="#AAAAAA"
+                    android:textSize="12sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/tvWishlistCount"
+                    android:text="12"
+                    android:textColor="#2F80FF"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- menu items -->
+        <TextView
+            android:text="ACCOUNT"
+            android:textColor="#AAAAAA"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
         <LinearLayout
             android:orientation="vertical"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="8dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <Button
-                android:text="Edit Profile"
+            <!-- each row -->
+            <LinearLayout
+                android:id="@+id/rowOrders"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_cart"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="My Orders"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
 
-            <Button
-                android:text="Shipping Address"
+            <!-- other rows similar -->
+            <LinearLayout
+                android:id="@+id/rowAddress"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_location"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Shipping Address"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
 
-            <Button
-                android:text="Payment Methods"
+            <LinearLayout
+                android:id="@+id/rowPayment"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_payment"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Payment Methods"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
 
-            <Button
-                android:text="Wishlist"
+            <LinearLayout
+                android:id="@+id/rowWishlist"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_heart"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Wishlist"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
+        </LinearLayout>
 
+        <!-- settings section -->
+        <TextView
+            android:text="SETTINGS"
+            android:textColor="#AAAAAA"
+            android:textStyle="bold"
+            android:layout_marginTop="24dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginTop="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:id="@+id/rowNotifications"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_notifications"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Notifications"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/rowPrivacy"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_privacy"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Privacy &amp; Security"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/rowLanguage"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_language"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Language"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <TextView
+                    android:id="@+id/tvLanguage"
+                    android:text="English"
+                    android:textColor="#2F80FF"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/rowDarkMode"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_dark_mode"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Dark Mode"
+                    android:textColor="#FFFFFF"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <Switch
+                    android:id="@+id/switchDark"
+                    android:checked="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </LinearLayout>
         </LinearLayout>
 
         <Button
             android:id="@+id/btnLogout"
-            android:text="Log Out"
+            android:text="Logout"
             android:textColor="#FF4444"
-            android:layout_marginTop="30dp"
+            android:layout_marginTop="24dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
 

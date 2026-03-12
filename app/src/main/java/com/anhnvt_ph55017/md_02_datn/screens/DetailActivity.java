@@ -3,6 +3,7 @@ package com.anhnvt_ph55017.md_02_datn.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -22,6 +23,7 @@ import java.util.List;
 public class DetailActivity extends AppCompatActivity {
 
     ImageView imgProduct;
+    ImageButton btnBack;
     TextView tvName, tvPrice, tvRating, tvDesc;
     Button btnAddCart;
     CartDAO cartDAO;
@@ -33,6 +35,7 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        btnBack = findViewById(R.id.btnBack);
         imgProduct = findViewById(R.id.imgProduct);
         tvName = findViewById(R.id.tvName);
         tvPrice = findViewById(R.id.tvPrice);
@@ -57,6 +60,9 @@ public class DetailActivity extends AppCompatActivity {
                     Toast.LENGTH_SHORT).show();
 
         });
+
+        // back icon
+        btnBack.setOnClickListener(v -> onBackPressed());
 
 
 
