@@ -1,0 +1,13 @@
+# Examples (curl)
+
+# List
+curl "http://localhost:5000/api/products?page=1&limit=10&q=phone"
+
+# Create
+curl -X POST -H "Content-Type: application/json" -d '{"name":"Ao","price":120000,"category":"Thoi trang"}' http://localhost:5000/api/products
+
+# Update
+curl -X PUT -H "Content-Type: application/json" -d '{"price":130000}' http://localhost:5000/api/products/<id>
+
+# Delete
+curl -X DELETE http://localhost:5000/api/products/<id>
