@@ -123,3 +123,31 @@ exports.markPaid = async (req, res) => {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };
+
+// PATCH /api/orders/:id/cancel
+// body: { reason: string }
+exports.cancelOrder = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ message: 'Order not found' });
+        // only owner or admin can cancel
+        if (order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+
+        // cannot cancel once shipped/delivered/returned/refunded
+        const nonCancelable = ['shipped', 'delivered', 'returned', 'refunded'];
+        if (nonCancelable.includes(order.status)) {
+            return res.status(400).json({ message: `Cannot cancel order with status '${order.status}'` });
+        }
+
+        order.status = 'cancelled';
+        const reason = req.body.reason || '';
+        if (reason) order.cancellationReason = reason;
+        order.statusHistory.push({ status: 'cancelled', note: reason });
+        await order.save();
+        res.json(order);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};

@@ -25,6 +25,16 @@ exports.getProducts = async (req, res) => {
     }
 };
 
+// GET /api/products/categories (get unique categories)
+exports.getCategories = async (req, res) => {
+    try {
+        const categories = await Product.distinct('category');
+        res.json(categories.sort());
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
 // GET /api/products/:id
 exports.getProductById = async (req, res) => {
     try {

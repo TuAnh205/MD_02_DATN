@@ -39,5 +39,15 @@ export const orderService = {
       console.error('Error marking order as paid:', err);
       throw err;
     }
+  },
+
+  cancelOrder: async (orderId, reason = '') => {
+    try {
+      const response = await api.patch(`/orders/${orderId}/cancel`, { reason });
+      return response.data;
+    } catch (err) {
+      console.error('Error cancelling order:', err);
+      throw err;
+    }
   }
 };
