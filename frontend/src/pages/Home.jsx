@@ -3,6 +3,29 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+const promotions = [
+  {
+    title: 'Flash sale mỗi ngày',
+    description: 'Ưu đãi đến 50% cho sản phẩm chọn lọc',
+    emoji: '🔥',
+  },
+  {
+    title: 'Freeship toàn quốc',
+    description: 'Miễn phí giao hàng cho đơn trên 1.000.000₫',
+    emoji: '🚚',
+  },
+  {
+    title: 'Trả góp 0%',
+    description: 'Duyệt nhanh trong 1 phút',
+    emoji: '💳',
+  },
+  {
+    title: 'Quà tặng kèm',
+    description: 'Tặng voucher đến 500.000₫',
+    emoji: '🎁',
+  },
+];
+
 export default function Home() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -50,37 +73,72 @@ export default function Home() {
     }
   };
 
+  const getDiscountPercent = (product) => {
+    const original = product.originalPrice || product.price;
+    if (!original || original <= product.price) return 0;
+    return Math.round((1 - product.price / original) * 100);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-primary to-secondary text-white py-12 px-4">
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-4xl font-bold mb-4">
-            Chào mừng {user?.name ? `, ${user.name}` : ''}!
-          </h1>
-          <p className="text-lg opacity-90">
-            Khám phá những sản phẩm chất lượng hàng đầu
-          </p>
+    <div className="min-h-screen bg-light">
+      <div className="hero-banner py-16 px-6">
+        <div className="hero-banner-content max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div>
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
+              CORETECH - Mua sắm công nghệ đỉnh cao
+            </h1>
+            <p className="text-lg text-white/90 mb-6">
+              Khuyến mãi mỗi ngày - trả góp 0% - freeship toàn quốc. Tìm ngay sản phẩm ưng ý!
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/" className="btn-primary">
+                Xem ưu đãi ngay
+              </Link>
+              <Link to="/cart" className="btn-secondary">
+                Giỏ hàng của tôi
+              </Link>
+            </div>
+          </div>
+          <div className="hidden lg:block">
+            <img
+              src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=60"
+              alt="Khuyến mãi"
+              className="rounded-xl shadow-lg"
+            />
+          </div>
         </div>
       </div>
 
-      {/* Products Section */}
-      <div className="max-w-6xl mx-auto px-4 py-12">
-        <h2 className="text-2xl font-bold text-dark mb-4">Sản Phẩm Nổi Bật</h2>
+      <div className="max-w-6xl mx-auto px-4 py-10">
+        <h2 className="text-2xl font-bold text-dark mb-4">Khuyến mãi hot</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {promotions.map((promo) => (
+            <div key={promo.title} className="promo-card">
+              <div className="mb-3 text-3xl">{promo.emoji}</div>
+              <h3 className="text-lg font-semibold text-dark mb-1">{promo.title}</h3>
+              <p className="text-sm text-gray-600">{promo.description}</p>
+            </div>
+          ))}
+        </div>
+      </div>
 
-        {/* Search Input */}
-        <div className="mb-6">
-          <input
-            type="text"
-            placeholder="Tìm kiếm sản phẩm (máy tính, điện thoại, tai nghe...)"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      <div className="max-w-6xl mx-auto px-4 pb-16">
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+          <h2 className="text-2xl font-bold text-dark">Sản phẩm nổi bật</h2>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+            <input
+              type="text"
+              placeholder="Tìm kiếm sản phẩm (máy tính, điện thoại, tai nghe...)"
+              className="input-field"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
         </div>
 
         {/* Category Filter */}
-        <div className="mb-6">
+        <div className="mb-8">
           <p className="text-sm font-semibold text-gray-600 mb-3">Lọc theo danh mục:</p>
           <div className="flex flex-wrap gap-2">
             <button
@@ -115,26 +173,42 @@ export default function Home() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {products.map((product) => (
-              <Link key={product._id} to={`/products/${product._id}`}>
-                <div className="card hover:shadow-lg cursor-pointer">
-                  {(product.image || product.images?.[0]) && (
-                    <img
-                      src={product.image || product.images?.[0]}
-                      alt={product.name}
-                      className="w-full h-48 object-cover rounded mb-4"
-                    />
-                  )}
-                  <h3 className="font-semibold text-dark mb-2 line-clamp-2">
-                    {product.name}
-                  </h3>
-                  <p className="text-primary font-bold text-lg">
-                    ${product.price?.toLocaleString()}
-                  </p>
-                  <p className="text-sm text-gray-500 mt-2">{product.category}</p>
-                </div>
-              </Link>
-            ))}
+            {products.map((product) => {
+              const discount = getDiscountPercent(product);
+
+              return (
+                <Link key={product._id} to={`/products/${product._id}`}>
+                  <div className="card hover:shadow-lg cursor-pointer relative">
+                    {discount > 0 && (
+                      <span className="badge badge-discount absolute right-4 top-4">
+                        -{discount}%
+                      </span>
+                    )}
+                    {(product.image || product.images?.[0]) && (
+                      <img
+                        src={product.image || product.images?.[0]}
+                        alt={product.name}
+                        className="w-full h-48 object-cover rounded mb-4"
+                      />
+                    )}
+                    <h3 className="font-semibold text-dark mb-2 line-clamp-2">
+                      {product.name}
+                    </h3>
+                    <div className="flex items-baseline gap-3">
+                      <p className="text-primary font-bold text-lg">
+                        ₫{product.price?.toLocaleString('vi-VN')}
+                      </p>
+                      {discount > 0 && (
+                        <p className="text-sm text-gray-400 line-through">
+                          ₫{product.originalPrice?.toLocaleString('vi-VN')}
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-500 mt-2">{product.category}</p>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>

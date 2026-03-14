@@ -9,9 +9,9 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #2C3E50;
-  background-color: #F5F5F5;
+  font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: #1F2937;
+  background-color: #F8FAFC;
 }
 
 html, body, #root {
@@ -33,5 +33,34 @@ html, body, #root {
 }
 
 .card {
-  @apply bg-white rounded-lg shadow-sm hover:shadow-md transition p-4;
+  @apply bg-white rounded-lg shadow-card hover:shadow-soft transition p-4;
+}
+
+.badge {
+  @apply inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold;
+}
+
+.badge-discount {
+  @apply bg-accent/10 text-accent;
+}
+
+.badge-new {
+  @apply bg-primary/10 text-primary;
+}
+
+.promo-card {
+  @apply bg-white rounded-xl shadow-card hover:shadow-soft transition p-5 border border-white hover:border-primary;
+}
+
+.hero-banner {
+  @apply relative overflow-hidden rounded-2xl bg-gradient-to-r from-primary to-secondary text-white;
+}
+
+.hero-banner::after {
+  content: "";
+  @apply absolute inset-0 bg-gradient-to-r from-black/20 via-transparent to-black/10;
+}
+
+.hero-banner-content {
+  @apply relative z-10;
 }

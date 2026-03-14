@@ -13,12 +13,48 @@ export default function Header() {
 
   return (
     <header className="bg-white shadow-sm">
-      <div className="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-        <Link to="/" className="text-2xl font-bold text-primary">
-          MD_02_DATN
+      <div className="bg-slate-900 text-slate-100 text-xs px-4 py-2">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center gap-4">
+            <span className="flex items-center gap-2">
+              <span className="text-primary">🚚</span>
+              Freeship toàn quốc từ 1.000.000₫
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-accent">💳</span>
+              Trả góp 0%
+            </span>
+            <span className="flex items-center gap-2">
+              <span className="text-white">📞</span>
+              Hotline: 1900 1000
+            </span>
+          </div>
+          <div className="flex flex-wrap items-center gap-4 text-gray-300">
+            <span>📦 7 ngày đổi trả</span>
+            <span>✅ Bảo hành chính hãng</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <Link to="/" className="text-2xl font-bold text-primary tracking-tight">
+          CORETECH
         </Link>
 
-        <nav className="flex items-center gap-8">
+        <div className="flex-1 max-w-lg">
+          <input
+            type="search"
+            placeholder="Tìm kiếm sản phẩm, thương hiệu, mã..."
+            className="input-field"
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') {
+                navigate('/');
+              }
+            }}
+          />
+        </div>
+
+        <nav className="flex flex-wrap items-center gap-3">
           <Link to="/" className="text-dark hover:text-primary transition">
             Trang Chủ
           </Link>
@@ -30,17 +66,14 @@ export default function Header() {
           </Link>
 
           {user ? (
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <span className="text-gray-600">{user.name}</span>
-              <button
-                onClick={handleLogout}
-                className="btn-primary text-sm"
-              >
+              <button onClick={handleLogout} className="btn-primary text-sm">
                 Đăng Xuất
               </button>
             </div>
           ) : (
-            <div className="flex gap-4">
+            <div className="flex gap-3">
               <Link to="/login" className="btn-secondary text-sm">
                 Đăng Nhập
               </Link>

@@ -11,9 +11,29 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState(null);
 
+  const [reviews, setReviews] = useState([]);
+  const [loadingReviews, setLoadingReviews] = useState(true);
+  const [rating, setRating] = useState(5);
+  const [comment, setComment] = useState('');
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewMessage, setReviewMessage] = useState(null);
+
   useEffect(() => {
     fetchProductDetail();
+    fetchReviews();
   }, [id]);
+
+  const fetchReviews = async () => {
+    try {
+      setLoadingReviews(true);
+      const response = await api.get(`/reviews/product/${id}`);
+      setReviews(response.data || []);
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+    } finally {
+      setLoadingReviews(false);
+    }
+  };
 
   const fetchProductDetail = async () => {
     try {
@@ -61,6 +81,37 @@ export default function ProductDetail() {
       alert('Không thể thêm vào giỏ hàng: ' + err.message);
     }
   };
+
+  const handleSubmitReview = async () => {
+    if (!comment.trim()) {
+      setReviewMessage({ type: 'error', text: 'Vui lòng nhập đánh giá.' });
+      return;
+    }
+
+    try {
+      setSubmittingReview(true);
+      setReviewMessage(null);
+      await api.post('/reviews', {
+        productId: id,
+        rating,
+        comment: comment.trim(),
+      });
+      setReviewMessage({ type: 'success', text: 'Cảm ơn bạn đã đánh giá!' });
+      setComment('');
+      setRating(5);
+      fetchReviews();
+    } catch (err) {
+      const message = err.response?.data?.message || err.message;
+      setReviewMessage({ type: 'error', text: message });
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const averageRating = reviews.length
+    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    : product.ratings?.average;
+  const ratingCount = reviews.length || product.ratings?.count || 0;
 
   return (
     <div className="min-h-screen bg-gray-50 py-12 px-4">
@@ -174,11 +225,102 @@ export default function ProductDetail() {
             </div>
 
             {/* Additional Info */}
-            {product.ratings && (
-              <div className="pt-6 border-t">
-                <p className="text-sm">
-                  <span className="font-semibold">Đánh giá:</span> {product.ratings.average?.toFixed(1) || 'Chưa có'} ⭐ ({product.ratings.count || 0} đánh giá)
-                </p>
+            <div className="pt-6 border-t">
+              <p className="text-sm">
+                <span className="font-semibold">Đánh giá:</span>{' '}
+                {ratingCount > 0 ? (
+                  <>
+                    {averageRating.toFixed(1)} ⭐ ({ratingCount} đánh giá)
+                  </>
+                ) : (
+                  'Chưa có đánh giá'
+                )}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Reviews */}
+        <div className="max-w-6xl mx-auto px-4 py-10">
+          <h2 className="text-2xl font-bold text-dark mb-6">Đánh giá khách hàng</h2>
+
+          <div className="bg-white p-6 rounded-lg shadow mb-8">
+            <h3 className="text-lg font-semibold mb-3">Viết đánh giá của bạn</h3>
+            {reviewMessage && (
+              <div
+                className={`mb-4 rounded px-4 py-3 text-sm ${
+                  reviewMessage.type === 'success' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'
+                }`}
+              >
+                {reviewMessage.text}
+              </div>
+            )}
+            <div className="mb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium">Đánh giá:</span>
+                <div className="flex gap-1">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <button
+                      key={star}
+                      type="button"
+                      onClick={() => setRating(star)}
+                      className={`text-2xl leading-none transition ${
+                        star <= rating ? 'text-accent' : 'text-gray-300 hover:text-accent'
+                      }`}
+                    >
+                      ★
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <textarea
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                rows={4}
+                placeholder="Viết cảm nhận của bạn về sản phẩm..."
+                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
+            <button
+              onClick={handleSubmitReview}
+              disabled={submittingReview}
+              className="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 disabled:bg-gray-300"
+            >
+              {submittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
+            </button>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-4">Đánh giá gần đây</h3>
+            {loadingReviews ? (
+              <div className="text-gray-500">Đang tải đánh giá...</div>
+            ) : reviews.length === 0 ? (
+              <p className="text-gray-500">Chưa có đánh giá nào. Hãy là người đầu tiên nhận xét!</p>
+            ) : (
+              <div className="space-y-6">
+                {reviews.map((review) => (
+                  <div key={review._id} className="border border-gray-100 rounded-lg p-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="text-sm font-semibold text-dark">
+                        {review.user?.name || 'Khách hàng'}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 mb-2">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={star <= review.rating ? 'text-accent' : 'text-gray-200'}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    {review.comment && <p className="text-gray-700">{review.comment}</p>}
+                  </div>
+                ))}
               </div>
             )}
           </div>
