@@ -1,5 +1,6 @@
 package com.anhnvt_ph55017.md_02_datn.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
@@ -11,8 +12,9 @@ import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.google.firebase.auth.FirebaseAuth;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
 
 import org.jspecify.annotations.NonNull;
 
@@ -66,7 +68,15 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(getContext(), isChecked ? "Dark mode on" : "Dark mode off", Toast.LENGTH_SHORT).show());
 
         btnLogout.setOnClickListener(v -> {
-            Toast.makeText(getContext(), "Logged out", Toast.LENGTH_SHORT).show();
+
+            FirebaseAuth.getInstance().signOut();   // logout firebase
+
+            Intent intent = new Intent(requireActivity(), LoginActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+            startActivity(intent);
+
+            Toast.makeText(getContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
         });
 
         return view;

@@ -55,6 +55,7 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             android:hint="Enter your email"
+            android:inputType="textEmailAddress"
             android:textColor="#FFFFFF"
             android:textColorHint="#7A8896"
             android:background="@drawable/edt_email"
@@ -96,8 +97,8 @@
             android:textColorHint="#7A8896"
             android:background="@drawable/edt_email"
             android:padding="16dp"
-            android:layout_marginTop="8dp"
-            android:drawableEnd="@drawable/ic_eye"/>
+            android:drawableEnd="@drawable/ic_eye"
+            android:layout_marginTop="8dp"/>
 
         <!-- Login button -->
         <androidx.appcompat.widget.AppCompatButton
@@ -137,6 +138,7 @@
             android:layout_marginTop="52dp"
             >
             <androidx.appcompat.widget.AppCompatButton
+                android:id="@+id/btn_google_sign_in"
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="1"

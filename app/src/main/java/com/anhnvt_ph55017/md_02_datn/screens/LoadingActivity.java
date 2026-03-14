@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.google.firebase.auth.FirebaseAuth;
 
 public class LoadingActivity extends AppCompatActivity {
 
@@ -39,8 +40,15 @@ public class LoadingActivity extends AppCompatActivity {
                     txtPercent.setText(progress + "%");
                     handler.postDelayed(this, 30);
                 } else {
-                    // Sang màn hình chính
-                    startActivity(new Intent(LoadingActivity.this, LoginActivity.class));
+                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
+                    Intent nextIntent;
+                    if (mAuth.getCurrentUser() != null) {
+                        nextIntent = new Intent(LoadingActivity.this, MainActivity.class);
+                    } else {
+                        nextIntent = new Intent(LoadingActivity.this, LoginActivity.class);
+                    }
+                    nextIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+                    startActivity(nextIntent);
                     finish();
                 }
             }
