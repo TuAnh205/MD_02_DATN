@@ -3,23 +3,45 @@ const Product = require('../models/Product');
 // GET /api/products
 exports.getProducts = async (req, res) => {
     try {
-        const { q, category, minPrice, maxPrice, sort = '-createdAt', page = 1, limit = 20 } = req.query;
+        const {
+            q,
+            category,
+            brand,
+            minPrice,
+            maxPrice,
+            minRating,
+            sort = '-createdAt',
+            page = 1,
+            limit = 20,
+        } = req.query;
+
         const filter = {};
         if (q) {
             const re = new RegExp(q, 'i');
             filter.$or = [{ name: re }, { description: re }, { sku: re }];
         }
         if (category) filter.category = category;
+        if (brand) filter.brand = brand;
         if (minPrice) filter.price = { ...(filter.price || {}), $gte: Number(minPrice) };
         if (maxPrice) filter.price = { ...(filter.price || {}), $lte: Number(maxPrice) };
+        if (minRating) filter['ratings.average'] = { $gte: Number(minRating) };
 
         const skip = (Math.max(1, Number(page)) - 1) * Number(limit);
         const [items, total] = await Promise.all([
             Product.find(filter).sort(sort).skip(skip).limit(Number(limit)),
-            Product.countDocuments(filter)
+            Product.countDocuments(filter),
         ]);
 
         res.json({ data: items, meta: { total, page: Number(page), limit: Number(limit) } });
+    } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+exports.getBrands = async (req, res) => {
+    try {
+        const brands = await Product.distinct('brand');
+        res.json(brands.filter(Boolean).sort());
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
     }
