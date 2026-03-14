@@ -93,6 +93,11 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
             Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show();
 
+
+            Intent intent = new Intent(context, com.anhnvt_ph55017.md_02_datn.screens.CartActivity.class);
+            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+            context.startActivity(intent);
+
         });
 
     }

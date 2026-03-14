@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 10; // 🔥 tăng version
+    private static final int DB_VERSION = 11; // 🔥 tăng version for address table
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -161,6 +161,21 @@ public class DBHelper extends SQLiteOpenHelper {
                         "updatedAt TEXT," +
                         "FOREIGN KEY(userId) REFERENCES users(id)," +
                         "FOREIGN KEY(voucherId) REFERENCES vouchers(id)" +
+                        ")"
+        );
+
+        /* ================= ADDRESSES ================= */
+        db.execSQL(
+                "CREATE TABLE addresses (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "userId INTEGER," +
+                        "name TEXT," +
+                        "phone TEXT," +
+                        "address TEXT," +
+                        "isDefault INTEGER DEFAULT 0," +
+                        "createdAt TEXT," +
+                        "updatedAt TEXT," +
+                        "FOREIGN KEY(userId) REFERENCES users(id)" +
                         ")"
         );
 

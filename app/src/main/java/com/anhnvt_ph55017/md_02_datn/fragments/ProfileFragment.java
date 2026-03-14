@@ -12,6 +12,8 @@ import android.widget.Button;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.anhnvt_ph55017.md_02_datn.screens.ShippingAddressActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
@@ -51,8 +53,11 @@ public class ProfileFragment extends Fragment {
         // menu clicks
         view.findViewById(R.id.rowOrders).setOnClickListener(v ->
                 Toast.makeText(getContext(), "My Orders", Toast.LENGTH_SHORT).show());
-        view.findViewById(R.id.rowAddress).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Shipping Address", Toast.LENGTH_SHORT).show());
+
+        view.findViewById(R.id.rowAddress).setOnClickListener(v -> {
+            Intent intent = new Intent(getActivity(), ShippingAddressActivity.class);
+            startActivity(intent);
+        });
         view.findViewById(R.id.rowPayment).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Payment Methods", Toast.LENGTH_SHORT).show());
         view.findViewById(R.id.rowWishlist).setOnClickListener(v ->

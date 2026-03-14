@@ -58,23 +58,22 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
         holder.tvStatus.setText(getStatusVietnamese(o.getStatus()));
         holder.tvArrivalDate.setText("Dự kiến giao: " + o.getArrivalDate());
         holder.tvItemCount.setText(o.getItemCount() + " sản phẩm");
-        
-        // Set status badge color
+
+        // Đặt màu cho trạng thái đơn hàng
         setStatusColor(holder.tvStatus, o.getStatus());
-        
-        // Load product image - using drawable resources as fallback
+
+        // Hiển thị ảnh sản phẩm (sử dụng drawable mặc định)
         if (holder.imgProduct != null) {
-            // If you have Glide library, use: Glide.with(context).load(o.getImageRes()).into(holder.imgProduct);
-            // For now, using default drawable
+
             holder.imgProduct.setImageResource(o.getImageRes());
         }
-        
-        // Set click listener for detail button
+
+        // Sự kiện khi nhấn nút xem chi tiết đơn hàng
         holder.btnDetail.setOnClickListener(v -> {
             if (listener != null) {
                 listener.onDetail(o);
             } else {
-                // fallback to direct intent
+
                 Intent intent = new Intent(context, OrderDetailActivity.class);
                 intent.putExtra("orderId", o.getId());
                 intent.putExtra("orderDate", o.getDate());
@@ -96,6 +95,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
     }
     
     private void setStatusColor(TextView tvStatus, String status) {
+        // set màu cho trạng thái
         if (status.equals("Chưa thanh toán")) {
             tvStatus.setTextColor(context.getResources().getColor(android.R.color.holo_orange_light, null));
         } else if (status.equals("Đang xử lý")) {
@@ -110,7 +110,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
     }
     
     private String getStatusVietnamese(String status) {
-        // status đã là tiếng Việt nên trả về trực tiếp
+
         return status;
 
     }

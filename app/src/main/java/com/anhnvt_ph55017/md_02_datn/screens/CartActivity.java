@@ -25,6 +25,7 @@ public class CartActivity extends AppCompatActivity {
     AppCompatButton btnCheckOut;
     List<Product> cartList;
     CartAdapter adapter;
+    com.anhnvt_ph55017.md_02_datn.DAO.CartDAO cartDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +38,10 @@ public class CartActivity extends AppCompatActivity {
         tvTotal = findViewById(R.id.tvTotal);
         cbAll = findViewById(R.id.cbAll);
 
-        cartList = new ArrayList<>();
+        cartDAO = new com.anhnvt_ph55017.md_02_datn.DAO.CartDAO(this);
+
+        cartList = cartDAO.getCartProducts(1);
+
         btnCheckOut.setOnClickListener(v -> {
             // only send items the user has selected
             ArrayList<com.anhnvt_ph55017.md_02_datn.models.Product> selected = new ArrayList<>();
@@ -48,10 +52,8 @@ public class CartActivity extends AppCompatActivity {
             intent.putExtra("cart", selected);
             startActivity(intent);
         });
-        cartList.add(new Product(1,"MacBook Pro",2500,R.drawable.anh1,"",10));
-        cartList.add(new Product(2,"iPhone 15",1200,R.drawable.anh2,"",10));
 
-        adapter = new CartAdapter(this,cartList,this::calculateTotal);
+        adapter = new CartAdapter(this, cartList, cartDAO, this::calculateTotal);
 
         rvCart.setLayoutManager(new LinearLayoutManager(this));
         rvCart.setAdapter(adapter);
@@ -61,6 +63,15 @@ public class CartActivity extends AppCompatActivity {
             calculateTotal();
         });
 
+        calculateTotal();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        cartList.clear();
+        cartList.addAll(cartDAO.getCartProducts(1));
+        adapter.notifyDataSetChanged();
         calculateTotal();
     }
 

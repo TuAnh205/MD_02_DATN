@@ -17,12 +17,16 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.anhnvt_ph55017.md_02_datn.DAO.AddressDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.HomeActivity;
 import com.anhnvt_ph55017.md_02_datn.fragments.HomeFragment;
+import com.anhnvt_ph55017.md_02_datn.models.Address;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 
 public class CheckOutActivity extends AppCompatActivity {
+
+    private static final int REQUEST_CODE_ADDRESS = 2001;
 
     RadioGroup paymentGroup;
     EditText edVoucher;
@@ -31,6 +35,12 @@ public class CheckOutActivity extends AppCompatActivity {
     androidx.recyclerview.widget.RecyclerView rvSummary;
     List<com.anhnvt_ph55017.md_02_datn.models.Product> cartList;
     com.anhnvt_ph55017.md_02_datn.Adapters.SummaryAdapter summaryAdapter;
+
+    // shipping
+    TextView tvShipName, tvShipPhone, tvShipAddress;
+    Button btnChangeAddress;
+    AddressDAO addressDAO;
+    Address selectedAddress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +55,14 @@ public class CheckOutActivity extends AppCompatActivity {
         tvTotal = findViewById(R.id.tvTotal);
         rvSummary = findViewById(R.id.rvSummary);
 
+        tvShipName = findViewById(R.id.tvShipName);
+        tvShipPhone = findViewById(R.id.tvShipPhone);
+        tvShipAddress = findViewById(R.id.tvShipAddress);
+        btnChangeAddress = findViewById(R.id.btnChangeAddress);
+
+        addressDAO = new AddressDAO(this);
+        loadDefaultAddress();
+
         cartList = (List<com.anhnvt_ph55017.md_02_datn.models.Product>) getIntent().getSerializableExtra("cart");
         if(cartList == null) cartList = new java.util.ArrayList<>();
 
@@ -53,6 +71,10 @@ public class CheckOutActivity extends AppCompatActivity {
         rvSummary.setAdapter(summaryAdapter);
 
         calculateTotals();
+
+        btnChangeAddress.setOnClickListener(v -> {
+            startActivityForResult(new Intent(CheckOutActivity.this, ShippingAddressActivity.class), REQUEST_CODE_ADDRESS);
+        });
 
         btnOrder.setOnClickListener(v -> {
 
@@ -110,5 +132,34 @@ public class CheckOutActivity extends AppCompatActivity {
         tvSubtotal.setText(String.format("Subtotal: $%.2f", subtotal));
         tvTax.setText(String.format("Tax: $%.2f", tax));
         tvTotal.setText(String.format("Total: $%.2f", total));
+    }
+
+    private void loadDefaultAddress() {
+        // ensure there are at least two sample addresses
+        List<Address> all = addressDAO.getAddresses(1);
+        if (all.isEmpty()) {
+            addressDAO.addAddress(1, "Nhà riêng", "0123 456 789", "Số 1, Đường A, Quận 1", true);
+            addressDAO.addAddress(1, "Công ty", "0987 654 321", "Tầng 7, Tòa nhà B, Quận 3", false);
+            all = addressDAO.getAddresses(1);
+        }
+
+        selectedAddress = addressDAO.getDefaultAddress(1);
+        if (selectedAddress == null && !all.isEmpty()) {
+            selectedAddress = all.get(0);
+        }
+
+        if (selectedAddress != null) {
+            tvShipName.setText(selectedAddress.getName());
+            tvShipPhone.setText(selectedAddress.getPhone());
+            tvShipAddress.setText(selectedAddress.getAddress());
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE_ADDRESS && resultCode == RESULT_OK && data != null) {
+            loadDefaultAddress();
+        }
     }
 }

@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 
 import java.util.List;
@@ -22,10 +23,13 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     Context context;
     List<Product> list;
+    CartDAO cartDAO;
     Runnable updateTotal;
-    public CartAdapter(Context context, List<Product> list, Runnable updateTotal) {
+
+    public CartAdapter(Context context, List<Product> list, CartDAO cartDAO, Runnable updateTotal) {
         this.context = context;
         this.list = list;
+        this.cartDAO = cartDAO;
         this.updateTotal = updateTotal;
     }
 
@@ -56,6 +60,9 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             p.setQty(p.getQty() + 1);
             holder.tvQty.setText(String.valueOf(p.getQty()));
             holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
+            // Cập nhật số lượng
+            if(cartDAO != null) cartDAO.updateQuantity(p.getId(), p.getQty());
+            // Cập nhật tổng tiền
             if(updateTotal != null) updateTotal.run();
         });
 
@@ -64,12 +71,16 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 p.setQty(p.getQty() - 1);
                 holder.tvQty.setText(String.valueOf(p.getQty()));
                 holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
+                if(cartDAO != null) cartDAO.updateQuantity(p.getId(), p.getQty());
                 if(updateTotal != null) updateTotal.run();
             }
         });
 
         holder.tvRemove.setOnClickListener(v -> {
 
+            if(cartDAO != null){
+                cartDAO.removeItem(p.getId());
+            }
             list.remove(position);
             notifyDataSetChanged();
             if(updateTotal != null) updateTotal.run();

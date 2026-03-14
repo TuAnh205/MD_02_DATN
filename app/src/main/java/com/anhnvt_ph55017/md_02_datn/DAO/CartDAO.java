@@ -78,7 +78,7 @@ public class CartDAO {
         List<Product> list = new ArrayList<>();
 
         Cursor cursor = db.rawQuery(
-                "SELECT p.id,p.name,p.price,p.image,p.description,p.stock " +
+                "SELECT p.id,p.name,p.price,p.image,p.description,p.stock,c.quantity " +
                         "FROM cart_items c " +
                         "JOIN carts ca ON c.cartId = ca.id " +
                         "JOIN products p ON c.productId = p.id " +
@@ -88,14 +88,16 @@ public class CartDAO {
 
         if(cursor.moveToFirst()){
             do{
-                list.add(new Product(
+                Product p = new Product(
                         cursor.getInt(0),
                         cursor.getString(1),
                         cursor.getDouble(2),
                         cursor.getInt(3),
                         cursor.getString(4),
                         cursor.getInt(5)
-                ));
+                );
+                p.setQty(cursor.getInt(6));
+                list.add(p);
             }while(cursor.moveToNext());
         }
 
