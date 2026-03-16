@@ -23,7 +23,12 @@ export default function Login() {
       }
 
       await login(email, password);
-      navigate('/');
+      const user = JSON.parse(localStorage.getItem('user'));
+      if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/');
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');
     } finally {

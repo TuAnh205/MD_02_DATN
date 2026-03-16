@@ -10,6 +10,15 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import Orders from './pages/Orders';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminHome from './pages/AdminHome';
+import AdminUsers from './pages/AdminUsers';
+import AdminProducts from './pages/AdminProducts';
+import AdminOrders from './pages/AdminOrders';
+import AdminReviews from './pages/AdminReviews';
+import AdminFeedbacks from './pages/AdminFeedbacks';
+import AdminPosts from './pages/AdminPosts';
+import AdminVouchers from './pages/AdminVouchers';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -19,6 +28,16 @@ function ProtectedRoute({ children }) {
   }
 
   return user ? children : <Navigate to="/login" />;
+}
+
+function AdminProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
+  return user && user.role === 'admin' ? children : <Navigate to="/login" />;
 }
 
 function AppContent() {
@@ -76,6 +95,23 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/admin"
+          element={
+            <AdminProtectedRoute>
+              <AdminDashboard />
+            </AdminProtectedRoute>
+          }
+        >
+          <Route index element={<AdminHome />} />
+          <Route path="users" element={<AdminUsers />} />
+          <Route path="products" element={<AdminProducts />} />
+          <Route path="orders" element={<AdminOrders />} />
+          <Route path="reviews" element={<AdminReviews />} />
+          <Route path="feedbacks" element={<AdminFeedbacks />} />
+          <Route path="posts" element={<AdminPosts />} />
+          <Route path="vouchers" element={<AdminVouchers />} />
+        </Route>
       </Routes>
     </Router>
   );
