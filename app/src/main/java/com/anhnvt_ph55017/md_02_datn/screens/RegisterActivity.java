@@ -1,5 +1,6 @@
 package com.anhnvt_ph55017.md_02_datn.screens;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.util.Patterns;
@@ -137,6 +138,12 @@ public class RegisterActivity extends AppCompatActivity {
         boolean success = userDAO.register(fullName, email, phone, pass1);
         if (success) {
             Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(this, LoginActivity.class);
+            intent.putExtra("prefill_email", email);
+            intent.putExtra("prefill_pass", pass1);
+            startActivity(intent);
+
             finish();
         } else {
             Toast.makeText(this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();

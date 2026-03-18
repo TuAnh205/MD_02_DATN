@@ -205,6 +205,7 @@
         <EditText
             android:id="@+id/edVoucher"
             android:hint="Enter voucher code"
+            android:inputType="text"
             android:textColor="#FFFFFF"
             android:textColorHint="#888"
             android:background="@drawable/bg_card"

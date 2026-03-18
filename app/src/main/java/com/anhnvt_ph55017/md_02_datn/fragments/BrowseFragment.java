@@ -1,6 +1,7 @@
 package com.anhnvt_ph55017.md_02_datn.fragments;
 
 import android.os.Bundle;
+import android.view.inputmethod.InputMethodManager;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -67,7 +68,21 @@ public class BrowseFragment extends Fragment {
             public void afterTextChanged(Editable s) {}
         });
 
+        // Handle search action on keyboard
+        editSearch.setOnEditorActionListener((v, actionId, event) -> {
+            if (actionId == android.view.inputmethod.EditorInfo.IME_ACTION_SEARCH) {
+                hideKeyboard();
+                return true;
+            }
+            return false;
+        });
+
         return view;
+    }
+
+    private void hideKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getContext().getSystemService(android.content.Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editSearch.getWindowToken(), 0);
     }
 
     private void filter(String text){

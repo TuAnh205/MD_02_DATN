@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 11; // 🔥 tăng version for address table
+    private static final int DB_VERSION = 12; // 🔥 tăng version for address table
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);

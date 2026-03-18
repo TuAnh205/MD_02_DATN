@@ -31,12 +31,13 @@ public class UserDAO {
     }
 
     // LOGIN
-    public boolean login(String email, String password) {
+    public boolean login(String identifier, String password) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
+        // Allow login by email or phone
         Cursor cursor = db.rawQuery(
-                "SELECT id FROM users WHERE email = ? AND password = ?",
-                new String[]{email, password}
+                "SELECT id FROM users WHERE (email = ? OR phone = ?) AND password = ?",
+                new String[]{identifier, identifier, password}
         );
 
         boolean ok = cursor.moveToFirst();

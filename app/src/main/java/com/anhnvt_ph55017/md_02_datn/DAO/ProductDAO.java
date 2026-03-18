@@ -107,4 +107,33 @@ public class ProductDAO {
         return list;
     }
 
+    // Tìm theo tên sản phẩm (like)
+    public List<Product> searchByName(String keyword) {
+        List<Product> list = new ArrayList<>();
+
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT id,name,price,image,description,stock FROM products WHERE name LIKE ?",
+                new String[]{"%" + keyword + "%"}
+        );
+
+        if (c.moveToFirst()) {
+            do {
+                list.add(new Product(
+                        c.getInt(0),
+                        c.getString(1),
+                        c.getDouble(2),
+                        c.getInt(3),
+                        c.getString(4),
+                        c.getInt(5)
+                ));
+            } while (c.moveToNext());
+        }
+
+        c.close();
+        db.close();
+
+        return list;
+    }
+
 }

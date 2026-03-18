@@ -79,6 +79,7 @@
             android:layout_height="56dp"
             android:background="@drawable/edt_email"
             android:hint="Enter email or phone"
+            android:inputType="text"
             android:padding="16dp"
             android:textColor="@android:color/white"
             android:textColorHint="#7F8C99"

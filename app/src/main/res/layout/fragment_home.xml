@@ -4,6 +4,7 @@
     android:layout_height="match_parent">
 
     <LinearLayout
+        android:layout_marginTop="20dp"
         android:orientation="vertical"
         android:padding="16dp"
         android:layout_width="match_parent"
@@ -47,31 +48,38 @@
 
         <!-- SEARCH -->
         <EditText
+            android:id="@+id/edtSearchHome"
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Search tech, brands..."
+
             android:textColor="@color/black"
             android:textColorHint="#7A8896"
             android:padding="12dp"
-            android:background="@drawable/bg_search"/>
+            android:background="@drawable/bg_search"
+            android:imeOptions="actionSearch"
+            android:inputType="text"/>
 
-        <!-- BANNER -->
-        <LinearLayout
+        <!-- BANNER SLIDESHOW -->
+        <FrameLayout
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:background="@drawable/bg_banner"
-            android:padding="16dp">
+            android:layout_height="160dp">
 
-            <TextView
-                android:text="Next-Gen VR\nOut Now"
-                android:textSize="22sp"
-                android:textStyle="bold"
-                android:textColor="@android:color/white"
+            <androidx.viewpager2.widget.ViewPager2
+                android:id="@+id/vpBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
+            <LinearLayout
+                android:id="@+id/dotsContainer"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="8dp"
+                android:orientation="horizontal" />
+        </FrameLayout>
 
         <!-- CATEGORY -->
         <TextView

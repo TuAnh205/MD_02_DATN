@@ -18,6 +18,8 @@
             android:textColor="#000000"
             android:padding="12dp"
             android:background="@drawable/bg_search"
+            android:imeOptions="actionSearch"
+            android:inputType="text"
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
 
@@ -32,32 +34,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <LinearLayout
-            android:orientation="vertical"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvSearchHistory"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <TextView
-                android:text="Gaming Laptops 2024"
-                android:textColor="#ccc"
-                android:padding="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Wireless Noise Cancelling"
-                android:textColor="#ccc"
-                android:padding="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-
-            <TextView
-                android:text="Mechanical Keyboards"
-                android:textColor="#ccc"
-                android:padding="8dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"/>
-        </LinearLayout>
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" />
 
         <!-- Trending -->
 
