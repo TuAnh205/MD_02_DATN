@@ -457,3 +457,88 @@ exports.deleteVoucher = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+// Revenue analytics
+exports.getRevenue = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+    
+    if (!year) {
+      return res.status(400).json({ message: 'Year is required' });
+    }
+
+    const yearNum = parseInt(year);
+    const monthNum = month ? parseInt(month) : null;
+
+    // Find all paid orders
+    const query = {
+      'payment.status': 'paid'
+    };
+
+    // Get orders
+    const orders = await Order.find(query).populate('items.product');
+    
+    let revenueData = [];
+    let total = 0;
+
+    if (monthNum) {
+      // Group by day for a specific month
+      const dailyRevenue = {};
+      
+      orders.forEach(order => {
+        const orderDate = new Date(order.createdAt);
+        if (orderDate.getFullYear() === yearNum && orderDate.getMonth() + 1 === monthNum) {
+          const day = orderDate.getDate();
+          if (!dailyRevenue[day]) {
+            dailyRevenue[day] = 0;
+          }
+          dailyRevenue[day] += order.total || 0;
+        }
+      });
+
+      // Get the number of days in the month
+      const daysInMonth = new Date(yearNum, monthNum, 0).getDate();
+      for (let day = 1; day <= daysInMonth; day++) {
+        revenueData.push({
+          day,
+          month: monthNum,
+          revenue: dailyRevenue[day] || 0
+        });
+        total += dailyRevenue[day] || 0;
+      }
+    } else {
+      // Group by month for the year
+      const monthlyRevenue = {};
+      
+      orders.forEach(order => {
+        const orderDate = new Date(order.createdAt);
+        if (orderDate.getFullYear() === yearNum) {
+          const month = orderDate.getMonth() + 1;
+          if (!monthlyRevenue[month]) {
+            monthlyRevenue[month] = 0;
+          }
+          monthlyRevenue[month] += order.total || 0;
+        }
+      });
+
+      // Include all 12 months
+      for (let month = 1; month <= 12; month++) {
+        revenueData.push({
+          month,
+          revenue: monthlyRevenue[month] || 0
+        });
+        total += monthlyRevenue[month] || 0;
+      }
+    }
+
+    res.json({
+      data: revenueData,
+      total,
+      year: yearNum,
+      ...(monthNum && { month: monthNum })
+    });
+  } catch (error) {
+    console.error('Error fetching revenue:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};

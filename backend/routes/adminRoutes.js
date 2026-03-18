@@ -47,4 +47,7 @@ router.post('/vouchers', adminController.createVoucher);
 router.put('/vouchers/:id', adminController.updateVoucher);
 router.delete('/vouchers/:id', adminController.deleteVoucher);
 
+// Revenue analytics routes
+router.get('/revenue', adminController.getRevenue);
+
 module.exports = router;

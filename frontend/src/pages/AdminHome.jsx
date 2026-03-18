@@ -31,16 +31,20 @@ export default function AdminHome() {
 
       // Fetch recent data
       const [ordersData, usersData] = await Promise.all([
-        api.get('/admin/orders?page=1&limit=5'),
+        api.get('/admin/orders?page=1&limit=100'),
         api.get('/admin/users?page=1&limit=5'),
       ]);
+
+      // Calculate revenue from paid orders
+      const paidOrders = ordersData.data.orders.filter(order => order.payment?.status === 'paid');
+      const totalRevenue = paidOrders.reduce((sum, order) => sum + (order.total || 0), 0);
 
       setStats({
         users: usersRes.data.count,
         products: productsRes.data.count,
         orders: ordersRes.data.count,
         reviews: reviewsRes.data.count,
-        revenue: 0, // Will be calculated from orders
+        revenue: totalRevenue,
         pendingOrders: ordersData.data.orders.filter(order => order.status === 'pending').length,
       });
 

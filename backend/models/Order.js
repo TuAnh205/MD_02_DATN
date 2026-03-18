@@ -49,12 +49,19 @@ const orderSchema = new mongoose.Schema({
         note: { type: String }
     }],
     payment: {
-        method: { type: String, enum: ['cod', 'momo', 'zalopay', 'vnpay', 'paypal', 'stripe', 'card'], required: true },
+        method: { type: String, enum: ['cod', 'momo', 'zalopay', 'vnpay', 'paypal', 'stripe', 'card', 'bank'], required: true },
         status: { type: String, enum: ['pending', 'paid', 'failed', 'refunded'], default: 'pending' },
         transactionId: { type: String },
         paidAt: { type: Date },
         refundAmount: { type: Number },
-        refundReason: { type: String }
+        refundReason: { type: String },
+        // Card payment info (only safe data, no full card number or CVV)
+        cardholderName: { type: String },
+        cardLastFour: { type: String },
+        // Bank transfer info
+        bankName: { type: String },
+        accountNumber: { type: String },
+        accountHolder: { type: String }
     },
     notes: { type: String },
     cancellationReason: { type: String },

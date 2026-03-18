@@ -1,12 +1,18 @@
 import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef(null);
+
+  // Hide header on admin routes
+  if (location.pathname.startsWith('/admin')) {
+    return null;
+  }
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -56,18 +62,6 @@ export default function Header() {
           CORETECH
         </Link>
 
-        <div className="flex-1 max-w-lg">
-          <input
-            type="search"
-            placeholder="Tìm kiếm sản phẩm, thương hiệu, mã..."
-            className="input-field"
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') {
-                navigate('/');
-              }
-            }}
-          />
-        </div>
 
         <nav className="flex flex-wrap items-center gap-3">
           <Link to="/" className="text-dark hover:text-primary transition">

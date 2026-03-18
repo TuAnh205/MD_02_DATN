@@ -16,6 +16,13 @@ export default function AdminDashboard() {
       description: 'Tổng quan hệ thống'
     },
     {
+      id: 'revenue',
+      label: 'Doanh Thu',
+      path: '/admin/revenue',
+      icon: '💰',
+      description: 'Xem biểu đồ doanh thu'
+    },
+    {
       id: 'users',
       label: 'Quản lý Người dùng',
       path: '/admin/users',

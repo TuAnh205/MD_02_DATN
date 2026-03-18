@@ -41,6 +41,19 @@ export const orderService = {
     }
   },
 
+  processCardPayment: async (orderId, cardData) => {
+    try {
+      const response = await api.post(`/orders/${orderId}/process-payment`, {
+        method: 'card',
+        cardData
+      });
+      return response.data;
+    } catch (err) {
+      console.error('Error processing card payment:', err);
+      throw err;
+    }
+  },
+
   cancelOrder: async (orderId, reason = '') => {
     try {
       const response = await api.patch(`/orders/${orderId}/cancel`, { reason });

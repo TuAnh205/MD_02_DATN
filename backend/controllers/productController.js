@@ -60,7 +60,7 @@ exports.getCategories = async (req, res) => {
 // GET /api/products/:id
 exports.getProductById = async (req, res) => {
     try {
-        const prod = await Product.findById(req.params.id);
+        const prod = await Product.findById(req.params.id).populate('createdBy', 'name email');
         if (!prod) return res.status(404).json({ message: 'Product not found' });
         res.json(prod);
     } catch (err) {

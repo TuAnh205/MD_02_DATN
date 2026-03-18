@@ -16,7 +16,14 @@ export default function Checkout() {
     city: '',
     district: '',
     ward: '',
-    paymentMethod: 'cod'
+    paymentMethod: 'cod',
+    cardNumber: '',
+    cardholderName: '',
+    expiryDate: '',
+    cvv: '',
+    bankName: '',
+    accountNumber: '',
+    accountHolder: ''
   });
 
   React.useEffect(() => {
@@ -60,6 +67,36 @@ export default function Checkout() {
       return;
     }
 
+    // Validate payment method specific fields
+    if (formData.paymentMethod === 'card') {
+      if (!formData.cardholderName || !formData.cardNumber || !formData.expiryDate || !formData.cvv) {
+        setError('Vui lòng điền đầy đủ thông tin thẻ tín dụng');
+        return;
+      }
+      const cardNumber = formData.cardNumber.replace(/\s/g, '').trim();
+      if (cardNumber.length !== 16) {
+        setError('Số thẻ phải có 16 chữ số');
+        return;
+      }
+      if (formData.cvv.length !== 3) {
+        setError('CVV phải có 3 chữ số');
+        return;
+      }
+      // Validate test card: 4242424242424242
+      const testCard = '4242424242424242';
+      if (cardNumber !== testCard) {
+        setError('❌ Mã thẻ không hợp lệ! Vui lòng sử dụng thẻ test: 4242 4242 4242 4242');
+        return;
+      }
+    }
+
+    if (formData.paymentMethod === 'bank') {
+      if (!formData.bankName || !formData.accountNumber || !formData.accountHolder) {
+        setError('Vui lòng điền đầy đủ thông tin tài khoản ngân hàng');
+        return;
+      }
+    }
+
     try {
       setLoading(true);
 
@@ -80,7 +117,19 @@ export default function Checkout() {
         total: calculateTotal(),
         payment: {
           method: formData.paymentMethod || 'cod',
-          status: 'pending'
+          status: 'pending',
+          // Only store safe payment info
+          ...(formData.paymentMethod === 'card' && {
+            cardholderName: formData.cardholderName,
+            // NOTE: In production, never send card digits to backend
+            // Use Stripe/Payment gateway tokenization instead
+            cardLastFour: formData.cardNumber.slice(-4)
+          }),
+          ...(formData.paymentMethod === 'bank' && {
+            bankName: formData.bankName,
+            accountNumber: formData.accountNumber,
+            accountHolder: formData.accountHolder
+          })
         },
         shipping: {
           address: {
@@ -97,6 +146,21 @@ export default function Checkout() {
       };
 
       const order = await orderService.createOrder(orderData);
+      
+      // Process payment if card payment
+      if (formData.paymentMethod === 'card') {
+        try {
+          await orderService.processCardPayment(order._id, {
+            cardNumber: formData.cardNumber.replace(/\s/g, '').trim(),
+            cardholderName: formData.cardholderName,
+            expiryDate: formData.expiryDate,
+            cvv: formData.cvv
+          });
+        } catch (paymentErr) {
+          setError('❌ Xử lý thanh toán thất bại: ' + (paymentErr.response?.data?.error || paymentErr.message));
+          return;
+        }
+      }
       
       // Clear cart after successful order
       await cartService.clearCart();
@@ -261,6 +325,30 @@ export default function Checkout() {
                     <span className="font-semibold">Thanh toán khi nhận hàng (COD)</span>
                   </label>
 
+                  <label className="flex items-center border rounded p-3 cursor-pointer hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="card"
+                      checked={formData.paymentMethod === 'card'}
+                      onChange={handleInputChange}
+                      className="mr-3"
+                    />
+                    <span className="font-semibold">Thẻ Tín Dụng/Ghi Nợ (Visa, Mastercard, ...)</span>
+                  </label>
+
+                  <label className="flex items-center border rounded p-3 cursor-pointer hover:bg-gray-50">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value="bank"
+                      checked={formData.paymentMethod === 'bank'}
+                      onChange={handleInputChange}
+                      className="mr-3"
+                    />
+                    <span className="font-semibold">Chuyển Khoản Ngân Hàng</span>
+                  </label>
+
                   <label className="flex items-center border rounded p-3 cursor-pointer hover:bg-gray-50 opacity-50">
                     <input
                       type="radio"
@@ -285,6 +373,106 @@ export default function Checkout() {
                     <span className="font-semibold">VNPay (Sắp có)</span>
                   </label>
                 </div>
+
+                {/* Card Payment Form */}
+                {formData.paymentMethod === 'card' && (
+                  <div className="mt-6 border-t pt-6">
+                    <h3 className="text-lg font-semibold text-dark mb-2">Thông tin thẻ tín dụng</h3>
+                    <p className="text-sm text-blue-600 bg-blue-50 rounded p-3 mb-4">
+                      💡 Để test: Nhập số thẻ <strong>4242 4242 4242 4242</strong>, tên bất kỳ, ngày hết hạn và CVV bất kỳ
+                    </p>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">Tên trên thẻ</label>
+                        <input
+                          type="text"
+                          name="cardholderName"
+                          value={formData.cardholderName}
+                          onChange={handleInputChange}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                          placeholder="VD: Trần Văn A"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">Số thẻ</label>
+                        <input
+                          type="text"
+                          name="cardNumber"
+                          value={formData.cardNumber}
+                          onChange={handleInputChange}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                          placeholder="4242 4242 4242 4242"
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-semibold mb-1">Ngày hết hạn</label>
+                          <input
+                            type="text"
+                            name="expiryDate"
+                            value={formData.expiryDate}
+                            onChange={handleInputChange}
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                            placeholder="MM/YY (vd: 12/25)"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-semibold mb-1">CVV</label>
+                          <input
+                            type="text"
+                            name="cvv"
+                            value={formData.cvv}
+                            onChange={handleInputChange}
+                            className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                            placeholder="123 (bất kỳ)"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Bank Transfer Form */}
+                {formData.paymentMethod === 'bank' && (
+                  <div className="mt-6 border-t pt-6">
+                    <h3 className="text-lg font-semibold text-dark mb-4">Thông tin tài khoản ngân hàng</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">Tên ngân hàng</label>
+                        <input
+                          type="text"
+                          name="bankName"
+                          value={formData.bankName}
+                          onChange={handleInputChange}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                          placeholder="VD: VietcomBank, BIDV, ..."
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">Số tài khoản</label>
+                        <input
+                          type="text"
+                          name="accountNumber"
+                          value={formData.accountNumber}
+                          onChange={handleInputChange}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                          placeholder="VD: 1234567890"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold mb-1">Chủ tài khoản</label>
+                        <input
+                          type="text"
+                          name="accountHolder"
+                          value={formData.accountHolder}
+                          onChange={handleInputChange}
+                          className="w-full border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                          placeholder="VD: Trần Văn A"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Order Items */}

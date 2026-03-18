@@ -46,7 +46,14 @@ exports.createOrder = async (req, res) => {
             },
             payment: {
                 method: payment?.method || 'cod',
-                status: payment?.status || 'pending'
+                status: payment?.status || 'pending',
+                // Store card payment info if provided
+                ...(payment?.cardholderName && { cardholderName: payment.cardholderName }),
+                ...(payment?.cardLastFour && { cardLastFour: payment.cardLastFour }),
+                // Store bank transfer info if provided
+                ...(payment?.bankName && { bankName: payment.bankName }),
+                ...(payment?.accountNumber && { accountNumber: payment.accountNumber }),
+                ...(payment?.accountHolder && { accountHolder: payment.accountHolder })
             }
         };
 
@@ -120,6 +127,48 @@ exports.markPaid = async (req, res) => {
         await order.save();
         res.json(order);
     } catch (err) {
+        res.status(500).json({ message: 'Server error', error: err.message });
+    }
+};
+
+// POST /api/orders/:id/process-payment
+// Process card payment
+exports.processPayment = async (req, res) => {
+    try {
+        const { method, cardData } = req.body;
+        const order = await Order.findById(req.params.id);
+        
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        
+        // Allow owner or admin
+        if (order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
+        
+        if (method === 'card') {
+            // Validate card - test card is 4242424242424242
+            const testCard = '4242424242424242';
+            if (cardData.cardNumber !== testCard) {
+                return res.status(400).json({ error: 'Mã thẻ không hợp lệ! Vui lòng sử dụng thẻ test: 4242 4242 4242 4242' });
+            }
+            
+            // Payment successful - update order
+            order.payment.status = 'paid';
+            order.payment.paidAt = new Date();
+            await order.save();
+            
+            return res.json({ 
+                success: true, 
+                message: '✅ Thanh toán thành công!',
+                order 
+            });
+        }
+        
+        res.status(400).json({ error: 'Invalid payment method' });
+    } catch (err) {
+        console.error('Error processing payment:', err);
         res.status(500).json({ message: 'Server error', error: err.message });
     }
 };

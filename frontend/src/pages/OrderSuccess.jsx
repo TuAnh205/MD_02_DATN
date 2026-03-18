@@ -86,6 +86,94 @@ export default function OrderSuccess() {
           </p>
         </div>
 
+        {/* Payment Confirmation Section */}
+        {order.status !== 'cancelled' && (
+          <div className={`rounded-lg shadow p-8 mb-8 ${order.payment.method === 'cod' ? 'bg-blue-50 border border-blue-200' : 'bg-amber-50 border border-amber-200'}`}>
+            <h2 className="text-lg font-bold text-dark mb-4">Xác nhận thanh toán</h2>
+            
+            {order.payment.method === 'cod' ? (
+              <>
+                <div className="flex items-start gap-4">
+                  <div className="text-2xl">📦</div>
+                  <div>
+                    <p className="font-semibold text-dark mb-2">Thanh toán khi nhận hàng (COD)</p>
+                    <p className="text-gray-600 mb-2">
+                      Bạn vui lòng thanh toán <span className="font-bold text-primary">₫{order.total?.toLocaleString('vi-VN')}</span> cho nhân viên giao hàng
+                    </p>
+                    <p className="text-sm text-gray-600">✓ Đơn hàng sẽ được giao trong vòng 3-5 ngày làm việc</p>
+                  </div>
+                </div>
+              </>
+            ) : order.payment.method === 'card' ? (
+              <>
+                <div className="flex items-start gap-4">
+                  <div className="text-2xl">💳</div>
+                  <div>
+                    <p className="font-semibold text-dark mb-2">Thanh toán bằng Thẻ Tín Dụng/Ghi Nợ</p>
+                    <div className="bg-white rounded p-4 mb-3 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Người thanh toán:</span>
+                        <span className="font-semibold">{order.payment.cardholderName}</span>
+                      </div>
+                      {order.payment.cardLastFour && (
+                        <div className="flex justify-between">
+                          <span className="text-gray-600">Thẻ thanh toán:</span>
+                          <span className="font-semibold">**** **** **** {order.payment.cardLastFour}</span>
+                        </div>
+                      )}
+                      <div className="flex justify-between border-t pt-2 font-bold">
+                        <span>Số tiền:</span>
+                        <span className="text-primary">₫{order.total?.toLocaleString('vi-VN')}</span>
+                      </div>
+                    </div>
+                    {order.payment.status === 'paid' ? (
+                      <p className="text-sm text-green-700 bg-green-50 rounded p-2 border border-green-200">
+                        ✅ Thanh toán thành công! Đơn hàng của bạn đã được xác nhận
+                      </p>
+                    ) : (
+                      <p className="text-sm text-amber-700">
+                        ⚠️ Vui lòng kiểm tra email hoặc sms để xác nhận thanh toán. Nếu không nhận được xác nhận, liên hệ ngay với chúng tôi
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : order.payment.method === 'bank' ? (
+              <>
+                <div className="flex items-start gap-4">
+                  <div className="text-2xl">🏦</div>
+                  <div>
+                    <p className="font-semibold text-dark mb-2">Thanh toán bằng Chuyển Khoản Ngân Hàng</p>
+                    <div className="bg-white rounded p-4 mb-3 space-y-2">
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Ngân hàng:</span>
+                        <span className="font-semibold">{order.payment.bankName}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Số tài khoản:</span>
+                        <span className="font-semibold">{order.payment.accountNumber}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-gray-600">Chủ tài khoản:</span>
+                        <span className="font-semibold">{order.payment.accountHolder}</span>
+                      </div>
+                      <div className="flex justify-between border-t pt-2 font-bold">
+                        <span>Số tiền:</span>
+                        <span className="text-primary">₫{order.total?.toLocaleString('vi-VN')}</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-amber-700">
+                      ⚠️ Vui lòng chuyển khoản trong vòng 24 giờ. Ghi nội dung: "ĐH-{order.orderNumber}". Sau khi nhận được chuyển khoản, hệ thống sẽ tự động xác nhận đơn hàng
+                    </p>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <p className="text-gray-600">Phương thức thanh toán: {order.payment.method}</p>
+            )}
+          </div>
+        )}
+
         {/* Order Details */}
         <div className="bg-white rounded-lg shadow p-8 mb-8">
           <h2 className="text-xl font-bold text-dark mb-6">Thông tin đơn hàng</h2>
@@ -100,13 +188,16 @@ export default function OrderSuccess() {
             <div>
               <p className="text-sm text-gray-600">Phương thức thanh toán</p>
               <p className="font-semibold text-dark">
-                {order.payment.method === 'cod' ? 'Thanh toán khi nhận' : order.payment.method}
+                {order.payment.method === 'cod' ? 'Thanh toán khi nhận' : 
+                 order.payment.method === 'card' ? 'Thẻ Tín Dụng' :
+                 order.payment.method === 'bank' ? 'Chuyển Khoản' :
+                 order.payment.method}
               </p>
             </div>
             <div>
               <p className="text-sm text-gray-600">Trạng thái thanh toán</p>
               <p className={`font-semibold ${order.payment.status === 'paid' ? 'text-green-600' : 'text-yellow-600'}`}>
-                {order.payment.status === 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán'}
+                {order.payment.status === 'paid' ? 'Đã thanh toán' : 'Chờ xác nhận'}
               </p>
             </div>
             <div>

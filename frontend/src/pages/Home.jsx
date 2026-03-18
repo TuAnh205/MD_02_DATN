@@ -308,16 +308,35 @@ export default function Home() {
                             -{discount}%
                           </span>
                         )}
-                        {(product.image || product.images?.[0]) && (
-                          <img
-                            src={product.image || product.images?.[0]}
-                            alt={product.name}
-                            className="w-full h-48 object-cover rounded mb-4"
-                          />
-                        )}
+                        {(() => {
+                          const rawImages = product.images || [];
+                          const normalizedImages = Array.isArray(rawImages)
+                            ? rawImages
+                            : typeof rawImages === 'string'
+                            ? [rawImages]
+                            : [];
+
+                          const defaultImg = 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=60';
+                          const imageSrc = product.image || normalizedImages[0] || defaultImg;
+
+                          return (
+                            <img
+                              src={imageSrc}
+                              alt={product.name}
+                              className="w-full h-48 object-cover rounded mb-4"
+                            />
+                          );
+                        })()}
                         <h3 className="font-semibold text-dark mb-2 line-clamp-2">
                           {product.name}
                         </h3>
+                        <div className="flex items-center gap-2 text-sm mb-2">
+                          <span className="font-semibold text-gray-800">
+                            {product.ratings?.average ? product.ratings.average.toFixed(1) : '—'}
+                          </span>
+                          <span className="text-yellow-500">★</span>
+                          <span className="text-gray-500">({product.ratings?.count || 0})</span>
+                        </div>
                         <div className="flex items-baseline gap-3">
                           <p className="text-primary font-bold text-lg">
                             ₫{product.price?.toLocaleString('vi-VN')}
@@ -329,6 +348,11 @@ export default function Home() {
                           )}
                         </div>
                         <p className="text-sm text-gray-500 mt-2">{product.category}</p>
+                        <p className="text-sm mt-1">
+                          <span className={`font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
+                          </span>
+                        </p>
                       </div>
                     </Link>
                   );

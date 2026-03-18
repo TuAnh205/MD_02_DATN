@@ -13,6 +13,7 @@ import Orders from './pages/Orders';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminHome from './pages/AdminHome';
+import AdminRevenue from './pages/AdminRevenue';
 import AdminUsers from './pages/AdminUsers';
 import AdminProducts from './pages/AdminProducts';
 import AdminOrders from './pages/AdminOrders';
@@ -113,6 +114,7 @@ function AppContent() {
           }
         >
           <Route index element={<AdminHome />} />
+          <Route path="revenue" element={<AdminRevenue />} />
           <Route path="users" element={<AdminUsers />} />
           <Route path="products" element={<AdminProducts />} />
           <Route path="orders" element={<AdminOrders />} />

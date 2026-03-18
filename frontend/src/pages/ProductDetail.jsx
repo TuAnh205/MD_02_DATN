@@ -10,6 +10,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   const [reviews, setReviews] = useState([]);
   const [loadingReviews, setLoadingReviews] = useState(true);
@@ -129,23 +130,63 @@ export default function ProductDetail() {
         {/* Product Details */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 bg-white p-8 rounded-lg shadow">
           {/* Image Section */}
-          <div className="flex items-center justify-center">
-            {(product.image || product.images?.[0]) ? (
-              <img
-                src={product.image || product.images?.[0]}
-                alt={product.name}
-                className="w-full max-w-sm h-auto rounded-lg object-cover"
-              />
-            ) : (
-              <div className="w-full max-w-sm h-96 bg-gray-200 rounded-lg flex items-center justify-center">
-                <span className="text-gray-400">Chưa có hình ảnh</span>
-              </div>
-            )}
+          <div className="flex flex-col items-center">
+            {(() => {
+              const rawImages = product.images || [];
+              const normalizedImages = Array.isArray(rawImages)
+                ? rawImages
+                : typeof rawImages === 'string'
+                ? [rawImages]
+                : [];
+
+              const defaultImg = 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=60';
+              const images = [product.image, ...normalizedImages, defaultImg].filter(Boolean);
+
+              const activeImage = images[activeImageIndex] || images[0];
+
+              return (
+                <>
+                  <img
+                    src={activeImage}
+                    alt={product.name}
+                    className="w-full max-w-sm h-auto rounded-lg object-cover mb-4"
+                  />
+
+                  {images.length > 1 && (
+                    <div className="flex gap-2 overflow-x-auto pb-2">
+                      {images.map((img, idx) => (
+                        <button
+                          key={idx}
+                          type="button"
+                          onClick={() => setActiveImageIndex(idx)}
+                          className={`w-20 h-20 rounded-lg overflow-hidden border ${
+                            idx === activeImageIndex ? 'border-primary' : 'border-gray-200'
+                          } focus:outline-none`}
+                        >
+                          <img
+                            src={img}
+                            alt={`${product.name} ${idx + 1}`}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </>
+              );
+            })()}
           </div>
 
           {/* Info Section */}
           <div>
-            <h1 className="text-4xl font-bold text-dark mb-4">{product.name}</h1>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
+              <h1 className="text-4xl font-bold text-dark">{product.name}</h1>
+              {product.createdBy && (
+                <p className="text-sm text-gray-500 mt-2 sm:mt-0">
+                  Người tạo: <span className="font-semibold text-dark">{product.createdBy.name}</span>
+                </p>
+              )}
+            </div>
 
             {/* Price */}
             <div className="mb-6">
@@ -171,6 +212,11 @@ export default function ProductDetail() {
                   <span className="font-semibold">Thương hiệu:</span> {product.brand}
                 </p>
               )}
+              {product.tags && product.tags.length > 0 && (
+                <p className="text-sm">
+                  <span className="font-semibold">Tags:</span> {product.tags.join(', ')}
+                </p>
+              )}
             </div>
 
             {/* Description */}
@@ -180,6 +226,72 @@ export default function ProductDetail() {
                 {product.description || product.detailedDescription || 'Chưa có mô tả'}
               </p>
             </div>
+
+
+            {/* Technical Details */}
+            {(product.attributes || product.variants?.length || product.weight || product.dimensions) && (
+              <div className="mb-6">
+                <h3 className="text-lg font-semibold mb-2">Chi tiết sản phẩm</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {product.attributes && Object.keys(product.attributes).length > 0 && (
+                    <div className="bg-gray-50 p-4 rounded">
+                      <h4 className="text-sm font-semibold mb-2">Thông số kỹ thuật</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        {Object.entries(product.attributes).map(([key, value]) => (
+                          <div key={key} className="flex justify-between">
+                            <span className="text-gray-500">{key}</span>
+                            <span className="font-medium">{value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {(product.weight || product.dimensions) && (
+                    <div className="bg-gray-50 p-4 rounded">
+                      <h4 className="text-sm font-semibold mb-2">Kích thước & Trọng lượng</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        {product.weight && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Trọng lượng</span>
+                            <span className="font-medium">{product.weight} kg</span>
+                          </div>
+                        )}
+                        {product.dimensions && (
+                          <div className="flex justify-between">
+                            <span className="text-gray-500">Kích thước</span>
+                            <span className="font-medium">
+                              {product.dimensions.length || 0} x {product.dimensions.width || 0} x {product.dimensions.height || 0} cm
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {product.variants?.length > 0 && (
+                    <div className="bg-gray-50 p-4 rounded">
+                      <h4 className="text-sm font-semibold mb-2">Phiên bản</h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        {product.variants.map((variant, idx) => (
+                          <div key={idx} className="border-b last:border-b-0 pb-2">
+                            <div className="flex justify-between">
+                              <span className="font-medium">{variant.name}</span>
+                              <span className="text-gray-500">{variant.value}</span>
+                            </div>
+                            {variant.priceModifier ? (
+                              <div className="text-xs text-gray-500">
+                                +₫{variant.priceModifier.toLocaleString('vi-VN')}
+                              </div>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Stock Info */}
             <div className="mb-6">
