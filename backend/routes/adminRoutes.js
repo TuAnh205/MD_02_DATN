@@ -24,6 +24,7 @@ router.delete('/products/:id', adminController.deleteProduct);
 router.get('/orders', adminController.getOrders);
 router.get('/orders/count', adminController.getOrderCount);
 router.put('/orders/:id/status', adminController.updateOrderStatus);
+router.patch('/orders/:id/status', adminController.updateOrderStatus);
 
 // Review management routes
 router.get('/reviews', adminController.getReviews);

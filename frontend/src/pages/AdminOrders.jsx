@@ -35,7 +35,8 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
-      await api.put(`/admin/orders/${orderId}`, { status: newStatus });
+      // Admin API expects PUT /admin/orders/:id/status
+      await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
       fetchOrders();
     } catch (error) {
       console.error('Error updating order status:', error);
@@ -90,7 +91,7 @@ export default function AdminOrders() {
             <option value="all">Tất cả trạng thái</option>
             <option value="pending">Chờ xác nhận</option>
             <option value="confirmed">Đã xác nhận</option>
-            <option value="shipping">Đang giao</option>
+            <option value="shipped">Đang giao</option>
             <option value="delivered">Đã giao</option>
             <option value="cancelled">Đã hủy</option>
           </select>
@@ -171,7 +172,7 @@ export default function AdminOrders() {
                     >
                       <option value="pending">Chờ xác nhận</option>
                       <option value="confirmed">Xác nhận</option>
-                      <option value="shipping">Đang giao</option>
+                      <option value="shipped">Đang giao</option>
                       <option value="delivered">Đã giao</option>
                       <option value="cancelled">Hủy đơn</option>
                     </select>

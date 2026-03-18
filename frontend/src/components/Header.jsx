@@ -5,10 +5,25 @@ import { useAuth } from '../context/AuthContext';
 export default function Header() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const dropdownRef = React.useRef(null);
+
+  // Close dropdown when clicking outside
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setIsDropdownOpen(false);
   };
 
   return (
@@ -66,11 +81,35 @@ export default function Header() {
           </Link>
 
           {user ? (
-            <div className="flex items-center gap-3">
-              <span className="text-gray-600">{user.name}</span>
-              <button onClick={handleLogout} className="btn-primary text-sm">
-                Đăng Xuất
+            <div className="relative" ref={dropdownRef}>
+              <button 
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                className="flex items-center gap-2 hover:text-primary transition"
+              >
+                <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium text-sm">
+                  {user.name?.charAt(0)?.toUpperCase()}
+                </div>
+                <span className="text-gray-600 hidden md:block">{user.name}</span>
               </button>
+
+              {/* Dropdown Menu */}
+              {isDropdownOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-10">
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsDropdownOpen(false)}
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                  >
+                    Thông tin cá nhân
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg border-t"
+                  >
+                    Đăng Xuất
+                  </button>
+                </div>
+              )}
             </div>
           ) : (
             <div className="flex gap-3">

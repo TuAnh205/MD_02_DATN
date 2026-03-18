@@ -33,6 +33,14 @@ const authService = {
   },
 
   getToken: () => localStorage.getItem('token'),
+
+  updateProfile: async (data) => {
+    const response = await api.put('/auth/me', data);
+    if (response.data.user) {
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
 };
 
 export default authService;
