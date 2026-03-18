@@ -93,6 +93,7 @@ exports.getProducts = async (req, res) => {
 
     const products = await Product.find()
       .populate('category')
+      .populate('createdBy', 'name email')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -124,7 +125,8 @@ exports.getProductCount = async (req, res) => {
 
 exports.createProduct = async (req, res) => {
   try {
-    const product = new Product(req.body);
+    const productData = { ...req.body, createdBy: req.user.id };
+    const product = new Product(productData);
     await product.save();
     res.status(201).json({ product });
   } catch (error) {

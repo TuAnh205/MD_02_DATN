@@ -11,6 +11,7 @@ const orderRoutes = require('./routes/orderRoutes');
 const reviewRoutes = require('./routes/reviewRoutes');
 const postRoutes = require('./routes/postRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -30,6 +31,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/posts', postRoutes);
 app.use('/api/feedback', feedbackRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Basic health
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

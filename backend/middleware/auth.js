@@ -3,7 +3,7 @@ const User = require('../models/User');
 
 const jwtSecret = process.env.JWT_SECRET || 'secret_jwt_key';
 
-module.exports = async (req, res, next) => {
+const auth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
     if (!authHeader) return res.status(401).json({ message: 'No token provided' });
     const parts = authHeader.split(' ');
@@ -20,3 +20,15 @@ module.exports = async (req, res, next) => {
         return res.status(401).json({ message: 'Token invalid' });
     }
 };
+
+const adminAuth = (req, res, next) => {
+    if (req.user && req.user.role === 'admin') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Admin access required' });
+    }
+};
+
+module.exports = auth;
+module.exports.auth = auth;
+module.exports.adminAuth = adminAuth;

@@ -214,6 +214,9 @@ export default function AdminProducts() {
                   Danh mục
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Người tạo
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Giá
                 </th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -252,6 +255,14 @@ export default function AdminProducts() {
                     <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
                       {product.category || 'Chưa phân loại'}
                     </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {product.createdBy?.name || 'N/A'}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {product.createdBy?.email || ''}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">

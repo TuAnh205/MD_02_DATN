@@ -20,11 +20,14 @@ export default function AdminOrders() {
         limit: '10',
         ...(statusFilter !== 'all' && { status: statusFilter })
       });
+      console.log('Fetching orders with params:', params.toString());
       const response = await api.get(`/admin/orders?${params}`);
+      console.log('Orders response:', response.data);
       setOrders(response.data.orders);
       setTotalPages(response.data.pagination.pages);
     } catch (error) {
       console.error('Error fetching orders:', error);
+      console.error('Error response:', error.response);
     } finally {
       setLoading(false);
     }
@@ -138,13 +141,13 @@ export default function AdminOrders() {
                       {order.items?.length} sản phẩm
                     </div>
                     <div className="text-sm text-gray-500">
-                      {order.items?.slice(0, 2).map(item => item.product?.name).join(', ')}
+                      {order.items?.slice(0, 2).map(item => item.name).join(', ')}
                       {order.items?.length > 2 && ` và ${order.items.length - 2} sản phẩm khác`}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {order.totalAmount?.toLocaleString()}₫
+                      {order.total?.toLocaleString()}₫
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

@@ -42,7 +42,8 @@ const productSchema = new mongoose.Schema({
     },
     salesCount: { type: Number, default: 0 },
     viewCount: { type: Number, default: 0 },
-    relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
+    relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
 }, { timestamps: true });
 
 // Indexes for search and filtering

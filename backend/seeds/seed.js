@@ -62,6 +62,13 @@ const seedProducts = async () => {
     await Product.deleteMany({});
     console.log('✓ Cleared existing products');
 
+    // Get admin user for createdBy
+    const adminUser = await User.findOne({ role: 'admin' });
+    if (!adminUser) {
+      console.error('✗ No admin user found, skipping product seeding');
+      return;
+    }
+
     const products = [
       {
         name: 'Laptop Dell XPS 13',
@@ -71,7 +78,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=Laptop+XPS',
         stock: 15,
         featured: true,
-        hot: true
+        hot: true,
+        createdBy: adminUser._id
       },
       {
         name: 'iPhone 15 Pro',
@@ -81,7 +89,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=iPhone+15',
         stock: 25,
         featured: true,
-        hot: true
+        hot: true,
+        createdBy: adminUser._id
       },
       {
         name: 'Samsung Galaxy Watch',
@@ -91,7 +100,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=Galaxy+Watch',
         stock: 30,
         featured: false,
-        hot: false
+        hot: false,
+        createdBy: adminUser._id
       },
       {
         name: 'Sony WH-1000XM5 Headphones',
@@ -101,7 +111,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=Sony+Headphones',
         stock: 20,
         featured: true,
-        hot: false
+        hot: false,
+        createdBy: adminUser._id
       },
       {
         name: 'iPad Air',
@@ -111,7 +122,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=iPad+Air',
         stock: 18,
         featured: false,
-        hot: true
+        hot: true,
+        createdBy: adminUser._id
       },
       {
         name: 'MacBook Pro M3',
@@ -121,7 +133,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=MacBook+Pro',
         stock: 10,
         featured: true,
-        hot: true
+        hot: true,
+        createdBy: adminUser._id
       },
       {
         name: 'Google Pixel 8',
@@ -131,7 +144,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=Google+Pixel',
         stock: 22,
         featured: false,
-        hot: false
+        hot: false,
+        createdBy: adminUser._id
       },
       {
         name: 'AirPods Pro Max',
@@ -141,7 +155,8 @@ const seedProducts = async () => {
         image: 'https://via.placeholder.com/300x200?text=AirPods+Max',
         stock: 12,
         featured: true,
-        hot: false
+        hot: false,
+        createdBy: adminUser._id
       }
     ];
 
