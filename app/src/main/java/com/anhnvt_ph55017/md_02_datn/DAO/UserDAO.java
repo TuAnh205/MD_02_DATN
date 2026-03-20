@@ -20,9 +20,11 @@ public class UserDAO {
     public boolean register(String fullname, String email, String phone, String password) {
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        String normalizedEmail = email == null ? null : email.trim().toLowerCase();
+
         ContentValues values = new ContentValues();
         values.put("fullname", fullname);
-        values.put("email", email);
+        values.put("email", normalizedEmail);
         values.put("phone", phone);
         values.put("password", password);
 
@@ -34,10 +36,13 @@ public class UserDAO {
     public boolean login(String identifier, String password) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        // Allow login by email or phone
+        String normalizedIdentifier = identifier == null ? "" : identifier.trim();
+        String normalizedEmail = normalizedIdentifier.toLowerCase();
+
+        // Allow login by email (case-insensitive) or phone
         Cursor cursor = db.rawQuery(
-                "SELECT id FROM users WHERE (email = ? OR phone = ?) AND password = ?",
-                new String[]{identifier, identifier, password}
+                "SELECT id FROM users WHERE ((LOWER(email) = ? OR phone = ?) AND password = ?)",
+                new String[]{normalizedEmail, normalizedIdentifier, password}
         );
 
         boolean ok = cursor.moveToFirst();
@@ -49,9 +54,10 @@ public class UserDAO {
     public boolean checkEmailExists(String email) {
         SQLiteDatabase db = dbHelper.getReadableDatabase();
 
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
         Cursor cursor = db.rawQuery(
-                "SELECT id FROM users WHERE email = ?",
-                new String[]{email}
+                "SELECT id FROM users WHERE LOWER(email) = ?",
+                new String[]{normalizedEmail}
         );
 
         boolean exists = cursor.moveToFirst();

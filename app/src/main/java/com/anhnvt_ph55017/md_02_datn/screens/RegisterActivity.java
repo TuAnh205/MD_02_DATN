@@ -15,6 +15,13 @@ import androidx.appcompat.widget.AppCompatButton;
 
 import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -24,6 +31,10 @@ public class RegisterActivity extends AppCompatActivity {
     TextView tvBack;
 
     UserDAO userDAO;
+    RequestQueue requestQueue;
+
+    // emulator: 10.0.2.2 (host machine)
+    private static final String BACKEND_BASE_URL = "http://10.0.2.2:5000/api";
 
     boolean isPass1Visible = false;
     boolean isPass2Visible = false;
@@ -36,6 +47,7 @@ public class RegisterActivity extends AppCompatActivity {
         anhXa();
         eye();
         userDAO = new UserDAO(this);
+        requestQueue = Volley.newRequestQueue(this);
 
         tvBack.setOnClickListener(v -> finish());
 
@@ -135,19 +147,76 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         // 7️⃣ Register
-        boolean success = userDAO.register(fullName, email, phone, pass1);
-        if (success) {
-            Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
+        attemptBackendRegister(fullName, email, phone, pass1);
+    }
 
-            Intent intent = new Intent(this, LoginActivity.class);
-            intent.putExtra("prefill_email", email);
-            intent.putExtra("prefill_pass", pass1);
-            startActivity(intent);
+    private void attemptBackendRegister(String fullName, String email, String phone, String password) {
+        String url = BACKEND_BASE_URL + "/auth/register";
 
-            finish();
-        } else {
-            Toast.makeText(this, "Đăng ký thất bại", Toast.LENGTH_SHORT).show();
+        JSONObject body = new JSONObject();
+        try {
+            body.put("name", fullName);
+            body.put("email", email);
+            body.put("phone", phone);
+            body.put("password", password);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi tạo yêu cầu đăng ký", Toast.LENGTH_LONG).show();
+            return;
         }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                body,
+                response -> {
+                    // If backend registration success, ensure local DB has record for offline mode
+                    if (!userDAO.checkEmailExists(email)) {
+                        userDAO.register(fullName, email, phone, password);
+                    }
+
+                    Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(this, LoginActivity.class);
+                    intent.putExtra("prefill_email", email);
+                    intent.putExtra("prefill_pass", password);
+                    startActivity(intent);
+                    finish();
+                },
+                error -> {
+                    String message = "Đăng ký thất bại";
+                    if (error.networkResponse != null && error.networkResponse.data != null) {
+                        try {
+                            String errorBody = new String(error.networkResponse.data);
+                            JSONObject errJson = new JSONObject(errorBody);
+                            message = errJson.optString("message", message);
+                        } catch (JSONException ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+
+                    Toast.makeText(this, "Backend: " + message + ". Sẽ thử đăng ký offline...", Toast.LENGTH_LONG).show();
+
+                    // Fallback local registration if backend unavailable or conflict
+                    if (userDAO.checkEmailExists(email)) {
+                        Toast.makeText(this, "Email đã tồn tại (offline)", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    boolean localSuccess = userDAO.register(fullName, email, phone, password);
+                    if (localSuccess) {
+                        Toast.makeText(this, "Đăng ký offline thành công", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(this, LoginActivity.class);
+                        intent.putExtra("prefill_email", email);
+                        intent.putExtra("prefill_pass", password);
+                        startActivity(intent);
+                        finish();
+                    } else {
+                        Toast.makeText(this, "Đăng ký thất bại vừa online vừa offline", Toast.LENGTH_LONG).show();
+                    }
+                }
+        );
+
+        requestQueue.add(request);
     }
 
     // ================= ICON MẮT =================

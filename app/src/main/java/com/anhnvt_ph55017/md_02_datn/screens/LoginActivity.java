@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.view.MotionEvent;
 import android.view.View;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
@@ -20,10 +21,16 @@ import com.anhnvt_ph55017.md_02_datn.Adapters.SavedAccountAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.SavedAccountAdapter.SavedAccount;
 import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.*;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -39,6 +46,10 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     GoogleSignInClient googleSignInClient;
     UserDAO userDAO;
+    RequestQueue requestQueue;
+
+    // adjust to your backend address (for emulator: 10.0.2.2)
+    private static final String BACKEND_BASE_URL = "http://10.0.2.2:5000/api";
 
     boolean isPasswordVisible = false;
 
@@ -63,6 +74,7 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         userDAO = new UserDAO(this);
+        requestQueue = Volley.newRequestQueue(this);
 
         configureGoogle();
 
@@ -113,36 +125,92 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        boolean ok = userDAO.login(identifier, pass);
-
-        if (ok) {
-            Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
-
-            // Lưu / xóa thông tin theo checkbox
-            if (checkRemember.isChecked()) {
-                getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                        .putString(PREF_EMAIL, identifier)
-                        .putString(PREF_PASS, pass)
-                        .putBoolean(PREF_REMEMBER, true)
-                        .apply();
-
-                // Also save to saved accounts list
-                saveToSavedAccounts(identifier, pass);
-            } else {
-                getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                        .remove(PREF_EMAIL)
-                        .remove(PREF_PASS)
-                        .putBoolean(PREF_REMEMBER, false)
-                        .apply();
-            }
-
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-
-        } else {
-            Toast.makeText(this, "Sai email/số điện thoại hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+        // Try backend login first
+        String url = BACKEND_BASE_URL + "/auth/login";
+        JSONObject body = new JSONObject();
+        try {
+            body.put("email", identifier);
+            body.put("password", pass);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            return;
         }
+
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                body,
+                response -> {
+                    try {
+                        String token = response.getString("token");
+                        JSONObject userObj = response.getJSONObject("user");
+                        String email = userObj.getString("email");
+                        String name = userObj.optString("name", "");
+
+                        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                                .putString("token", token)
+                                .putString("user_email", email)
+                                .putString("user_name", name)
+                                .apply();
+
+                        if (checkRemember.isChecked()) {
+                            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                                    .putString(PREF_EMAIL, identifier)
+                                    .putString(PREF_PASS, pass)
+                                    .putBoolean(PREF_REMEMBER, true)
+                                    .apply();
+                            saveToSavedAccounts(identifier, pass);
+                        } else {
+                            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                                    .remove(PREF_EMAIL)
+                                    .remove(PREF_PASS)
+                                    .putBoolean(PREF_REMEMBER, false)
+                                    .apply();
+                        }
+
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Đăng nhập thất bại", Toast.LENGTH_SHORT).show();
+                    }
+                },
+                error -> {
+                    String errMsg = "Sai email/số điện thoại hoặc mật khẩu";
+
+                    if (error.networkResponse != null && error.networkResponse.data != null) {
+                        try {
+                            String errorBody = new String(error.networkResponse.data);
+                            JSONObject errJson = new JSONObject(errorBody);
+                            if (errJson.has("message")) {
+                                errMsg = errJson.getString("message");
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // ALWAYS fallback to local for normal (email/password) accounts
+                    boolean localOk = userDAO.login(identifier, pass);
+                    if (localOk) {
+                        Toast.makeText(this, "Đăng nhập thành công (offline)", Toast.LENGTH_SHORT).show();
+                        Intent intent = new Intent(this, MainActivity.class);
+                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        startActivity(intent);
+                        return;
+                    }
+
+                    if (errMsg.contains("Google") || errMsg.contains("Firebase")) {
+                        Toast.makeText(this, errMsg + " (ngày đã login backend?)", Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(this, errMsg, Toast.LENGTH_SHORT).show();
+                    }
+                }
+        );
+
+        requestQueue.add(jsonObjectRequest);
     }
 
     private void loadSavedCredentials() {
@@ -173,12 +241,23 @@ public class LoginActivity extends AppCompatActivity {
 
     // ================= GOOGLE CONFIG =================
 
+    private static final String DEFAULT_WEB_CLIENT_ID_PLACEHOLDER = "YOUR_DEFAULT_WEB_CLIENT_ID_HERE";
+
     private void configureGoogle() {
+
+        String webClientId = getString(R.string.default_web_client_id);
+
+        if (webClientId == null || webClientId.isEmpty() || webClientId.equals(DEFAULT_WEB_CLIENT_ID_PLACEHOLDER)) {
+            Toast.makeText(this, "Thiết lập Google Sign-In không hợp lệ, cập nhật default_web_client_id trong strings.xml", Toast.LENGTH_LONG).show();
+            Log.e("LoginActivity", "default_web_client_id is invalid: " + webClientId);
+            btnGoogle.setEnabled(false);
+            return;
+        }
 
         GoogleSignInOptions gso =
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestEmail()
-                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestIdToken(webClientId)
                         .build();
 
         googleSignInClient = GoogleSignIn.getClient(this, gso);
@@ -210,12 +289,25 @@ public class LoginActivity extends AppCompatActivity {
             try {
 
                 GoogleSignInAccount account = task.getResult(ApiException.class);
+                String idToken = account.getIdToken();
 
-                firebaseAuth(account.getIdToken());
+                if (idToken == null || idToken.isEmpty()) {
+                    Toast.makeText(this, "Không lấy được Google token. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                    Log.e("LoginActivity", "Google account idToken is null/empty");
+                    loginGoogle(); // rerun the flow so user can choose account again
+                    return;
+                }
 
+                String email = account.getEmail();
+                String name = account.getDisplayName();
+                sendGoogleTokenToBackend(idToken, email, name);
+
+            } catch (ApiException e) {
+                Toast.makeText(this, "Google login failed: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                Log.e("LoginActivity", "Google sign in failed", e);
             } catch (Exception e) {
-
                 Toast.makeText(this, "Google login failed", Toast.LENGTH_SHORT).show();
+                Log.e("LoginActivity", "Unknown sign in error", e);
             }
         }
     }
@@ -227,6 +319,9 @@ public class LoginActivity extends AppCompatActivity {
         AuthCredential credential =
                 GoogleAuthProvider.getCredential(idToken, null);
 
+        // Clear stale session before signing in:
+        mAuth.signOut();
+
         mAuth.signInWithCredential(credential)
                 .addOnCompleteListener(task -> {
 
@@ -234,15 +329,175 @@ public class LoginActivity extends AppCompatActivity {
 
                         Toast.makeText(this, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show();
 
-                        Intent intent = new Intent(this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                        if (mAuth.getCurrentUser() != null) {
+                            String firebaseUid = mAuth.getCurrentUser().getUid();
+                            String email = mAuth.getCurrentUser().getEmail();
+                            String name = mAuth.getCurrentUser().getDisplayName();
+
+                            Log.d("LoginActivity", "Google user done: uid=" + firebaseUid + ", email=" + email + ", name=" + name);
+
+                            if (firebaseUid == null || firebaseUid.isEmpty() || email == null || email.isEmpty()) {
+                                Toast.makeText(this, "Firebase user data incomplete", Toast.LENGTH_LONG).show();
+                                proceedToMain();
+                            } else {
+                                syncFirebaseUserWithServer(firebaseUid, email, name);
+                            }
+                        } else {
+                            Toast.makeText(this, "Firebase user null after Google sign-in", Toast.LENGTH_LONG).show();
+                            proceedToMain();
+                        }
 
                     } else {
+                        Exception ex = task.getException();
+                        String message = "Google login thất bại";
+                        if (ex != null) {
+                            message += ": " + ex.getMessage();
+                            Log.e("LoginActivity", "signInWithCredential error", ex);
+                        }
 
-                        Toast.makeText(this, "Google login thất bại", Toast.LENGTH_SHORT).show();
+                        if (ex instanceof FirebaseAuthInvalidCredentialsException || ex instanceof FirebaseAuthInvalidUserException) {
+                            Toast.makeText(this, "Mã xác thực Google đã hết hạn hoặc không hợp lệ. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                            googleSignInClient.signOut().addOnCompleteListener(logoutTask -> loginGoogle());
+                        } else if (ex != null && ex.getMessage() != null && ex.getMessage().contains("recaptcha")) {
+                            Toast.makeText(this, "Xác thực reCAPTCHA bị lỗi. Vui lòng thử lại.", Toast.LENGTH_LONG).show();
+                            googleSignInClient.signOut().addOnCompleteListener(logoutTask -> loginGoogle());
+                        } else {
+                            Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                        }
                     }
                 });
+    }
+
+    private void sendGoogleTokenToBackend(String idToken, String email, String name) {
+        String url = BACKEND_BASE_URL + "/auth/google-login";
+
+        JSONObject body = new JSONObject();
+        try {
+            body.put("idToken", idToken);
+            if (email != null) body.put("email", email);
+            if (name != null) body.put("name", name);
+        } catch (JSONException e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Đã có lỗi khi tạo payload đăng nhập Google", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                body,
+                response -> {
+                    try {
+                        String token = response.getString("token");
+                        JSONObject userObj = response.getJSONObject("user");
+                        String emailFromServer = userObj.optString("email");
+                        String nameFromServer = userObj.optString("name");
+
+                        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                                .putString("token", token)
+                                .putString("user_email", emailFromServer)
+                                .putString("user_name", nameFromServer)
+                                .apply();
+
+                        Toast.makeText(this, "Google login thành công", Toast.LENGTH_SHORT).show();
+                        proceedToMain();
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                        Toast.makeText(this, "Lỗi đọc phản hồi server", Toast.LENGTH_LONG).show();
+                    }
+                },
+                error -> {
+                    String errMsg = "Google login server failed";
+                    if (error.networkResponse != null && error.networkResponse.data != null) {
+                        try {
+                            String errorBody = new String(error.networkResponse.data);
+                            JSONObject errJson = new JSONObject(errorBody);
+                            errMsg = errJson.optString("message", errMsg);
+                        } catch (Exception ex) {
+                            ex.printStackTrace();
+                        }
+                    }
+                    Toast.makeText(this, "Google login thất bại: " + errMsg, Toast.LENGTH_LONG).show();
+
+                    // fallback: clear local firebase if exists and re-run login
+                    mAuth.signOut();
+                    googleSignInClient.signOut();
+
+                }
+        );
+
+        requestQueue.add(request);
+    }
+
+    private void proceedToMain() {
+        Intent intent = new Intent(this, MainActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+    }
+
+    private void syncFirebaseUserWithServer(String firebaseUid, String email, String name) {
+        String url = BACKEND_BASE_URL + "/auth/firebase-sync";
+
+        Log.d("LoginActivity", "syncFirebaseUserWithServer: url=" + url + " uid=" + firebaseUid + " email=" + email + " name=" + name);
+
+        JSONObject body = new JSONObject();
+        try {
+            body.put("firebaseUid", firebaseUid);
+            body.put("email", email);
+            body.put("name", name);
+        } catch (JSONException ex) {
+            ex.printStackTrace();
+            Toast.makeText(this, "Đã có lỗi khi tạo dữ liệu sync", Toast.LENGTH_LONG).show();
+            proceedToMain();
+            return;
+        }
+
+        Log.d("LoginActivity", "syncFirebaseUserWithServer payload: " + body.toString());
+
+        JsonObjectRequest syncRequest = new JsonObjectRequest(
+                Request.Method.POST,
+                url,
+                body,
+                response -> {
+                    try {
+                        String token = response.getString("token");
+                        JSONObject userObj = response.getJSONObject("user");
+                        String emailFromServer = userObj.optString("email");
+                        String nameFromServer = userObj.optString("name");
+
+                        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                                .putString("token", token)
+                                .putString("user_email", emailFromServer)
+                                .putString("user_name", nameFromServer)
+                                .apply();
+
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    proceedToMain();
+                },
+                error -> {
+                    Log.e("LoginActivity", "syncFirebaseUserWithServer failed", error);
+
+                    if (error.networkResponse != null) {
+                        String serverResponse = new String(error.networkResponse.data);
+                        Log.e("LoginActivity", "syncFirebaseUserWithServer response: " + serverResponse);
+                        try {
+                            JSONObject err = new JSONObject(serverResponse);
+                            String msg = err.optString("message", "Lỗi server khi sync.");
+                            Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                        } catch (JSONException e) {
+                            Toast.makeText(this, "syncFirebaseUserWithServer: lỗi không xác định", Toast.LENGTH_LONG).show();
+                        }
+                    } else {
+                        Toast.makeText(this, "syncFirebaseUserWithServer: không thể kết nối server", Toast.LENGTH_LONG).show();
+                    }
+
+                    proceedToMain();
+                }
+        );
+
+        requestQueue.add(syncRequest);
     }
 
     // ================= SHOW / HIDE PASSWORD =================
