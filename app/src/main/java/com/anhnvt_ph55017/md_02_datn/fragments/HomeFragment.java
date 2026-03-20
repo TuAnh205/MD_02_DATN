@@ -178,7 +178,7 @@ public class HomeFragment extends Fragment {
 
         for (int i = 0; i < count; i++) {
             dots[i] = new ImageView(getContext());
-            dots[i].setImageResource(R.drawable.bg_circle_gray); // default inactive
+            dots[i].setImageResource(R.drawable.bg_circle_blue); // default inactive
             LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
                     12, 12
             );
@@ -194,7 +194,7 @@ public class HomeFragment extends Fragment {
             if (i == position) {
                 dots[i].setImageResource(R.drawable.bg_circle_blue); // active
             } else {
-                dots[i].setImageResource(R.drawable.bg_circle_gray); // inactive
+                dots[i].setImageResource(R.drawable.bg_circle_blue); // inactive
             }
         }
     }
