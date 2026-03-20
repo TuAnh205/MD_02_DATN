@@ -113,35 +113,40 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
-        boolean ok = userDAO.login(identifier, pass);
+        try {
+            boolean ok = userDAO.login(identifier, pass);
 
-        if (ok) {
-            Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+            if (ok) {
+                Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
 
-            // Lưu / xóa thông tin theo checkbox
-            if (checkRemember.isChecked()) {
-                getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                        .putString(PREF_EMAIL, identifier)
-                        .putString(PREF_PASS, pass)
-                        .putBoolean(PREF_REMEMBER, true)
-                        .apply();
+                // Lưu / xóa thông tin theo checkbox
+                if (checkRemember.isChecked()) {
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                            .putString(PREF_EMAIL, identifier)
+                            .putString(PREF_PASS, pass)
+                            .putBoolean(PREF_REMEMBER, true)
+                            .apply();
 
-                // Also save to saved accounts list
-                saveToSavedAccounts(identifier, pass);
+                    // Also save to saved accounts list
+                    saveToSavedAccounts(identifier, pass);
+                } else {
+                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                            .remove(PREF_EMAIL)
+                            .remove(PREF_PASS)
+                            .putBoolean(PREF_REMEMBER, false)
+                            .apply();
+                }
+
+                Intent intent = new Intent(this, MainActivity.class);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                startActivity(intent);
+
             } else {
-                getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                        .remove(PREF_EMAIL)
-                        .remove(PREF_PASS)
-                        .putBoolean(PREF_REMEMBER, false)
-                        .apply();
+                Toast.makeText(this, "Sai email/số điện thoại hoặc mật khẩu", Toast.LENGTH_SHORT).show();
             }
-
-            Intent intent = new Intent(this, MainActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-
-        } else {
-            Toast.makeText(this, "Sai email/số điện thoại hoặc mật khẩu", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi đăng nhập: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -282,58 +287,66 @@ public class LoginActivity extends AppCompatActivity {
     // ================= SAVED ACCOUNTS =================
 
     private void saveToSavedAccounts(String email, String password) {
-        String savedAccountsStr = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                .getString("saved_accounts", "");
+        try {
+            String savedAccountsStr = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .getString("saved_accounts", "");
 
-        // Check if this account is already saved
-        String newAccount = email + "," + password;
-        if (savedAccountsStr.contains(newAccount)) {
-            return; // Already saved
+            // Check if this account is already saved
+            String newAccount = email + "," + password;
+            if (savedAccountsStr.contains(newAccount)) {
+                return; // Already saved
+            }
+
+            // Add to the list (limit to 5 accounts)
+            String[] accounts = savedAccountsStr.isEmpty() ? new String[0] : savedAccountsStr.split(";");
+            java.util.List<String> accountList = new java.util.ArrayList<>(java.util.Arrays.asList(accounts));
+
+            // Remove if already exists (update password)
+            accountList.removeIf(acc -> acc.startsWith(email + ","));
+
+            // Add new account at the beginning
+            accountList.add(0, newAccount);
+
+            // Keep only last 5 accounts
+            if (accountList.size() > 5) {
+                accountList = accountList.subList(0, 5);
+            }
+
+            // Save back
+            String updatedAccounts = String.join(";", accountList);
+            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
+                    .putString("saved_accounts", updatedAccounts)
+                    .apply();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        // Add to the list (limit to 5 accounts)
-        String[] accounts = savedAccountsStr.isEmpty() ? new String[0] : savedAccountsStr.split(";");
-        java.util.List<String> accountList = new java.util.ArrayList<>(java.util.Arrays.asList(accounts));
-
-        // Remove if already exists (update password)
-        accountList.removeIf(acc -> acc.startsWith(email + ","));
-
-        // Add new account at the beginning
-        accountList.add(0, newAccount);
-
-        // Keep only last 5 accounts
-        if (accountList.size() > 5) {
-            accountList = accountList.subList(0, 5);
-        }
-
-        // Save back
-        String updatedAccounts = String.join(";", accountList);
-        getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                .putString("saved_accounts", updatedAccounts)
-                .apply();
     }
 
     private void loadAndShowSavedAccounts() {
-        // Load all saved accounts from SharedPreferences
-        // We'll store them as email1,password1;email2,password2;...
-        String savedAccountsStr = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                .getString("saved_accounts", "");
+        try {
+            // Load all saved accounts from SharedPreferences
+            // We'll store them as email1,password1;email2,password2;...
+            String savedAccountsStr = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
+                    .getString("saved_accounts", "");
 
-        if (!savedAccountsStr.isEmpty()) {
-            String[] accounts = savedAccountsStr.split(";");
-            java.util.List<SavedAccount> accountList = new java.util.ArrayList<>();
+            if (!savedAccountsStr.isEmpty()) {
+                String[] accounts = savedAccountsStr.split(";");
+                java.util.List<SavedAccountAdapter.SavedAccount> accountList = new java.util.ArrayList<>();
 
-            for (String account : accounts) {
-                String[] parts = account.split(",");
-                if (parts.length == 2) {
-                    accountList.add(new SavedAccount(parts[0], parts[1]));
+                for (String account : accounts) {
+                    String[] parts = account.split(",");
+                    if (parts.length == 2) {
+                        accountList.add(new SavedAccountAdapter.SavedAccount(parts[0], parts[1]));
+                    }
+                }
+
+                if (!accountList.isEmpty()) {
+                    savedAccountAdapter.setAccounts(accountList);
+                    rvSavedAccounts.setVisibility(View.VISIBLE);
                 }
             }
-
-            if (!accountList.isEmpty()) {
-                savedAccountAdapter.setAccounts(accountList);
-                rvSavedAccounts.setVisibility(View.VISIBLE);
-            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

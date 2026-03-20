@@ -16,6 +16,7 @@ import android.widget.TextView;
 import android.content.Intent;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
+import com.anhnvt_ph55017.md_02_datn.DAO.OrderDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 
@@ -32,6 +33,7 @@ public class OrdersFragment extends Fragment {
     OrderAdapter adapter;
     static List<Order> orderList;    // shared history
     List<Order> filteredList;
+    OrderDAO orderDAO;
     
     TextView tvAll, tvPending, tvProcessing, tvShipping, tvDelivered;
     String selectedStatus = "ALL";
@@ -61,22 +63,34 @@ public class OrdersFragment extends Fragment {
         tvShipping = view.findViewById(R.id.tvShipping);
         tvDelivered = view.findViewById(R.id.tvDelivered);
 
-        if(orderList == null) orderList = new ArrayList<>();
-
-        // Add sample orders with status and arrival date only once
-        if(orderList.isEmpty()){
-            orderList.add(new Order("CT-9021", "Oct 20 2023", 1499, "Đang giao hàng", "Oct 24", 2, R.drawable.anh1,
-                    "Tai nghe Bluetooth", 1499, "Tai nghe không dây chất lượng cao"));
-            orderList.add(new Order("CT-8955", "Oct 18 2023", 899, "Đang giao hàng", "Oct 26", 1, R.drawable.anh2,
-                    "Loa di động", 899, "Loa Bluetooth công suất lớn"));
-            orderList.add(new Order("CT-8842", "Oct 15 2023", 450, "Đã nhận", "Oct 21", 2, R.drawable.anh3,
-                    "Chuột không dây", 225, "Chuột quang tiện lợi"));
-            orderList.add(new Order("CT-8700", "Sep 28 2023", 2140, "Đã nhận", "Oct 2", 1, R.drawable.anh1,
-                    "Bộ sạc dự phòng", 2140, "Pin dự phòng dung lượng cao"));
-            orderList.add(new Order("CT-8600", "Nov 1 2023", 1200, "Chưa thanh toán", "Nov 5", 3, R.drawable.anh2,
-                    "Sạc nhanh", 400, "Củ sạc nhanh 65W"));
-            orderList.add(new Order("CT-8501", "Oct 25 2023", 750, "Đang xử lý", "Oct 30", 1, R.drawable.anh3,
-                    "Dây cáp USB", 750, "Cáp sạc dài 2m"));
+        // Initialize OrderDAO and load orders from database
+        if (getContext() != null) {
+            orderDAO = new OrderDAO(getContext());
+            
+            if (orderList == null) {
+                orderList = new ArrayList<>();
+            }
+            
+            // Load orders from database (user ID = 1 for now)
+            List<Order> dbOrders = orderDAO.getAllOrders();
+            orderList.clear();
+            orderList.addAll(dbOrders);
+            
+            // If no orders in database, add sample data for demo
+            if (orderList.isEmpty()) {
+                orderList.add(new Order("CT-9021", "Oct 20 2023", 1499, "Đang giao hàng", "Oct 24", 2, R.drawable.anh1,
+                        "Tai nghe Bluetooth", 1499, "Tai nghe không dây chất lượng cao"));
+                orderList.add(new Order("CT-8955", "Oct 18 2023", 899, "Đang giao hàng", "Oct 26", 1, R.drawable.anh2,
+                        "Loa di động", 899, "Loa Bluetooth công suất lớn"));
+                orderList.add(new Order("CT-8842", "Oct 15 2023", 450, "Đã nhận", "Oct 21", 2, R.drawable.anh3,
+                        "Chuột không dây", 225, "Chuột quang tiện lợi"));
+                orderList.add(new Order("CT-8700", "Sep 28 2023", 2140, "Đã nhận", "Oct 2", 1, R.drawable.anh1,
+                        "Bộ sạc dự phòng", 2140, "Pin dự phòng dung lượng cao"));
+                orderList.add(new Order("CT-8600", "Nov 1 2023", 1200, "Chưa thanh toán", "Nov 5", 3, R.drawable.anh2,
+                        "Sạc nhanh", 400, "Củ sạc nhanh 65W"));
+                orderList.add(new Order("CT-8501", "Oct 25 2023", 750, "Đang xử lý", "Oct 30", 1, R.drawable.anh3,
+                        "Dây cáp USB", 750, "Cáp sạc dài 2m"));
+            }
         }
 
         filteredList = new ArrayList<>(orderList);
@@ -177,6 +191,12 @@ public class OrdersFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        // Reload orders from database when fragment resumes
+        if (orderDAO != null) {
+            List<Order> dbOrders = orderDAO.getAllOrders();
+            orderList.clear();
+            orderList.addAll(dbOrders);
+        }
         // refresh in case orders were added while away
         filterByStatus(selectedStatus);
     }

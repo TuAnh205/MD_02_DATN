@@ -18,6 +18,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.anhnvt_ph55017.md_02_datn.DAO.AddressDAO;
+import com.anhnvt_ph55017.md_02_datn.DAO.OrderDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.HomeActivity;
 import com.anhnvt_ph55017.md_02_datn.fragments.HomeFragment;
@@ -40,6 +41,7 @@ public class CheckOutActivity extends AppCompatActivity {
     TextView tvShipName, tvShipPhone, tvShipAddress;
     Button btnChangeAddress;
     AddressDAO addressDAO;
+    OrderDAO orderDAO;
     Address selectedAddress;
 
     @Override
@@ -61,6 +63,7 @@ public class CheckOutActivity extends AppCompatActivity {
         btnChangeAddress = findViewById(R.id.btnChangeAddress);
 
         addressDAO = new AddressDAO(this);
+        orderDAO = new OrderDAO(this);
         loadDefaultAddress();
 
         cartList = (List<com.anhnvt_ph55017.md_02_datn.models.Product>) getIntent().getSerializableExtra("cart");
@@ -78,41 +81,70 @@ public class CheckOutActivity extends AppCompatActivity {
 
         btnOrder.setOnClickListener(v -> {
 
-            int checked = paymentGroup.getCheckedRadioButtonId();
+            int checkedId = paymentGroup.getCheckedRadioButtonId();
 
-            if(checked == -1){
-                Toast.makeText(this,"Chọn phương thức thanh toán",Toast.LENGTH_SHORT).show();
+            if (checkedId == -1) {
+                Toast.makeText(this, "Vui lòng chọn phương thức thanh toán", Toast.LENGTH_SHORT).show();
                 return;
             }
 
             String voucher = edVoucher.getText().toString();
 
-            // create order object and add to history
-            if(!cartList.isEmpty()){
+            if (!cartList.isEmpty()) {
                 double subtotal = 0;
                 int itemCount = 0;
-                for(com.anhnvt_ph55017.md_02_datn.models.Product p : cartList){
+
+                for (com.anhnvt_ph55017.md_02_datn.models.Product p : cartList) {
                     subtotal += p.getPrice() * p.getQty();
                     itemCount += p.getQty();
                 }
+
                 String id = "OD-" + System.currentTimeMillis();
-                String date = new java.text.SimpleDateFormat("MMM dd yyyy").format(new java.util.Date());
+                String date = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
                 String status = "Đang xử lý";
-                String arrival = "TBD";
+                String arrival = "Chưa xác định";
+
                 int image = cartList.get(0).getImage();
                 String name = cartList.get(0).getName();
                 double price = cartList.get(0).getPrice();
                 String desc = cartList.get(0).getDescription();
 
                 com.anhnvt_ph55017.md_02_datn.models.Order newOrder =
-                        new com.anhnvt_ph55017.md_02_datn.models.Order(id, date, subtotal, status,
-                                arrival, itemCount, image, name, price, desc);
+                        new com.anhnvt_ph55017.md_02_datn.models.Order(
+                                id, date, subtotal, status,
+                                arrival, itemCount, image, name, price, desc
+                        );
 
+                // ===== FIX PAYMENT METHOD =====
+                String paymentMethod;
+
+                if (checkedId == R.id.payMomo) {
+                    paymentMethod = "Ví MoMo";
+                } else if (checkedId == R.id.payZalo) {
+                    paymentMethod = "ZaloPay";
+                } else if (checkedId == R.id.payCard) {
+                    paymentMethod = "Thẻ tín dụng";
+                } else if (checkedId == R.id.payCOD) {
+                    paymentMethod = "Thanh toán khi nhận hàng";
+                } else {
+                    paymentMethod = "Khác";
+                }
+
+                // ===== ADDRESS =====
+                String address = selectedAddress != null
+                        ? selectedAddress.getAddress()
+                        : "Địa chỉ mặc định";
+
+                // ===== SAVE DB =====
+                orderDAO.addOrder(id, 1, subtotal, status, address, paymentMethod, voucher);
+
+                // ===== ADD TO MEMORY =====
                 com.anhnvt_ph55017.md_02_datn.fragments.OrdersFragment.addOrder(newOrder);
             }
 
+            Toast.makeText(this, "Thanh toán thành công!", Toast.LENGTH_LONG).show();
+
             Intent home = new Intent(CheckOutActivity.this, MainActivity.class);
-            Toast.makeText(this,"Thanh toán thành công!",Toast.LENGTH_LONG).show();
             home.putExtra("openFragment", "home");
             home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(home);

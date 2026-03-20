@@ -24,30 +24,34 @@ public class ProductDAO {
 
         List<Product> list = new ArrayList<>();
 
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor c = db.rawQuery(
-                "SELECT id,name,price,image,description,stock FROM products",
-                null
-        );
+            Cursor c = db.rawQuery(
+                    "SELECT id,name,price,image,description,stock FROM products",
+                    null
+            );
 
-        if(c.moveToFirst()){
-            do{
+            if(c.moveToFirst()){
+                do{
 
-                list.add(new Product(
-                        c.getInt(0),
-                        c.getString(1),
-                        c.getDouble(2),
-                        c.getInt(3),
-                        c.getString(4),
-                        c.getInt(5)
-                ));
+                    list.add(new Product(
+                            c.getInt(0),
+                            c.getString(1),
+                            c.getDouble(2),
+                            c.getInt(3),
+                            c.getString(4),
+                            c.getInt(5)
+                    ));
 
-            }while(c.moveToNext());
+                }while(c.moveToNext());
+            }
+
+            c.close();
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        c.close();
-        db.close();
 
         return list;
     }
@@ -62,47 +66,51 @@ public class ProductDAO {
             return getAll();
         }
 
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        StringBuilder query = new StringBuilder(
-                "SELECT id,name,price,image,description,stock FROM products WHERE categoryId IN ("
-        );
+            StringBuilder query = new StringBuilder(
+                    "SELECT id,name,price,image,description,stock FROM products WHERE categoryId IN ("
+            );
 
-        for(int i = 0; i < categoryIds.size(); i++){
-            query.append("?");
-            if(i < categoryIds.size() - 1){
-                query.append(",");
+            for(int i = 0; i < categoryIds.size(); i++){
+                query.append("?");
+                if(i < categoryIds.size() - 1){
+                    query.append(",");
+                }
             }
+
+            query.append(")");
+
+            String[] args = new String[categoryIds.size()];
+            int index = 0;
+
+            for(Integer id : categoryIds){
+                args[index++] = String.valueOf(id);
+            }
+
+            Cursor c = db.rawQuery(query.toString(), args);
+
+            if(c.moveToFirst()){
+                do{
+
+                    list.add(new Product(
+                            c.getInt(0),
+                            c.getString(1),
+                            c.getDouble(2),
+                            c.getInt(3),
+                            c.getString(4),
+                            c.getInt(5)
+                    ));
+
+                }while(c.moveToNext());
+            }
+
+            c.close();
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        query.append(")");
-
-        String[] args = new String[categoryIds.size()];
-        int index = 0;
-
-        for(Integer id : categoryIds){
-            args[index++] = String.valueOf(id);
-        }
-
-        Cursor c = db.rawQuery(query.toString(), args);
-
-        if(c.moveToFirst()){
-            do{
-
-                list.add(new Product(
-                        c.getInt(0),
-                        c.getString(1),
-                        c.getDouble(2),
-                        c.getInt(3),
-                        c.getString(4),
-                        c.getInt(5)
-                ));
-
-            }while(c.moveToNext());
-        }
-
-        c.close();
-        db.close();
 
         return list;
     }
@@ -111,27 +119,31 @@ public class ProductDAO {
     public List<Product> searchByName(String keyword) {
         List<Product> list = new ArrayList<>();
 
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
-        Cursor c = db.rawQuery(
-                "SELECT id,name,price,image,description,stock FROM products WHERE name LIKE ?",
-                new String[]{"%" + keyword + "%"}
-        );
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
+            Cursor c = db.rawQuery(
+                    "SELECT id,name,price,image,description,stock FROM products WHERE name LIKE ?",
+                    new String[]{"%" + keyword + "%"}
+            );
 
-        if (c.moveToFirst()) {
-            do {
-                list.add(new Product(
-                        c.getInt(0),
-                        c.getString(1),
-                        c.getDouble(2),
-                        c.getInt(3),
-                        c.getString(4),
-                        c.getInt(5)
-                ));
-            } while (c.moveToNext());
+            if (c.moveToFirst()) {
+                do {
+                    list.add(new Product(
+                            c.getInt(0),
+                            c.getString(1),
+                            c.getDouble(2),
+                            c.getInt(3),
+                            c.getString(4),
+                            c.getInt(5)
+                    ));
+                } while (c.moveToNext());
+            }
+
+            c.close();
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        c.close();
-        db.close();
 
         return list;
     }

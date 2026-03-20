@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 12; // 🔥 tăng version for address table
+    private static final int DB_VERSION = 13; // 🔥 tăng version for search_history table
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -194,10 +194,20 @@ public class DBHelper extends SQLiteOpenHelper {
                         "FOREIGN KEY(productId) REFERENCES products(id)" +
                         ")"
         );
+
+        /* ================= SEARCH HISTORY ================= */
+        db.execSQL(
+                "CREATE TABLE search_history (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "keyword TEXT UNIQUE," +
+                        "createdAt TEXT" +
+                        ")"
+        );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+        db.execSQL("DROP TABLE IF EXISTS search_history");
         db.execSQL("DROP TABLE IF EXISTS order_items");
         db.execSQL("DROP TABLE IF EXISTS orders");
         db.execSQL("DROP TABLE IF EXISTS vouchers");

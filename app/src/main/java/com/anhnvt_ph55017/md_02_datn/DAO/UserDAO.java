@@ -18,44 +18,62 @@ public class UserDAO {
 
     // REGISTER
     public boolean register(String fullname, String email, String phone, String password) {
-        SQLiteDatabase db = dbHelper.getWritableDatabase();
+        try {
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
 
-        ContentValues values = new ContentValues();
-        values.put("fullname", fullname);
-        values.put("email", email);
-        values.put("phone", phone);
-        values.put("password", password);
+            ContentValues values = new ContentValues();
+            values.put("fullname", fullname);
+            values.put("email", email);
+            values.put("phone", phone);
+            values.put("password", password);
 
-        long result = db.insert("users", null, values);
-        return result != -1;
+            long result = db.insert("users", null, values);
+            db.close();
+            return result != -1;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // LOGIN
     public boolean login(String identifier, String password) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        // Allow login by email or phone
-        Cursor cursor = db.rawQuery(
-                "SELECT id FROM users WHERE (email = ? OR phone = ?) AND password = ?",
-                new String[]{identifier, identifier, password}
-        );
+            // Allow login by email or phone
+            Cursor cursor = db.rawQuery(
+                    "SELECT id FROM users WHERE (email = ? OR phone = ?) AND password = ?",
+                    new String[]{identifier, identifier, password}
+            );
 
-        boolean ok = cursor.moveToFirst();
-        cursor.close();
-        return ok;
+            boolean ok = cursor.moveToFirst();
+            cursor.close();
+            db.close();
+            return ok;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 
     // CHECK EMAIL
     public boolean checkEmailExists(String email) {
-        SQLiteDatabase db = dbHelper.getReadableDatabase();
+        try {
+            SQLiteDatabase db = dbHelper.getReadableDatabase();
 
-        Cursor cursor = db.rawQuery(
-                "SELECT id FROM users WHERE email = ?",
-                new String[]{email}
-        );
+            Cursor cursor = db.rawQuery(
+                    "SELECT id FROM users WHERE email = ?",
+                    new String[]{email}
+            );
 
-        boolean exists = cursor.moveToFirst();
-        cursor.close();
-        return exists;
+            boolean exists = cursor.moveToFirst();
+            cursor.close();
+            db.close();
+            return exists;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }
