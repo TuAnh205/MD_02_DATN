@@ -1,42 +1,43 @@
 {
-    "name": "md02_datn-backend",
-    "version": "1.0.0",
-    "description": "Backend API for MD_02_DATN - Full E-commerce Platform",
-    "main": "app.js",
-    "scripts": {
-        "start": "node app.js",
-        "dev": "nodemon app.js",
-        "test": "jest",
-        "seed": "node seeds/seed.js"
-    },
-    "author": "",
-    "license": "MIT",
-    "dependencies": {
-        "axios": "^1.13.6",
-        "bcryptjs": "^2.4.3",
-        "cloudinary": "^1.35.0",
-        "cors": "^2.8.5",
-        "dotenv": "^16.0.0",
-        "express": "^4.18.2",
-        "express-rate-limit": "^6.7.0",
-        "express-validator": "^7.0.1",
-        "helmet": "^6.0.1",
-        "jsonwebtoken": "^9.0.0",
-        "mongoose": "^6.8.0",
-        "morgan": "^1.10.0",
-        "multer": "^1.4.5-lts.1",
-        "nodemailer": "^6.10.1",
-        "passport": "^0.6.0",
-        "passport-facebook": "^3.0.0",
-        "passport-google-oauth20": "^2.0.0",
-        "paypal-rest-sdk": "^1.8.1",
-        "socket.io": "^4.7.2",
-        "stripe": "^12.0.0",
-        "uuid": "^9.0.0"
-    },
-    "devDependencies": {
-        "jest": "^29.5.0",
-        "nodemon": "^3.1.14",
-        "supertest": "^6.3.3"
-    }
+  "name": "md02_datn-backend",
+  "version": "1.0.0",
+  "description": "Backend API for MD_02_DATN - Full E-commerce Platform",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "test": "jest",
+    "seed": "node seeds/seed.js"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.6",
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.35.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
+    "express": "^4.18.2",
+    "express-rate-limit": "^6.7.0",
+    "express-validator": "^7.0.1",
+    "firebase-admin": "^11.11.1",
+    "helmet": "^6.0.1",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^6.8.0",
+    "morgan": "^1.10.0",
+    "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.10.1",
+    "passport": "^0.6.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth20": "^2.0.0",
+    "paypal-rest-sdk": "^1.8.1",
+    "socket.io": "^4.7.2",
+    "stripe": "^12.0.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^29.5.0",
+    "nodemon": "^3.1.14",
+    "supertest": "^6.3.3"
+  }
 }
