@@ -163,17 +163,17 @@ export default function Products() {
 
               <div>
                 <p className="text-sm font-semibold text-gray-600 mb-2">Đánh giá</p>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {[5, 4, 3, 2, 1].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setMinRating(star)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition ${
+                      className={`flex items-center gap-0.5 px-1.5 py-1 rounded text-xs font-medium transition whitespace-nowrap ${
                         minRating === star ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      <span className="text-accent">★</span>
+                      <span className="text-sm">★</span>
                       {star}+
                     </button>
                   ))}

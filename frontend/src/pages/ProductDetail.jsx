@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { cartService } from '../services/cartService';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -74,6 +76,10 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     try {
       await cartService.addToCart(id, quantity);
       alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
@@ -84,6 +90,11 @@ export default function ProductDetail() {
   };
 
   const handleSubmitReview = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
     if (!comment.trim()) {
       setReviewMessage({ type: 'error', text: 'Vui lòng nhập đánh giá.' });
       return;
@@ -363,6 +374,15 @@ export default function ProductDetail() {
                   +
                 </button>
               </div>
+              {!user && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 flex items-center gap-3">
+                  <div className="text-blue-600 text-lg">ℹ️</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">Vui lòng đăng nhập để mua sắm</p>
+                    <p className="text-xs text-blue-700 mt-0.5">Nhấn nút "Thêm vào giỏ hàng" để tiếp tục</p>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
@@ -413,6 +433,15 @@ export default function ProductDetail() {
 
           <div className="bg-white p-6 rounded-lg shadow mb-8">
             <h3 className="text-lg font-semibold mb-3">Viết đánh giá của bạn</h3>
+            {!user && (
+              <div className="bg-amber-50 border border-amber-200 rounded p-4 mb-4 flex items-center gap-3">
+                <div className="text-amber-600 text-lg">🔐</div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-amber-900">Vui lòng đăng nhập để đánh giá sản phẩm</p>
+                  <p className="text-xs text-amber-700 mt-0.5">Bạn cần có tài khoản để chia sẻ cảm nhận của mình</p>
+                </div>
+              </div>
+            )}
             {reviewMessage && (
               <div
                 className={`mb-4 rounded px-4 py-3 text-sm ${
@@ -422,7 +451,7 @@ export default function ProductDetail() {
                 {reviewMessage.text}
               </div>
             )}
-            <div className="mb-4">
+            <div className="mb-4 opacity-75 disabled:opacity-50">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium">Đánh giá:</span>
                 <div className="flex gap-1">
@@ -431,9 +460,10 @@ export default function ProductDetail() {
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
+                      disabled={!user}
                       className={`text-2xl leading-none transition ${
                         star <= rating ? 'text-accent' : 'text-gray-300 hover:text-accent'
-                      }`}
+                      } ${!user ? 'cursor-not-allowed' : ''}`}
                     >
                       ★
                     </button>
@@ -443,15 +473,16 @@ export default function ProductDetail() {
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
+                disabled={!user}
                 rows={4}
-                placeholder="Viết cảm nhận của bạn về sản phẩm..."
-                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder={user ? "Viết cảm nhận của bạn về sản phẩm..." : "Vui lòng đăng nhập để viết đánh giá..."}
+                className={`w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary ${!user ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               />
             </div>
             <button
               onClick={handleSubmitReview}
-              disabled={submittingReview}
-              className="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 disabled:bg-gray-300"
+              disabled={submittingReview || !user}
+              className={`bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed ${!user ? 'opacity-60' : ''}`}
             >
               {submittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
             </button>

@@ -171,7 +171,7 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-light">
       {/* Hero Carousel */}
-      <div className="relative h-96 md:h-[500px] overflow-hidden">
+      <div className="relative h-96 md:h-[500px] overflow-hidden z-10">
         {heroSlides.map((slide, index) => (
           <div
             key={slide.id}
@@ -441,17 +441,17 @@ export default function Home() {
 
               <div>
                 <p className="text-sm font-semibold text-gray-600 mb-2">Đánh giá</p>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-1.5">
                   {[5, 4, 3, 2, 1].map((star) => (
                     <button
                       key={star}
                       type="button"
                       onClick={() => setMinRating(star)}
-                      className={`flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition ${
+                      className={`flex items-center gap-0.5 px-1.5 py-1 rounded text-xs font-medium transition whitespace-nowrap ${
                         minRating === star ? 'bg-primary text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                       }`}
                     >
-                      <span className="text-accent">★</span>
+                      <span className="text-sm">★</span>
                       {star}+
                     </button>
                   ))}
