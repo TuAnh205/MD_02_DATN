@@ -3,31 +3,79 @@ import { Link } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+const heroSlides = [
+  {
+    id: 1,
+    title: 'CORETECH - Mua sắm công nghệ đỉnh cao',
+    subtitle: 'Khuyến mãi mỗi ngày - trả góp 0% - freeship toàn quốc',
+    description: 'Tìm ngay sản phẩm ưng ý với ưu đãi hấp dẫn',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=1200&q=80',
+    cta: 'Xem ưu đãi ngay',
+    ctaLink: '/',
+  },
+  {
+    id: 2,
+    title: 'Siêu sale cuối tuần',
+    subtitle: 'Giảm đến 70% cho laptop gaming',
+    description: 'Gaming gear chất lượng cao với giá không thể tốt hơn',
+    image: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=1200&q=80',
+    cta: 'Mua ngay',
+    ctaLink: '/products?category=Máy tính',
+  },
+  {
+    id: 3,
+    title: 'Smartphone flagship',
+    subtitle: 'iPhone 15 Pro - Camera đỉnh cao',
+    description: 'Trải nghiệm nhiếp ảnh chuyên nghiệp với AI',
+    image: 'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=1200&q=80',
+    cta: 'Khám phá ngay',
+    ctaLink: '/products?category=Điện thoại',
+  },
+];
+
+const categories = [
+  { name: 'Máy tính', icon: '💻', count: '25+', image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=300&q=60' },
+  { name: 'Điện thoại', icon: '📱', count: '15+', image: 'https://images.unsplash.com/photo-1542751110-97427bbecf20?auto=format&fit=crop&w=300&q=60' },
+  { name: 'Tai nghe', icon: '🎧', count: '20+', image: 'https://images.unsplash.com/photo-1580894894518-5d728c78d432?auto=format&fit=crop&w=300&q=60' },
+  { name: 'Phụ kiện', icon: '🖱️', count: '30+', image: 'https://images.unsplash.com/photo-1527814050087-3793815479db?auto=format&fit=crop&w=300&q=60' },
+  { name: 'Màn hình', icon: '🖥️', count: '12+', image: 'https://images.unsplash.com/photo-1527443224154-c4a3942d3acf?auto=format&fit=crop&w=300&q=60' },
+  { name: 'Loa', icon: '🔊', count: '18+', image: 'https://images.unsplash.com/photo-1608043152269-423dbba4e7e1?auto=format&fit=crop&w=300&q=60' },
+];
+
 const promotions = [
   {
     title: 'Flash sale mỗi ngày',
     description: 'Ưu đãi đến 50% cho sản phẩm chọn lọc',
     emoji: '🔥',
+    bgColor: 'bg-red-50',
+    textColor: 'text-red-600',
   },
   {
     title: 'Freeship toàn quốc',
     description: 'Miễn phí giao hàng cho đơn trên 1.000.000₫',
     emoji: '🚚',
+    bgColor: 'bg-blue-50',
+    textColor: 'text-blue-600',
   },
   {
     title: 'Trả góp 0%',
     description: 'Duyệt nhanh trong 1 phút',
     emoji: '💳',
+    bgColor: 'bg-green-50',
+    textColor: 'text-green-600',
   },
   {
     title: 'Quà tặng kèm',
     description: 'Tặng voucher đến 500.000₫',
     emoji: '🎁',
+    bgColor: 'bg-purple-50',
+    textColor: 'text-purple-600',
   },
 ];
 
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [hotProducts, setHotProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -36,13 +84,23 @@ export default function Home() {
   const [maxPrice, setMaxPrice] = useState('');
   const [minRating, setMinRating] = useState(0);
   const [sortBy, setSortBy] = useState('-createdAt');
-  const [categories, setCategories] = useState([]);
+  const [productCategories, setProductCategories] = useState([]);
   const [brands, setBrands] = useState([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
   const { user } = useAuth();
 
   useEffect(() => {
     fetchCategories();
     fetchBrands();
+    fetchHotProducts();
+  }, []);
+
+  // Auto-slide carousel
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000);
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -55,7 +113,7 @@ export default function Home() {
   const fetchCategories = async () => {
     try {
       const response = await api.get('/products/categories');
-      setCategories(response.data || []);
+      setProductCategories(response.data || []);
     } catch (err) {
       console.error('Error fetching categories:', err);
     }
@@ -67,6 +125,15 @@ export default function Home() {
       setBrands(response.data || []);
     } catch (err) {
       console.error('Error fetching brands:', err);
+    }
+  };
+
+  const fetchHotProducts = async () => {
+    try {
+      const response = await api.get('/products?hot=true&limit=8');
+      setHotProducts(response.data.data || []);
+    } catch (err) {
+      console.error('Error fetching hot products:', err);
     }
   };
 
@@ -103,41 +170,189 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-light">
-      <div className="hero-banner py-16 px-6">
-        <div className="hero-banner-content max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-              CORETECH - Mua sắm công nghệ đỉnh cao
-            </h1>
-            <p className="text-lg text-white/90 mb-6">
-              Khuyến mãi mỗi ngày - trả góp 0% - freeship toàn quốc. Tìm ngay sản phẩm ưng ý!
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link to="/" className="btn-primary">
-                Xem ưu đãi ngay
-              </Link>
-              <Link to="/cart" className="btn-secondary">
-                Giỏ hàng của tôi
-              </Link>
+      {/* Hero Carousel */}
+      <div className="relative h-96 md:h-[500px] overflow-hidden">
+        {heroSlides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            <div className="absolute inset-0 bg-black/40 z-10" />
+            <img
+              src={slide.image}
+              alt={slide.title}
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 z-20 flex items-center">
+              <div className="max-w-6xl mx-auto px-4 w-full">
+                <div className="max-w-lg">
+                  <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 leading-tight">
+                    {slide.title}
+                  </h1>
+                  <p className="text-lg md:text-xl text-white/90 mb-2">
+                    {slide.subtitle}
+                  </p>
+                  <p className="text-sm md:text-base text-white/80 mb-6">
+                    {slide.description}
+                  </p>
+                  <Link
+                    to={slide.ctaLink}
+                    className="inline-block bg-primary hover:bg-primary-dark text-white px-8 py-3 rounded-lg font-semibold transition-colors"
+                  >
+                    {slide.cta}
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
-          <div className="hidden lg:block">
-            <img
-              src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=60"
-              alt="Khuyến mãi"
-              className="rounded-xl shadow-lg"
+        ))}
+
+        {/* Carousel Indicators */}
+        <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 z-30 flex space-x-2">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                index === currentSlide ? 'bg-white' : 'bg-white/50'
+              }`}
             />
-          </div>
+          ))}
+        </div>
+
+        {/* Carousel Navigation */}
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors"
+        >
+          ‹
+        </button>
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length)}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-30 bg-white/20 hover:bg-white/30 text-white p-2 rounded-full transition-colors"
+        >
+          ›
+        </button>
+      </div>
+
+      {/* Categories Section */}
+      <div className="max-w-6xl mx-auto px-4 py-12">
+        <h2 className="text-2xl font-bold text-dark mb-8 text-center">Danh mục nổi bật</h2>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+          {categories.map((category) => (
+            <Link
+              key={category.name}
+              to={`/products?category=${category.name}`}
+              className="group"
+            >
+              <div className="bg-white rounded-xl shadow-card p-4 hover:shadow-lg transition-shadow text-center">
+                <div className="w-16 h-16 mx-auto mb-3 rounded-full bg-gradient-to-br from-primary/10 to-primary/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                  <span className="text-2xl">{category.icon}</span>
+                </div>
+                <h3 className="font-semibold text-dark mb-1 group-hover:text-primary transition-colors">
+                  {category.name}
+                </h3>
+                <p className="text-sm text-gray-500">{category.count} sản phẩm</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
+
+      {/* Hot Products Section */}
+      {hotProducts.length > 0 && (
+        <div className="bg-gray-50 py-12">
+          <div className="max-w-6xl mx-auto px-4">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-dark">Sản phẩm hot 🔥</h2>
+              <Link
+                to="/products?hot=true"
+                className="text-primary hover:text-primary-dark font-semibold flex items-center gap-2"
+              >
+                Xem tất cả
+                <span>→</span>
+              </Link>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {hotProducts.map((product) => {
+                const discount = getDiscountPercent(product);
+
+                return (
+                  <Link key={product._id} to={`/products/${product._id}`}>
+                    <div className="bg-white rounded-xl shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group">
+                      {discount > 0 && (
+                        <span className="badge badge-discount absolute right-4 top-4 z-10">
+                          -{discount}%
+                        </span>
+                      )}
+                      <div className="relative overflow-hidden">
+                        <img
+                          src={product.image || product.images?.[0] || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=60'}
+                          alt={product.name}
+                          className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
+                      </div>
+                      <div className="p-4">
+                        <h3 className="font-semibold text-dark mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                          {product.name}
+                        </h3>
+                        <div className="flex items-center gap-2 text-sm mb-2">
+                          {product.ratings?.average ? (
+                            <>
+                              <div className="flex items-center">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <span
+                                    key={star}
+                                    className={`text-sm ${
+                                      star <= Math.floor(product.ratings.average)
+                                        ? 'text-yellow-500'
+                                        : star - 0.5 <= product.ratings.average
+                                        ? 'text-yellow-500'
+                                        : 'text-gray-300'
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                              <span className="font-semibold text-gray-800">
+                                {product.ratings.average.toFixed(1)}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-gray-400">Chưa có đánh giá</span>
+                          )}
+                        </div>
+                        <div className="flex items-baseline gap-3">
+                          <p className="text-primary font-bold text-lg">
+                            ₫{product.price?.toLocaleString('vi-VN')}
+                          </p>
+                          {discount > 0 && (
+                            <p className="text-sm text-gray-400 line-through">
+                              ₫{product.originalPrice?.toLocaleString('vi-VN')}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="max-w-6xl mx-auto px-4 py-10">
         <h2 className="text-2xl font-bold text-dark mb-4">Khuyến mãi hot</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {promotions.map((promo) => (
-            <div key={promo.title} className="promo-card">
+            <div key={promo.title} className={`promo-card ${promo.bgColor} border-0 hover:shadow-lg transition-shadow`}>
               <div className="mb-3 text-3xl">{promo.emoji}</div>
-              <h3 className="text-lg font-semibold text-dark mb-1">{promo.title}</h3>
+              <h3 className={`text-lg font-semibold ${promo.textColor} mb-1`}>{promo.title}</h3>
               <p className="text-sm text-gray-600">{promo.description}</p>
             </div>
           ))}
@@ -147,7 +362,8 @@ export default function Home() {
       <div className="max-w-6xl mx-auto px-4 pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Filters */}
-          <aside className="lg:col-span-3 bg-white rounded-xl shadow-card p-6">
+          <aside className="lg:col-span-3">
+            <div className="bg-white rounded-xl shadow-card p-6 sticky top-4">
             <h3 className="text-lg font-semibold text-dark mb-4">Bộ lọc</h3>
 
             <div className="space-y-5">
@@ -162,7 +378,7 @@ export default function Home() {
                   >
                     Tất cả
                   </button>
-                  {categories.map((cat) => (
+                  {productCategories.map((cat) => (
                     <button
                       key={cat}
                       className={`px-3 py-1 rounded text-xs font-medium transition-all ${
@@ -256,6 +472,7 @@ export default function Home() {
               >
                 Xóa bộ lọc
               </button>
+            </div>
             </div>
           </aside>
 
