@@ -293,11 +293,37 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Stock Info */}
+            {/* Rating Display */}
             <div className="mb-6">
-              <p className={`text-sm font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
-              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-semibold">Đánh giá:</span>
+                {ratingCount > 0 ? (
+                  <>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`text-lg ${
+                            star <= Math.floor(averageRating)
+                              ? 'text-yellow-500'
+                              : star - 0.5 <= averageRating
+                              ? 'text-yellow-500'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="font-semibold text-gray-800">
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500">({ratingCount} đánh giá)</span>
+                  </>
+                ) : (
+                  <span className="text-gray-400">Chưa có đánh giá</span>
+                )}
+              </div>
             </div>
 
             {/* Quantity & Add to Cart */}
@@ -342,7 +368,26 @@ export default function ProductDetail() {
                 <span className="font-semibold">Đánh giá:</span>{' '}
                 {ratingCount > 0 ? (
                   <>
-                    {averageRating.toFixed(1)} ⭐ ({ratingCount} đánh giá)
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`text-sm ${
+                            star <= Math.floor(averageRating)
+                              ? 'text-yellow-500'
+                              : star - 0.5 <= averageRating
+                              ? 'text-yellow-500'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="font-semibold text-gray-800">
+                        {averageRating.toFixed(1)}
+                      </span>
+                      <span className="text-gray-500">({ratingCount} đánh giá)</span>
+                    </div>
                   </>
                 ) : (
                   'Chưa có đánh giá'

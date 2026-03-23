@@ -331,10 +331,31 @@ export default function Home() {
                           {product.name}
                         </h3>
                         <div className="flex items-center gap-2 text-sm mb-2">
-                          <span className="font-semibold text-gray-800">
-                            {product.ratings?.average ? product.ratings.average.toFixed(1) : '—'}
-                          </span>
-                          <span className="text-yellow-500">★</span>
+                          {product.ratings?.average ? (
+                            <>
+                              <div className="flex items-center">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                  <span
+                                    key={star}
+                                    className={`text-sm ${
+                                      star <= Math.floor(product.ratings.average)
+                                        ? 'text-yellow-500'
+                                        : star - 0.5 <= product.ratings.average
+                                        ? 'text-yellow-500'
+                                        : 'text-gray-300'
+                                    }`}
+                                  >
+                                    ★
+                                  </span>
+                                ))}
+                              </div>
+                              <span className="font-semibold text-gray-800">
+                                {product.ratings.average.toFixed(1)}
+                              </span>
+                            </>
+                          ) : (
+                            <span className="text-gray-400">Chưa có đánh giá</span>
+                          )}
                           <span className="text-gray-500">({product.ratings?.count || 0})</span>
                         </div>
                         <div className="flex items-baseline gap-3">
