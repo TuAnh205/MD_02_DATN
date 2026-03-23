@@ -235,6 +235,7 @@ exports.getReviews = async (req, res) => {
     const reviews = await Review.find()
       .populate('user', 'name')
       .populate('product', 'name')
+      .populate('response.respondedBy', 'name')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
@@ -272,6 +273,35 @@ exports.deleteReview = async (req, res) => {
       return res.status(404).json({ message: 'Review not found' });
     }
     res.json({ message: 'Review deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.replyReview = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { text } = req.body;
+
+    if (!text || text.trim() === '') {
+      return res.status(400).json({ message: 'Reply text is required' });
+    }
+
+    const review = await Review.findById(id);
+    if (!review) {
+      return res.status(404).json({ message: 'Review not found' });
+    }
+
+    review.response = {
+      text: text.trim(),
+      respondedAt: new Date(),
+      respondedBy: req.user.id
+    };
+
+    await review.save();
+    await review.populate('response.respondedBy', 'name');
+
+    res.json({ review });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

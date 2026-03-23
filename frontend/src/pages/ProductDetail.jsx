@@ -475,7 +475,20 @@ export default function ProductDetail() {
                         </span>
                       ))}
                     </div>
-                    {review.comment && <p className="text-gray-700">{review.comment}</p>}
+                    {review.comment && <p className="text-gray-700 mb-3">{review.comment}</p>}
+                    {review.response && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-sm font-medium text-blue-800">
+                            Phản hồi từ {review.response.respondedBy?.name || 'Admin'}
+                          </span>
+                          <span className="text-xs text-blue-600">
+                            {new Date(review.response.respondedAt).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+                        <p className="text-blue-700 text-sm">{review.response.text}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
