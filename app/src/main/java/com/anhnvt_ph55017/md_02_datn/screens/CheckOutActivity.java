@@ -99,7 +99,6 @@ public class CheckOutActivity extends AppCompatActivity {
                     itemCount += p.getQty();
                 }
 
-                String id = "OD-" + System.currentTimeMillis();
                 String date = new java.text.SimpleDateFormat("dd/MM/yyyy").format(new java.util.Date());
                 String status = "Đang xử lý";
                 String arrival = "Chưa xác định";
@@ -109,23 +108,13 @@ public class CheckOutActivity extends AppCompatActivity {
                 double price = cartList.get(0).getPrice();
                 String desc = cartList.get(0).getDescription();
 
-                com.anhnvt_ph55017.md_02_datn.models.Order newOrder =
-                        new com.anhnvt_ph55017.md_02_datn.models.Order(
-                                id, date, subtotal, status,
-                                arrival, itemCount, image, name, price, desc
-                        );
-
                 // ===== FIX PAYMENT METHOD =====
                 String paymentMethod;
 
-                if (checkedId == R.id.payMomo) {
-                    paymentMethod = "Ví MoMo";
-                } else if (checkedId == R.id.payZalo) {
-                    paymentMethod = "ZaloPay";
+                if (checkedId == R.id.payCOD) {
+                    paymentMethod = "Thanh toán sau khi nhận hàng";
                 } else if (checkedId == R.id.payCard) {
-                    paymentMethod = "Thẻ tín dụng";
-                } else if (checkedId == R.id.payCOD) {
-                    paymentMethod = "Thanh toán khi nhận hàng";
+                    paymentMethod = "Sử dụng thẻ";
                 } else {
                     paymentMethod = "Khác";
                 }
@@ -136,16 +125,23 @@ public class CheckOutActivity extends AppCompatActivity {
                         : "Địa chỉ mặc định";
 
                 // ===== SAVE DB =====
-                orderDAO.addOrder(id, 1, subtotal, status, address, paymentMethod, voucher);
+                long dbId = orderDAO.addOrder(null, 1, subtotal, status, address, paymentMethod, voucher, image);
+                String id = "OD-" + dbId;
+
+                com.anhnvt_ph55017.md_02_datn.models.Order newOrder =
+                        new com.anhnvt_ph55017.md_02_datn.models.Order(
+                                id, date, subtotal, status,
+                                arrival, itemCount, image, name, price, desc
+                        );
 
                 // ===== ADD TO MEMORY =====
-                com.anhnvt_ph55017.md_02_datn.fragments.OrdersFragment.addOrder(newOrder);
+
             }
 
             Toast.makeText(this, "Thanh toán thành công!", Toast.LENGTH_LONG).show();
 
             Intent home = new Intent(CheckOutActivity.this, MainActivity.class);
-            home.putExtra("openFragment", "home");
+            home.putExtra("openFragment", "orders");
             home.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
             startActivity(home);
             finish();

@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 13; // 🔥 tăng version for search_history table
+    private static final int DB_VERSION = 14; // 🔥 tăng version for imageRes in orders table
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -157,6 +157,7 @@ public class DBHelper extends SQLiteOpenHelper {
                         "status TEXT," +
                         "shipDiscount REAL," +
                         "shipCost REAL," +
+                        "imageRes INTEGER DEFAULT 0," +
                         "createdAt TEXT," +
                         "updatedAt TEXT," +
                         "FOREIGN KEY(userId) REFERENCES users(id)," +
@@ -207,17 +208,23 @@ public class DBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS search_history");
-        db.execSQL("DROP TABLE IF EXISTS order_items");
-        db.execSQL("DROP TABLE IF EXISTS orders");
-        db.execSQL("DROP TABLE IF EXISTS vouchers");
-        db.execSQL("DROP TABLE IF EXISTS cart_items");
-        db.execSQL("DROP TABLE IF EXISTS carts");
-        db.execSQL("DROP TABLE IF EXISTS products");
-        db.execSQL("DROP TABLE IF EXISTS reviews");
-
-        db.execSQL("DROP TABLE IF EXISTS categories");
-        db.execSQL("DROP TABLE IF EXISTS users");
-        onCreate(db);
+        if (oldVersion < 14) {
+            // Add imageRes column to orders table
+            db.execSQL("ALTER TABLE orders ADD COLUMN imageRes INTEGER DEFAULT 0");
+        }
+        // For older versions, drop and recreate (dev mode)
+        if (oldVersion < 13) {
+            db.execSQL("DROP TABLE IF EXISTS search_history");
+            db.execSQL("DROP TABLE IF EXISTS order_items");
+            db.execSQL("DROP TABLE IF EXISTS orders");
+            db.execSQL("DROP TABLE IF EXISTS vouchers");
+            db.execSQL("DROP TABLE IF EXISTS cart_items");
+            db.execSQL("DROP TABLE IF EXISTS carts");
+            db.execSQL("DROP TABLE IF EXISTS products");
+            db.execSQL("DROP TABLE IF EXISTS reviews");
+            db.execSQL("DROP TABLE IF EXISTS categories");
+            db.execSQL("DROP TABLE IF EXISTS users");
+            onCreate(db);
+        }
     }
 }

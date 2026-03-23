@@ -10,6 +10,7 @@ import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -102,6 +103,9 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("token", token)
                                 .apply();
 
+                        // 🔥 GET USER PROFILE AND SAVE TO DB
+                        getUserProfile(token);
+
                         Toast.makeText(this, "Login thành công", Toast.LENGTH_SHORT).show();
 
                         startActivity(new Intent(this, MainActivity.class));
@@ -111,6 +115,45 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_LONG).show();
                     }
             );
+
+            Volley.newRequestQueue(this).add(request);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    // ================= GET USER PROFILE =================
+    private void getUserProfile(String token) {
+        try {
+            String url = BASE_URL + "/auth/profile";
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.GET,
+                    url,
+                    null,
+                    response -> {
+                        // Assume response has name, email, phone
+                        String name = response.optString("name", "");
+                        String email = response.optString("email", "");
+                        String phone = response.optString("phone", "");
+
+                        // Save to local DB
+                        UserDAO userDAO = new UserDAO(this);
+                        userDAO.insertOrUpdateUser(name, email, phone);
+                    },
+                    error -> {
+                        // Silent fail, maybe user not in DB yet
+                        Log.e("PROFILE_ERROR", "Failed to get profile: " + error.toString());
+                    }
+            ) {
+                @Override
+                public java.util.Map<String, String> getHeaders() {
+                    java.util.Map<String, String> headers = new java.util.HashMap<>();
+                    headers.put("Authorization", "Bearer " + token);
+                    return headers;
+                }
+            };
 
             Volley.newRequestQueue(this).add(request);
 
@@ -227,6 +270,9 @@ public class LoginActivity extends AppCompatActivity {
                                 .edit()
                                 .putString("token", token)
                                 .apply();
+
+                        // 🔥 GET USER PROFILE AND SAVE TO DB
+                        getUserProfile(token);
 
                         Toast.makeText(this, "Google login thành công", Toast.LENGTH_SHORT).show();
 

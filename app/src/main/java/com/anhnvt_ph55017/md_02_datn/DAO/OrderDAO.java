@@ -23,7 +23,7 @@ public class OrderDAO {
 
     // Thêm đơn hàng mới
     public long addOrder(String orderId, int userId, double total, String status, 
-                        String address, String payment, String note) {
+                        String address, String payment, String note, int imageRes) {
         try {
             ContentValues values = new ContentValues();
             values.put("userId", userId);
@@ -32,6 +32,7 @@ public class OrderDAO {
             values.put("address", address);
             values.put("payment", payment);
             values.put("note", note);
+            values.put("imageRes", imageRes);
             values.put("createdAt", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
             values.put("updatedAt", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 
@@ -47,7 +48,7 @@ public class OrderDAO {
         List<Order> orders = new ArrayList<>();
         try {
             Cursor cursor = db.rawQuery(
-                    "SELECT id, total, status, createdAt FROM orders WHERE userId=? ORDER BY createdAt DESC",
+                    "SELECT id, total, status, createdAt, imageRes FROM orders WHERE userId=? ORDER BY createdAt DESC",
                     new String[]{String.valueOf(userId)}
             );
 
@@ -57,6 +58,7 @@ public class OrderDAO {
                     double total = cursor.getDouble(1);
                     String status = cursor.getString(2);
                     String createdAt = cursor.getString(3);
+                    int imageRes = cursor.getInt(4);
 
                     // Parse date
                     String[] dateParts = createdAt.split(" ");
@@ -65,7 +67,7 @@ public class OrderDAO {
                     // Convert to "MMM dd yyyy" format
                     String date = convertDateFormat(dateStr);
                     
-                    Order order = new Order("OD-" + id, date, total, status, "TBD", 1, 0);
+                    Order order = new Order("OD-" + id, date, total, status, "TBD", 1, imageRes);
                     orders.add(order);
                 } while (cursor.moveToNext());
             }
@@ -81,7 +83,7 @@ public class OrderDAO {
         List<Order> orders = new ArrayList<>();
         try {
             Cursor cursor = db.rawQuery(
-                    "SELECT id, total, status, createdAt FROM orders ORDER BY createdAt DESC",
+                    "SELECT id, total, status, createdAt, imageRes FROM orders ORDER BY createdAt DESC",
                     null
             );
 
@@ -91,10 +93,11 @@ public class OrderDAO {
                     double total = cursor.getDouble(1);
                     String status = cursor.getString(2);
                     String createdAt = cursor.getString(3);
+                    int imageRes = cursor.getInt(4);
 
                     String date = convertDateFormat(createdAt.split(" ")[0]);
                     
-                    Order order = new Order("OD-" + id, date, total, status, "TBD", 1, 0);
+                    Order order = new Order("OD-" + id, date, total, status, "TBD", 1, imageRes);
                     orders.add(order);
                 } while (cursor.moveToNext());
             }
@@ -106,26 +109,17 @@ public class OrderDAO {
     }
 
     // Cập nhật trạng thái đơn hàng
-    public int updateOrderStatus(int orderId, String newStatus) {
+    public boolean updateOrderStatus(int orderId, String newStatus) {
         try {
             ContentValues values = new ContentValues();
             values.put("status", newStatus);
             values.put("updatedAt", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new java.util.Date()));
 
-            return db.update("orders", values, "id=?", new String[]{String.valueOf(orderId)});
+            int rowsAffected = db.update("orders", values, "id=?", new String[]{String.valueOf(orderId)});
+            return rowsAffected > 0;
         } catch (Exception e) {
             e.printStackTrace();
-            return 0;
-        }
-    }
-
-    // Xóa đơn hàng
-    public int deleteOrder(int orderId) {
-        try {
-            return db.delete("orders", "id=?", new String[]{String.valueOf(orderId)});
-        } catch (Exception e) {
-            e.printStackTrace();
-            return 0;
+            return false;
         }
     }
 

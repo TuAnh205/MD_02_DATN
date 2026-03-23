@@ -64,4 +64,61 @@ public class UserDAO {
         cursor.close();
         return exists;
     }
+
+    // INSERT OR UPDATE USER FROM FIREBASE/SERVER
+    public boolean insertOrUpdateUser(String fullname, String email, String phone) {
+        SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+        String normalizedEmail = email == null ? null : email.trim().toLowerCase();
+
+        // Check if user exists
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM users WHERE LOWER(email) = ?",
+                new String[]{normalizedEmail}
+        );
+
+        ContentValues values = new ContentValues();
+        values.put("fullname", fullname);
+        values.put("email", normalizedEmail);
+        values.put("phone", phone);
+
+        long result;
+        if (cursor.moveToFirst()) {
+            // Update existing
+            int id = cursor.getInt(0);
+            result = db.update("users", values, "id = ?", new String[]{String.valueOf(id)});
+        } else {
+            // Insert new
+            result = db.insert("users", null, values);
+        }
+
+        cursor.close();
+        return result != -1;
+    }
+
+    // GET USER BY EMAIL
+    public User getUserByEmail(String email) {
+        SQLiteDatabase db = dbHelper.getReadableDatabase();
+
+        String normalizedEmail = email == null ? "" : email.trim().toLowerCase();
+
+        Cursor cursor = db.rawQuery(
+                "SELECT id, fullname, email, phone, password FROM users WHERE LOWER(email) = ?",
+                new String[]{normalizedEmail}
+        );
+
+        User user = null;
+        if (cursor.moveToFirst()) {
+            user = new User(
+                    cursor.getInt(0),
+                    cursor.getString(1),
+                    cursor.getString(2),
+                    cursor.getString(3),
+                    cursor.getString(4)
+            );
+        }
+
+        cursor.close();
+        return user;
+    }
 }

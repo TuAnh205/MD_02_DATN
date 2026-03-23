@@ -104,19 +104,8 @@
             <RadioButton
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/payMomo"
-                android:text="Momo Wallet"
-                android:textColor="#FFFFFF"
-                android:buttonTint="#2F80FF"
-                android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:layout_marginTop="8dp"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/payZalo"
-                android:text="ZaloPay"
+                android:id="@+id/payCOD"
+                android:text="Thanh toán sau khi nhận hàng"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#2F80FF"
                 android:background="@drawable/bg_card"
@@ -127,18 +116,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/payCard"
-                android:text="Credit Card"
-                android:textColor="#FFFFFF"
-                android:buttonTint="#2F80FF"
-                android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:layout_marginTop="8dp"/>
-
-            <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:id="@+id/payCOD"
-                android:text="Cash On Delivery"
+                android:text="Sử dụng thẻ"
                 android:textColor="#FFFFFF"
                 android:buttonTint="#2F80FF"
                 android:background="@drawable/bg_card"
@@ -219,7 +197,7 @@
 
         <Button
             android:id="@+id/btnOrder"
-            android:text="Thanh Toán"
+            android:text="Đặt hàng"
             android:textColor="#fff"
             android:textSize="16sp"
             android:background="@drawable/bg_button"

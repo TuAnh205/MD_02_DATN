@@ -15,7 +15,9 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.models.User;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
 import com.anhnvt_ph55017.md_02_datn.screens.ShippingAddressActivity;
 import com.google.firebase.auth.FirebaseAuth;
@@ -44,11 +46,19 @@ public class ProfileFragment extends Fragment {
         switchDark      = view.findViewById(R.id.switchDark);
         btnLogout       = view.findViewById(R.id.btnLogout);
 
-        // Lấy thông tin user từ Firebase (nếu có), fallback về sample data
-        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            tvName.setText(user.getDisplayName() != null ? user.getDisplayName() : "Người dùng");
-            tvEmail.setText(user.getEmail() != null ? user.getEmail() : "");
+        // Lấy thông tin user từ local DB, fallback về Firebase
+        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        if (firebaseUser != null) {
+            UserDAO userDAO = new UserDAO(getContext());
+            User user = userDAO.getUserByEmail(firebaseUser.getEmail());
+            if (user != null) {
+                tvName.setText(user.getFullname() != null ? user.getFullname() : "Người dùng");
+                tvEmail.setText(user.getEmail() != null ? user.getEmail() : "");
+            } else {
+                // Fallback to Firebase
+                tvName.setText(firebaseUser.getDisplayName() != null ? firebaseUser.getDisplayName() : "Người dùng");
+                tvEmail.setText(firebaseUser.getEmail() != null ? firebaseUser.getEmail() : "");
+            }
         } else {
             tvName.setText("Alex Johnson");
             tvEmail.setText("alex.johnson@coretech.io");
@@ -59,6 +69,11 @@ public class ProfileFragment extends Fragment {
         // Menu clicks
         view.findViewById(R.id.rowOrders).setOnClickListener(v ->
                 Toast.makeText(getContext(), "My Orders", Toast.LENGTH_SHORT).show());
+
+        view.findViewById(R.id.imgEdit).setOnClickListener(v -> {
+            Intent intent = new Intent(requireActivity(), com.anhnvt_ph55017.md_02_datn.screens.EditProfileActivity.class);
+            startActivityForResult(intent, 3001);
+        });
 
         view.findViewById(R.id.rowAddress).setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), ShippingAddressActivity.class);
@@ -94,5 +109,16 @@ public class ProfileFragment extends Fragment {
         });
 
         return view;
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == 3001 && resultCode == getActivity().RESULT_OK && data != null) {
+            String name = data.getStringExtra("name");
+            String email = data.getStringExtra("email");
+            if (name != null) tvName.setText(name);
+            if (email != null) tvEmail.setText(email);
+        }
     }
 }

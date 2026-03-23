@@ -35,16 +35,16 @@ public class OrdersFragment extends Fragment {
     List<Order> filteredList;
     OrderDAO orderDAO;
     
-    TextView tvAll, tvPending, tvProcessing, tvShipping, tvDelivered;
+    TextView tvAll, tvPending, tvProcessing, tvShipping, tvDelivered, tvCancelled;
     String selectedStatus = "ALL";
-    String[] statusValues = {"Chưa thanh toán", "Đang xử lý", "Đang giao hàng", "Đã nhận"};
+    String[] statusValues = {"Chưa thanh toán", "Đang xử lý", "Đang giao hàng", "Đã nhận", "Đã hủy"};
 
     // keep single reference for callbacks
-    private static OrdersFragment instance;
+
 
     public OrdersFragment() {
         // Required empty public constructor
-        instance = this;
+
     }
 
     // Hàm khởi tạo giao diện fragment, thiết lập recycler và dữ liệu
@@ -62,6 +62,7 @@ public class OrdersFragment extends Fragment {
         tvProcessing = view.findViewById(R.id.tvProcessing);
         tvShipping = view.findViewById(R.id.tvShipping);
         tvDelivered = view.findViewById(R.id.tvDelivered);
+        tvCancelled = view.findViewById(R.id.tvCancelled);
 
         // Initialize OrderDAO and load orders from database
         if (getContext() != null) {
@@ -78,18 +79,18 @@ public class OrdersFragment extends Fragment {
             
             // If no orders in database, add sample data for demo
             if (orderList.isEmpty()) {
-                orderList.add(new Order("CT-9021", "Oct 20 2023", 1499, "Đang giao hàng", "Oct 24", 2, R.drawable.anh1,
-                        "Tai nghe Bluetooth", 1499, "Tai nghe không dây chất lượng cao"));
-                orderList.add(new Order("CT-8955", "Oct 18 2023", 899, "Đang giao hàng", "Oct 26", 1, R.drawable.anh2,
-                        "Loa di động", 899, "Loa Bluetooth công suất lớn"));
-                orderList.add(new Order("CT-8842", "Oct 15 2023", 450, "Đã nhận", "Oct 21", 2, R.drawable.anh3,
-                        "Chuột không dây", 225, "Chuột quang tiện lợi"));
-                orderList.add(new Order("CT-8700", "Sep 28 2023", 2140, "Đã nhận", "Oct 2", 1, R.drawable.anh1,
-                        "Bộ sạc dự phòng", 2140, "Pin dự phòng dung lượng cao"));
-                orderList.add(new Order("CT-8600", "Nov 1 2023", 1200, "Chưa thanh toán", "Nov 5", 3, R.drawable.anh2,
-                        "Sạc nhanh", 400, "Củ sạc nhanh 65W"));
-                orderList.add(new Order("CT-8501", "Oct 25 2023", 750, "Đang xử lý", "Oct 30", 1, R.drawable.anh3,
-                        "Dây cáp USB", 750, "Cáp sạc dài 2m"));
+                orderList.add(new Order("OD-9021", "Oct 20 2023", 1499, "Đang giao hàng", "Oct 24", 2,
+                        "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM", null, "Thanh toán khi nhận hàng"));
+                orderList.add(new Order("OD-8955", "Oct 18 2023", 899, "Đang giao hàng", "Oct 26", 1,
+                        "456 Đường DEF, Phường UVW, Quận 2, TP.HCM", null, "Thanh toán khi nhận hàng"));
+                orderList.add(new Order("OD-8842", "Oct 15 2023", 450, "Đã nhận", "Oct 21", 2,
+                        "789 Đường GHI, Phường RST, Quận 3, TP.HCM", null, "Thanh toán khi nhận hàng"));
+                orderList.add(new Order("OD-8700", "Sep 28 2023", 2140, "Đã nhận", "Oct 2", 1,
+                        "321 Đường JKL, Phường OPQ, Quận 4, TP.HCM", null, "Thanh toán khi nhận hàng"));
+                orderList.add(new Order("OD-8600", "Nov 1 2023", 1200, "Chưa thanh toán", "Nov 5", 3,
+                        "654 Đường MNO, Phường XYZ, Quận 5, TP.HCM", null, "Thanh toán khi nhận hàng"));
+                orderList.add(new Order("OD-8501", "Oct 25 2023", 750, "Đang xử lý", "Oct 30", 1,
+                        "987 Đường PQR, Phường ABC, Quận 6, TP.HCM", null, "Thanh toán khi nhận hàng"));
             }
         }
 
@@ -108,6 +109,8 @@ public class OrdersFragment extends Fragment {
             intent.putExtra("productName", order.getProductName());
             intent.putExtra("productPrice", order.getProductPrice());
             intent.putExtra("productDesc", order.getProductDesc());
+            intent.putExtra("shippingAddress", order.getShippingAddress());
+            intent.putExtra("paymentMethod", order.getPaymentMethod());
             startActivityForResult(intent, REQUEST_CODE_DETAIL);
         });
 
@@ -129,6 +132,7 @@ public class OrdersFragment extends Fragment {
         tvProcessing.setOnClickListener(v -> filterByStatus("Đang xử lý"));
         tvShipping.setOnClickListener(v -> filterByStatus("Đang giao hàng"));
         tvDelivered.setOnClickListener(v -> filterByStatus("Đã nhận"));
+        tvCancelled.setOnClickListener(v -> filterByStatus("Đã hủy"));
     }
     
     // Lọc danh sách đơn theo trạng thái được chọn
@@ -156,6 +160,7 @@ public class OrdersFragment extends Fragment {
         else if (status.equals("Đang xử lý")) setTabActive(tvProcessing);
         else if (status.equals("Đang giao hàng")) setTabActive(tvShipping);
         else if (status.equals("Đã nhận")) setTabActive(tvDelivered);
+        else if (status.equals("Đã hủy")) setTabActive(tvCancelled);
     }
     
     // Nhận kết quả trả về từ OrderDetailActivity (thay đổi trạng thái)
@@ -166,12 +171,11 @@ public class OrdersFragment extends Fragment {
             String id = data.getStringExtra("orderId");
             String newStatus = data.getStringExtra("newStatus");
             if (id != null && newStatus != null) {
-                // update underlying orders and refresh
-                for (Order o : orderList) {
-                    if (o.getId().equals(id)) {
-                        o.setStatus(newStatus);
-                        break;
-                    }
+                // Reload orders from database to get updated status
+                if (orderDAO != null) {
+                    List<Order> dbOrders = orderDAO.getAllOrders();
+                    orderList.clear();
+                    orderList.addAll(dbOrders);
                 }
                 filterByStatus(selectedStatus);
             }
@@ -179,14 +183,7 @@ public class OrdersFragment extends Fragment {
     }
 
     // provide static helper for other activities
-    public static void addOrder(Order order) {
-        if (orderList == null) orderList = new ArrayList<>();
-        // newest at top
-        orderList.add(0, order);
-        if (instance != null && instance.adapter != null) {
-            instance.filterByStatus(instance.selectedStatus);
-        }
-    }
+
 
     @Override
     public void onResume() {
@@ -219,6 +216,8 @@ public class OrdersFragment extends Fragment {
         tvShipping.setAlpha(0.6f);
         tvDelivered.setTextColor(getResources().getColor(R.color.white, null));
         tvDelivered.setAlpha(0.6f);
+        tvCancelled.setTextColor(getResources().getColor(R.color.white, null));
+        tvCancelled.setAlpha(0.6f);
         
         // đánh dấu tab đang hoạt động
         activeTab.setTextColor(getResources().getColor(android.R.color.holo_blue_light));
