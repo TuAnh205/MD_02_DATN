@@ -222,9 +222,19 @@ export default function ProductDetail() {
             {/* Description */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
-              <p className="text-gray-600">
-                {product.description || product.detailedDescription || 'Chưa có mô tả'}
-              </p>
+              <div className="text-gray-600 space-y-3">
+                {product.description && (
+                  <p className="font-semibold text-gray-700">{product.description}</p>
+                )}
+                {product.detailedDescription && (
+                  <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">
+                    {product.detailedDescription}
+                  </div>
+                )}
+                {!product.description && !product.detailedDescription && (
+                  <p>Chưa có mô tả</p>
+                )}
+              </div>
             </div>
 
 
@@ -459,7 +469,7 @@ export default function ProductDetail() {
                   <div key={review._id} className="border border-gray-100 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-sm font-semibold text-dark">
-                        {review.user?.name || 'Khách hàng'}
+                        {review.user?.name || review.user?.email || 'Khách hàng'}
                       </div>
                       <div className="text-xs text-gray-500">
                         {new Date(review.createdAt).toLocaleDateString('vi-VN')}

@@ -67,7 +67,7 @@ exports.deleteReview = async (req, res) => {
 exports.listByProduct = async (req, res) => {
     try {
         const productId = req.params.productId;
-        const items = await Review.find({ product: productId }).populate('user', 'name').populate('response.respondedBy', 'name');
+        const items = await Review.find({ product: productId }).populate('user', 'name email').populate('response.respondedBy', 'name');
         res.json(items);
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
