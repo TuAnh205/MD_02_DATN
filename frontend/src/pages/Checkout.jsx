@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cartService } from '../services/cartService';
 import { orderService } from '../services/orderService';
+import { promotionService } from '../services/promotionService';
 
 export default function Checkout() {
   const navigate = useNavigate();
   const [cartData, setCartData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [discountCode, setDiscountCode] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState(null);
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -53,9 +57,44 @@ export default function Checkout() {
     }));
   };
 
+  const applyDiscountCode = async () => {
+    if (!discountCode.trim()) return;
+
+    try {
+      setApplyingDiscount(true);
+      setError(null);
+
+      const cartItems = cartData.items.map(item => ({
+        productId: item.product._id,
+        quantity: item.qty,
+        price: item.price
+      }));
+
+      const discountResult = await promotionService.applyDiscountCode(
+        discountCode.trim(),
+        cartItems,
+        null // userId if logged in
+      );
+
+      setAppliedDiscount(discountResult);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Mã giảm giá không hợp lệ');
+      setAppliedDiscount(null);
+    } finally {
+      setApplyingDiscount(false);
+    }
+  };
+
+  const removeDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountCode('');
+  };
+
   const calculateTotal = () => {
     if (!cartData?.items) return 0;
-    return cartData.items.reduce((total, item) => total + (item.price * item.qty), 0);
+    const subtotal = cartData.items.reduce((total, item) => total + (item.price * item.qty), 0);
+    const discount = appliedDiscount?.discountAmount || 0;
+    return Math.max(0, subtotal - discount);
   };
 
   const handleSubmitOrder = async (e) => {
@@ -113,7 +152,9 @@ export default function Checkout() {
             sku: item.sku || ''
           };
         }),
-        subtotal: calculateTotal(),
+        subtotal: cartData.items.reduce((total, item) => total + (item.price * item.qty), 0),
+        discount: appliedDiscount?.discountAmount || 0,
+        discountCode: appliedDiscount ? discountCode : null,
         total: calculateTotal(),
         payment: {
           method: formData.paymentMethod || 'cod',
@@ -515,11 +556,55 @@ export default function Checkout() {
             <div className="bg-white rounded-lg shadow p-6 sticky top-4">
               <h2 className="text-xl font-bold text-dark mb-6">Tóm tắt đơn hàng</h2>
 
+              {/* Discount Code */}
+              <div className="mb-6">
+                <label className="block text-sm font-semibold mb-2">Mã giảm giá</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={discountCode}
+                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                    placeholder="Nhập mã giảm giá"
+                    className="flex-1 border rounded px-3 py-2 focus:outline-none focus:border-primary"
+                    disabled={appliedDiscount !== null}
+                  />
+                  {!appliedDiscount ? (
+                    <button
+                      type="button"
+                      onClick={applyDiscountCode}
+                      disabled={applyingDiscount || !discountCode.trim()}
+                      className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 disabled:bg-gray-400"
+                    >
+                      {applyingDiscount ? '...' : 'Áp dụng'}
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={removeDiscount}
+                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+                    >
+                      Xóa
+                    </button>
+                  )}
+                </div>
+                {appliedDiscount && (
+                  <div className="mt-2 text-green-600 text-sm">
+                    ✅ {appliedDiscount.promotion.name}: -₫{appliedDiscount.discountAmount.toLocaleString('vi-VN')}
+                  </div>
+                )}
+              </div>
+
               <div className="space-y-4 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Tạm tính:</span>
-                  <span className="font-semibold">₫{total?.toLocaleString('vi-VN')}</span>
+                  <span className="font-semibold">₫{cartData?.items?.reduce((total, item) => total + (item.price * item.qty), 0)?.toLocaleString('vi-VN')}</span>
                 </div>
+                {appliedDiscount && (
+                  <div className="flex justify-between text-green-600">
+                    <span>Giảm giá ({appliedDiscount.promotion.name}):</span>
+                    <span>-₫{appliedDiscount.discountAmount.toLocaleString('vi-VN')}</span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-gray-600">Giao hàng:</span>
                   <span className="font-semibold text-green-600">Miễn phí</span>
@@ -527,7 +612,7 @@ export default function Checkout() {
                 <div className="border-t pt-4 flex justify-between">
                   <span className="text-lg font-bold">Tổng cộng:</span>
                   <span className="text-lg font-bold text-primary">
-                    ₫{total?.toLocaleString('vi-VN')}
+                    ₫{calculateTotal()?.toLocaleString('vi-VN')}
                   </span>
                 </div>
               </div>
