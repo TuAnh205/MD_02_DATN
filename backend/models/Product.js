@@ -41,10 +41,15 @@ const productSchema = new mongoose.Schema({
         average: { type: Number, default: 0, min: 0, max: 5 },
         count: { type: Number, default: 0 }
     },
-    salesCount: { type: Number, default: 0 },
-    viewCount: { type: Number, default: 0 },
-    relatedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }],
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    discount: {
+        type: { type: String, enum: ['percentage', 'fixed'], default: 'percentage' },
+        value: { type: Number, default: 0, min: 0 },
+        startDate: { type: Date },
+        endDate: { type: Date },
+        isActive: { type: Boolean, default: false }
+    },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    promotions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Promotion' }],
 }, { timestamps: true });
 
 // Indexes for search and filtering

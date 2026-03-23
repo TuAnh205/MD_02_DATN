@@ -6,6 +6,8 @@ export default function AdminReviews() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [replyText, setReplyText] = useState('');
+  const [editingReviewId, setEditingReviewId] = useState(null);
 
   useEffect(() => {
     fetchReviews();
@@ -33,6 +35,23 @@ export default function AdminReviews() {
     } catch (error) {
       console.error('Error deleting review:', error);
       alert('Có lỗi xảy ra khi xóa đánh giá');
+    }
+  };
+
+  const replyReview = async (reviewId) => {
+    if (!replyText.trim()) {
+      alert('Vui lòng nhập nội dung trả lời');
+      return;
+    }
+
+    try {
+      await api.put(`/admin/reviews/${reviewId}/reply`, { text: replyText });
+      setReplyText('');
+      setEditingReviewId(null);
+      fetchReviews();
+    } catch (error) {
+      console.error('Error replying to review:', error);
+      alert('Có lỗi xảy ra khi trả lời đánh giá');
     }
   };
 
@@ -114,9 +133,60 @@ export default function AdminReviews() {
                     ))}
                   </div>
                 )}
+
+                {review.response && (
+                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <span className="text-sm font-medium text-blue-800">
+                        Phản hồi từ {review.response.respondedBy?.name || 'Admin'}
+                      </span>
+                      <span className="text-xs text-blue-600">
+                        {new Date(review.response.respondedAt).toLocaleDateString('vi-VN')}
+                      </span>
+                    </div>
+                    <p className="text-blue-700">{review.response.text}</p>
+                  </div>
+                )}
+
+                {editingReviewId === review._id && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    <textarea
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      placeholder="Nhập nội dung trả lời..."
+                      className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      rows={3}
+                    />
+                    <div className="flex space-x-2 mt-2">
+                      <button
+                        onClick={() => replyReview(review._id)}
+                        className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Gửi trả lời
+                      </button>
+                      <button
+                        onClick={() => {
+                          setEditingReviewId(null);
+                          setReplyText('');
+                        }}
+                        className="px-4 py-2 bg-gray-300 text-gray-700 text-sm rounded-lg hover:bg-gray-400 transition-colors"
+                      >
+                        Hủy
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="ml-4">
+              <div className="ml-4 flex flex-col space-y-2">
+                {!review.response && editingReviewId !== review._id && (
+                  <button
+                    onClick={() => setEditingReviewId(review._id)}
+                    className="px-3 py-1 text-sm text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors"
+                  >
+                    Trả lời
+                  </button>
+                )}
                 <button
                   onClick={() => deleteReview(review._id)}
                   className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"

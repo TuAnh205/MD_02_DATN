@@ -2,10 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { cartService } from '../services/cartService';
+import { useAuth } from '../context/AuthContext';
 
 export default function ProductDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
@@ -74,6 +76,10 @@ export default function ProductDetail() {
   }
 
   const handleAddToCart = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
     try {
       await cartService.addToCart(id, quantity);
       alert(`Đã thêm ${quantity} sản phẩm vào giỏ hàng!`);
@@ -84,6 +90,11 @@ export default function ProductDetail() {
   };
 
   const handleSubmitReview = async () => {
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+    
     if (!comment.trim()) {
       setReviewMessage({ type: 'error', text: 'Vui lòng nhập đánh giá.' });
       return;
@@ -222,9 +233,19 @@ export default function ProductDetail() {
             {/* Description */}
             <div className="mb-6">
               <h3 className="text-lg font-semibold mb-2">Mô tả</h3>
-              <p className="text-gray-600">
-                {product.description || product.detailedDescription || 'Chưa có mô tả'}
-              </p>
+              <div className="text-gray-600 space-y-3">
+                {product.description && (
+                  <p className="font-semibold text-gray-700">{product.description}</p>
+                )}
+                {product.detailedDescription && (
+                  <div className="whitespace-pre-wrap text-gray-600 leading-relaxed">
+                    {product.detailedDescription}
+                  </div>
+                )}
+                {!product.description && !product.detailedDescription && (
+                  <p>Chưa có mô tả</p>
+                )}
+              </div>
             </div>
 
 
@@ -293,11 +314,37 @@ export default function ProductDetail() {
               </div>
             )}
 
-            {/* Stock Info */}
+            {/* Rating Display */}
             <div className="mb-6">
-              <p className={`text-sm font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                {product.stock > 0 ? `Còn ${product.stock} sản phẩm` : 'Hết hàng'}
-              </p>
+              <div className="flex items-center gap-2 mb-2">
+                <span className="font-semibold">Đánh giá:</span>
+                {ratingCount > 0 ? (
+                  <>
+                    <div className="flex items-center">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`text-lg ${
+                            star <= Math.floor(averageRating)
+                              ? 'text-yellow-500'
+                              : star - 0.5 <= averageRating
+                              ? 'text-yellow-500'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <span className="font-semibold text-gray-800">
+                      {averageRating.toFixed(1)}
+                    </span>
+                    <span className="text-gray-500">({ratingCount} đánh giá)</span>
+                  </>
+                ) : (
+                  <span className="text-gray-400">Chưa có đánh giá</span>
+                )}
+              </div>
             </div>
 
             {/* Quantity & Add to Cart */}
@@ -327,6 +374,15 @@ export default function ProductDetail() {
                   +
                 </button>
               </div>
+              {!user && (
+                <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-4 flex items-center gap-3">
+                  <div className="text-blue-600 text-lg">ℹ️</div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-blue-900">Vui lòng đăng nhập để mua sắm</p>
+                    <p className="text-xs text-blue-700 mt-0.5">Nhấn nút "Thêm vào giỏ hàng" để tiếp tục</p>
+                  </div>
+                </div>
+              )}
               <button
                 onClick={handleAddToCart}
                 disabled={product.stock === 0}
@@ -342,7 +398,26 @@ export default function ProductDetail() {
                 <span className="font-semibold">Đánh giá:</span>{' '}
                 {ratingCount > 0 ? (
                   <>
-                    {averageRating.toFixed(1)} ⭐ ({ratingCount} đánh giá)
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`text-sm ${
+                            star <= Math.floor(averageRating)
+                              ? 'text-yellow-500'
+                              : star - 0.5 <= averageRating
+                              ? 'text-yellow-500'
+                              : 'text-gray-300'
+                          }`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                      <span className="font-semibold text-gray-800">
+                        {averageRating.toFixed(1)}
+                      </span>
+                      <span className="text-gray-500">({ratingCount} đánh giá)</span>
+                    </div>
                   </>
                 ) : (
                   'Chưa có đánh giá'
@@ -358,6 +433,15 @@ export default function ProductDetail() {
 
           <div className="bg-white p-6 rounded-lg shadow mb-8">
             <h3 className="text-lg font-semibold mb-3">Viết đánh giá của bạn</h3>
+            {!user && (
+              <div className="bg-amber-50 border border-amber-200 rounded p-4 mb-4 flex items-center gap-3">
+                <div className="text-amber-600 text-lg">🔐</div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-amber-900">Vui lòng đăng nhập để đánh giá sản phẩm</p>
+                  <p className="text-xs text-amber-700 mt-0.5">Bạn cần có tài khoản để chia sẻ cảm nhận của mình</p>
+                </div>
+              </div>
+            )}
             {reviewMessage && (
               <div
                 className={`mb-4 rounded px-4 py-3 text-sm ${
@@ -367,7 +451,7 @@ export default function ProductDetail() {
                 {reviewMessage.text}
               </div>
             )}
-            <div className="mb-4">
+            <div className="mb-4 opacity-75 disabled:opacity-50">
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-sm font-medium">Đánh giá:</span>
                 <div className="flex gap-1">
@@ -376,9 +460,10 @@ export default function ProductDetail() {
                       key={star}
                       type="button"
                       onClick={() => setRating(star)}
+                      disabled={!user}
                       className={`text-2xl leading-none transition ${
                         star <= rating ? 'text-accent' : 'text-gray-300 hover:text-accent'
-                      }`}
+                      } ${!user ? 'cursor-not-allowed' : ''}`}
                     >
                       ★
                     </button>
@@ -388,15 +473,16 @@ export default function ProductDetail() {
               <textarea
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
+                disabled={!user}
                 rows={4}
-                placeholder="Viết cảm nhận của bạn về sản phẩm..."
-                className="w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary"
+                placeholder={user ? "Viết cảm nhận của bạn về sản phẩm..." : "Vui lòng đăng nhập để viết đánh giá..."}
+                className={`w-full border border-gray-200 rounded-lg p-3 focus:outline-none focus:ring-2 focus:ring-primary ${!user ? 'bg-gray-50 cursor-not-allowed' : ''}`}
               />
             </div>
             <button
               onClick={handleSubmitReview}
-              disabled={submittingReview}
-              className="bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 disabled:bg-gray-300"
+              disabled={submittingReview || !user}
+              className={`bg-primary text-white px-6 py-2 rounded hover:bg-primary/90 disabled:bg-gray-300 disabled:cursor-not-allowed ${!user ? 'opacity-60' : ''}`}
             >
               {submittingReview ? 'Đang gửi...' : 'Gửi đánh giá'}
             </button>
@@ -414,7 +500,7 @@ export default function ProductDetail() {
                   <div key={review._id} className="border border-gray-100 rounded-lg p-4">
                     <div className="flex items-center justify-between mb-2">
                       <div className="text-sm font-semibold text-dark">
-                        {review.user?.name || 'Khách hàng'}
+                        {review.user?.name || review.user?.email || 'Khách hàng'}
                       </div>
                       <div className="text-xs text-gray-500">
                         {new Date(review.createdAt).toLocaleDateString('vi-VN')}
@@ -430,7 +516,20 @@ export default function ProductDetail() {
                         </span>
                       ))}
                     </div>
-                    {review.comment && <p className="text-gray-700">{review.comment}</p>}
+                    {review.comment && <p className="text-gray-700 mb-3">{review.comment}</p>}
+                    {review.response && (
+                      <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                        <div className="flex items-center space-x-2 mb-1">
+                          <span className="text-sm font-medium text-blue-800">
+                            Phản hồi từ {review.response.respondedBy?.name || 'Admin'}
+                          </span>
+                          <span className="text-xs text-blue-600">
+                            {new Date(review.response.respondedAt).toLocaleDateString('vi-VN')}
+                          </span>
+                        </div>
+                        <p className="text-blue-700 text-sm">{review.response.text}</p>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

@@ -3,6 +3,8 @@ package com.anhnvt_ph55017.md_02_datn.fragments;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -13,14 +15,11 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anhnvt_ph55017.md_02_datn.screens.ShippingAddressActivity;
-import com.google.firebase.auth.FirebaseAuth;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
-
-import org.jspecify.annotations.NonNull;
-
-import javax.annotation.Nullable;
+import com.anhnvt_ph55017.md_02_datn.screens.ShippingAddressActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 public class ProfileFragment extends Fragment {
 
@@ -36,52 +35,62 @@ public class ProfileFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
 
-        tvName = view.findViewById(R.id.tvName);
-        tvEmail = view.findViewById(R.id.tvEmail);
-        tvOrderCount = view.findViewById(R.id.tvOrderCount);
+        // Ánh xạ view
+        tvName          = view.findViewById(R.id.tvName);
+        tvEmail         = view.findViewById(R.id.tvEmail);
+        tvOrderCount    = view.findViewById(R.id.tvOrderCount);
         tvWishlistCount = view.findViewById(R.id.tvWishlistCount);
-        tvLanguage = view.findViewById(R.id.tvLanguage);
-        switchDark = view.findViewById(R.id.switchDark);
-        btnLogout = view.findViewById(R.id.btnLogout);
+        tvLanguage      = view.findViewById(R.id.tvLanguage);
+        switchDark      = view.findViewById(R.id.switchDark);
+        btnLogout       = view.findViewById(R.id.btnLogout);
 
-        // sample data
-        tvName.setText("Alex Johnson");
-        tvEmail.setText("alex.johnson@coretech.io");
+        // Lấy thông tin user từ Firebase (nếu có), fallback về sample data
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user != null) {
+            tvName.setText(user.getDisplayName() != null ? user.getDisplayName() : "Người dùng");
+            tvEmail.setText(user.getEmail() != null ? user.getEmail() : "");
+        } else {
+            tvName.setText("Alex Johnson");
+            tvEmail.setText("alex.johnson@coretech.io");
+        }
         tvOrderCount.setText("24");
         tvWishlistCount.setText("12");
 
-        // menu clicks
+        // Menu clicks
         view.findViewById(R.id.rowOrders).setOnClickListener(v ->
                 Toast.makeText(getContext(), "My Orders", Toast.LENGTH_SHORT).show());
 
         view.findViewById(R.id.rowAddress).setOnClickListener(v -> {
-            Intent intent = new Intent(getActivity(), ShippingAddressActivity.class);
+            Intent intent = new Intent(requireActivity(), ShippingAddressActivity.class);
             startActivity(intent);
         });
+
         view.findViewById(R.id.rowPayment).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Payment Methods", Toast.LENGTH_SHORT).show());
+
         view.findViewById(R.id.rowWishlist).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Wishlist", Toast.LENGTH_SHORT).show());
+
         view.findViewById(R.id.rowNotifications).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Notifications", Toast.LENGTH_SHORT).show());
+
         view.findViewById(R.id.rowPrivacy).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Privacy & Security", Toast.LENGTH_SHORT).show());
+
         view.findViewById(R.id.rowLanguage).setOnClickListener(v ->
                 Toast.makeText(getContext(), "Change language", Toast.LENGTH_SHORT).show());
 
         switchDark.setOnCheckedChangeListener((buttonView, isChecked) ->
                 Toast.makeText(getContext(), isChecked ? "Dark mode on" : "Dark mode off", Toast.LENGTH_SHORT).show());
 
+        // Logout
         btnLogout.setOnClickListener(v -> {
-
-            FirebaseAuth.getInstance().signOut();   // logout firebase
+            FirebaseAuth.getInstance().signOut();
 
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-
             startActivity(intent);
-
-            Toast.makeText(getContext(), "Đăng xuất thành công", Toast.LENGTH_SHORT).show();
+            // Không gọi Toast sau startActivity vì Context đã bị destroy
         });
 
         return view;

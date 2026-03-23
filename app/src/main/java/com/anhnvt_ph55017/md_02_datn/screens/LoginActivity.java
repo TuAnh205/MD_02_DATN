@@ -3,27 +3,24 @@ package com.anhnvt_ph55017.md_02_datn.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.CheckBox;
-import android.widget.EditText;
-import android.widget.TextView;
-import android.widget.Toast;
+import android.widget.*;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
-import com.anhnvt_ph55017.md_02_datn.Adapters.SavedAccountAdapter;
-import com.anhnvt_ph55017.md_02_datn.Adapters.SavedAccountAdapter.SavedAccount;
-import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.android.volley.Request;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.Volley;
+
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.*;
+
+import org.json.JSONObject;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -32,173 +29,116 @@ public class LoginActivity extends AppCompatActivity {
     EditText edtEmail, edtPass;
     Button btnLogin, btnGoogle;
     TextView tvSignUp, tvReset;
-    CheckBox checkRemember;
-    RecyclerView rvSavedAccounts;
-    SavedAccountAdapter savedAccountAdapter;
 
     FirebaseAuth mAuth;
     GoogleSignInClient googleSignInClient;
-    UserDAO userDAO;
+
+    private static final String BASE_URL = "http://192.168.1.10:5000/api";
 
     boolean isPasswordVisible = false;
-
-    private static final String PREFS_NAME = "auth_prefs";
-    private static final String PREF_EMAIL = "pref_email";
-    private static final String PREF_PASS = "pref_pass";
-    private static final String PREF_REMEMBER = "pref_remember";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
+        // ánh xạ
         edtEmail = findViewById(R.id.edt_Email);
         edtPass = findViewById(R.id.edt_Pass);
-        checkRemember = findViewById(R.id.checkRemember);
         btnLogin = findViewById(R.id.btn_login);
         btnGoogle = findViewById(R.id.btn_google_sign_in);
         tvSignUp = findViewById(R.id.tvSignUp);
         tvReset = findViewById(R.id.tvResetPass);
-        rvSavedAccounts = findViewById(R.id.rvSavedAccounts);
 
         mAuth = FirebaseAuth.getInstance();
-        userDAO = new UserDAO(this);
 
         configureGoogle();
-
-        loadSavedCredentials();
+        togglePassword();
         prefillFromRegister();
 
-        // Setup saved accounts RecyclerView
-        rvSavedAccounts.setLayoutManager(new LinearLayoutManager(this));
-        savedAccountAdapter = new SavedAccountAdapter(account -> {
-            // Auto-fill email and password when account is selected
-            edtEmail.setText(account.getEmail());
-            edtPass.setText(account.getPassword());
-            rvSavedAccounts.setVisibility(View.GONE);
-        });
-        rvSavedAccounts.setAdapter(savedAccountAdapter);
+        // login thường
+        btnLogin.setOnClickListener(v -> login());
 
-        // Show saved accounts when email field is focused and empty
-        edtEmail.setOnFocusChangeListener((v, hasFocus) -> {
-            if (hasFocus && edtEmail.getText().toString().trim().isEmpty()) {
-                loadAndShowSavedAccounts();
-            } else {
-                rvSavedAccounts.setVisibility(View.GONE);
-            }
-        });
-
-        btnLogin.setOnClickListener(v -> loginEmail());
-
+        // google
         btnGoogle.setOnClickListener(v -> loginGoogle());
 
+        // chuyển sang register
         tvSignUp.setOnClickListener(v ->
                 startActivity(new Intent(this, RegisterActivity.class)));
 
+        // quên mật khẩu
         tvReset.setOnClickListener(v ->
                 startActivity(new Intent(this, ResetPass.class)));
-
-        togglePassword();
     }
 
-    // ================= EMAIL LOGIN =================
+    // ================= LOGIN EMAIL =================
+    private void login() {
 
-    private void loginEmail() {
-
-        String identifier = edtEmail.getText().toString().trim();
+        String email = edtEmail.getText().toString().trim().toLowerCase();
         String pass = edtPass.getText().toString().trim();
 
-        if (identifier.isEmpty() || pass.isEmpty()) {
-            Toast.makeText(this, "Vui lòng nhập đầy đủ", Toast.LENGTH_SHORT).show();
+        if (email.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(this, "Nhập đầy đủ", Toast.LENGTH_SHORT).show();
             return;
         }
 
         try {
-            boolean ok = userDAO.login(identifier, pass);
+            JSONObject body = new JSONObject();
+            body.put("email", email);
+            body.put("password", pass);
 
-            if (ok) {
-                Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
+            String url = BASE_URL + "/auth/login";
 
-                // Lưu / xóa thông tin theo checkbox
-                if (checkRemember.isChecked()) {
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                            .putString(PREF_EMAIL, identifier)
-                            .putString(PREF_PASS, pass)
-                            .putBoolean(PREF_REMEMBER, true)
-                            .apply();
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    body,
+                    response -> {
 
-                    // Also save to saved accounts list
-                    saveToSavedAccounts(identifier, pass);
-                } else {
-                    getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                            .remove(PREF_EMAIL)
-                            .remove(PREF_PASS)
-                            .putBoolean(PREF_REMEMBER, false)
-                            .apply();
-                }
+                        String token = response.optString("token");
 
-                Intent intent = new Intent(this, MainActivity.class);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                startActivity(intent);
+                        getSharedPreferences("auth", MODE_PRIVATE)
+                                .edit()
+                                .putString("token", token)
+                                .apply();
 
-            } else {
-                Toast.makeText(this, "Sai email/số điện thoại hoặc mật khẩu", Toast.LENGTH_SHORT).show();
-            }
+                        Toast.makeText(this, "Login thành công", Toast.LENGTH_SHORT).show();
+
+                        startActivity(new Intent(this, MainActivity.class));
+                        finish();
+                    },
+                    error -> {
+                        Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_LONG).show();
+                    }
+            );
+
+            Volley.newRequestQueue(this).add(request);
+
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Lỗi đăng nhập: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    private void loadSavedCredentials() {
-        android.content.SharedPreferences prefs = getSharedPreferences(PREFS_NAME, MODE_PRIVATE);
-        boolean remembered = prefs.getBoolean(PREF_REMEMBER, false);
-        checkRemember.setChecked(remembered);
-
-        if (remembered) {
-            String savedEmail = prefs.getString(PREF_EMAIL, "");
-            String savedPass = prefs.getString(PREF_PASS, "");
-            edtEmail.setText(savedEmail);
-            edtPass.setText(savedPass);
-        }
-    }
-
-    private void prefillFromRegister() {
-        Intent intent = getIntent();
-        if (intent != null) {
-            String email = intent.getStringExtra("prefill_email");
-            String pass = intent.getStringExtra("prefill_pass");
-            if (email != null && pass != null) {
-                edtEmail.setText(email);
-                edtPass.setText(pass);
-                checkRemember.setChecked(true);
-            }
         }
     }
 
     // ================= GOOGLE CONFIG =================
-
     private void configureGoogle() {
+
+        String webClientId = getString(R.string.default_web_client_id);
 
         GoogleSignInOptions gso =
                 new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                         .requestEmail()
-                        .requestIdToken(getString(R.string.default_web_client_id))
+                        .requestIdToken(webClientId)
                         .build();
 
         googleSignInClient = GoogleSignIn.getClient(this, gso);
     }
 
     // ================= GOOGLE LOGIN =================
-
     private void loginGoogle() {
 
-        // logout google cache để chọn lại account
         googleSignInClient.signOut().addOnCompleteListener(task -> {
-
             Intent signInIntent = googleSignInClient.getSignInIntent();
             startActivityForResult(signInIntent, RC_SIGN_IN);
-
         });
     }
 
@@ -215,18 +155,23 @@ public class LoginActivity extends AppCompatActivity {
             try {
 
                 GoogleSignInAccount account = task.getResult(ApiException.class);
+                String idToken = account.getIdToken();
 
-                firebaseAuth(account.getIdToken());
+                if (idToken == null) {
+                    Toast.makeText(this, "Không lấy được token", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                firebaseAuth(idToken);
 
             } catch (Exception e) {
-
-                Toast.makeText(this, "Google login failed", Toast.LENGTH_SHORT).show();
+                e.printStackTrace();
+                Toast.makeText(this, "Google login fail", Toast.LENGTH_SHORT).show();
             }
         }
     }
 
     // ================= FIREBASE AUTH =================
-
     private void firebaseAuth(String idToken) {
 
         AuthCredential credential =
@@ -237,43 +182,108 @@ public class LoginActivity extends AppCompatActivity {
 
                     if (task.isSuccessful()) {
 
-                        Toast.makeText(this, "Đăng nhập Google thành công", Toast.LENGTH_SHORT).show();
+                        FirebaseUser user = mAuth.getCurrentUser();
 
-                        Intent intent = new Intent(this, MainActivity.class);
-                        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                        startActivity(intent);
+                        if (user != null) {
+
+                            String uid = user.getUid();
+                            String email = user.getEmail();
+                            String name = user.getDisplayName();
+
+                            syncServer(uid, email, name);
+                        }
 
                     } else {
-
-                        Toast.makeText(this, "Google login thất bại", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(this, "Firebase fail", Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
-    // ================= SHOW / HIDE PASSWORD =================
+    // ================= SYNC SERVER =================
 
+    private void syncServer(String uid, String email, String name) {
+        // 🔥 CHECK EMAIL
+        if (email == null || email.isEmpty()) {
+            Toast.makeText(this, "Google account không có email", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        try {
+            JSONObject body = new JSONObject();
+            body.put("firebaseUid", uid);
+            body.put("email", email);
+            body.put("name", name != null ? name : "User");
+
+            String url = BASE_URL + "/auth/firebase-sync";
+
+            JsonObjectRequest request = new JsonObjectRequest(
+                    Request.Method.POST,
+                    url,
+                    body,
+                    response -> {
+                        String token = response.optString("token");
+
+                        getSharedPreferences("auth", MODE_PRIVATE)
+                                .edit()
+                                .putString("token", token)
+                                .apply();
+
+                        Toast.makeText(this, "Google login thành công", Toast.LENGTH_SHORT).show();
+
+                        startActivity(new Intent(this, MainActivity.class));
+                        finish();
+                    },
+                    error -> {
+                        // 🔥 LOG CHI TIẾT ĐỂ DEBUG
+                        if (error.networkResponse != null && error.networkResponse.data != null) {
+                            String bodyStr = new String(error.networkResponse.data);
+                            Log.e("SYNC_ERROR", bodyStr);
+                            Toast.makeText(this, "Sync server lỗi: " + bodyStr, Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.e("SYNC_ERROR", error.toString());
+                            Toast.makeText(this, "Sync server lỗi: " + error.toString(), Toast.LENGTH_LONG).show();
+                        }
+                    }
+            );
+
+            Volley.newRequestQueue(this).add(request);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Lỗi tạo request sync server", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    // ================= SHOW PASSWORD =================
     private void togglePassword() {
 
         edtPass.setOnTouchListener((v, event) -> {
 
             if (event.getAction() == MotionEvent.ACTION_UP) {
 
-                int drawableEnd = 2;
+                if (edtPass.getCompoundDrawables()[2] == null) return false;
 
-                if (event.getRawX() >= (edtPass.getRight()
-                        - edtPass.getCompoundDrawables()[drawableEnd].getBounds().width())) {
+                int drawableWidth = edtPass.getCompoundDrawables()[2].getBounds().width();
+
+                // 🔥 FIX CHUẨN: dùng getX()
+                if (event.getX() >= (edtPass.getWidth() - drawableWidth - edtPass.getPaddingEnd())) {
 
                     if (isPasswordVisible) {
 
+                        // Ẩn mật khẩu
                         edtPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                        edtPass.setCompoundDrawablesWithIntrinsicBounds(
+                                0, 0, R.drawable.ic_eye_close, 0);
 
                     } else {
 
-                        edtPass.setInputType(InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        // Hiện mật khẩu
+                        edtPass.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD);
+                        edtPass.setCompoundDrawablesWithIntrinsicBounds(
+                                0, 0, R.drawable.ic_eye, 0);
                     }
 
-                    edtPass.setSelection(edtPass.length());
-
+                    edtPass.setSelection(edtPass.getText().length());
                     isPasswordVisible = !isPasswordVisible;
 
                     return true;
@@ -284,69 +294,19 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    // ================= SAVED ACCOUNTS =================
+    // ================= PREFILL =================
+    private void prefillFromRegister() {
 
-    private void saveToSavedAccounts(String email, String password) {
-        try {
-            String savedAccountsStr = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .getString("saved_accounts", "");
+        Intent intent = getIntent();
 
-            // Check if this account is already saved
-            String newAccount = email + "," + password;
-            if (savedAccountsStr.contains(newAccount)) {
-                return; // Already saved
+        if (intent != null) {
+            String email = intent.getStringExtra("prefill_email");
+            String pass = intent.getStringExtra("prefill_pass");
+
+            if (email != null && pass != null) {
+                edtEmail.setText(email);
+                edtPass.setText(pass);
             }
-
-            // Add to the list (limit to 5 accounts)
-            String[] accounts = savedAccountsStr.isEmpty() ? new String[0] : savedAccountsStr.split(";");
-            java.util.List<String> accountList = new java.util.ArrayList<>(java.util.Arrays.asList(accounts));
-
-            // Remove if already exists (update password)
-            accountList.removeIf(acc -> acc.startsWith(email + ","));
-
-            // Add new account at the beginning
-            accountList.add(0, newAccount);
-
-            // Keep only last 5 accounts
-            if (accountList.size() > 5) {
-                accountList = accountList.subList(0, 5);
-            }
-
-            // Save back
-            String updatedAccounts = String.join(";", accountList);
-            getSharedPreferences(PREFS_NAME, MODE_PRIVATE).edit()
-                    .putString("saved_accounts", updatedAccounts)
-                    .apply();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void loadAndShowSavedAccounts() {
-        try {
-            // Load all saved accounts from SharedPreferences
-            // We'll store them as email1,password1;email2,password2;...
-            String savedAccountsStr = getSharedPreferences(PREFS_NAME, MODE_PRIVATE)
-                    .getString("saved_accounts", "");
-
-            if (!savedAccountsStr.isEmpty()) {
-                String[] accounts = savedAccountsStr.split(";");
-                java.util.List<SavedAccountAdapter.SavedAccount> accountList = new java.util.ArrayList<>();
-
-                for (String account : accounts) {
-                    String[] parts = account.split(",");
-                    if (parts.length == 2) {
-                        accountList.add(new SavedAccountAdapter.SavedAccount(parts[0], parts[1]));
-                    }
-                }
-
-                if (!accountList.isEmpty()) {
-                    savedAccountAdapter.setAccounts(accountList);
-                    rvSavedAccounts.setVisibility(View.VISIBLE);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
     }
 }

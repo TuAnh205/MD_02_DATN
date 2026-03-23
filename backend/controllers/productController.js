@@ -10,6 +10,8 @@ exports.getProducts = async (req, res) => {
             minPrice,
             maxPrice,
             minRating,
+            featured,
+            hot,
             sort = '-createdAt',
             page = 1,
             limit = 20,
@@ -25,6 +27,8 @@ exports.getProducts = async (req, res) => {
         if (minPrice) filter.price = { ...(filter.price || {}), $gte: Number(minPrice) };
         if (maxPrice) filter.price = { ...(filter.price || {}), $lte: Number(maxPrice) };
         if (minRating) filter['ratings.average'] = { $gte: Number(minRating) };
+        if (featured === 'true') filter.isFeatured = true;
+        if (hot === 'true') filter.hot = true;
 
         const skip = (Math.max(1, Number(page)) - 1) * Number(limit);
         const [items, total] = await Promise.all([
