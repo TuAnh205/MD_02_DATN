@@ -1,0 +1,184 @@
+Category,Type,English Text,Location,Notes
+Main UI Texts,Header,"Shopping Cart",activity_cart.xml,Main screen title
+Main UI Texts,Header,"Checkout",activity_check_out.xml,Checkout screen title
+Main UI Texts,Header,"Edit Profile",activity_edit_profile.xml,Profile edit screen title
+Main UI Texts,Header,"ELECTRONICS AND INNOVATION",activity_loading.xml,Loading screen subtitle
+Main UI Texts,Header,"INITIALIZING SYSTEMS",activity_loading.xml,Loading screen message
+Main UI Texts,Branding,"CORE-TECH",activity_login.xml; activity_loading.xml; activity_reset_pass.xml,App brand name
+Main UI Texts,Welcome,"Welcome to CORE- TECH",activity_login.xml,Login welcome message
+Main UI Texts,Tagline,"Your gateway to the next generation of electronics.",activity_login.xml,Login tagline
+Main UI Texts,Form,"Create Account",activity_register.xml,Registration header
+Main UI Texts,Form,"Join Core-Tech for the best electronics deals.",activity_register.xml,Registration description
+Main UI Texts,Form,"Reset Password",activity_reset_pass.xml,Password reset header
+Main UI Texts,Form,"Enter the email or phone number associated with your account and we'll send an OTP to verify your identity.",activity_reset_pass.xml,Password reset instructions
+Main UI Texts,Form,"Verify Your Identity",activity_otp.xml,OTP verification header
+Main UI Texts,Form,"Enter the 6-digit code sent to your email",activity_otp.xml,OTP instructions
+Main UI Texts,Product,"Product Name",bottom_sheet_product_options.xml,Product display
+Main UI Texts,Product,"Stock: 0",bottom_sheet_product_options.xml,Stock indicator
+Main UI Texts,Product,"Color",bottom_sheet_product_options.xml,Product option label
+Main UI Texts,Product,"Size",bottom_sheet_product_options.xml,Product option label
+Main UI Texts,Product,"Quantity",bottom_sheet_product_options.xml,Product option label
+Main UI Texts,Product,"+ ADD TO CART",bottom_sheet_product_options.xml,Action button
+Main UI Texts,Product,"You also like",activity_detail.xml,Related products section
+Main UI Texts,Button,"Login",activity_login.xml,Action button
+Main UI Texts,Button,"Register",activity_register.xml,Action button
+Main UI Texts,Button,"Sign Up",activity_login.xml,Action button
+Main UI Texts,Button,"Send OTP >",activity_reset_pass.xml,Action button
+Main UI Texts,Button,"Back to Login",activity_reset_pass.xml,Navigation button
+Main UI Texts,Button,"Verify",activity_otp.xml,Action button
+Main UI Texts,Button,"Resend OTP",activity_otp.xml,Action button
+Main UI Texts,Button,"Add to Cart",activity_detail.xml,Action button
+Main UI Texts,Button,"Save Changes",activity_edit_profile.xml,Action button
+Main UI Texts,Button,"Cancel",activity_edit_profile.xml,Action button
+Main UI Texts,Checkout,"Shipping Address",activity_check_out.xml,Checkout section
+Main UI Texts,Checkout,"Payment Method",activity_check_out.xml,Checkout section
+Main UI Texts,Checkout,"Your Items",activity_check_out.xml,Checkout section
+Main UI Texts,Checkout,"Voucher",activity_check_out.xml,Checkout section
+Main UI Texts,Cart,"All",activity_cart.xml,Filter option
+Main UI Texts,Financial,"Subtotal: $0",activity_cart.xml,Price calculation
+Main UI Texts,Financial,"Tax: $0",activity_cart.xml,Price calculation
+Main UI Texts,Financial,"Order Total: $0",activity_cart.xml,Price calculation
+Main UI Texts,Financial,"Subtotal: $0.00",activity_check_out.xml,Price calculation
+Main UI Texts,Financial,"Tax: $0.00",activity_check_out.xml,Price calculation
+Main UI Texts,Financial,"Total: $1249",activity_check_out.xml,Price calculation
+Main UI Texts,Social,"OR CONTINUE WITH",activity_login.xml,Social login header
+Main UI Texts,Social,"Google",activity_login.xml,Social login option
+Main UI Texts,Social,"FaceBook",activity_login.xml,Social login option
+Main UI Texts,Profile,"ACCOUNT",fragment_profile.xml,Menu section header
+Main UI Texts,Profile,"My Orders",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"Shipping Address",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"Payment Methods",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"Wishlist",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"SETTINGS",fragment_profile.xml,Menu section header
+Main UI Texts,Profile,"Notifications",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"Privacy & Security",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"Language",fragment_profile.xml,Menu item
+Main UI Texts,Profile,"English",fragment_profile.xml,Language selection
+Main UI Texts,Profile,"Dark Mode",fragment_profile.xml,Settings option
+Main UI Texts,Profile,"Logout",fragment_profile.xml,Action button
+Toast Messages,Authentication,"Nhập đầy đủ",LoginActivity; RegisterActivity,Validation error - Vietnamese
+Toast Messages,Authentication,"Email không hợp lệ",RegisterActivity,Validation error - Vietnamese
+Toast Messages,Authentication,"Mật khẩu không khớp",RegisterActivity,Validation error - Vietnamese
+Toast Messages,Authentication,"Firebase lỗi: {error}",RegisterActivity,Error handling - Vietnamese
+Toast Messages,Authentication,"Đăng ký thành công",RegisterActivity,Success message - Vietnamese
+Toast Messages,Authentication,"Email đã tồn tại hoặc lỗi server",RegisterActivity,Error message - Vietnamese
+Toast Messages,Authentication,"Login thành công",LoginActivity,Success message - Vietnamese
+Toast Messages,Authentication,"Sai tài khoản hoặc mật khẩu",LoginActivity,Error message - Vietnamese
+Toast Messages,Authentication,"Không lấy được token",LoginActivity,Error message - Vietnamese
+Toast Messages,Authentication,"Google login fail",LoginActivity,Error message
+Toast Messages,Authentication,"Firebase fail",LoginActivity,Error message
+Toast Messages,Authentication,"Google account không có email",LoginActivity,Error message - Vietnamese
+Toast Messages,Authentication,"Google login thành công",LoginActivity,Success message - Vietnamese
+Toast Messages,Authentication,"Sync server lỗi: {error}",LoginActivity,Error message - Vietnamese
+Toast Messages,Authentication,"Lỗi tạo request sync server",LoginActivity,Error message - Vietnamese
+Toast Messages,Product,"You have {count} notification(s)",HomeFragment,Info message
+Toast Messages,Product,"No new notifications",HomeFragment,Info message
+Toast Messages,Product,"Invalid product data",DetailActivity,Error message
+Toast Messages,Product,"Invalid product",DetailActivity,Error message
+Toast Messages,Cart,"Please login to checkout",CheckOutActivity; CartActivity,Validation message
+Toast Messages,Cart,"Vui lòng chọn phương thức thanh toán",CheckOutActivity,Validation message - Vietnamese
+Toast Messages,Cart,"Thanh toán thành công!",CheckOutActivity,Success message - Vietnamese
+Toast Messages,Cart,"Vui lòng điền đủ thông tin",ShippingAddressActivity,Validation message - Vietnamese
+Toast Messages,Profile,"My Orders",ProfileFragment,Menu item label
+Toast Messages,Profile,"Payment Methods",ProfileFragment,Menu item label
+Toast Messages,Profile,"Wishlist",ProfileFragment,Menu item label
+Toast Messages,Profile,"Notifications",ProfileFragment,Menu item label
+Toast Messages,Profile,"Privacy & Security",ProfileFragment,Menu item label
+Toast Messages,Profile,"Change language",ProfileFragment,Action message
+Toast Messages,Profile,"Dark mode on",ProfileFragment,Status message
+Toast Messages,Profile,"Dark mode off",ProfileFragment,Status message
+Toast Messages,Profile,"Vui lòng điền tên và email",EditProfileActivity,Validation message - Vietnamese
+Toast Messages,Profile,"Lỗi lưu vào database",EditProfileActivity,Error message - Vietnamese
+Toast Messages,Profile,"Cập nhật thành công",EditProfileActivity,Success message - Vietnamese
+Toast Messages,Profile,"Cập nhật Firebase không thành công",EditProfileActivity,Error message - Vietnamese
+Toast Messages,Order,"Không thể hủy đơn hàng ở trạng thái hiện tại",OrderDetailActivity,Validation message - Vietnamese
+Toast Messages,Order,"Vui lòng chọn lý do hủy",OrderDetailActivity,Validation message - Vietnamese
+Toast Messages,Order,"Đơn hàng #{id} đã bị hủy\nLý do: {reason}",OrderDetailActivity,Confirmation message - Vietnamese
+Toast Messages,Order,"Lỗi khi hủy đơn hàng",OrderDetailActivity,Error message - Vietnamese
+Toast Messages,Order,"Mở chat với shop",OrderDetailActivity,Action message - Vietnamese
+Toast Messages,Order,"Mua lại đơn hàng",OrderDetailActivity,Action message - Vietnamese
+Toast Messages,Order,"Gọi shop",OrderDetailActivity,Action message - Vietnamese
+Toast Messages,Order,"Mở trung tâm hỗ trợ",OrderDetailActivity,Action message - Vietnamese
+Toast Messages,Order,"Yêu cầu hoàn tiền",OrderDetailActivity,Action message - Vietnamese
+Toast Messages,Order,"Vui lòng chọn số sao",OrderDetailActivity,Validation message - Vietnamese
+Toast Messages,Order,"Vui lòng nhập nhận xét",OrderDetailActivity,Validation message - Vietnamese
+Toast Messages,Order,"Cảm ơn đánh giá của bạn ({rating} sao)",OrderDetailActivity,Success message - Vietnamese
+Toast Messages,Order,"Lỗi khi mở chi tiết đơn hàng: {message}",OrderDetailActivity,Error message - Vietnamese
+Product Descriptions,Laptop,"MacBook Pro M3","DBHelper.java, Database","Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators."
+Product Descriptions,Laptop,"Dell XPS 15","DBHelper.java, Database","High-end Windows laptop with powerful performance, premium design and stunning display."
+Product Descriptions,Phone,"iPhone 15","DBHelper.java, Database","Latest Apple smartphone with A17 chip, dynamic island, improved cameras and all-day battery life."
+Product Descriptions,Phone,"Samsung Galaxy S25","DBHelper.java, Database","Flagship Samsung phone with powerful processor, advanced camera system and beautiful AMOLED display."
+Product Descriptions,Phone,"Google Pixel 8 Pro","DBHelper.java, Database","Google flagship phone with AI camera features and pure Android experience."
+Product Descriptions,Audio,"Sony WH-1000XM5","DBHelper.java, Database","Industry leading noise cancelling headphones with crystal clear sound and 30 hours battery life."
+Product Descriptions,Audio,"AirPods Pro 2","DBHelper.java, Database","Premium Apple wireless earbuds with active noise cancellation and spatial audio."
+Product Descriptions,Audio,"JBL Tune 760NC","DBHelper.java, Database","Wireless headphones with active noise cancelling and deep bass sound."
+Product Descriptions,Accessories,"Cáp sạc iPhone","DBHelper.java, Database","Cáp Lightning chuẩn Apple, bền bỉ và an toàn cho mọi thiết bị."
+Product Descriptions,Accessories,"Ốp lưng Samsung","DBHelper.java, Database","Ốp lưng chống sốc cao cấp, bảo vệ điện thoại khỏi va đập."
+Product Descriptions,Accessories,"Pin dự phòng 20000mAh","DBHelper.java, Database","Pin dự phòng dung lượng lớn, sạc nhanh và an toàn."
+Product Descriptions,Watches,"Apple Watch Series 9","DBHelper.java, Database","Đồng hồ thông minh Apple mới nhất với thiết kế thanh lịch và tính năng sức khỏe toàn diện."
+Product Descriptions,Watches,"Samsung Galaxy Watch 6","DBHelper.java, Database","Đồng hồ thông minh Samsung với màn hình AMOLED sắc nét và pin lâu dài."
+Product Descriptions,Watches,"Fitbit Charge 6","DBHelper.java, Database","Vòng theo dõi sức khỏe Fitbit với cảm biến độc lập và ứng dụng thông minh."
+UI Hints,Form,"Enter your email",activity_login.xml,Input placeholder
+UI Hints,Form,"Enter your password",activity_login.xml,Input placeholder
+UI Hints,Form,"Enter your full name",activity_register.xml,Input placeholder
+UI Hints,Form,"example@coretech.com",activity_register.xml,Input example
+UI Hints,Form,"+1 (555) 000-0000",activity_register.xml,Input format
+UI Hints,Form,"Create a strong password",activity_register.xml,Input instruction
+UI Hints,Form,"Password",activity_register.xml,Input placeholder
+UI Hints,Form,"Enter email or phone",activity_reset_pass.xml,Input placeholder
+UI Hints,Form,"Format: name@domain.com or +1 234 567 8900",activity_reset_pass.xml,Input format
+UI Hints,Profile,"Alex Johnson",activity_edit_profile.xml,Example name
+UI Hints,Profile,"alex.johnson@coretech.io",activity_edit_profile.xml,Example email
+UI Hints,Profile,"+1 555-0123-4567",activity_edit_profile.xml,Example phone
+UI Hints,Profile,"Senior Hardware Architect...",activity_edit_profile.xml,Example bio
+UI Hints,Cart,"Enter voucher code",activity_check_out.xml,Input placeholder
+UI Hints,Search,"Search tech, brands...",fragment_home.xml; fragment_browse.xml,Search placeholder
+UI Hints,Order,"Nhập nhận xét của bạn...",activity_order_detail.xml,Comment input placeholder - Vietnamese
+UI Hints,Accessibility,"Decrease Quantity",bottom_sheet_product_options.xml,Button description
+UI Hints,Accessibility,"Increase Quantity",bottom_sheet_product_options.xml,Button description
+UI Hints,Accessibility,"Back",activity_detail.xml,Button description
+UI Hints,Accessibility,"Edit",item_address.xml,Button description
+UI Hints,Accessibility,"Delete",item_address.xml,Button description
+UI Hints,Accessibility,"Banner image",item_banner.xml,Image description
+Activity Titles,Home,"Core-Tech",fragment_home.xml,App home header
+Activity Titles,Navigation,"Categories",fragment_home.xml,Menu section
+Activity Titles,Profile,"ORDERS",fragment_profile.xml,Account section header
+Activity Titles,Profile,"WISHLIST",fragment_profile.xml,Account section header
+Activity Titles,Orders,"Lịch sử đơn hàng",fragment_orders.xml,Screen title - Vietnamese
+Activity Titles,Orders,"Tất cả",fragment_orders.xml,Filter option - Vietnamese
+Activity Titles,Orders,"Chưa thanh toán",fragment_orders.xml,Filter option - Vietnamese
+Activity Titles,Orders,"Đang xử lý",fragment_orders.xml,Filter option - Vietnamese
+Activity Titles,Orders,"Đang giao hàng",fragment_orders.xml,Filter option - Vietnamese
+Activity Titles,Orders,"Đã nhận",fragment_orders.xml,Filter option - Vietnamese
+Activity Titles,Orders,"Đã hủy",fragment_orders.xml,Filter option - Vietnamese
+Activity Titles,Support,"Liên hệ cửa hàng",activity_order_detail.xml,Section header - Vietnamese
+Activity Titles,Support,"💬 Nhắn tin với shop",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Support,"☎ Gọi cửa hàng",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Support,"Hỗ trợ",activity_order_detail.xml,Section header - Vietnamese
+Activity Titles,Support,"🏢 Trung tâm hỗ trợ",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Support,"💰 Yêu cầu hoàn tiền",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Forms,"Full Name",activity_edit_profile.xml,Form field label
+Activity Titles,Forms,"Email Address",activity_edit_profile.xml,Form field label
+Activity Titles,Forms,"Phone Number",activity_edit_profile.xml,Form field label
+Activity Titles,Forms,"Professional Bio",activity_edit_profile.xml,Form field label
+Activity Titles,Legal,"I agree to the Terms of Service and Privacy Policy.",activity_register.xml,Terms checkbox label
+Activity Titles,Links,"Remembered your password?",activity_reset_pass.xml,Link text
+Activity Titles,Links,"Didn't receive code?",activity_otp.xml,Link text
+Activity Titles,Links,"Don't have an account?",activity_login.xml,Link text
+Activity Titles,Loading,"0%",activity_loading.xml,Loading percentage
+Activity Titles,Order,"Danh sách hàng hóa",activity_order_detail.xml,Section header - Vietnamese
+Activity Titles,Order,"Trạng thái",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Địa chỉ giao hàng",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Số lượng sản phẩm:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Dự kiến nhận:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Tổng tiền:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Đánh giá sản phẩm",activity_order_detail.xml,Section header - Vietnamese
+Activity Titles,Order,"Gửi đánh giá",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Order,"Chi tiết đơn hàng",activity_order_detail.xml,Section header - Vietnamese
+Activity Titles,Order,"Mã đơn hàng:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Phương thức thanh toán:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Thời gian đặt:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Thời gian nhận:",activity_order_detail.xml,Field label - Vietnamese
+Activity Titles,Order,"Hủy đơn",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Order,"Mua lại",activity_order_detail.xml,Action button - Vietnamese
+Activity Titles,Order,"Chi tiết",item_order.xml,Link text - Vietnamese
