@@ -45,9 +45,11 @@ public class UserDAO {
                 new String[]{normalizedEmail, normalizedIdentifier, password}
         );
 
-        boolean ok = cursor.moveToFirst();
-        cursor.close();
-        return ok;
+        try {
+            return cursor.moveToFirst();
+        } finally {
+            cursor.close();
+        }
     }
 
     // CHECK EMAIL
@@ -60,9 +62,11 @@ public class UserDAO {
                 new String[]{normalizedEmail}
         );
 
-        boolean exists = cursor.moveToFirst();
-        cursor.close();
-        return exists;
+        try {
+            return cursor.moveToFirst();
+        } finally {
+            cursor.close();
+        }
     }
 
     // INSERT OR UPDATE USER FROM FIREBASE/SERVER
@@ -83,16 +87,19 @@ public class UserDAO {
         values.put("phone", phone);
 
         long result;
-        if (cursor.moveToFirst()) {
-            // Update existing
-            int id = cursor.getInt(0);
-            result = db.update("users", values, "id = ?", new String[]{String.valueOf(id)});
-        } else {
-            // Insert new
-            result = db.insert("users", null, values);
+        try {
+            if (cursor.moveToFirst()) {
+                // Update existing
+                int id = cursor.getInt(0);
+                result = db.update("users", values, "id = ?", new String[]{String.valueOf(id)});
+            } else {
+                // Insert new
+                result = db.insert("users", null, values);
+            }
+        } finally {
+            cursor.close();
         }
 
-        cursor.close();
         return result != -1;
     }
 
@@ -108,17 +115,20 @@ public class UserDAO {
         );
 
         User user = null;
-        if (cursor.moveToFirst()) {
-            user = new User(
-                    cursor.getInt(0),
-                    cursor.getString(1),
-                    cursor.getString(2),
-                    cursor.getString(3),
-                    cursor.getString(4)
-            );
+        try {
+            if (cursor.moveToFirst()) {
+                user = new User(
+                        cursor.getInt(0),
+                        cursor.getString(1),
+                        cursor.getString(2),
+                        cursor.getString(3),
+                        cursor.getString(4)
+                );
+            }
+        } finally {
+            cursor.close();
         }
 
-        cursor.close();
         return user;
     }
 }

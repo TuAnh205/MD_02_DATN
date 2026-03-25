@@ -16,6 +16,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.SearchHistoryAdapter;
@@ -65,6 +67,9 @@ public class BrowseFragment extends Fragment {
 
         // Load search history (10 gần nhất)
         loadSearchHistory();
+
+        // Load trending keywords
+        loadTrendingKeywords(view);
 
         // Tìm kiếm theo chữ
         editSearch.addTextChangedListener(new TextWatcher() {
@@ -141,4 +146,38 @@ public class BrowseFragment extends Fragment {
 
         adapter.setData(filtered);
     }
+
+    /**
+     * Load và hiển thị xu hướng tìm kiếm
+     */
+    private void loadTrendingKeywords(View view) {
+        LinearLayout trendingContainer = view.findViewById(R.id.trendingKeywordsContainer);
+        trendingContainer.removeAllViews();
+
+        // Dữ liệu xu hướng tìm kiếm mẫu - chỉ 4 items để gọn nhẹ
+        String[] trendingKeywords = {
+                "🔥 iPhone 15",
+                "🔥 MacBook Pro M3",
+                "🔥 Tai nghe Sony",
+                "🔥 Samsung Galaxy S25"
+        };
+
+        for (String keyword : trendingKeywords) {
+            View itemView = LayoutInflater.from(getContext()).inflate(
+                    R.layout.item_trending_keyword, trendingContainer, false);
+
+            TextView tvKeyword = itemView.findViewById(R.id.tvKeyword);
+            tvKeyword.setText(keyword);
+
+            itemView.setOnClickListener(v -> {
+                String cleanKeyword = keyword.replaceAll("🔥 ", "").trim();
+                editSearch.setText(cleanKeyword);
+                editSearch.setSelection(cleanKeyword.length());
+                filter(cleanKeyword);
+            });
+
+            trendingContainer.addView(itemView);
+        }
+    }
 }
+

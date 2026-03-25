@@ -17,6 +17,8 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.BannerAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.CategoryAdapter;
@@ -25,11 +27,13 @@ import com.anhnvt_ph55017.md_02_datn.DAO.CategoryDAO;
 import com.anhnvt_ph55017.md_02_datn.DAO.ProductDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.screens.CartActivity;
+import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
 
 public class HomeFragment extends Fragment {
 
     RecyclerView rvCategory, rvProduct;
-    ImageView imgCart;
+    ImageView imgCart, imgNotification;
+    TextView tvNotificationBadge;
     ViewPager2 vpBanner;
     LinearLayout dotsContainer;
     EditText edtSearchHome;
@@ -55,14 +59,30 @@ public class HomeFragment extends Fragment {
             rvCategory = view.findViewById(R.id.rvCategory);
             rvProduct = view.findViewById(R.id.rvProduct);
             imgCart = view.findViewById(R.id.imgCart);
+            imgNotification = view.findViewById(R.id.imgNotification);
+            tvNotificationBadge = view.findViewById(R.id.tvNotificationBadge);
 
             if (getContext() == null) {
                 return view;
             }
 
+            // Update notification badge
+            updateNotificationBadge();
+
             imgCart.setOnClickListener(v -> {
                 Intent intent = new Intent(getActivity(), CartActivity.class);
                 startActivity(intent);
+            });
+
+            imgNotification.setOnClickListener(v -> {
+                int count = NotificationManager.getNotificationCount(getContext());
+                if (count > 0) {
+                    Toast.makeText(getContext(), "You have " + count + " notification(s)", Toast.LENGTH_SHORT).show();
+                    NotificationManager.clearNotifications(getContext());
+                    updateNotificationBadge();
+                } else {
+                    Toast.makeText(getContext(), "No new notifications", Toast.LENGTH_SHORT).show();
+                }
             });
 
             CategoryDAO categoryDAO = new CategoryDAO(getContext());
@@ -247,6 +267,26 @@ public class HomeFragment extends Fragment {
         try {
             if (bannerHandler != null && bannerRunnable != null) {
                 bannerHandler.postDelayed(bannerRunnable, bannerIntervalMs);
+            }
+            // Update notification badge when fragment resumes
+            updateNotificationBadge();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateNotificationBadge() {
+        try {
+            if (getContext() != null && tvNotificationBadge != null) {
+                int count = NotificationManager.getNotificationCount(getContext());
+                tvNotificationBadge.setText(String.valueOf(count));
+                
+                // Show badge only if count > 0
+                if (count > 0) {
+                    tvNotificationBadge.setVisibility(View.VISIBLE);
+                } else {
+                    tvNotificationBadge.setVisibility(View.GONE);
+                }
             }
         } catch (Exception e) {
             e.printStackTrace();

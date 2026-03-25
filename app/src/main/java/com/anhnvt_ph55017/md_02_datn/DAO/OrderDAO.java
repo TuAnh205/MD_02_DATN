@@ -26,6 +26,7 @@ public class OrderDAO {
                         String address, String payment, String note, int imageRes) {
         try {
             ContentValues values = new ContentValues();
+            values.put("orderId", orderId);
             values.put("userId", userId);
             values.put("total", total);
             values.put("status", status);

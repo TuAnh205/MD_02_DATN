@@ -2,6 +2,8 @@ package com.anhnvt_ph55017.md_02_datn.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -16,7 +18,9 @@ import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.DAO.ProductDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 import java.util.List;
 
@@ -46,35 +50,63 @@ public class DetailActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
+        // Validate intent data
+        if (intent == null) {
+            Toast.makeText(this, "Invalid product data", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
+
         cartDAO = new CartDAO(this);
 
-// lấy id sản phẩm
-        int productId = intent.getIntExtra("id",0);
+        // Get product ID
+        int productId = intent.getIntExtra("id", 0);
+        
+        if (productId <= 0) {
+            Toast.makeText(this, "Invalid product", Toast.LENGTH_SHORT).show();
+            finish();
+            return;
+        }
 
+        // Build product object from intent data
+        String productName = intent.getStringExtra("name");
+        double productPrice = intent.getDoubleExtra("price", 0);
+        int productImage = intent.getIntExtra("image", 0);
+        String productDesc = intent.getStringExtra("desc");
+        float productRating = intent.getFloatExtra("rating", 4.5f);
+        int productReviewCount = intent.getIntExtra("reviewCount", 0);
+
+        Product product = new Product(productId, productName, productPrice, productImage, productDesc, 100);
+        product.setRating(productRating);
+        product.setReviewCount(productReviewCount);
+
+        // Add to cart - Show Bottom Sheet
         btnAddCart.setOnClickListener(v -> {
+            BottomSheetProductOptions bottomSheet = 
+                BottomSheetProductOptions.newInstance(product, selectedProduct -> {
+                    int userId = SessionManager.getUserId(DetailActivity.this);
+                    
+                    if (userId <= 0) {
+                        userId = 1;  // Guest cart
+                    }
 
-            cartDAO.addToCart(1, productId); // userId tạm = 1
-
-            Toast.makeText(DetailActivity.this,
-                    "Added to cart",
-                    Toast.LENGTH_SHORT).show();
-
+                    cartDAO.addToCart(userId, selectedProduct.getId());
+                    showCustomToast("Added to cart");
+                });
+            
+            bottomSheet.show(getSupportFragmentManager(), "product_options");
         });
 
-        // back icon
+        // Back button
         btnBack.setOnClickListener(v -> onBackPressed());
 
+        // Set product details with null checks
+        imgProduct.setImageResource(product.getImage());
+        tvName.setText(product.getName() != null ? product.getName() : "Unknown Product");
+        tvPrice.setText("$" + product.getPrice());
+        tvDesc.setText(product.getDescription() != null ? product.getDescription() : "No description available");
 
-
-        imgProduct.setImageResource(intent.getIntExtra("image",0));
-        tvName.setText(intent.getStringExtra("name"));
-        tvPrice.setText("$" + intent.getDoubleExtra("price",0));
-        tvDesc.setText(intent.getStringExtra("desc"));
-
-        float rating = intent.getFloatExtra("rating",4.5f);
-        int review = intent.getIntExtra("reviewCount",100);
-
-        tvRating.setText("⭐ " + rating + " (" + review + " reviews)");
+        tvRating.setText("⭐ " + product.getRating() + " (" + product.getReviewCount() + " reviews)");
 
         /* RELATED PRODUCTS */
 
@@ -83,5 +115,20 @@ public class DetailActivity extends AppCompatActivity {
 
         rvRelated.setLayoutManager(new GridLayoutManager(this,2));
         rvRelated.setAdapter(new ProductAdapter(this,list));
+    }
+
+    private void showCustomToast(String message) {
+        Toast toast = new Toast(DetailActivity.this);
+        
+        LayoutInflater inflater = LayoutInflater.from(DetailActivity.this);
+        View layout = inflater.inflate(R.layout.custom_toast_layout, null);
+        
+        TextView tvMessage = layout.findViewById(R.id.tvToastMessage);
+        tvMessage.setText(message);
+        
+        toast.setView(layout);
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setGravity(android.view.Gravity.BOTTOM | android.view.Gravity.CENTER_HORIZONTAL, 0, 100);
+        toast.show();
     }
 }

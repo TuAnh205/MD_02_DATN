@@ -158,4 +158,25 @@ public class CartDAO {
 
         return total;
     }
+
+    /* ================= CLEAR ALL CART ================= */
+
+    public void clearCart(int userId){
+        
+        Cursor cursor = db.rawQuery(
+                "SELECT id FROM carts WHERE userId=?",
+                new String[]{String.valueOf(userId)}
+        );
+
+        if(cursor.moveToFirst()){
+            int cartId = cursor.getInt(0);
+            db.delete(
+                    "cart_items",
+                    "cartId=?",
+                    new String[]{String.valueOf(cartId)}
+            );
+        }
+        
+        cursor.close();
+    }
 }

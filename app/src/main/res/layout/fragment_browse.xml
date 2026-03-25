@@ -1,36 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B1A2B">
+    android:background="#0B1A2B"
+    android:fillViewport="true">
 
     <LinearLayout
         android:orientation="vertical"
-        android:padding="16dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp">
 
-        <!-- SEARCH BAR -->
-
+        <!-- ========== SEARCH BAR ========== -->
         <EditText
             android:id="@+id/edtSearch"
-            android:hint="Search tech, brands..."
+            android:hint="Tìm kiếm công nghệ, thương hiệu..."
             android:textColor="#000000"
+            android:textColorHint="#999999"
             android:padding="12dp"
             android:background="@drawable/bg_search"
             android:imeOptions="actionSearch"
             android:inputType="text"
             android:layout_width="match_parent"
-            android:layout_height="50dp"/>
+            android:layout_height="44dp"
+            android:textSize="14sp"
+            android:layout_marginBottom="16dp"/>
 
-        <!-- Recent -->
-
+        <!-- ========== RECENT SEARCHES SECTION ========== -->
         <TextView
-            android:text="Recent Searches"
-            android:textSize="18sp"
+            android:text="Tìm kiếm gần đây"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#fff"
-            android:layout_marginTop="20dp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -38,71 +45,75 @@
             android:id="@+id/rvSearchHistory"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" />
+            android:layout_marginBottom="24dp"
+            android:nestedScrollingEnabled="false"/>
 
-        <!-- Trending -->
-
+        <!-- ========== TRENDING KEYWORDS SECTION ========== -->
         <TextView
-            android:text="Trending Categories"
-            android:textSize="18sp"
+            android:text="🔥 Xu hướng tìm kiếm"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#fff"
-            android:layout_marginTop="20dp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <GridLayout
-            android:columnCount="2"
+        <LinearLayout
+            android:orientation="vertical"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="12dp"
+            android:id="@+id/trendingKeywordsContainer"/>
 
-            <Button
-                android:text="Gaming"
-                android:layout_margin="6dp"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_height="wrap_content"/>
+        <!-- Expand/Collapse Button -->
+        <LinearLayout
+            android:id="@+id/trendingExpandMore"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:gravity="center"
+            android:layout_marginBottom="24dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:background="?attr/selectableItemBackground">
 
-            <Button
-                android:text="Smart Home"
-                android:layout_margin="6dp"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_height="wrap_content"/>
+            <TextView
+                android:id="@+id/tvExpandText"
+                android:text="Xem thêm"
+                android:textSize="13sp"
+                android:textColor="#2979FF"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="6dp"/>
 
-            <Button
-                android:text="Wearables"
-                android:layout_margin="6dp"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_height="wrap_content"/>
+            <ImageView
+                android:id="@+id/imgExpandArrow"
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@drawable/ic_expand_more"
+                android:tint="#2979FF"/>
 
-            <Button
-                android:text="Audio"
-                android:layout_margin="6dp"
-                android:layout_width="0dp"
-                android:layout_columnWeight="1"
-                android:layout_height="wrap_content"/>
+        </LinearLayout>
 
-        </GridLayout>
-
-        <!-- PRODUCT LIST -->
-
+        <!-- ========== RECOMMENDATIONS SECTION ========== -->
         <TextView
-            android:text="Recommended for you"
-            android:textSize="18sp"
+            android:text="✨ Gợi ý cho bạn"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#fff"
-            android:layout_marginTop="20dp"
+            android:textColor="#FFFFFF"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSearchProducts"
-            android:layout_marginTop="10dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
+            android:nestedScrollingEnabled="false"/>
 
     </LinearLayout>
 
-</ScrollView>
+</androidx.core.widget.NestedScrollView>

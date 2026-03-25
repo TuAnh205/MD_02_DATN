@@ -68,7 +68,7 @@ public class ProfileFragment extends Fragment {
 
         // Menu clicks
         view.findViewById(R.id.rowOrders).setOnClickListener(v ->
-                Toast.makeText(getContext(), "My Orders", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "Đơn hàng của tôi", Toast.LENGTH_SHORT).show());
 
         view.findViewById(R.id.imgEdit).setOnClickListener(v -> {
             Intent intent = new Intent(requireActivity(), com.anhnvt_ph55017.md_02_datn.screens.EditProfileActivity.class);
@@ -81,22 +81,22 @@ public class ProfileFragment extends Fragment {
         });
 
         view.findViewById(R.id.rowPayment).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Payment Methods", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "Phương thức thanh toán", Toast.LENGTH_SHORT).show());
 
         view.findViewById(R.id.rowWishlist).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Wishlist", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "Sản phẩm yêu thích", Toast.LENGTH_SHORT).show());
 
         view.findViewById(R.id.rowNotifications).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Notifications", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "Thông báo", Toast.LENGTH_SHORT).show());
 
         view.findViewById(R.id.rowPrivacy).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Privacy & Security", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "Quyền riêng tư & Bảo mật", Toast.LENGTH_SHORT).show());
 
         view.findViewById(R.id.rowLanguage).setOnClickListener(v ->
-                Toast.makeText(getContext(), "Change language", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), "Đổi ngôn ngữ", Toast.LENGTH_SHORT).show());
 
         switchDark.setOnCheckedChangeListener((buttonView, isChecked) ->
-                Toast.makeText(getContext(), isChecked ? "Dark mode on" : "Dark mode off", Toast.LENGTH_SHORT).show());
+                Toast.makeText(getContext(), isChecked ? "Bật chế độ tối" : "Tắt chế độ tối", Toast.LENGTH_SHORT).show());
 
         // Logout
         btnLogout.setOnClickListener(v -> {

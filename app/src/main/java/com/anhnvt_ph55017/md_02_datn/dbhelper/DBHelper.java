@@ -9,7 +9,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class DBHelper extends SQLiteOpenHelper {
 
     private static final String DB_NAME = "coretech.db";
-    private static final int DB_VERSION = 14; // 🔥 tăng version for imageRes in orders table
+    private static final int DB_VERSION = 19; // 🔥 tăng version cho Browse UI tối ưu
 
     public DBHelper(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -84,24 +84,34 @@ public class DBHelper extends SQLiteOpenHelper {
         // ===== DATA MẪU =====
         db.execSQL("INSERT INTO categories(name,image) VALUES " +
                 "('Laptop'," + R.drawable.ic_laptop + ")," +
-                "('Phone'," + R.drawable.ic_phone + ")," +
-                "('Headphone'," + R.drawable.ic_headphone + ")"
+                "('Điện thoại'," + R.drawable.ic_phone + ")," +
+                "('Tai nghe'," + R.drawable.ic_headphone + ")," +
+                "('Phụ kiện'," + R.drawable.ic_box + ")," +
+                "('Đồng hồ'," + R.drawable.ic_notifications + ")"
         );
 
         db.execSQL(
                 "INSERT INTO products(categoryId,name,price,oldPrice,image,description,stock,rating,reviewCount,isFavorite) VALUES " +
 
-                        "(1,'MacBook Pro M3',2500,3000," + R.drawable.anh1 + ",'Powerful laptop with Apple M3 chip, 16GB RAM and stunning Retina display. Perfect for developers and creators.',10,4.8,120,0)," +
-                        "(1,'Dell XPS 15',2400,2800," + R.drawable.laptop2 + ",'High-end Windows laptop with powerful performance, premium design and stunning display.',10,4.7,110,0)," +
+                        "(1,'MacBook Pro M3',2500,3000," + R.drawable.anh1 + ",'Laptop mạnh mẽ với chip Apple M3, RAM 16GB và màn hình Retina tuyệt đẹp. Hoàn hảo cho lập trình viên và nhà sáng tạo.',10,4.8,120,0)," +
+                        "(1,'Dell XPS 15',2400,2800," + R.drawable.laptop2 + ",'Laptop Windows cao cấp với hiệu suất mạnh mẽ, thiết kế sang trọng và màn hình tuyệt vời.',10,4.7,110,0)," +
 
-                        "(2,'iPhone 15',1200,1400," + R.drawable.anh2 + ",'Latest Apple smartphone with A17 chip, dynamic island, improved cameras and all-day battery life.',20,4.6,95,0)," +
-                        "(2,'Samsung Galaxy S25',1250,1450," + R.drawable.phone2 + ",'Flagship Samsung phone with powerful processor, advanced camera system and beautiful AMOLED display.',20,4.7,100,0)," +
+                        "(2,'iPhone 15',1200,1400," + R.drawable.anh22 + ",'Smartphone Apple mới nhất với chip A17, dynamic island, camera tốt hơn và pin cả ngày.',20,4.6,95,0)," +
+                        "(2,'Samsung Galaxy S25',1250,1450," + R.drawable.anh23 + ",'Điện thoại Samsung flagship với xử lý nhanh, hệ thống camera nâng cao và màn hình AMOLED đẹp.',20,4.7,100,0)," +
 
-                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh3 + ",'Industry leading noise cancelling headphones with crystal clear sound and 30 hours battery life.',15,4.9,210,0)," +
-                        "(3,'AirPods Pro 2',450,550," + R.drawable.anh1 + ",'Premium Apple wireless earbuds with active noise cancellation and spatial audio.',18,4.8,180,0)," +
+                        "(3,'Sony WH-1000XM5',500,650," + R.drawable.anh31 + ",'Tai nghe khử tiếng ồn hàng đầu ngành với âm thanh sống động và pin 30 tiếng.',15,4.9,210,0)," +
+                        "(3,'AirPods Pro 2',450,550," + R.drawable.anh32 + ",'Tai nghe không dây Apple cao cấp với khử tiếng ồn chủ động và âm thanh không gian.',18,4.8,180,0)," +
 
-                        "(2,'Google Pixel 8 Pro',1100,1300," + R.drawable.anh2 + ",'Google flagship phone with AI camera features and pure Android experience.',22,4.6,90,0)," +
-                        "(3,'JBL Tune 760NC',300,400," + R.drawable.anh3 + ",'Wireless headphones with active noise cancelling and deep bass sound.',25,4.5,75,0)"
+                        "(2,'Google Pixel 8 Pro',1100,1300," + R.drawable.anh24 + ",'Điện thoại flagship Google với tính năng camera AI và trải nghiệm Android nguyên bản.',22,4.6,90,0)," +
+                        "(3,'JBL Tune 760NC',300,400," + R.drawable.anh33 + ",'Tai nghe không dây với khử tiếng ồn chủ động và âm bass sâu.',25,4.5,75,0)," +
+
+                        "(4,'Cáp sạc iPhone',25,35," + R.drawable.anh41 + ",'Cáp Lightning chuẩn Apple, bền bỉ và an toàn cho mọi thiết bị.',50,4.7,145,0)," +
+                        "(4,'Ốp lưng Samsung',15,25," + R.drawable.anh42 + ",'Ốp lưng chống sốc cao cấp, bảo vệ điện thoại khỏi va đập.',40,4.6,110,0)," +
+                        "(4,'Pin dự phòng 20000mAh',35,50," + R.drawable.anh43 + ",'Pin dự phòng dung lượng lớn, sạc nhanh và an toàn.',35,4.8,190,0)," +
+
+                        "(5,'Apple Watch Series 9',399,499," + R.drawable.anh51 + ",'Đồng hồ thông minh Apple mới nhất với thiết kế thanh lịch và tính năng sức khỏe toàn diện.',12,4.9,230,0)," +
+                        "(5,'Samsung Galaxy Watch 6',299,399," + R.drawable.anh52 + ",'Đồng hồ thông minh Samsung với màn hình AMOLED sắc nét và pin lâu dài.',15,4.7,165,0)," +
+                        "(5,'Fitbit Charge 6',199,279," + R.drawable.anh53 + ",'Vòng theo dõi sức khỏe Fitbit với cảm biến hiện đại và ứng dụng thông minh.',20,4.6,125,0)"
         );
 
         /* ================= CARTS ================= */

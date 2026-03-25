@@ -32,23 +32,24 @@ public class ProductDAO {
                     null
             );
 
-            if(c.moveToFirst()){
-                do{
+            try {
+                if(c.moveToFirst()){
+                    do{
 
-                    list.add(new Product(
-                            c.getInt(0),
-                            c.getString(1),
-                            c.getDouble(2),
-                            c.getInt(3),
-                            c.getString(4),
-                            c.getInt(5)
-                    ));
+                        list.add(new Product(
+                                c.getInt(0),
+                                c.getString(1),
+                                c.getDouble(2),
+                                c.getInt(3),
+                                c.getString(4),
+                                c.getInt(5)
+                        ));
 
-                }while(c.moveToNext());
+                    }while(c.moveToNext());
+                }
+            } finally {
+                c.close();
             }
-
-            c.close();
-            db.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -91,23 +92,24 @@ public class ProductDAO {
 
             Cursor c = db.rawQuery(query.toString(), args);
 
-            if(c.moveToFirst()){
-                do{
+            try {
+                if(c.moveToFirst()){
+                    do{
 
-                    list.add(new Product(
-                            c.getInt(0),
-                            c.getString(1),
-                            c.getDouble(2),
-                            c.getInt(3),
-                            c.getString(4),
-                            c.getInt(5)
-                    ));
+                        list.add(new Product(
+                                c.getInt(0),
+                                c.getString(1),
+                                c.getDouble(2),
+                                c.getInt(3),
+                                c.getString(4),
+                                c.getInt(5)
+                        ));
 
-                }while(c.moveToNext());
+                    }while(c.moveToNext());
+                }
+            } finally {
+                c.close();
             }
-
-            c.close();
-            db.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

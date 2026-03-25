@@ -24,6 +24,8 @@ import com.anhnvt_ph55017.md_02_datn.HomeActivity;
 import com.anhnvt_ph55017.md_02_datn.fragments.HomeFragment;
 import com.anhnvt_ph55017.md_02_datn.models.Address;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
+import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
 
 public class CheckOutActivity extends AppCompatActivity {
 
@@ -48,6 +50,16 @@ public class CheckOutActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_check_out);
+
+        // Check if user is logged in
+        int userId = SessionManager.getUserId(this);
+        if (userId <= 0) {
+            Toast.makeText(this, "Please login to checkout", Toast.LENGTH_SHORT).show();
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish();
+            return;
+        }
 
         paymentGroup = findViewById(R.id.paymentGroup);
         edVoucher = findViewById(R.id.edVoucher);
@@ -137,6 +149,9 @@ public class CheckOutActivity extends AppCompatActivity {
                 // ===== ADD TO MEMORY =====
 
             }
+
+            // Increment notification count for successful order
+            NotificationManager.incrementNotification(this);
 
             Toast.makeText(this, "Thanh toán thành công!", Toast.LENGTH_LONG).show();
 

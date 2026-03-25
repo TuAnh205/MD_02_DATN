@@ -69,7 +69,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:text="ORDERS"
+                    android:text="Đơn HÀNG"
                     android:textColor="#AAAAAA"
                     android:textSize="12sp"
                     android:layout_width="wrap_content"
@@ -93,7 +93,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content">
                 <TextView
-                    android:text="WISHLIST"
+                    android:text="YÊ THÍCH"
                     android:textColor="#AAAAAA"
                     android:textSize="12sp"
                     android:layout_width="wrap_content"
@@ -111,7 +111,7 @@
 
         <!-- menu items -->
         <TextView
-            android:text="ACCOUNT"
+            android:text="TÀI KHOẢN"
             android:textColor="#AAAAAA"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
@@ -139,7 +139,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="My Orders"
+                    android:text="Đơn hàng của tôi"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -166,7 +166,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Shipping Address"
+                    android:text="Địa chỉ giao hàng"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -192,7 +192,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Payment Methods"
+                    android:text="Phương thức thanh toán"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -217,7 +217,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Wishlist"
+                    android:text="Sản phẩm yêu thích"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -232,7 +232,7 @@
 
         <!-- settings section -->
         <TextView
-            android:text="SETTINGS"
+            android:text="CÀI ĐẶT"
             android:textColor="#AAAAAA"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
@@ -259,7 +259,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Notifications"
+                    android:text="Thông báo"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -285,7 +285,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Privacy &amp; Security"
+                    android:text="Quyền riêng tư &amp; Bảo mật"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -311,7 +311,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Language"
+                    android:text="Ngôn ngữ"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -319,7 +319,7 @@
                     android:layout_height="wrap_content"/>
                 <TextView
                     android:id="@+id/tvLanguage"
-                    android:text="English"
+                    android:text="Tiếng Việt"
                     android:textColor="#2F80FF"
                     android:layout_marginEnd="8dp"
                     android:layout_width="wrap_content"
@@ -343,7 +343,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
-                    android:text="Dark Mode"
+                    android:text="Chế độ tối"
                     android:textColor="#FFFFFF"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
@@ -359,7 +359,7 @@
 
         <Button
             android:id="@+id/btnLogout"
-            android:text="Logout"
+            android:text="Đăng xuất"
             android:textColor="#FF4444"
             android:layout_marginTop="24dp"
             android:layout_width="match_parent"

@@ -12,6 +12,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.models.User;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -141,6 +143,12 @@ public class LoginActivity extends AppCompatActivity {
                         // Save to local DB
                         UserDAO userDAO = new UserDAO(this);
                         userDAO.insertOrUpdateUser(name, email, phone);
+                        
+                        // Get user ID and save to session
+                        User user = userDAO.getUserByEmail(email);
+                        if (user != null) {
+                            SessionManager.saveUserSession(this, user.getId(), user.getEmail(), user.getFullname());
+                        }
                     },
                     error -> {
                         // Silent fail, maybe user not in DB yet

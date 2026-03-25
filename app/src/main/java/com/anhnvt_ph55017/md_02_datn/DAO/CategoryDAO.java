@@ -27,18 +27,19 @@ public class CategoryDAO {
 
             Cursor c = db.rawQuery("SELECT id,name,image FROM categories", null);
 
-            if (c.moveToFirst()) {
-                do {
-                    list.add(new Category(
-                            c.getInt(0),
-                            c.getString(1),
-                            c.getInt(2)
-                    ));
-                } while (c.moveToNext());
+            try {
+                if (c.moveToFirst()) {
+                    do {
+                        list.add(new Category(
+                                c.getInt(0),
+                                c.getString(1),
+                                c.getInt(2)
+                        ));
+                    } while (c.moveToNext());
+                }
+            } finally {
+                c.close();
             }
-
-            c.close();
-            db.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

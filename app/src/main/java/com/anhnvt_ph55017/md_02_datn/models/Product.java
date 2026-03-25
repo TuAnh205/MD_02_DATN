@@ -16,6 +16,9 @@ public class Product implements Serializable {
 
     int qty = 1;
     boolean selected = true;
+    
+    String color = "Black";  // Default color
+    int storage = 64;        // Default storage in GB
 
     public Product(int id, String name, double price, int image,
                    String description, int stock) {
@@ -31,8 +34,16 @@ public class Product implements Serializable {
         return rating;
     }
 
+    public void setRating(float rating) {
+        this.rating = rating;
+    }
+
     public int getReviewCount() {
         return reviewCount;
+    }
+
+    public void setReviewCount(int reviewCount) {
+        this.reviewCount = reviewCount;
     }
 
     public int getStock() {
@@ -83,5 +94,21 @@ public class Product implements Serializable {
 
     public void setSelected(boolean selected) {
         this.selected = selected;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
+    public int getStorage() {
+        return storage;
+    }
+
+    public void setStorage(int storage) {
+        this.storage = storage;
     }
 }

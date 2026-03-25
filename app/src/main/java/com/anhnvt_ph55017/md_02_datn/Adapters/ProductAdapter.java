@@ -1,5 +1,6 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -11,12 +12,15 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.DetailActivity;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 import java.util.List;
 
@@ -84,20 +88,27 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         });
 
-        // ADD TO CART
+        // ADD TO CART - Show Bottom Sheet
         holder.btnAdd.setOnClickListener(v -> {
+            // Show bottom sheet to select color, storage, and quantity
+            if (context instanceof AppCompatActivity) {
+                BottomSheetProductOptions bottomSheet = 
+                    BottomSheetProductOptions.newInstance(product, selectedProduct -> {
+                        // Callback: Add to cart with selected options
+                        int userId = SessionManager.getUserId(context);
+                        if (userId <= 0) {
+                            userId = 1;  // Guest cart
+                        }
 
-            CartDAO cartDAO = new CartDAO(context);
-
-            cartDAO.addToCart(1, product.getId()); // userId tạm = 1
-
-            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show();
-
-
-//            Intent intent = new Intent(context, com.anhnvt_ph55017.md_02_datn.screens.CartActivity.class);
-//            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-//            context.startActivity(intent);
-
+                        CartDAO cartDAO = new CartDAO(context);
+                        cartDAO.addToCart(userId, selectedProduct.getId());
+                        
+                        // Show custom toast
+                        showCustomToast(context, "Added to cart");
+                    });
+                
+                bottomSheet.show(((AppCompatActivity) context).getSupportFragmentManager(), "product_options");
+            }
         });
 
     }
@@ -111,6 +122,22 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public void setData(List<Product> list){
         this.list = list;
         notifyDataSetChanged();
+    }
+
+    // Custom Toast helper
+    private void showCustomToast(Context context, String message) {
+        Toast toast = new Toast(context);
+        
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View layout = inflater.inflate(R.layout.custom_toast_layout, null);
+        
+        TextView tvMessage = layout.findViewById(R.id.tvToastMessage);
+        tvMessage.setText(message);
+        
+        toast.setView(layout);
+        toast.setDuration(Toast.LENGTH_SHORT);
+        toast.setGravity(android.view.Gravity.BOTTOM | android.view.Gravity.CENTER_HORIZONTAL, 0, 100);
+        toast.show();
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
