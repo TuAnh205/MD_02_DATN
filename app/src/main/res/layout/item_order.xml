@@ -85,6 +85,18 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"/>
 
+    <!-- RATING BADGE (shown when order is reviewed) -->
+    <TextView
+        android:id="@+id/tvRatingBadge"
+        android:text="⭐ 4.5 | ✅ Đã đánh giá"
+        android:textColor="#FF8C00"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:layout_marginTop="4dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone" />
+
     </LinearLayout>
 
     <!-- DETAIL BUTTON -->

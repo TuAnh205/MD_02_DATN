@@ -59,6 +59,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
         holder.tvArrivalDate.setText("Dự kiến giao: " + o.getArrivalDate());
         holder.tvItemCount.setText(o.getItemCount() + " sản phẩm");
 
+        // Show rating badge if order is reviewed
+        if (o.getRating() > 0) {
+            holder.tvRatingBadge.setText(String.format("⭐ %.1f | ✅ Đã đánh giá", o.getRating()));
+            holder.tvRatingBadge.setVisibility(View.VISIBLE);
+        } else {
+            holder.tvRatingBadge.setVisibility(View.GONE);
+        }
+
         // Đặt màu cho trạng thái đơn hàng
         setStatusColor(holder.tvStatus, o.getStatus());
 
@@ -117,7 +125,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
 
     class ViewHolder extends RecyclerView.ViewHolder{
 
-        TextView tvOrderId, tvDate, tvPrice, tvStatus, tvArrivalDate, tvItemCount;
+        TextView tvOrderId, tvDate, tvPrice, tvStatus, tvArrivalDate, tvItemCount, tvRatingBadge;
         Button btnDetail;
         android.widget.ImageView imgProduct;
 
@@ -130,6 +138,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
             tvStatus = itemView.findViewById(R.id.tvStatus);
             tvArrivalDate = itemView.findViewById(R.id.tvArrivalDate);
             tvItemCount = itemView.findViewById(R.id.tvItemCount);
+            tvRatingBadge = itemView.findViewById(R.id.tvRatingBadge);
             btnDetail = itemView.findViewById(R.id.btnDetail);
             imgProduct = itemView.findViewById(R.id.imgProduct);
         }

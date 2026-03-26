@@ -21,6 +21,11 @@ public class Order {
     String shippingAddress;
     List<OrderItem> items;
     String paymentMethod;
+    String createdAt;  // Để tính ngày dự kiến nhận
+    String cancellationReason;  // Lý do hủy đơn
+    double rating;  // Đánh giá sao (0-5)
+    String reviewComment;  // Review comment từ khách
+    String reviewedAt;  // Ngày đánh giá
 
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount, int imageRes) {
         this(id, date, total, status, arrivalDate, itemCount, imageRes, "", 0, "");
@@ -180,5 +185,45 @@ public class Order {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(String createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public String getCancellationReason() {
+        return cancellationReason;
+    }
+
+    public void setCancellationReason(String cancellationReason) {
+        this.cancellationReason = cancellationReason;
+    }
+
+    public double getRating() {
+        return rating;
+    }
+
+    public void setRating(double rating) {
+        this.rating = rating;
+    }
+
+    public String getReviewComment() {
+        return reviewComment;
+    }
+
+    public void setReviewComment(String reviewComment) {
+        this.reviewComment = reviewComment;
+    }
+
+    public String getReviewedAt() {
+        return reviewedAt;
+    }
+
+    public void setReviewedAt(String reviewedAt) {
+        this.reviewedAt = reviewedAt;
     }
 }

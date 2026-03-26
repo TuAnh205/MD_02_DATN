@@ -183,6 +183,82 @@
 
             </LinearLayout>
 
+            <!-- RATING CARD -->
+            <LinearLayout
+                android:id="@+id/ratingCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:text="Đánh giá sản phẩm"
+                    android:textSize="16sp"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:rating="0"
+                    android:stepSize="1"
+                    android:layout_marginBottom="12dp" />
+
+                <EditText
+                    android:id="@+id/edtRatingComment"
+                    android:hint="Nhập nhận xét của bạn..."
+                    android:textColor="#FFFFFF"
+                    android:textColorHint="#666666"
+                    android:background="#1a2a3a"
+                    android:padding="12dp"
+                    android:minLines="3"
+                    android:inputType="text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/btnSubmitRating"
+                    android:text="Gửi đánh giá"
+                    android:textColor="#FFFFFF"
+                    android:background="#2F80FF"
+                    android:layout_marginTop="12dp"
+                    android:padding="10dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <!-- Review Display Section (shown when rating exists) -->
+                <TextView
+                    android:id="@+id/tvReviewedStars"
+                    android:text="⭐ 5.0 sao - Đã đánh giá"
+                    android:textSize="14sp"
+                    android:textColor="#FF8C00"
+                    android:textStyle="bold"
+                    android:layout_marginTop="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tvReviewedComment"
+                    android:text="Nhận xét của bạn"
+                    android:textSize="13sp"
+                    android:textColor="#DDDDDD"
+                    android:background="#1a2a3a"
+                    android:padding="12dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
             <!-- SHIPPING ADDRESS CARD -->
             <LinearLayout
                 android:layout_width="match_parent"
@@ -296,58 +372,6 @@
                         android:layout_height="wrap_content" />
 
                 </LinearLayout>
-
-            </LinearLayout>
-
-            <!-- RATING CARD -->
-            <LinearLayout
-                android:id="@+id/ratingCard"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:layout_marginBottom="12dp">
-
-                <TextView
-                    android:text="Đánh giá sản phẩm"
-                    android:textSize="16sp"
-                    android:textColor="#FFFFFF"
-                    android:textStyle="bold"
-                    android:layout_marginBottom="12dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <RatingBar
-                    android:id="@+id/ratingBar"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:numStars="5"
-                    android:rating="0"
-                    android:stepSize="1"
-                    android:layout_marginBottom="12dp" />
-
-                <EditText
-                    android:id="@+id/edtRatingComment"
-                    android:hint="Nhập nhận xét của bạn..."
-                    android:textColor="#FFFFFF"
-                    android:textColorHint="#666666"
-                    android:background="#1a2a3a"
-                    android:padding="12dp"
-                    android:minLines="3"
-                    android:inputType="text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <Button
-                    android:id="@+id/btnSubmitRating"
-                    android:text="Gửi đánh giá"
-                    android:textColor="#FFFFFF"
-                    android:background="#2F80FF"
-                    android:layout_marginTop="12dp"
-                    android:padding="10dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
