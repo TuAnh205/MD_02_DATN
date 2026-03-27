@@ -2,6 +2,7 @@ const Product = require('../models/Product');
 const User = require('../models/User');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
+const Notification = require('../models/Notification');
 
 // ================= GET SHOP PRODUCTS =================
 exports.getShopProducts = async (req, res) => {
@@ -85,6 +86,46 @@ exports.getShopOrders = async (req, res) => {
       .sort({ createdAt: -1 });
 
     res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ================= SHOP NOTIFICATIONS =================
+exports.getShopNotifications = async (req, res) => {
+  try {
+    const shopId = req.user.id;
+    const notifications = await Notification.find({ user: shopId })
+      .sort({ createdAt: -1 })
+      .limit(50);
+    res.json(notifications);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.markNotificationRead = async (req, res) => {
+  try {
+    const shopId = req.user.id;
+    const { id } = req.params;
+
+    const notification = await Notification.findOneAndUpdate(
+      { _id: id, user: shopId },
+      { isRead: true, readAt: new Date() },
+      { new: true }
+    );
+    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    res.json(notification);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+exports.markAllNotificationsRead = async (req, res) => {
+  try {
+    const shopId = req.user.id;
+    await Notification.updateMany({ user: shopId, isRead: false }, { isRead: true, readAt: new Date() });
+    res.json({ message: 'All notifications marked read' });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

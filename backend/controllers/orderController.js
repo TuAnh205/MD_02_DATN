@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const Notification = require('../models/Notification');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -77,6 +78,22 @@ exports.createOrder = async (req, res) => {
 
         const order = new Order(orderData);
         await order.save();
+
+        // Tạo thông báo cho shop (mỗi shop một thông báo)
+        const shopIds = [...new Set(order.items.map((item) => item.shopId.toString()))];
+        for (const shopId of shopIds) {
+            const relatedCount = order.items.filter((item) => item.shopId.toString() === shopId)
+                .reduce((sum, i) => sum + i.qty, 0);
+
+            await Notification.create({
+                user: shopId,
+                type: 'shop_order',
+                title: 'Đơn hàng mới',
+                message: `Bạn có ${relatedCount} sản phẩm trong đơn #${order.orderNumber}`,
+                data: { orderId: order._id, orderNumber: order.orderNumber },
+                isRead: false
+            });
+        }
         
         console.log('Order created successfully:', order._id);
         

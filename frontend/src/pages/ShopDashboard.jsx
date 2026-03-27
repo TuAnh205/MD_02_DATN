@@ -1,12 +1,29 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import notificationService from '../services/notificationService';
 
 export default function ShopDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [showNotifications, setShowNotifications] = useState(false);
+
+  useEffect(() => {
+    const loadNotifications = async () => {
+      try {
+        const items = await notificationService.getNotifications();
+        setNotifications(items);
+        setUnreadCount(items.filter((n) => !n.isRead).length);
+      } catch (err) {
+        console.error('Không thể tải thông báo:', err);
+      }
+    };
+    loadNotifications();
+  }, []);
 
   const menuItems = [
     {
@@ -71,7 +88,66 @@ export default function ShopDashboard() {
                 Shop Dashboard - {user?.name}
               </h1>
             </div>
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-4 relative">
+              <button
+                onClick={() => {
+                  setShowNotifications(!showNotifications);
+                }}
+                className="relative text-gray-600 hover:text-gray-900"
+              >
+                <span role="img" aria-label="notification" className="text-2xl">🔔</span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-4 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">{unreadCount}</span>
+                )}
+              </button>
+
+              {showNotifications && (
+                <div className="absolute right-0 top-12 z-50 w-80 bg-white border border-gray-200 rounded shadow-lg p-2">
+                  <div className="flex justify-between items-center mb-2">
+                    <strong>Thông báo</strong>
+                    {unreadCount > 0 && (
+                      <button
+                        className="text-xs text-blue-600"
+                        onClick={async () => {
+                          await notificationService.markAllRead();
+                          setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+                          setUnreadCount(0);
+                        }}
+                      >
+                        Đánh dấu đã đọc
+                      </button>
+                    )}
+                  </div>
+                  <div className="max-h-72 overflow-y-auto">
+                    {notifications.length === 0 ? (
+                      <p className="text-sm text-gray-500">Không có thông báo</p>
+                    ) : (
+                      notifications.map((item) => (
+                        <div key={item._id} className={`p-2 rounded mb-1 ${item.isRead ? 'bg-gray-50' : 'bg-blue-50'} border ${item.isRead ? 'border-gray-200' : 'border-blue-200'}`}>
+                          <div className="flex justify-between items-start">
+                            <p className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleString('vi-VN')}</p>
+                            {!item.isRead && (
+                              <button
+                                className="text-xs text-blue-600"
+                                onClick={async () => {
+                                  await notificationService.markRead(item._id);
+                                  setNotifications((prev) => prev.map((n) => n._id === item._id ? { ...n, isRead: true } : n));
+                                  setUnreadCount((c) => Math.max(0, c - 1));
+                                }}
+                              >
+                                Đã đọc
+                              </button>
+                            )}
+                          </div>
+                          <p className="font-medium text-sm">{item.title}</p>
+                          <p className="text-sm text-gray-700">{item.message}</p>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+
               <Link
                 to="/"
                 className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"

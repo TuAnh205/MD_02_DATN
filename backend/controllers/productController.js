@@ -15,7 +15,7 @@ exports.getProducts = async (req, res) => {
             hot,
             sort = '-createdAt',
             page = 1,
-            limit = 20,
+            limit = 10000, // Show all products by default
         } = req.query;
 
         const filter = {};
@@ -33,7 +33,12 @@ exports.getProducts = async (req, res) => {
 
         const skip = (Math.max(1, Number(page)) - 1) * Number(limit);
         const [items, total] = await Promise.all([
-            Product.find(filter).populate('createdBy', 'name email').sort(sort).skip(skip).limit(Number(limit)),
+            Product.find(filter)
+                .populate('createdBy', 'name email')
+                .populate('shopId', 'name email')
+                .sort(sort)
+                .skip(skip)
+                .limit(Number(limit)),
             Product.countDocuments(filter),
         ]);
 

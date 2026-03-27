@@ -20,6 +20,11 @@ router.get('/orders', shopController.getShopOrders);
 router.get('/reviews', shopController.getShopReviews);
 router.put('/reviews/:id/reply', shopController.replyShopReview);
 
+// Notification routes
+router.get('/notifications', shopController.getShopNotifications);
+router.put('/notifications/:id/read', shopController.markNotificationRead);
+router.put('/notifications/read-all', shopController.markAllNotificationsRead);
+
 // Revenue analytics routes
 router.get('/revenue', shopController.getShopRevenue);
 

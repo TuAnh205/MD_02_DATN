@@ -12,8 +12,10 @@ export default function ShopProducts() {
     price: '',
     category: '',
     stock: '',
+    image: '',
     images: [],
   });
+  const [imagePreview, setImagePreview] = useState(null);
 
   useEffect(() => {
     fetchProducts();
@@ -54,10 +56,31 @@ export default function ShopProducts() {
       price: '',
       category: '',
       stock: '',
+      image: '',
       images: [],
     });
+    setImagePreview(null);
     setEditingProduct(null);
     setShowCreateForm(false);
+  };
+
+  const handleImageUrlChange = (e) => {
+    const url = e.target.value;
+    setFormData({ ...formData, image: url });
+    setImagePreview(url);
+  };
+
+  const handleImageFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result;
+        setFormData({ ...formData, image: base64 });
+        setImagePreview(base64);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const editProduct = (product) => {
@@ -68,8 +91,10 @@ export default function ShopProducts() {
       price: product.price,
       category: product.category,
       stock: product.stock,
+      image: product.image || '',
       images: product.images || [],
     });
+    setImagePreview(product.image || null);
     setShowCreateForm(true);
   };
 
@@ -162,6 +187,53 @@ export default function ShopProducts() {
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
               />
             </div>
+
+            {/* Image Section */}
+            <div className="border-t pt-4">
+              <label className="block text-sm font-medium text-gray-700 mb-3">Hình ảnh sản phẩm</label>
+              <div className="space-y-3">
+                {/* Image URL Input */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Từ đường dẫn URL</label>
+                  <input
+                    type="text"
+                    placeholder="Nhập đường dẫn ảnh..."
+                    value={formData.image}
+                    onChange={handleImageUrlChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                  />
+                </div>
+
+                {/* File Upload Input */}
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">Hoặc tải ảnh từ thiết bị</label>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageFileChange}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 text-sm"
+                  />
+                </div>
+
+                {/* Image Preview */}
+                {imagePreview && (
+                  <div className="mt-4 border rounded-md p-4 bg-gray-50">
+                    <p className="text-xs font-medium text-gray-600 mb-2">Xem trước ảnh:</p>
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="max-h-48 max-w-full rounded-md object-cover"
+                      onError={() => {
+                        setImagePreview(null);
+                        setFormData({ ...formData, image: '' });
+                        alert('Lỗi tải ảnh. Vui lòng kiểm tra đường dẫn hoặc thử file khác.');
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
             <div className="flex space-x-4">
               <button
                 type="submit"

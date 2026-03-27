@@ -22,6 +22,7 @@ export default function ProductDetail() {
   const [reviewMessage, setReviewMessage] = useState(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
     fetchProductDetail();
     fetchReviews();
   }, [id]);

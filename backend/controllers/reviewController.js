@@ -1,5 +1,6 @@
 const Review = require('../models/Review');
 const Product = require('../models/Product');
+const Notification = require('../models/Notification');
 
 // Helper function to update product ratings
 const updateProductRatings = async (productId) => {
@@ -25,6 +26,19 @@ exports.createReview = async (req, res) => {
         const review = new Review({ user: userId, product: productId, rating, comment });
         await review.save();
         await updateProductRatings(productId);
+
+        const product = await Product.findById(productId).select('name shopId');
+        if (product && product.shopId) {
+            await Notification.create({
+                user: product.shopId,
+                type: 'review',
+                title: 'Có đánh giá mới',
+                message: `Sản phẩm "${product.name}" vừa có đánh giá ${rating} sao`,
+                data: { productId, reviewId: review._id },
+                isRead: false
+            });
+        }
+
         res.status(201).json(review);
     } catch (err) {
         if (err.code === 11000) return res.status(400).json({ message: 'You have already reviewed this product' });
