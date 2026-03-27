@@ -19,17 +19,33 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'shipping address is required' });
         }
 
+        const productIds = items.map(item => item.product);
+        const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId');
+
+        if (productsInDb.length !== productIds.length) {
+            return res.status(400).json({ message: 'Một hoặc nhiều sản phẩm không hợp lệ' });
+        }
+
+        const productMap = productsInDb.reduce((acc, p) => {
+            acc[p._id.toString()] = p;
+            return acc;
+        }, {});
+
         const orderData = {
             orderNumber: 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
             user: userId,
-            items: items.map(item => ({
-                product: item.product,
-                name: item.name || 'Unknown Product',
-                price: item.price || 0,
-                qty: item.qty || 1,
-                image: item.image || '',
-                sku: item.sku || ''
-            })),
+            items: items.map(item => {
+                const p = productMap[item.product];
+                return {
+                    product: item.product,
+                    shopId: p.shopId,
+                    name: item.name || 'Unknown Product',
+                    price: item.price || 0,
+                    qty: item.qty || 1,
+                    image: item.image || '',
+                    sku: item.sku || ''
+                };
+            }),
             subtotal: subtotal || total || 0,
             total: total || 0,
             shipping: {

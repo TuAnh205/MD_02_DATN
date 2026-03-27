@@ -22,6 +22,11 @@ import AdminReviews from './pages/AdminReviews';
 import AdminFeedbacks from './pages/AdminFeedbacks';
 import AdminPosts from './pages/AdminPosts';
 import AdminVouchers from './pages/AdminVouchers';
+import ShopDashboard from './pages/ShopDashboard';
+import ShopProducts from './pages/ShopProducts';
+import ShopRevenue from './pages/ShopRevenue';
+import ShopOrders from './pages/ShopOrders';
+import ShopReviews from './pages/ShopReviews';
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -41,6 +46,16 @@ function AdminProtectedRoute({ children }) {
   }
 
   return user && user.role === 'admin' ? children : <Navigate to="/login" />;
+}
+
+function ShopProtectedRoute({ children }) {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
+  }
+
+  return user && user.role === 'shop' ? children : <Navigate to="/login" />;
 }
 
 function AppContent() {
@@ -93,6 +108,20 @@ function AppContent() {
             </ProtectedRoute>
           }
         />
+        <Route
+          path="/shop"
+          element={
+            <ShopProtectedRoute>
+              <ShopDashboard />
+            </ShopProtectedRoute>
+          }
+        >
+          <Route index element={<ShopProducts />} />
+          <Route path="products" element={<ShopProducts />} />
+          <Route path="reviews" element={<ShopReviews />} />
+          <Route path="revenue" element={<ShopRevenue />} />
+          <Route path="orders" element={<ShopOrders />} />
+        </Route>
         <Route
           path="/admin"
           element={

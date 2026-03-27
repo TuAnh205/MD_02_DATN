@@ -49,7 +49,7 @@ exports.updateUserRole = async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    if (!['user', 'admin'].includes(role)) {
+    if (!['user', 'shop', 'admin'].includes(role)) {
       return res.status(400).json({ message: 'Invalid role' });
     }
 
@@ -79,6 +79,65 @@ exports.deleteUser = async (req, res) => {
     }
 
     res.json({ message: 'User deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Shop management
+exports.getShops = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const shops = await User.find({ role: 'shop' })
+      .select('-password')
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 });
+
+    const total = await User.countDocuments({ role: 'shop' });
+
+    res.json({
+      shops,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit),
+      },
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.getShopCount = async (req, res) => {
+  try {
+    const count = await User.countDocuments({ role: 'shop' });
+    res.json({ count });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.updateShopStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { isActive } = req.body;
+
+    const shop = await User.findByIdAndUpdate(
+      id,
+      { isActive },
+      { new: true }
+    ).select('-password');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json({ shop });
   } catch (error) {
     res.status(500).json({ message: 'Server error', error: error.message });
   }

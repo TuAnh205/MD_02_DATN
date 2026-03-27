@@ -13,6 +13,11 @@ router.get('/users/count', adminController.getUserCount);
 router.put('/users/:id/role', adminController.updateUserRole);
 router.delete('/users/:id', adminController.deleteUser);
 
+// Shop management routes
+router.get('/shops', adminController.getShops);
+router.get('/shops/count', adminController.getShopCount);
+router.put('/shops/:id/status', adminController.updateShopStatus);
+
 // Product management routes
 router.get('/products', adminController.getProducts);
 router.get('/products/count', adminController.getProductCount);

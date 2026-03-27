@@ -49,6 +49,7 @@ const productSchema = new mongoose.Schema({
         isActive: { type: Boolean, default: false }
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     promotions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Promotion' }],
 }, { timestamps: true });
 

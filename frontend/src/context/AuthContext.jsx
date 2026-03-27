@@ -33,6 +33,13 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  const registerShop = async (name, email, password) => {
+    const response = await authService.registerShop(name, email, password);
+    setUser(response.user);
+    setToken(response.token);
+    return response;
+  };
+
   const logout = () => {
     authService.logout();
     setUser(null);
@@ -46,7 +53,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, token, loading, login, register, registerShop, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

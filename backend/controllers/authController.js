@@ -105,6 +105,47 @@ exports.login = async (req, res) => {
   }
 };
 
+// ================= REGISTER SHOP =================
+exports.registerShop = async (req, res) => {
+  try {
+    const { name, email, password, phone } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Missing data" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    const exist = await User.findOne({ email: normalizedEmail });
+    if (exist) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+
+    const shop = new User({
+      name,
+      email: normalizedEmail,
+      password: hashed,
+      phone,
+      role: "shop",
+    });
+
+    await shop.save();
+
+    const token = generateToken(shop);
+
+    res.status(201).json({
+      message: "Shop register success",
+      token,
+      user: shop,
+    });
+  } catch (err) {
+    console.error("REGISTER SHOP ERROR:", err);
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // ================= FIREBASE SYNC =================
 exports.firebaseSync = async (req, res) => {
   try {
