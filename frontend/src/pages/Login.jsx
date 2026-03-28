@@ -24,8 +24,11 @@ export default function Login() {
 
       await login(email, password);
       const user = JSON.parse(localStorage.getItem('user'));
+      console.log('User role:', user.role); // Debug log
       if (user.role === 'admin') {
         navigate('/admin');
+      } else if (user.role === 'shop') {
+        navigate('/shop');
       } else {
         navigate('/');
       }
@@ -85,7 +88,13 @@ export default function Login() {
           <p className="text-sm text-gray-600">
             Chưa có tài khoản?{' '}
             <Link to="/register" className="text-primary font-semibold hover:underline">
-              Đăng Ký
+              Đăng Ký Người Mua
+            </Link>
+          </p>
+          <p className="text-sm text-gray-600">
+            Bạn là chủ shop?{' '}
+            <Link to="/register?role=shop" className="text-secondary font-semibold hover:underline">
+              Đăng Ký Tài Khoản Shop
             </Link>
           </p>
           <p>

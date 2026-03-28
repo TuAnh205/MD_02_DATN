@@ -10,34 +10,30 @@ exports.getHomeData = async (req, res) => {
 
         // Get featured products
         const featuredProducts = await Product.find({
-            isActive: true,
             isFeatured: true
         })
         .select('name price originalPrice images ratings category')
         .sort({ createdAt: -1 })
-        .limit(12);
+        .limit(100);
 
         // Get best-selling products
         const bestSellingProducts = await Product.find({
-            isActive: true,
             salesCount: { $gt: 0 }
         })
         .select('name price originalPrice images ratings category salesCount')
         .sort({ salesCount: -1 })
-        .limit(12);
+        .limit(100);
 
         // Get new products
         const newProducts = await Product.find({
-            isActive: true,
             createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Last 30 days
         })
         .select('name price originalPrice images ratings category')
         .sort({ createdAt: -1 })
-        .limit(12);
+        .limit(100);
 
         // Get categories with product counts
         const categories = await Product.aggregate([
-            { $match: { isActive: true } },
             { $group: { _id: '$category', count: { $sum: 1 } } },
             { $sort: { count: -1 } },
             { $limit: 10 }
@@ -67,11 +63,10 @@ exports.getBanners = async (req, res) => {
 
 exports.getFeaturedProducts = async (req, res) => {
     try {
-        const { limit = 12, page = 1 } = req.query;
+        const { limit = 10000, page = 1 } = req.query;
         const skip = (page - 1) * limit;
 
         const products = await Product.find({
-            isActive: true,
             isFeatured: true
         })
         .select('name price originalPrice images ratings category brand')
@@ -80,7 +75,6 @@ exports.getFeaturedProducts = async (req, res) => {
         .limit(parseInt(limit));
 
         const total = await Product.countDocuments({
-            isActive: true,
             isFeatured: true
         });
 
@@ -100,11 +94,10 @@ exports.getFeaturedProducts = async (req, res) => {
 
 exports.getBestSellingProducts = async (req, res) => {
     try {
-        const { limit = 12, page = 1 } = req.query;
+        const { limit = 10000, page = 1 } = req.query;
         const skip = (page - 1) * limit;
 
         const products = await Product.find({
-            isActive: true,
             salesCount: { $gt: 0 }
         })
         .select('name price originalPrice images ratings category brand salesCount')
@@ -113,7 +106,6 @@ exports.getBestSellingProducts = async (req, res) => {
         .limit(parseInt(limit));
 
         const total = await Product.countDocuments({
-            isActive: true,
             salesCount: { $gt: 0 }
         });
 
@@ -133,11 +125,10 @@ exports.getBestSellingProducts = async (req, res) => {
 
 exports.getNewProducts = async (req, res) => {
     try {
-        const { limit = 12, page = 1 } = req.query;
+        const { limit = 10000, page = 1 } = req.query;
         const skip = (page - 1) * limit;
 
         const products = await Product.find({
-            isActive: true,
             createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
         })
         .select('name price originalPrice images ratings category brand')
@@ -146,7 +137,6 @@ exports.getNewProducts = async (req, res) => {
         .limit(parseInt(limit));
 
         const total = await Product.countDocuments({
-            isActive: true,
             createdAt: { $gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) }
         });
 
@@ -167,7 +157,6 @@ exports.getNewProducts = async (req, res) => {
 exports.getCategories = async (req, res) => {
     try {
         const categories = await Product.aggregate([
-            { $match: { isActive: true } },
             {
                 $group: {
                     _id: '$category',

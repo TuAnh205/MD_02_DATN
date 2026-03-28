@@ -29,6 +29,15 @@ const adminAuth = (req, res, next) => {
     }
 };
 
+const shopAuth = (req, res, next) => {
+    if (req.user && req.user.role === 'shop') {
+        next();
+    } else {
+        res.status(403).json({ message: 'Shop access required' });
+    }
+};
+
 module.exports = auth;
 module.exports.auth = auth;
 module.exports.adminAuth = adminAuth;
+module.exports.shopAuth = shopAuth;

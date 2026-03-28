@@ -22,6 +22,7 @@ export default function ProductDetail() {
   const [reviewMessage, setReviewMessage] = useState(null);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'auto' });
     fetchProductDetail();
     fetchReviews();
   }, [id]);
@@ -192,9 +193,9 @@ export default function ProductDetail() {
           <div>
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4">
               <h1 className="text-4xl font-bold text-dark">{product.name}</h1>
-              {product.createdBy && (
+              {product.shopId && (
                 <p className="text-sm text-gray-500 mt-2 sm:mt-0">
-                  Người tạo: <span className="font-semibold text-dark">{product.createdBy.name}</span>
+                  Shop: <span className="font-semibold text-dark">{product.shopId.name}</span>
                 </p>
               )}
             </div>

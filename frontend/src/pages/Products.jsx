@@ -53,7 +53,7 @@ export default function Products() {
       setLoading(true);
 
       const params = new URLSearchParams();
-      params.set('limit', '20');
+      params.set('limit', '10000');
       params.set('page', '1');
       params.set('sort', sortBy);
 
@@ -298,6 +298,9 @@ export default function Products() {
                           )}
                         </div>
                         <p className="text-sm text-gray-500 mt-2">{product.category}</p>
+                        {product.shopId && (
+                          <p className="text-xs text-gray-600 mt-1">Shop: {product.shopId.name}</p>
+                        )}
                       </div>
                     </Link>
                   );

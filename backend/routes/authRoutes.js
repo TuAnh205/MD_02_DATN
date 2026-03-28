@@ -4,6 +4,7 @@ const ctrl = require("../controllers/authController");
 const auth = require("../middleware/auth");
 
 router.post("/register", ctrl.register);
+router.post("/register-shop", ctrl.registerShop);
 router.post("/login", ctrl.login);
 router.post("/google-login", ctrl.googleLogin);
 router.post("/forgot-password", ctrl.forgotPassword);

@@ -9,8 +9,8 @@ export default function Header() {
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const dropdownRef = React.useRef(null);
 
-  // Hide header on admin routes
-  if (location.pathname.startsWith('/admin')) {
+  // Hide header on admin and shop routes
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/shop')) {
     return null;
   }
 

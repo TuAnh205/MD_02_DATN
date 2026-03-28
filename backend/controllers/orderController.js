@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const Notification = require('../models/Notification');
 
 exports.createOrder = async (req, res) => {
     try {
@@ -19,17 +20,33 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'shipping address is required' });
         }
 
+        const productIds = items.map(item => item.product);
+        const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId');
+
+        if (productsInDb.length !== productIds.length) {
+            return res.status(400).json({ message: 'Một hoặc nhiều sản phẩm không hợp lệ' });
+        }
+
+        const productMap = productsInDb.reduce((acc, p) => {
+            acc[p._id.toString()] = p;
+            return acc;
+        }, {});
+
         const orderData = {
             orderNumber: 'ORD-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5).toUpperCase(),
             user: userId,
-            items: items.map(item => ({
-                product: item.product,
-                name: item.name || 'Unknown Product',
-                price: item.price || 0,
-                qty: item.qty || 1,
-                image: item.image || '',
-                sku: item.sku || ''
-            })),
+            items: items.map(item => {
+                const p = productMap[item.product];
+                return {
+                    product: item.product,
+                    shopId: p.shopId,
+                    name: item.name || 'Unknown Product',
+                    price: item.price || 0,
+                    qty: item.qty || 1,
+                    image: item.image || '',
+                    sku: item.sku || ''
+                };
+            }),
             subtotal: subtotal || total || 0,
             total: total || 0,
             shipping: {
@@ -61,6 +78,22 @@ exports.createOrder = async (req, res) => {
 
         const order = new Order(orderData);
         await order.save();
+
+        // Tạo thông báo cho shop (mỗi shop một thông báo)
+        const shopIds = [...new Set(order.items.map((item) => item.shopId.toString()))];
+        for (const shopId of shopIds) {
+            const relatedCount = order.items.filter((item) => item.shopId.toString() === shopId)
+                .reduce((sum, i) => sum + i.qty, 0);
+
+            await Notification.create({
+                user: shopId,
+                type: 'shop_order',
+                title: 'Đơn hàng mới',
+                message: `Bạn có ${relatedCount} sản phẩm trong đơn #${order.orderNumber}`,
+                data: { orderId: order._id, orderNumber: order.orderNumber },
+                isRead: false
+            });
+        }
         
         console.log('Order created successfully:', order._id);
         
