@@ -20,6 +20,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.User;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
 import com.anhnvt_ph55017.md_02_datn.screens.ShippingAddressActivity;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -100,7 +101,11 @@ public class ProfileFragment extends Fragment {
 
         // Logout
         btnLogout.setOnClickListener(v -> {
+            // Clear Firebase session
             FirebaseAuth.getInstance().signOut();
+            
+            // Clear local session
+            SessionManager.clearSession(getContext());
 
             Intent intent = new Intent(requireActivity(), LoginActivity.class);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);

@@ -334,13 +334,13 @@ public class OrderDetailActivity extends AppCompatActivity {
                 } catch (Exception ex) {
                     Log.w("OrderDetailActivity", "Cannot parse orderId for DB update: " + orderId, ex);
                 }
-                boolean success = (orderIdInt > 0) ? orderDAO.updateOrderStatus(orderIdInt, "Đã hủy") : false;
+                boolean success = (orderIdInt > 0) ? orderDAO.updateOrderCancellation(orderIdInt, reason) : false;
 
                 if (success) {
                     // update status locally
                     orderStatus = "Đã hủy";
                     tvOrderStatus.setText(getStatusVietnamese(orderStatus));
-                    tvStatusDescription.setText("Đơn hàng đã bị hủy");
+                    tvStatusDescription.setText("💔 Lý do: " + reason);
                     btnCancel.setVisibility(android.view.View.GONE);
                     btnBuyAgain.setVisibility(android.view.View.VISIBLE);
                     Toast.makeText(OrderDetailActivity.this, "Đơn hàng #" + orderId + " đã bị hủy\nLý do: " + reason, Toast.LENGTH_LONG).show();

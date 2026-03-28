@@ -19,6 +19,7 @@ import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.DAO.OrderDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 
 import java.util.ArrayList;
@@ -72,8 +73,11 @@ public class OrdersFragment extends Fragment {
                 orderList = new ArrayList<>();
             }
             
-            // Load orders from database (user ID = 1 for now)
-            List<Order> dbOrders = orderDAO.getAllOrders();
+            // Load orders from database for current user
+            int userId = SessionManager.getUserId(getContext());
+            if (userId <= 0) userId = 1;  // Fallback to user 1 if not logged in
+            
+            List<Order> dbOrders = orderDAO.getOrdersByUserId(userId);
             orderList.clear();
             orderList.addAll(dbOrders);
             

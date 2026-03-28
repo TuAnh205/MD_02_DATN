@@ -52,6 +52,15 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
         holder.tvPhone.setText(a.getPhone());
         holder.tvAddress.setText(a.getAddress());
         holder.rbDefault.setChecked(a.isDefault());
+        
+        // Set tag visibility and text
+        if (a.isDefault()) {
+            holder.tvTag.setVisibility(View.VISIBLE);
+            holder.tvTag.setText("MẶC ĐỊNH");
+        } else {
+            holder.tvTag.setVisibility(View.GONE);
+        }
+        
         holder.itemView.setBackgroundColor(a.isDefault()
                 ? Color.parseColor("#2F80FF")
                 : Color.parseColor("#162233"));
@@ -77,7 +86,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         RadioButton rbDefault;
-        TextView tvName, tvPhone, tvAddress;
+        TextView tvName, tvPhone, tvAddress, tvTag;
         ImageButton btnEdit, btnDelete;
 
         public ViewHolder(@NonNull View itemView) {
@@ -86,6 +95,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
             tvName = itemView.findViewById(R.id.tvName);
             tvPhone = itemView.findViewById(R.id.tvPhone);
             tvAddress = itemView.findViewById(R.id.tvAddress);
+            tvTag = itemView.findViewById(R.id.tvTag);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
 

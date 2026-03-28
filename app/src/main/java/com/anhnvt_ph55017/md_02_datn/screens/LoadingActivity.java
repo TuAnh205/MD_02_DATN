@@ -9,6 +9,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.google.firebase.auth.FirebaseAuth;
 
 public class LoadingActivity extends AppCompatActivity {
@@ -42,7 +43,8 @@ public class LoadingActivity extends AppCompatActivity {
                 } else {
                     FirebaseAuth mAuth = FirebaseAuth.getInstance();
                     Intent nextIntent;
-                    if (mAuth.getCurrentUser() != null) {
+                    // Check both Firebase auth and local session
+                    if (mAuth.getCurrentUser() != null && SessionManager.isLoggedIn(LoadingActivity.this)) {
                         nextIntent = new Intent(LoadingActivity.this, MainActivity.class);
                     } else {
                         nextIntent = new Intent(LoadingActivity.this, LoginActivity.class);

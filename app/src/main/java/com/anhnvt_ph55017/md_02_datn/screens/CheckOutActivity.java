@@ -45,6 +45,7 @@ public class CheckOutActivity extends AppCompatActivity {
     AddressDAO addressDAO;
     OrderDAO orderDAO;
     Address selectedAddress;
+    private int userId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,7 +53,7 @@ public class CheckOutActivity extends AppCompatActivity {
         setContentView(R.layout.activity_check_out);
 
         // Check if user is logged in
-        int userId = SessionManager.getUserId(this);
+        userId = SessionManager.getUserId(this);
         if (userId <= 0) {
             Toast.makeText(this, "Please login to checkout", Toast.LENGTH_SHORT).show();
             Intent loginIntent = new Intent(this, LoginActivity.class);
@@ -137,7 +138,7 @@ public class CheckOutActivity extends AppCompatActivity {
                         : "Địa chỉ mặc định";
 
                 // ===== SAVE DB =====
-                long dbId = orderDAO.addOrder(null, 1, subtotal, status, address, paymentMethod, voucher, image);
+                long dbId = orderDAO.addOrder(null, userId, subtotal, status, address, paymentMethod, voucher, image);
                 String id = "OD-" + dbId;
 
                 com.anhnvt_ph55017.md_02_datn.models.Order newOrder =
@@ -179,14 +180,14 @@ public class CheckOutActivity extends AppCompatActivity {
 
     private void loadDefaultAddress() {
         // ensure there are at least two sample addresses
-        List<Address> all = addressDAO.getAddresses(1);
+        List<Address> all = addressDAO.getAddresses(userId);
         if (all.isEmpty()) {
-            addressDAO.addAddress(1, "Nhà riêng", "0123 456 789", "Số 1, Đường A, Quận 1", true);
-            addressDAO.addAddress(1, "Công ty", "0987 654 321", "Tầng 7, Tòa nhà B, Quận 3", false);
-            all = addressDAO.getAddresses(1);
+            addressDAO.addAddress(userId, "Nhà riêng", "0123 456 789", "Số 1, Đường A, Quận 1", true);
+            addressDAO.addAddress(userId, "Công ty", "0987 654 321", "Tầng 7, Tòa nhà B, Quận 3", false);
+            all = addressDAO.getAddresses(userId);
         }
 
-        selectedAddress = addressDAO.getDefaultAddress(1);
+        selectedAddress = addressDAO.getDefaultAddress(userId);
         if (selectedAddress == null && !all.isEmpty()) {
             selectedAddress = all.get(0);
         }

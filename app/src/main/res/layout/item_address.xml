@@ -4,8 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
-    card_view:cardCornerRadius="12dp"
-    card_view:cardElevation="0dp"
+    card_view:cardCornerRadius="20dp"
+    card_view:cardElevation="4dp"
     card_view:cardBackgroundColor="#162233">
 
     <LinearLayout
@@ -14,6 +14,7 @@
         android:orientation="vertical"
         android:padding="12dp">
 
+        <!-- First Row: RadioButton + Name + Tag + Buttons -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -26,15 +27,38 @@
                 android:layout_height="wrap_content"
                 android:buttonTint="#2F80FF" />
 
-            <TextView
-                android:id="@+id/tvName"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold"
-                android:textSize="16sp"
-                android:layout_marginStart="12dp"
+            <LinearLayout
                 android:layout_width="0dp"
+                android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_height="wrap_content" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvName"
+                    android:textColor="#FFFFFF"
+                    android:textStyle="bold"
+                    android:textSize="16sp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tvTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="MẶC ĐỊNH"
+                    android:textColor="#2F80FF"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_circle_blue"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="2dp"
+                    android:paddingBottom="2dp"
+                    android:layout_marginStart="8dp" />
+
+            </LinearLayout>
 
             <ImageButton
                 android:id="@+id/btnEdit"
@@ -55,19 +79,25 @@
 
         </LinearLayout>
 
+        <!-- Phone -->
         <TextView
             android:id="@+id/tvPhone"
             android:textColor="#CCCCCC"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginStart="36dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="14sp" />
 
+        <!-- Address -->
         <TextView
             android:id="@+id/tvAddress"
             android:textColor="#CCCCCC"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginStart="36dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:textSize="14sp" />
 
     </LinearLayout>
 
