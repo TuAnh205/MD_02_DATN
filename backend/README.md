@@ -32,3 +32,23 @@ API endpoints
 Notes
 - Ensure MongoDB is running and `MONGO_URI` points to it.
 - This is a minimal scaffold. Consider adding validation, auth (JWT), file upload (multer) for images, and tests for production use.
+
+Gmail OTP setup (important)
+
+If register by Gmail fails with `Invalid login: 535-5.7.8 Username and Password not accepted`, your mail credentials are not valid for Gmail SMTP.
+
+Use this config in `.env` with real values (do not keep placeholder text):
+
+```env
+MAIL_USER=your_real_gmail@gmail.com
+MAIL_PASS=your_16_char_gmail_app_password
+MAIL_HOST=smtp.gmail.com
+MAIL_PORT=465
+MAIL_SECURE=true
+MAIL_FROM="MD02 DATN <your_real_gmail@gmail.com>"
+```
+
+Requirements for `MAIL_PASS`:
+- You must enable 2-Step Verification on your Google account.
+- Create an App Password in Google Account > Security > App passwords.
+- Use the generated app password (not your normal Gmail password).

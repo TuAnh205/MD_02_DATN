@@ -14,6 +14,9 @@ const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
 const mailUser = process.env.MAIL_USER || "";
 const mailPass = process.env.MAIL_PASS || "";
 const mailFrom = process.env.MAIL_FROM || mailUser;
+const mailHost = process.env.MAIL_HOST || "smtp.gmail.com";
+const mailPort = Number(process.env.MAIL_PORT || 465);
+const mailSecure = String(process.env.MAIL_SECURE || "true").toLowerCase() === "true";
 
 const otpStore = new Map();
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -21,6 +24,7 @@ const OTP_TTL_MS = 10 * 60 * 1000;
 const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
 
 const gmailRegex = /^[^\s@]+@gmail\.com$/i;
+const placeholderRegex = /(your_|replace_me)/i;
 
 // ================= FIREBASE INIT =================
 if (!admin.apps.length) {
@@ -28,7 +32,9 @@ if (!admin.apps.length) {
 }
 
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  host: mailHost,
+  port: mailPort,
+  secure: mailSecure,
   auth: {
     user: mailUser,
     pass: mailPass,
@@ -37,10 +43,24 @@ const transporter = nodemailer.createTransport({
 
 const generateOtpCode = () => String(Math.floor(100000 + Math.random() * 900000));
 
-const sendOtpMail = async (email, code) => {
+const validateMailConfig = () => {
   if (!mailUser || !mailPass) {
     throw new Error("MAIL_USER/MAIL_PASS not configured");
   }
+
+  if (placeholderRegex.test(mailUser) || placeholderRegex.test(mailPass)) {
+    throw new Error(
+      "MAIL_USER/MAIL_PASS are still placeholder values. Use your Gmail and a 16-character App Password.",
+    );
+  }
+
+  if (!/@gmail\.com$/i.test(mailUser)) {
+    throw new Error("MAIL_USER must be a Gmail address when using Gmail SMTP");
+  }
+};
+
+const sendOtpMail = async (email, code) => {
+  validateMailConfig();
 
   await transporter.sendMail({
     from: mailFrom,
@@ -86,6 +106,12 @@ const generateToken = (user) => {
     jwtSecret,
     { expiresIn: jwtExpire },
   );
+};
+
+exports.emailRegistrationDisabled = async (req, res) => {
+  return res.status(410).json({
+    message: "Dang ky bang email da duoc tat. Vui long su dung Google de tao tai khoan.",
+  });
 };
 
 // ================= REGISTER =================
@@ -169,6 +195,14 @@ exports.sendVerificationCode = async (req, res) => {
     res.json({ message: "Verification code sent" });
   } catch (err) {
     console.error("SEND VERIFICATION CODE ERROR:", err);
+    const lowered = String(err.message || "").toLowerCase();
+    if (lowered.includes("badcredentials") || lowered.includes("invalid login")) {
+      return res.status(500).json({
+        message:
+          "Gmail authentication failed. Set MAIL_USER to your Gmail and MAIL_PASS to a Gmail App Password (not normal account password).",
+      });
+    }
+
     res.status(500).json({ message: err.message || "Cannot send verification code" });
   }
 };
@@ -388,22 +422,12 @@ exports.googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Google account has no email" });
     }
 
-    let user = await User.findOne({ email });
+    let user = await User.findOne({ email: email.trim().toLowerCase() });
 
     if (!user) {
-      const randomPass = crypto.randomBytes(6).toString("hex");
-      const hashed = await bcrypt.hash(randomPass, 10);
-
-      user = new User({
-        firebaseUid,
-        email: email.trim().toLowerCase(),
-        name,
-        password: hashed,
-        role: "user",
-        isVerified: true,
+      return res.status(400).json({
+        message: "Tai khoan chua ton tai. Vui long dang ky bang email/mat khau.",
       });
-
-      await user.save();
     } else {
       user.firebaseUid = firebaseUid;
       if (!user.name) user.name = name;

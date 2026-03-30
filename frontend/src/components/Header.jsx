@@ -111,7 +111,10 @@ export default function Header() {
                 Đăng Nhập
               </Link>
               <Link to="/register" className="btn-primary text-sm">
-                Đăng Ký
+                ĐK Người Mua
+              </Link>
+              <Link to="/register?role=shop" className="btn-primary text-sm">
+                ĐK Shop
               </Link>
             </div>
           )}

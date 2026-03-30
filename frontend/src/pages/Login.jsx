@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
 import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
@@ -10,9 +9,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
-  const rawGoogleClientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID || '').trim();
-  const hasGoogleClientId = Boolean(rawGoogleClientId) && rawGoogleClientId !== 'your_google_oauth_web_client_id';
+  const { login } = useAuth();
 
   const redirectByRole = () => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -48,29 +45,6 @@ export default function Login() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleGoogleSuccess = async (credentialResponse) => {
-    try {
-      setError('');
-      setLoading(true);
-
-      if (!credentialResponse?.credential) {
-        setError('Không lấy được thông tin đăng nhập Google');
-        return;
-      }
-
-      await googleLogin(credentialResponse.credential);
-      redirectByRole();
-    } catch (err) {
-      setError(err.response?.data?.message || 'Đăng nhập Google thất bại');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleError = () => {
-    setError('Đăng nhập Google thất bại');
   };
 
   return (
@@ -117,19 +91,6 @@ export default function Login() {
             {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
           </button>
         </form>
-
-        {hasGoogleClientId ? (
-          <>
-            <div className="my-4 text-center text-sm text-gray-500">hoặc</div>
-            <div className="flex justify-center">
-              <GoogleLogin onSuccess={handleGoogleSuccess} onError={handleGoogleError} />
-            </div>
-          </>
-        ) : (
-          <div className="my-4 text-center text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-3 py-2">
-            Google Login chưa được cấu hình: thiếu VITE_GOOGLE_CLIENT_ID.
-          </div>
-        )}
 
         <div className="mt-6 space-y-2 text-center">
           <p className="text-sm text-gray-600">
