@@ -36,7 +36,8 @@ public class LoginActivity extends AppCompatActivity {
     FirebaseAuth mAuth;
     GoogleSignInClient googleSignInClient;
 
-    private static final String BASE_URL = "http://192.168.1.10:5000/api";
+    // ✅ Cập nhật đúng IP máy chủ
+    private static final String BASE_URL = "http://192.168.1.13:5000/api";
 
     boolean isPasswordVisible = false;
 
@@ -97,19 +98,18 @@ public class LoginActivity extends AppCompatActivity {
                     url,
                     body,
                     response -> {
-
                         String token = response.optString("token");
 
+                        // Lưu token
                         getSharedPreferences("auth", MODE_PRIVATE)
                                 .edit()
                                 .putString("token", token)
                                 .apply();
 
-                        // 🔥 GET USER PROFILE AND SAVE TO DB
-                        getUserProfile(token);
+                        // ✅ Lưu session tối thiểu để isLoggedIn() = true
+                        SessionManager.saveUserSession(this, 1, email, "User");
 
                         Toast.makeText(this, "Login thành công", Toast.LENGTH_SHORT).show();
-
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
                     },
@@ -117,51 +117,6 @@ public class LoginActivity extends AppCompatActivity {
                         Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_LONG).show();
                     }
             );
-
-            Volley.newRequestQueue(this).add(request);
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    // ================= GET USER PROFILE =================
-    private void getUserProfile(String token) {
-        try {
-            String url = BASE_URL + "/auth/profile";
-
-            JsonObjectRequest request = new JsonObjectRequest(
-                    Request.Method.GET,
-                    url,
-                    null,
-                    response -> {
-                        // Assume response has name, email, phone
-                        String name = response.optString("name", "");
-                        String email = response.optString("email", "");
-                        String phone = response.optString("phone", "");
-
-                        // Save to local DB
-                        UserDAO userDAO = new UserDAO(this);
-                        userDAO.insertOrUpdateUser(name, email, phone);
-                        
-                        // Get user ID and save to session
-                        User user = userDAO.getUserByEmail(email);
-                        if (user != null) {
-                            SessionManager.saveUserSession(this, user.getId(), user.getEmail(), user.getFullname());
-                        }
-                    },
-                    error -> {
-                        // Silent fail, maybe user not in DB yet
-                        Log.e("PROFILE_ERROR", "Failed to get profile: " + error.toString());
-                    }
-            ) {
-                @Override
-                public java.util.Map<String, String> getHeaders() {
-                    java.util.Map<String, String> headers = new java.util.HashMap<>();
-                    headers.put("Authorization", "Bearer " + token);
-                    return headers;
-                }
-            };
 
             Volley.newRequestQueue(this).add(request);
 
@@ -237,9 +192,9 @@ public class LoginActivity extends AppCompatActivity {
 
                         if (user != null) {
 
-                            String uid = user.getUid();
+                            String uid   = user.getUid();
                             String email = user.getEmail();
-                            String name = user.getDisplayName();
+                            String name  = user.getDisplayName();
 
                             syncServer(uid, email, name);
                         }
@@ -251,9 +206,8 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     // ================= SYNC SERVER =================
-
     private void syncServer(String uid, String email, String name) {
-        // 🔥 CHECK EMAIL
+
         if (email == null || email.isEmpty()) {
             Toast.makeText(this, "Google account không có email", Toast.LENGTH_SHORT).show();
             return;
@@ -274,25 +228,27 @@ public class LoginActivity extends AppCompatActivity {
                     response -> {
                         String token = response.optString("token");
 
+                        // Lưu token
                         getSharedPreferences("auth", MODE_PRIVATE)
                                 .edit()
                                 .putString("token", token)
                                 .apply();
 
-                        // 🔥 GET USER PROFILE AND SAVE TO DB
-                        getUserProfile(token);
+                        // ✅ Lưu session tối thiểu để isLoggedIn() = true
+                        SessionManager.saveUserSession(
+                                this, 1, email, name != null ? name : "User"
+                        );
 
                         Toast.makeText(this, "Google login thành công", Toast.LENGTH_SHORT).show();
-
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
                     },
                     error -> {
-                        // 🔥 LOG CHI TIẾT ĐỂ DEBUG
                         if (error.networkResponse != null && error.networkResponse.data != null) {
                             String bodyStr = new String(error.networkResponse.data);
-                            Log.e("SYNC_ERROR", bodyStr);
-                            Toast.makeText(this, "Sync server lỗi: " + bodyStr, Toast.LENGTH_LONG).show();
+                            int statusCode = error.networkResponse.statusCode;
+                            Log.e("SYNC_ERROR", "Status: " + statusCode + " | Body: " + bodyStr);
+                            Toast.makeText(this, "Sync server lỗi " + statusCode + ": " + bodyStr, Toast.LENGTH_LONG).show();
                         } else {
                             Log.e("SYNC_ERROR", error.toString());
                             Toast.makeText(this, "Sync server lỗi: " + error.toString(), Toast.LENGTH_LONG).show();
@@ -319,7 +275,6 @@ public class LoginActivity extends AppCompatActivity {
 
                 int drawableWidth = edtPass.getCompoundDrawables()[2].getBounds().width();
 
-                // 🔥 FIX CHUẨN: dùng getX()
                 if (event.getX() >= (edtPass.getWidth() - drawableWidth - edtPass.getPaddingEnd())) {
 
                     if (isPasswordVisible) {
@@ -355,7 +310,7 @@ public class LoginActivity extends AppCompatActivity {
 
         if (intent != null) {
             String email = intent.getStringExtra("prefill_email");
-            String pass = intent.getStringExtra("prefill_pass");
+            String pass  = intent.getStringExtra("prefill_pass");
 
             if (email != null && pass != null) {
                 edtEmail.setText(email);
