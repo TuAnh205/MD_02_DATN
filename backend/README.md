@@ -19,6 +19,20 @@ npm install
 $env:MONGO_URI = 'mongodb://localhost:27017/md02_datn'; npm start
 ```
 
+Auto seed on startup
+
+The backend now auto-seeds demo data on startup by default.
+
+- It does not delete existing data.
+- It only inserts missing demo users, products, and promotions.
+- Disable with `AUTO_SEED_ON_START=false` in `.env`.
+
+Manual seed is still available:
+
+```powershell
+npm run seed
+```
+
 API endpoints
 
 - GET /api/products?limit=10&page=1&q=search

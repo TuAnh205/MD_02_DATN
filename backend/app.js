@@ -14,11 +14,10 @@ const feedbackRoutes = require('./routes/feedbackRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
 const shopRoutes = require('./routes/shopRoutes');
+const { seedDatabase } = require('./seeds/seed');
 
 const app = express();
-
-// Connect DB
-connectDB();
+const autoSeedOnStart = String(process.env.AUTO_SEED_ON_START || 'true').toLowerCase() === 'true';
 
 app.use(morgan('dev'));
 app.use(cors());
@@ -47,4 +46,15 @@ app.use((err, req, res, next) => {
 });
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+const startServer = async () => {
+    await connectDB();
+
+    if (autoSeedOnStart) {
+        await seedDatabase({ connect: false, exitOnFinish: false });
+    }
+
+    app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+};
+
+startServer();

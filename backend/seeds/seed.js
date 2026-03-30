@@ -5,6 +5,16 @@ const User = require('../models/User');
 const Product = require('../models/Product');
 const Promotion = require('../models/Promotion');
 
+const upsertIfMissing = async (model, filter, payload) => {
+  const result = await model.updateOne(
+    filter,
+    { $setOnInsert: payload },
+    { upsert: true }
+  );
+
+  return result.upsertedCount === 1 ? 'inserted' : 'existing';
+};
+
 const connectDB = async () => {
   try {
     const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/md02_datn';
@@ -18,11 +28,6 @@ const connectDB = async () => {
 
 const seedUsers = async () => {
   try {
-    // Clear existing users
-    await User.deleteMany({});
-    console.log('✓ Cleared existing users');
-
-    // Create test users
     const hashedPassword = await bcrypt.hash('123456', 10);
 
     const users = [
@@ -46,12 +51,27 @@ const seedUsers = async () => {
         password: hashedPassword,
         role: 'user',
         avatar: 'https://via.placeholder.com/150?text=John'
+      },
+      {
+        name: 'Demo Shop',
+        email: 'shop@test.com',
+        password: hashedPassword,
+        role: 'shop',
+        avatar: 'https://via.placeholder.com/150?text=Shop'
       }
     ];
 
-    const createdUsers = await User.insertMany(users);
-    console.log(`✓ Created ${createdUsers.length} test users`);
-    return createdUsers;
+    let insertedCount = 0;
+
+    for (const user of users) {
+      const status = await upsertIfMissing(User, { email: user.email }, user);
+      if (status === 'inserted') {
+        insertedCount += 1;
+      }
+    }
+
+    console.log(`✓ Users ready: ${users.length} total, ${insertedCount} inserted, ${users.length - insertedCount} already existed`);
+    return User.find({ email: { $in: users.map((user) => user.email) } });
   } catch (err) {
     console.error('✗ Error seeding users:', err.message);
   }
@@ -59,14 +79,15 @@ const seedUsers = async () => {
 
 const seedProducts = async () => {
   try {
-    // Clear existing products
-    await Product.deleteMany({});
-    console.log('✓ Cleared existing products');
-
-    // Get admin user for createdBy
     const adminUser = await User.findOne({ role: 'admin' });
     if (!adminUser) {
       console.error('✗ No admin user found, skipping product seeding');
+      return;
+    }
+
+    const shopUser = await User.findOne({ role: 'shop' });
+    if (!shopUser) {
+      console.error('✗ No shop user found, skipping product seeding');
       return;
     }
 
@@ -81,7 +102,8 @@ const seedProducts = async () => {
         stock: 15,
         isFeatured: true,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'iPhone 15 Pro',
@@ -93,7 +115,8 @@ const seedProducts = async () => {
         stock: 25,
         isFeatured: true,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Samsung Galaxy Watch',
@@ -105,7 +128,8 @@ const seedProducts = async () => {
         stock: 30,
         featured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Sony WH-1000XM5 Headphones',
@@ -117,7 +141,8 @@ const seedProducts = async () => {
         stock: 20,
         featured: true,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'iPad Air',
@@ -129,7 +154,8 @@ const seedProducts = async () => {
         stock: 18,
         featured: false,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'MacBook Pro M3',
@@ -141,7 +167,8 @@ const seedProducts = async () => {
         stock: 10,
         isFeatured: true,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Google Pixel 8',
@@ -153,7 +180,8 @@ const seedProducts = async () => {
         stock: 22,
         featured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'AirPods Pro Max',
@@ -165,7 +193,9 @@ const seedProducts = async () => {
         stock: 12,
         featured: true,
         hot: false,
-        createdBy: adminUser._id      },
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      },
       {
         name: 'Bàn phím cơ Logitech MX Keys',
         price: 189000,
@@ -176,7 +206,8 @@ const seedProducts = async () => {
         stock: 25,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Chuột Logitech MX Master 3S',
@@ -188,7 +219,8 @@ const seedProducts = async () => {
         stock: 30,
         isFeatured: true,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Màn hình LG 27UK650-W 4K',
@@ -200,7 +232,8 @@ const seedProducts = async () => {
         stock: 15,
         isFeatured: false,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Loa Bluetooth JBL GO 3',
@@ -212,7 +245,8 @@ const seedProducts = async () => {
         stock: 40,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Ổ cứng SSD Samsung 970 EVO 1TB',
@@ -224,7 +258,8 @@ const seedProducts = async () => {
         stock: 20,
         isFeatured: false,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Router WiFi TP-Link Archer AX55',
@@ -236,7 +271,8 @@ const seedProducts = async () => {
         stock: 18,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Webcam Logitech C920 HD',
@@ -248,7 +284,8 @@ const seedProducts = async () => {
         stock: 22,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Tai nghe gaming Razer BlackShark V2',
@@ -260,7 +297,8 @@ const seedProducts = async () => {
         stock: 16,
         isFeatured: true,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Bàn phím gaming Corsair K57 RGB',
@@ -272,7 +310,8 @@ const seedProducts = async () => {
         stock: 14,
         isFeatured: false,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Chuột gaming Logitech G305',
@@ -284,7 +323,8 @@ const seedProducts = async () => {
         stock: 28,
         isFeatured: true,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Màn hình gaming Samsung Odyssey G7',
@@ -296,7 +336,8 @@ const seedProducts = async () => {
         stock: 8,
         isFeatured: true,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Loa soundbar Samsung HW-K360',
@@ -308,7 +349,8 @@ const seedProducts = async () => {
         stock: 12,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Ổ cứng di động WD My Passport 2TB',
@@ -320,7 +362,8 @@ const seedProducts = async () => {
         stock: 25,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Switch mạng TP-Link TL-SG108',
@@ -332,7 +375,8 @@ const seedProducts = async () => {
         stock: 15,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Microphone Blue Yeti USB',
@@ -344,7 +388,8 @@ const seedProducts = async () => {
         stock: 10,
         isFeatured: true,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Bàn phím Apple Magic Keyboard',
@@ -356,7 +401,8 @@ const seedProducts = async () => {
         stock: 20,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Chuột Apple Magic Mouse 2',
@@ -368,7 +414,8 @@ const seedProducts = async () => {
         stock: 18,
         isFeatured: false,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Màn hình Apple Studio Display',
@@ -380,7 +427,8 @@ const seedProducts = async () => {
         stock: 5,
         isFeatured: true,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Loa Apple HomePod mini',
@@ -392,7 +440,8 @@ const seedProducts = async () => {
         stock: 15,
         isFeatured: false,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Ổ cứng SSD WD Black SN850 1TB',
@@ -404,7 +453,8 @@ const seedProducts = async () => {
         stock: 12,
         isFeatured: true,
         hot: false,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Router mesh TP-Link Deco X20',
@@ -416,7 +466,8 @@ const seedProducts = async () => {
         stock: 8,
         isFeatured: false,
         hot: true,
-        createdBy: adminUser._id
+        createdBy: adminUser._id,
+        shopId: shopUser._id
       },
       {
         name: 'Webcam Sony ZV-1',
@@ -428,12 +479,87 @@ const seedProducts = async () => {
         stock: 10,
         isFeatured: true,
         hot: false,
-        createdBy: adminUser._id      }
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      },
+      {
+        name: 'Sạc nhanh Anker Nano 30W',
+        price: 39000,
+        category: 'Phụ kiện',
+        description: 'Củ sạc USB-C nhỏ gọn 30W',
+        detailedDescription: '✨ Tổng quan sản phẩm\nAnker Nano 30W là củ sạc USB-C siêu nhỏ gọn dành cho điện thoại, tablet và tai nghe. Công nghệ GaN giúp sạc nhanh, tỏa nhiệt thấp.\n\n⚡ Tốc độ sạc\nHỗ trợ Power Delivery 30W, sạc iPhone từ 0% đến 50% trong khoảng 30 phút. Tương thích tốt với nhiều thiết bị Android.\n\n🧳 Thiết kế\nKích thước nhỏ, chân cắm gọn, phù hợp mang theo hằng ngày. Vật liệu chống cháy, bảo vệ quá dòng và quá nhiệt.\n\n👉 Nhận xét: Củ sạc nhỏ nhưng mạnh, giá dễ tiếp cận.',
+        images: ['https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=800&q=60'],
+        stock: 35,
+        isFeatured: false,
+        hot: true,
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      },
+      {
+        name: 'Pin dự phòng Xiaomi 20000mAh',
+        price: 49000,
+        category: 'Phụ kiện',
+        description: 'Pin dự phòng dung lượng lớn 18W',
+        detailedDescription: '✨ Tổng quan sản phẩm\nPin dự phòng Xiaomi 20000mAh phù hợp cho người thường xuyên di chuyển. Dung lượng lớn, hỗ trợ sạc nhanh hai chiều và nhiều cổng kết nối.\n\n🔋 Dung lượng\nDung lượng 20000mAh giúp sạc điện thoại nhiều lần trong ngày. Hỗ trợ output tối đa 18W và input nhanh qua USB-C.\n\n🔌 Kết nối\nTrang bị 2 cổng USB-A và 1 cổng USB-C, có thể sạc cùng lúc nhiều thiết bị. Có cơ chế bảo vệ an toàn 9 lớp.\n\n👉 Nhận xét: Bền, ổn định, phù hợp đi học và đi làm.',
+        images: ['https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?auto=format&fit=crop&w=800&q=60'],
+        stock: 28,
+        isFeatured: false,
+        hot: false,
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      },
+      {
+        name: 'Tai nghe JBL Tune 710BT',
+        price: 99000,
+        category: 'Tai nghe',
+        description: 'Tai nghe bluetooth over-ear pin lâu',
+        detailedDescription: '✨ Tổng quan sản phẩm\nJBL Tune 710BT là mẫu tai nghe bluetooth over-ear có âm bass mạnh mẽ đặc trưng JBL. Thiết kế gập gọn tiện mang theo.\n\n🎧 Chất âm\nDriver 40mm cho âm thanh rõ ràng, bass tốt. Hỗ trợ kết nối có dây khi hết pin để không bị gián đoạn.\n\n🔋 Pin\nThời lượng pin lên đến 50 giờ, sạc nhanh qua USB-C. Điều khiển nhạc và cuộc gọi trực tiếp trên tai nghe.\n\n👉 Nhận xét: Tai nghe tầm giá tốt, pin rất trâu.',
+        images: ['https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=60'],
+        stock: 24,
+        isFeatured: true,
+        hot: true,
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      },
+      {
+        name: 'Balo laptop Tomtoc 15.6 inch',
+        price: 79000,
+        category: 'Phụ kiện',
+        description: 'Balo chống sốc, chống nước nhẹ',
+        detailedDescription: '✨ Tổng quan sản phẩm\nTomtoc 15.6 inch là balo laptop dành cho dân văn phòng và sinh viên. Thiết kế tối giản, nhiều ngăn, chất liệu chống thấm nhẹ.\n\n👜 Thiết kế\nNgăn laptop chống sốc riêng biệt, thêm nhiều ngăn phụ cho sạc, chuột và tài liệu. Quai đeo êm, thoáng khí khi dùng lâu.\n\n🌧️ Chất liệu\nVải polyester bền, chống bám bụi và chống nước nhẹ trong điều kiện mưa nhỏ. Khóa kéo mượt, hoàn thiện chắc chắn.\n\n👉 Nhận xét: Balo thực dụng, đẹp và bền trong tầm giá.',
+        images: ['https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?auto=format&fit=crop&w=800&q=60'],
+        stock: 32,
+        isFeatured: false,
+        hot: false,
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      },
+      {
+        name: 'Đế tản nhiệt Coolermaster U3 Plus',
+        price: 119000,
+        category: 'Phụ kiện',
+        description: 'Đế tản nhiệt laptop 3 quạt',
+        detailedDescription: '✨ Tổng quan sản phẩm\nCoolermaster U3 Plus là đế tản nhiệt laptop có thể tùy chỉnh vị trí quạt theo vị trí nóng trên máy. Phù hợp laptop 15 đến 17 inch.\n\n🌬️ Hiệu năng tản nhiệt\n3 quạt tốc độ cao giúp hạ nhiệt CPU và GPU hiệu quả khi chơi game hoặc render. Khung nhôm giúp tản nhiệt thụ động tốt hơn.\n\n🛠️ Tính tiện dụng\nCó thể nâng góc máy để gõ thoải mái, giảm mỏi cổ tay. Cấp nguồn qua USB, dễ dùng, không cần cài đặt.\n\n👉 Nhận xét: Hữu ích cho laptop làm việc nặng, hoạt động ổn định.',
+        images: ['https://images.unsplash.com/photo-1587202372775-e229f172b9d7?auto=format&fit=crop&w=800&q=60'],
+        stock: 19,
+        isFeatured: false,
+        hot: true,
+        createdBy: adminUser._id,
+        shopId: shopUser._id
+      }
     ];
 
-    const createdProducts = await Product.insertMany(products);
-    console.log(`✓ Created ${createdProducts.length} test products`);
-    return createdProducts;
+    let insertedCount = 0;
+
+    for (const product of products) {
+      const status = await upsertIfMissing(Product, { name: product.name }, product);
+      if (status === 'inserted') {
+        insertedCount += 1;
+      }
+    }
+
+    console.log(`✓ Products ready: ${products.length} total, ${insertedCount} inserted, ${products.length - insertedCount} already existed`);
+    return Product.find({ name: { $in: products.map((product) => product.name) } });
   } catch (err) {
     console.error('✗ Error seeding products:', err.message);
   }
@@ -441,11 +567,6 @@ const seedProducts = async () => {
 
 const seedPromotions = async () => {
   try {
-    // Clear existing promotions
-    await Promotion.deleteMany({});
-    console.log('✓ Cleared existing promotions');
-
-    // Get admin user for createdBy
     const adminUser = await User.findOne({ role: 'admin' });
     if (!adminUser) {
       console.error('✗ No admin user found, skipping promotion seeding');
@@ -499,17 +620,30 @@ const seedPromotions = async () => {
       }
     ];
 
-    const createdPromotions = await Promotion.insertMany(promotions);
-    console.log(`✓ Created ${createdPromotions.length} test promotions`);
-    return createdPromotions;
+    let insertedCount = 0;
+
+    for (const promotion of promotions) {
+      const status = await upsertIfMissing(Promotion, { code: promotion.code }, promotion);
+      if (status === 'inserted') {
+        insertedCount += 1;
+      }
+    }
+
+    console.log(`✓ Promotions ready: ${promotions.length} total, ${insertedCount} inserted, ${promotions.length - insertedCount} already existed`);
+    return Promotion.find({ code: { $in: promotions.map((promotion) => promotion.code) } });
   } catch (err) {
     console.error('✗ Error seeding promotions:', err.message);
   }
 };
 
-const seedDatabase = async () => {
+const seedDatabase = async (options = {}) => {
+  const { connect = true, exitOnFinish = true } = options;
+
   try {
-    await connectDB();
+    if (connect) {
+      await connectDB();
+    }
+
     await seedUsers();
     await seedProducts();
     await seedPromotions();
@@ -524,12 +658,27 @@ const seedDatabase = async () => {
     console.log('  Password: 123456');
     console.log('  Email: john@test.com');
     console.log('  Password: 123456');
+    console.log('\nShop:');
+    console.log('  Email: shop@test.com');
+    console.log('  Password: 123456');
     
-    process.exit(0);
+    if (exitOnFinish) {
+      process.exit(0);
+    }
   } catch (err) {
     console.error('✗ Seeding failed:', err.message);
-    process.exit(1);
+    if (exitOnFinish) {
+      process.exit(1);
+    }
+
+    throw err;
   }
 };
 
-seedDatabase();
+module.exports = {
+  seedDatabase,
+};
+
+if (require.main === module) {
+  seedDatabase();
+}
