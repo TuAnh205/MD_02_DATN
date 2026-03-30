@@ -19,15 +19,17 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+import java.util.List;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.BannerAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.CategoryAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.DAO.CategoryDAO;
-import com.anhnvt_ph55017.md_02_datn.DAO.ProductDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.CartActivity;
 import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
+import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
 public class HomeFragment extends Fragment {
 
@@ -38,7 +40,7 @@ public class HomeFragment extends Fragment {
     LinearLayout dotsContainer;
     EditText edtSearchHome;
 
-    ProductDAO productDAO;
+    List<Product> listProducts;
 
     private final Handler bannerHandler = new Handler(Looper.getMainLooper());
     private final int bannerIntervalMs = 3500;
@@ -86,7 +88,7 @@ public class HomeFragment extends Fragment {
             });
 
             CategoryDAO categoryDAO = new CategoryDAO(getContext());
-            productDAO = new ProductDAO(getContext());
+            listProducts = new java.util.ArrayList<>();
 
             setupBanner();
             setupSearch();
@@ -98,21 +100,16 @@ public class HomeFragment extends Fragment {
 
             rvCategory.setAdapter(
                     new CategoryAdapter(categoryDAO.getAll(), selectedCategory -> {
-                        rvProduct.setAdapter(
-                                new ProductAdapter(
-                                        getContext(),
-                                        productDAO.getByCategories(selectedCategory)
-                                )
-                        );
+                        // For now, show all products when category selected
+                        loadProductsFromApi();
                     })
             );
 
             // Recycler product
             rvProduct.setLayoutManager(new GridLayoutManager(getContext(),2));
 
-            rvProduct.setAdapter(
-                    new ProductAdapter(getContext(), productDAO.getAll())
-            );
+            // Load products from API
+            loadProductsFromApi();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -184,9 +181,10 @@ public class HomeFragment extends Fragment {
                                 && event.getAction() == android.view.KeyEvent.ACTION_DOWN)) {
                     String query = edtSearchHome.getText().toString().trim();
                     if (!query.isEmpty()) {
-                        rvProduct.setAdapter(new ProductAdapter(getContext(), productDAO.searchByName(query)));
+                        // For now, reload all and filter locally
+                        loadProductsFromApi();
                     } else {
-                        rvProduct.setAdapter(new ProductAdapter(getContext(), productDAO.getAll()));
+                        loadProductsFromApi();
                     }
                     // Hide keyboard
                     hideKeyboard();
@@ -197,6 +195,31 @@ public class HomeFragment extends Fragment {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    private void loadProductsFromApi() {
+        if (getContext() == null) return;
+
+        ProductApiService.fetchProducts(getContext(), "", new ProductApiService.ProductCallback() {
+            @Override
+            public void onSuccess(List<Product> products) {
+                listProducts = products;
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        rvProduct.setAdapter(new ProductAdapter(getContext(), products));
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() ->
+                        Toast.makeText(getContext(), "Load products failed: " + error, Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
     }
 
     private void hideKeyboard() {

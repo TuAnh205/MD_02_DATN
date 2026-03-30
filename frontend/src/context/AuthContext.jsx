@@ -26,6 +26,13 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  const googleLogin = async (idToken) => {
+    const response = await authService.googleLogin(idToken);
+    setUser(response.user);
+    setToken(response.token);
+    return response;
+  };
+
   const register = async (name, email, password) => {
     const response = await authService.register(name, email, password);
     setUser(response.user);
@@ -35,6 +42,17 @@ export const AuthProvider = ({ children }) => {
 
   const registerShop = async (name, email, password) => {
     const response = await authService.registerShop(name, email, password);
+    setUser(response.user);
+    setToken(response.token);
+    return response;
+  };
+
+  const sendVerificationCode = async (name, email, password, role = 'user', phone = '') => {
+    return authService.sendVerificationCode(name, email, password, role, phone);
+  };
+
+  const verifyEmailCode = async (email, code) => {
+    const response = await authService.verifyEmailCode(email, code);
     setUser(response.user);
     setToken(response.token);
     return response;
@@ -53,7 +71,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, registerShop, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, token, loading, login, googleLogin, register, registerShop, sendVerificationCode, verifyEmailCode, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

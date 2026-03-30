@@ -5,6 +5,8 @@ const auth = require("../middleware/auth");
 
 router.post("/register", ctrl.register);
 router.post("/register-shop", ctrl.registerShop);
+router.post("/send-verification-code", ctrl.sendVerificationCode);
+router.post("/verify-email-code", ctrl.verifyEmailCode);
 router.post("/login", ctrl.login);
 router.post("/google-login", ctrl.googleLogin);
 router.post("/forgot-password", ctrl.forgotPassword);

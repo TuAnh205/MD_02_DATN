@@ -7,13 +7,16 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
+  const [message, setMessage] = useState('');
   const [role, setRole] = useState('user');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { register, registerShop } = useAuth();
+  const { sendVerificationCode, verifyEmailCode } = useAuth();
 
   useEffect(() => {
     const roleParam = searchParams.get('role');
@@ -22,31 +25,67 @@ export default function Register() {
     }
   }, [searchParams]);
 
-  const handleSubmit = async (e) => {
+  const validateForm = () => {
+    if (!name || !email || !password || !confirmPassword) {
+      setError('Vui lòng nhập đầy đủ thông tin');
+      return false;
+    }
+
+    if (!email.toLowerCase().endsWith('@gmail.com')) {
+      setError('Vui lòng dùng tài khoản Gmail');
+      return false;
+    }
+
+    if (password !== confirmPassword) {
+      setError('Mật khẩu không khớp');
+      return false;
+    }
+
+    if (password.length < 6) {
+      setError('Mật khẩu phải có ít nhất 6 ký tự');
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSendCode = async (e) => {
     e.preventDefault();
     setError('');
+    setMessage('');
+
+    if (!validateForm()) {
+      return;
+    }
+
     setLoading(true);
-
     try {
-      if (!name || !email || !password || !confirmPassword) {
-        setError('Vui lòng nhập đầy đủ thông tin');
-        return;
-      }
+      await sendVerificationCode(name, email, password, role);
+      setCodeSent(true);
+      setMessage('Đã gửi mã xác nhận về Gmail của bạn.');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Gửi mã xác nhận thất bại');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      if (password !== confirmPassword) {
-        setError('Mật khẩu không khớp');
-        return;
-      }
+  const handleVerifyAndRegister = async (e) => {
+    e.preventDefault();
+    setError('');
+    setMessage('');
 
-      if (password.length < 6) {
-        setError('Mật khẩu phải có ít nhất 6 ký tự');
-        return;
-      }
+    if (!verificationCode) {
+      setError('Vui lòng nhập mã xác nhận');
+      return;
+    }
 
-      await (role === 'shop' ? registerShop(name, email, password) : register(name, email, password));
+    setLoading(true);
+    try {
+      await verifyEmailCode(email, verificationCode);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Đăng ký thất bại');
+      setError(err.response?.data?.message || 'Xác nhận mã thất bại');
     } finally {
       setLoading(false);
     }
@@ -63,7 +102,13 @@ export default function Register() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        {message && (
+          <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+            {message}
+          </div>
+        )}
+
+        <form className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-dark mb-2">Họ Tên</label>
             <input
@@ -141,12 +186,38 @@ export default function Register() {
           </div>
 
           <button
-            type="submit"
+            type="button"
+            onClick={handleSendCode}
             disabled={loading}
             className="w-full btn-primary font-semibold disabled:opacity-50"
           >
-            {loading ? 'Đang đăng ký...' : 'Đăng Ký'}
+            {loading ? 'Đang gửi mã...' : 'Gửi Mã Xác Nhận Gmail'}
           </button>
+
+          {codeSent && (
+            <>
+              <div>
+                <label className="block text-sm font-medium text-dark mb-2">Mã Xác Nhận</label>
+                <input
+                  type="text"
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  className="input-field"
+                  placeholder="Nhập mã 6 số"
+                  disabled={loading}
+                />
+              </div>
+
+              <button
+                type="button"
+                onClick={handleVerifyAndRegister}
+                disabled={loading}
+                className="w-full btn-primary font-semibold disabled:opacity-50"
+              >
+                {loading ? 'Đang xác nhận...' : 'Xác Nhận & Đăng Ký'}
+              </button>
+            </>
+          )}
         </form>
 
         <div className="mt-6 text-center">

@@ -61,7 +61,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
             holder.tvQty.setText(String.valueOf(p.getQty()));
             holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
             // Cập nhật số lượng
-            if(cartDAO != null) cartDAO.updateQuantity(p.getId(), p.getQty());
+            if(cartDAO != null) {
+                int productId = p.getIntId();
+                if (productId >= 0) {
+                    cartDAO.updateQuantity(productId, p.getQty());
+                }
+            }
             // Cập nhật tổng tiền
             if(updateTotal != null) updateTotal.run();
         });
@@ -71,7 +76,12 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
                 p.setQty(p.getQty() - 1);
                 holder.tvQty.setText(String.valueOf(p.getQty()));
                 holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
-                if(cartDAO != null) cartDAO.updateQuantity(p.getId(), p.getQty());
+                if(cartDAO != null) {
+                    int productId = p.getIntId();
+                    if (productId >= 0) {
+                        cartDAO.updateQuantity(productId, p.getQty());
+                    }
+                }
                 if(updateTotal != null) updateTotal.run();
             }
         });
@@ -79,7 +89,10 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
         holder.tvRemove.setOnClickListener(v -> {
 
             if(cartDAO != null){
-                cartDAO.removeItem(p.getId());
+                int productId = p.getIntId();
+                if (productId >= 0) {
+                    cartDAO.removeItem(productId);
+                }
             }
             list.remove(position);
             notifyDataSetChanged();

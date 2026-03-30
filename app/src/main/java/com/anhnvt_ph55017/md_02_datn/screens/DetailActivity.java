@@ -16,10 +16,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
-import com.anhnvt_ph55017.md_02_datn.DAO.ProductDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 import java.util.List;
@@ -32,7 +32,6 @@ public class DetailActivity extends AppCompatActivity {
     Button btnAddCart;
     CartDAO cartDAO;
     RecyclerView rvRelated;
-    ProductDAO productDAO;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +89,10 @@ public class DetailActivity extends AppCompatActivity {
                         userId = 1;  // Guest cart
                     }
 
-                    cartDAO.addToCart(userId, selectedProduct.getId());
+                    int productIdToAdd = selectedProduct.getIntId();
+                    if (productIdToAdd >= 0) {
+                        cartDAO.addToCart(userId, productIdToAdd);
+                    }
                     showCustomToast("Added to cart");
                 });
             
@@ -109,12 +111,25 @@ public class DetailActivity extends AppCompatActivity {
         tvRating.setText("⭐ " + product.getRating() + " (" + product.getReviewCount() + " reviews)");
 
         /* RELATED PRODUCTS */
+        loadRelatedProducts();
+    }
 
-        productDAO = new ProductDAO(this);
-        List<Product> list = productDAO.getAll();
+    private void loadRelatedProducts() {
+        if (this == null) return;
+        ProductApiService.fetchProducts(this, "", new ProductApiService.ProductCallback() {
+            @Override
+            public void onSuccess(List<Product> products) {
+                runOnUiThread(() -> {
+                    rvRelated.setLayoutManager(new GridLayoutManager(DetailActivity.this,2));
+                    rvRelated.setAdapter(new ProductAdapter(DetailActivity.this, products));
+                });
+            }
 
-        rvRelated.setLayoutManager(new GridLayoutManager(this,2));
-        rvRelated.setAdapter(new ProductAdapter(this,list));
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(DetailActivity.this, "Lấy sản phẩm liên quan thất bại: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     private void showCustomToast(String message) {

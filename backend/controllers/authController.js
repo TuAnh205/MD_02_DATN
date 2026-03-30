@@ -3,15 +3,78 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const admin = require("firebase-admin");
+const nodemailer = require("nodemailer");
+const { OAuth2Client } = require("google-auth-library");
 
 // ================= CONFIG =================
 const jwtSecret = process.env.JWT_SECRET || "secret_jwt_key";
 const jwtExpire = process.env.JWT_EXPIRE || "7d";
+const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
+
+const mailUser = process.env.MAIL_USER || "";
+const mailPass = process.env.MAIL_PASS || "";
+const mailFrom = process.env.MAIL_FROM || mailUser;
+
+const otpStore = new Map();
+const OTP_TTL_MS = 10 * 60 * 1000;
+
+const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
+
+const gmailRegex = /^[^\s@]+@gmail\.com$/i;
 
 // ================= FIREBASE INIT =================
 if (!admin.apps.length) {
   admin.initializeApp();
 }
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: mailUser,
+    pass: mailPass,
+  },
+});
+
+const generateOtpCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
+const sendOtpMail = async (email, code) => {
+  if (!mailUser || !mailPass) {
+    throw new Error("MAIL_USER/MAIL_PASS not configured");
+  }
+
+  await transporter.sendMail({
+    from: mailFrom,
+    to: email,
+    subject: "Ma xac nhan dang ky tai khoan",
+    text: `Ma xac nhan cua ban la: ${code}. Ma co hieu luc trong 10 phut.`,
+    html: `<p>Ma xac nhan cua ban la: <b>${code}</b></p><p>Ma co hieu luc trong 10 phut.</p>`,
+  });
+};
+
+const verifyGoogleToken = async (idToken) => {
+  if (googleClient) {
+    const ticket = await googleClient.verifyIdToken({
+      idToken,
+      audience: googleClientId,
+    });
+
+    const payload = ticket.getPayload();
+    return {
+      uid: payload.sub,
+      email: payload.email,
+      name: payload.name || "User",
+      verified: Boolean(payload.email_verified),
+    };
+  }
+
+  const decoded = await admin.auth().verifyIdToken(idToken);
+  return {
+    uid: decoded.uid,
+    email: decoded.email,
+    name: decoded.name || "User",
+    verified: true,
+  };
+};
 
 // ================= TOKEN =================
 const generateToken = (user) => {
@@ -63,6 +126,102 @@ exports.register = async (req, res) => {
   } catch (err) {
     console.error("REGISTER ERROR:", err);
     res.status(500).json({ message: err.message });
+  }
+};
+
+// ================= SEND EMAIL VERIFICATION CODE =================
+exports.sendVerificationCode = async (req, res) => {
+  try {
+    const { name, email, password, phone, role = "user" } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: "Missing data" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+
+    if (!gmailRegex.test(normalizedEmail)) {
+      return res.status(400).json({ message: "Only Gmail is supported" });
+    }
+
+    const exist = await User.findOne({ email: normalizedEmail });
+    if (exist) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    const code = generateOtpCode();
+
+    otpStore.set(normalizedEmail, {
+      code,
+      expiresAt: Date.now() + OTP_TTL_MS,
+      payload: {
+        name,
+        email: normalizedEmail,
+        password: hashed,
+        phone,
+        role: role === "shop" ? "shop" : "user",
+      },
+    });
+
+    await sendOtpMail(normalizedEmail, code);
+
+    res.json({ message: "Verification code sent" });
+  } catch (err) {
+    console.error("SEND VERIFICATION CODE ERROR:", err);
+    res.status(500).json({ message: err.message || "Cannot send verification code" });
+  }
+};
+
+// ================= VERIFY EMAIL CODE =================
+exports.verifyEmailCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ message: "email and code are required" });
+    }
+
+    const normalizedEmail = email.trim().toLowerCase();
+    const cached = otpStore.get(normalizedEmail);
+
+    if (!cached) {
+      return res.status(400).json({ message: "Verification code not found" });
+    }
+
+    if (Date.now() > cached.expiresAt) {
+      otpStore.delete(normalizedEmail);
+      return res.status(400).json({ message: "Verification code expired" });
+    }
+
+    if (String(code).trim() !== cached.code) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    const exist = await User.findOne({ email: normalizedEmail });
+    if (exist) {
+      otpStore.delete(normalizedEmail);
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const user = new User({
+      ...cached.payload,
+      isVerified: true,
+    });
+
+    await user.save();
+    otpStore.delete(normalizedEmail);
+
+    const token = generateToken(user);
+
+    res.status(201).json({
+      message: "Email verified and account created",
+      token,
+      user,
+    });
+  } catch (err) {
+    console.error("VERIFY EMAIL CODE ERROR:", err);
+    res.status(500).json({ message: err.message || "Verify email failed" });
   }
 };
 
@@ -219,11 +378,15 @@ exports.googleLogin = async (req, res) => {
       return res.status(400).json({ message: "Missing idToken" });
     }
 
-    const decoded = await admin.auth().verifyIdToken(idToken);
+    const googleData = await verifyGoogleToken(idToken);
 
-    const firebaseUid = decoded.uid;
-    const email = decoded.email;
-    const name = decoded.name || "User";
+    const firebaseUid = googleData.uid;
+    const email = googleData.email;
+    const name = googleData.name;
+
+    if (!email) {
+      return res.status(400).json({ message: "Google account has no email" });
+    }
 
     let user = await User.findOne({ email });
 
@@ -233,12 +396,18 @@ exports.googleLogin = async (req, res) => {
 
       user = new User({
         firebaseUid,
-        email,
+        email: email.trim().toLowerCase(),
         name,
         password: hashed,
         role: "user",
+        isVerified: true,
       });
 
+      await user.save();
+    } else {
+      user.firebaseUid = firebaseUid;
+      if (!user.name) user.name = name;
+      user.isVerified = true;
       await user.save();
     }
 

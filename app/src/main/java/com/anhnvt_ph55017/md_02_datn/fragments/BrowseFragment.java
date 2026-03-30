@@ -18,13 +18,14 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.SearchHistoryAdapter;
-import com.anhnvt_ph55017.md_02_datn.DAO.ProductDAO;
 import com.anhnvt_ph55017.md_02_datn.DAO.SearchHistoryDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,6 @@ import java.util.List;
 public class BrowseFragment extends Fragment {
 
     RecyclerView rvProducts, rvSearchHistory;
-    ProductDAO productDAO;
     SearchHistoryDAO searchHistoryDAO;
     List<Product> listProduct;
     ProductAdapter adapter;
@@ -56,14 +56,14 @@ public class BrowseFragment extends Fragment {
             return view;
         }
 
-        productDAO = new ProductDAO(getContext());
         searchHistoryDAO = new SearchHistoryDAO(getContext());
 
-        // Load products
-        listProduct = productDAO.getAll();
+        listProduct = new ArrayList<>();
         adapter = new ProductAdapter(getContext(), listProduct);
         rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 2));
         rvProducts.setAdapter(adapter);
+
+        loadProductsFromApi();
 
         // Load search history (10 gần nhất)
         loadSearchHistory();
@@ -108,6 +108,27 @@ public class BrowseFragment extends Fragment {
     /**
      * Load 10 lịch sử tìm kiếm gần nhất và hiển thị theo chiều ngang
      */
+    private void loadProductsFromApi() {
+        if (getContext() == null) {
+            return;
+        }
+
+        ProductApiService.fetchProducts(getContext(), "", new ProductApiService.ProductCallback() {
+            @Override
+            public void onSuccess(List<Product> products) {
+                listProduct = products;
+                adapter.setData(products);
+            }
+
+            @Override
+            public void onError(String error) {
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Lấy sản phẩm thất bại: " + error, Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
+    }
+
     private void loadSearchHistory() {
         if (getContext() == null) {
             return;

@@ -28,6 +28,35 @@ const authService = {
     return response.data;
   },
 
+  googleLogin: async (idToken) => {
+    const response = await api.post('/auth/google-login', { idToken });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
+  sendVerificationCode: async (name, email, password, role = 'user', phone = '') => {
+    const response = await api.post('/auth/send-verification-code', {
+      name,
+      email,
+      password,
+      role,
+      phone,
+    });
+    return response.data;
+  },
+
+  verifyEmailCode: async (email, code) => {
+    const response = await api.post('/auth/verify-email-code', { email, code });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
   logout: () => {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

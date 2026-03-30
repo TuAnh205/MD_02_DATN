@@ -3,16 +3,14 @@ package com.anhnvt_ph55017.md_02_datn.screens;
 import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.*;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
-import com.anhnvt_ph55017.md_02_datn.models.User;
+import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
@@ -21,7 +19,6 @@ import com.android.volley.toolbox.Volley;
 import com.google.android.gms.auth.api.signin.*;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.*;
 
 import org.json.JSONObject;
 
@@ -33,11 +30,7 @@ public class LoginActivity extends AppCompatActivity {
     Button btnLogin, btnGoogle;
     TextView tvSignUp, tvReset;
 
-    FirebaseAuth mAuth;
     GoogleSignInClient googleSignInClient;
-
-    // ✅ Cập nhật đúng IP máy chủ
-    private static final String BASE_URL = "http://192.168.1.13:5000/api";
 
     boolean isPasswordVisible = false;
 
@@ -53,8 +46,6 @@ public class LoginActivity extends AppCompatActivity {
         btnGoogle = findViewById(R.id.btn_google_sign_in);
         tvSignUp = findViewById(R.id.tvSignUp);
         tvReset = findViewById(R.id.tvResetPass);
-
-        mAuth = FirebaseAuth.getInstance();
 
         configureGoogle();
         togglePassword();
@@ -91,14 +82,29 @@ public class LoginActivity extends AppCompatActivity {
             body.put("email", email);
             body.put("password", pass);
 
-            String url = BASE_URL + "/auth/login";
+            String url = NetworkConstants.getApiBaseUrl() + "/api/auth/login";
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
                     url,
                     body,
                     response -> {
-                        String token = response.optString("token");
+                        String token = response.optString("token", "");
+                        JSONObject userObj = response.optJSONObject("user");
+
+                        if (token.isEmpty() || userObj == null) {
+                            Toast.makeText(this, "Dữ liệu đăng nhập không hợp lệ", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        String userId = userObj.optString("_id", "");
+                        String userEmail = userObj.optString("email", email);
+                        String userName = userObj.optString("name", "User");
+
+                        if (userId.isEmpty()) {
+                            Toast.makeText(this, "Không lấy được userId", Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
                         // Lưu token
                         getSharedPreferences("auth", MODE_PRIVATE)
@@ -106,15 +112,24 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("token", token)
                                 .apply();
 
-                        // ✅ Lưu session tối thiểu để isLoggedIn() = true
-                        SessionManager.saveUserSession(this, 1, email, "User");
+                        // Lưu session theo user backend để app và web dùng chung account.
+                        SessionManager.saveUserSession(this, userId, userEmail, userName);
 
                         Toast.makeText(this, "Login thành công", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
                     },
                     error -> {
-                        Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_LONG).show();
+                        if (error.networkResponse != null) {
+                            int statusCode = error.networkResponse.statusCode;
+                            if (statusCode == 401) {
+                                Toast.makeText(this, "Sai tài khoản hoặc mật khẩu", Toast.LENGTH_LONG).show();
+                            } else {
+                                Toast.makeText(this, "Lỗi server: " + statusCode, Toast.LENGTH_LONG).show();
+                            }
+                        } else {
+                            Toast.makeText(this, "Không kết nối được server. Kiểm tra IP backend trong NetworkConstants", Toast.LENGTH_LONG).show();
+                        }
                     }
             );
 
@@ -168,7 +183,7 @@ public class LoginActivity extends AppCompatActivity {
                     return;
                 }
 
-                firebaseAuth(idToken);
+                googleLoginToServer(idToken);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -177,56 +192,35 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    // ================= FIREBASE AUTH =================
-    private void firebaseAuth(String idToken) {
-
-        AuthCredential credential =
-                GoogleAuthProvider.getCredential(idToken, null);
-
-        mAuth.signInWithCredential(credential)
-                .addOnCompleteListener(task -> {
-
-                    if (task.isSuccessful()) {
-
-                        FirebaseUser user = mAuth.getCurrentUser();
-
-                        if (user != null) {
-
-                            String uid   = user.getUid();
-                            String email = user.getEmail();
-                            String name  = user.getDisplayName();
-
-                            syncServer(uid, email, name);
-                        }
-
-                    } else {
-                        Toast.makeText(this, "Firebase fail", Toast.LENGTH_SHORT).show();
-                    }
-                });
-    }
-
-    // ================= SYNC SERVER =================
-    private void syncServer(String uid, String email, String name) {
-
-        if (email == null || email.isEmpty()) {
-            Toast.makeText(this, "Google account không có email", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+    // ================= GOOGLE LOGIN SERVER =================
+    private void googleLoginToServer(String idToken) {
         try {
             JSONObject body = new JSONObject();
-            body.put("firebaseUid", uid);
-            body.put("email", email);
-            body.put("name", name != null ? name : "User");
+            body.put("idToken", idToken);
 
-            String url = BASE_URL + "/auth/firebase-sync";
+            String url = NetworkConstants.getApiBaseUrl() + "/api/auth/google-login";
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
                     url,
                     body,
                     response -> {
-                        String token = response.optString("token");
+                        String token = response.optString("token", "");
+                        JSONObject userObj = response.optJSONObject("user");
+
+                        if (token.isEmpty() || userObj == null) {
+                            Toast.makeText(this, "Google login trả dữ liệu không hợp lệ", Toast.LENGTH_LONG).show();
+                            return;
+                        }
+
+                        String userId = userObj.optString("_id", "");
+                        String email = userObj.optString("email", "");
+                        String name = userObj.optString("name", "User");
+
+                        if (userId.isEmpty() || email.isEmpty()) {
+                            Toast.makeText(this, "Thiếu thông tin user từ server", Toast.LENGTH_LONG).show();
+                            return;
+                        }
 
                         // Lưu token
                         getSharedPreferences("auth", MODE_PRIVATE)
@@ -234,24 +228,18 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("token", token)
                                 .apply();
 
-                        // ✅ Lưu session tối thiểu để isLoggedIn() = true
-                        SessionManager.saveUserSession(
-                                this, 1, email, name != null ? name : "User"
-                        );
+                        SessionManager.saveUserSession(this, userId, email, name);
 
                         Toast.makeText(this, "Google login thành công", Toast.LENGTH_SHORT).show();
                         startActivity(new Intent(this, MainActivity.class));
                         finish();
                     },
                     error -> {
-                        if (error.networkResponse != null && error.networkResponse.data != null) {
-                            String bodyStr = new String(error.networkResponse.data);
+                        if (error.networkResponse != null) {
                             int statusCode = error.networkResponse.statusCode;
-                            Log.e("SYNC_ERROR", "Status: " + statusCode + " | Body: " + bodyStr);
-                            Toast.makeText(this, "Sync server lỗi " + statusCode + ": " + bodyStr, Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Google login lỗi server: " + statusCode, Toast.LENGTH_LONG).show();
                         } else {
-                            Log.e("SYNC_ERROR", error.toString());
-                            Toast.makeText(this, "Sync server lỗi: " + error.toString(), Toast.LENGTH_LONG).show();
+                            Toast.makeText(this, "Google login lỗi kết nối", Toast.LENGTH_LONG).show();
                         }
                     }
             );
@@ -260,7 +248,7 @@ public class LoginActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(this, "Lỗi tạo request sync server", Toast.LENGTH_LONG).show();
+            Toast.makeText(this, "Lỗi tạo request Google login", Toast.LENGTH_LONG).show();
         }
     }
 

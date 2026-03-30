@@ -12,6 +12,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
 import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONObject;
@@ -21,8 +22,7 @@ public class RegisterActivity extends AppCompatActivity {
     EditText edtName, edtEmail, edtPhone, edtPass, edtConfirm;
     Button btnRegister;
 
-    // 🔥 dùng IP máy bạn (KHÔNG dùng 10.0.2.2)
-    private static final String BASE_URL = "http://192.168.1.10:5000/api";
+    private static final String BASE_URL = NetworkConstants.API_BASE_URL + "/api";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

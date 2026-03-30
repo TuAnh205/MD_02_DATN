@@ -4,10 +4,11 @@ import java.io.Serializable;
 
 public class Product implements Serializable {
 
-    int id;
+    String id;
     String name;
     double price;
-    int image;
+    int image;          // local drawable resource id (for in-app DB items)
+    String imageUrl;    // remote URL (for API products)
     String description;
     float rating;
     int reviewCount;
@@ -22,12 +23,38 @@ public class Product implements Serializable {
 
     public Product(int id, String name, double price, int image,
                    String description, int stock) {
-        this.id = id;
+        this.id = String.valueOf(id);
         this.name = name;
         this.price = price;
         this.image = image;
         this.description = description;
         this.stock = stock;
+    }
+
+    public Product(String id, String name, double price, String imageUrl,
+                   String description, int stock) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.description = description;
+        this.stock = stock;
+    }
+
+    public int getImage() {
+        return image;
+    }
+
+    public void setImage(int image) {
+        this.image = image;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public float getRating() {
@@ -62,13 +89,19 @@ public class Product implements Serializable {
         this.description = description;
     }
 
-    public int getId() { return id; }
+    public String getId() { return id; }
+
+    public int getIntId() {
+        try {
+            return Integer.parseInt(id);
+        } catch (Exception e) {
+            return -1;
+        }
+    }
 
     public String getName() { return name; }
 
     public double getPrice() { return price; }
-
-    public int getImage() { return image; }
 
     public boolean isFavorite() {
         return isFavorite;

@@ -3,6 +3,7 @@ package com.anhnvt_ph55017.md_02_datn.Adapters;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,6 +11,10 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.android.volley.Response;
+import com.android.volley.toolbox.ImageRequest;
+import com.android.volley.toolbox.Volley;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -51,7 +56,35 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         holder.tvName.setText(product.getName());
         holder.tvPrice.setText("$" + product.getPrice());
-        holder.imgProduct.setImageResource(product.getImage());
+
+        // loading image bằng URL nếu có, else dùng resource local
+        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
+            ImageRequest imageRequest = new ImageRequest(
+                    product.getImageUrl(),
+                    new Response.Listener<Bitmap>() {
+                        @Override
+                        public void onResponse(Bitmap response) {
+                            holder.imgProduct.setImageBitmap(response);
+                        }
+                    },
+                    0,
+                    0,
+                    ImageView.ScaleType.CENTER_CROP,
+                    Bitmap.Config.RGB_565,
+                    error -> {
+                        if (product.getImage() != 0) {
+                            holder.imgProduct.setImageResource(product.getImage());
+                        } else {
+                            holder.imgProduct.setImageResource(R.drawable.bg_image);
+                        }
+                    }
+            );
+            Volley.newRequestQueue(context).add(imageRequest);
+        } else if (product.getImage() != 0) {
+            holder.imgProduct.setImageResource(product.getImage());
+        } else {
+            holder.imgProduct.setImageResource(R.drawable.ic_launcher_foreground);
+        }
 
         // rating
         holder.tvRating.setText(product.getRating() + " (" + product.getReviewCount() + ")");
@@ -101,7 +134,10 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                         }
 
                         CartDAO cartDAO = new CartDAO(context);
-                        cartDAO.addToCart(userId, selectedProduct.getId());
+                        int productId = selectedProduct.getIntId();
+                        if (productId >= 0) {
+                            cartDAO.addToCart(userId, productId);
+                        }
                         
                         // Show custom toast
                         showCustomToast(context, "Added to cart");
