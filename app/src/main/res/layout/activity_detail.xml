@@ -37,6 +37,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+
             <!-- NAME -->
             <TextView
                 android:id="@+id/tvName"
@@ -45,6 +46,24 @@
                 android:textColor="@android:color/white"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
+
+            <!-- NEW RELEASE BADGE -->
+            <TextView
+                android:id="@+id/tvNewBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="NEW RELEASE"
+                android:textColor="#fff"
+                android:background="@drawable/bg_btn_blue"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:textStyle="bold"
+                android:textSize="12sp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"/>
 
             <!-- PRICE -->
             <TextView
@@ -64,13 +83,169 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
 
-            <!-- DESCRIPTION -->
+
+            <!-- DESCRIPTION NGẮN -->
             <TextView
                 android:id="@+id/tvDesc"
                 android:textColor="#B0BEC5"
                 android:layout_marginTop="8dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
+
+            <!-- DETAILED DESCRIPTION -->
+            <TextView
+                android:id="@+id/tvDetailedDesc"
+                android:textColor="#B0BEC5"
+                android:textSize="15sp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:lineSpacingExtra="2dp"
+                android:textStyle="italic"/>
+
+
+            <!-- RATING & ĐÁNH GIÁ -->
+            <TextView
+                android:text="ĐÁNH GIÁ &amp; NHẬN XÉT"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="#2F80FF"
+                android:layout_marginTop="24dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <!-- Block điểm trung bình và biểu đồ số sao -->
+            <LinearLayout
+                android:orientation="horizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="12dp">
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:gravity="center_horizontal"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content">
+                    <TextView
+                        android:id="@+id/tvRatingAverage"
+                        android:text="4.8"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="36sp"
+                        android:textStyle="bold"
+                        android:textColor="#fff"
+                        android:gravity="center"/>
+                    <TextView
+                        android:id="@+id/tvRatingCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="1.2K đánh giá"
+                        android:textSize="14sp"
+                        android:textColor="#B0BEC5"
+                        android:gravity="center"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:orientation="vertical"
+                    android:layout_width="0dp"
+                    android:layout_weight="2"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="16dp">
+                    <!-- 5 sao -->
+                    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="5" android:textColor="#fff" android:layout_width="24dp" android:layout_height="wrap_content"/>
+                        <ProgressBar android:id="@+id/progress5" style="?android:attr/progressBarStyleHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="12dp" android:progress="80" android:max="100" android:progressDrawable="@drawable/progress_rating"/>
+                        <TextView android:id="@+id/tvCount5" android:text="1000" android:textColor="#B0BEC5" android:layout_width="40dp" android:gravity="end" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <!-- 4 sao -->
+                    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="4" android:textColor="#fff" android:layout_width="24dp" android:layout_height="wrap_content"/>
+                        <ProgressBar android:id="@+id/progress4" style="?android:attr/progressBarStyleHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="12dp" android:progress="10" android:max="100" android:progressDrawable="@drawable/progress_rating"/>
+                        <TextView android:id="@+id/tvCount4" android:text="120" android:textColor="#B0BEC5" android:layout_width="40dp" android:gravity="end" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <!-- 3 sao -->
+                    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="3" android:textColor="#fff" android:layout_width="24dp" android:layout_height="wrap_content"/>
+                        <ProgressBar android:id="@+id/progress3" style="?android:attr/progressBarStyleHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="12dp" android:progress="5" android:max="100" android:progressDrawable="@drawable/progress_rating"/>
+                        <TextView android:id="@+id/tvCount3" android:text="30" android:textColor="#B0BEC5" android:layout_width="40dp" android:gravity="end" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <!-- 2 sao -->
+                    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="2" android:textColor="#fff" android:layout_width="24dp" android:layout_height="wrap_content"/>
+                        <ProgressBar android:id="@+id/progress2" style="?android:attr/progressBarStyleHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="12dp" android:progress="3" android:max="100" android:progressDrawable="@drawable/progress_rating"/>
+                        <TextView android:id="@+id/tvCount2" android:text="10" android:textColor="#B0BEC5" android:layout_width="40dp" android:gravity="end" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                    <!-- 1 sao -->
+                    <LinearLayout android:orientation="horizontal" android:layout_width="match_parent" android:layout_height="wrap_content">
+                        <TextView android:text="1" android:textColor="#fff" android:layout_width="24dp" android:layout_height="wrap_content"/>
+                        <ProgressBar android:id="@+id/progress1" style="?android:attr/progressBarStyleHorizontal" android:layout_width="0dp" android:layout_weight="1" android:layout_height="12dp" android:progress="2" android:max="100" android:progressDrawable="@drawable/progress_rating"/>
+                        <TextView android:id="@+id/tvCount1" android:text="5" android:textColor="#B0BEC5" android:layout_width="40dp" android:gravity="end" android:layout_height="wrap_content"/>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- FORM ĐÁNH GIÁ -->
+            <TextView
+                android:text="Viết đánh giá của bạn"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#fff"
+                android:layout_marginTop="16dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <LinearLayout
+                android:id="@+id/layoutReviewForm"
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="#1A2233"
+                android:padding="12dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:gravity="center_vertical">
+                <TextView android:text="Chọn số sao" android:textColor="#B0BEC5" android:textSize="14sp" android:layout_width="wrap_content" android:layout_height="wrap_content"/>
+                <RatingBar
+                    android:id="@+id/ratingBar"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:numStars="5"
+                    android:stepSize="1.0"
+                    android:rating="5"
+                    android:layout_marginBottom="8dp"/>
+                <EditText
+                    android:id="@+id/edtReview"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Bạn thấy sản phẩm này thế nào?"
+                    android:background="@drawable/bg_card"
+                    android:textColor="#fff"
+                    android:textColorHint="#B0BEC5"
+                    android:padding="8dp"
+                    android:layout_marginBottom="8dp"/>
+                <Button
+                    android:id="@+id/btnSendReview"
+                    android:text="Gửi đánh giá"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textColor="#fff"
+                    android:backgroundTint="#2F80FF"/>
+            </LinearLayout>
+
+            <!-- DANH SÁCH ĐÁNH GIÁ -->
+            <TextView
+                android:text="Đánh giá của người dùng"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="#fff"
+                android:layout_marginTop="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rvReviews"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"/>
 
             <!-- ADD TO CART -->
             <Button

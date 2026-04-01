@@ -1,20 +1,11 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import com.android.volley.Response;
-import com.android.volley.toolbox.ImageRequest;
-import com.android.volley.toolbox.Volley;
+import android.widget.*;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,13 +17,14 @@ import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.DetailActivity;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
+import com.bumptech.glide.Glide;
 
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
 
-    List<Product> list;
-    Context context;
+    private List<Product> list;
+    private Context context;
 
     public ProductAdapter(Context context, List<Product> list) {
         this.context = context;
@@ -42,10 +34,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View view = LayoutInflater.from(context)
                 .inflate(R.layout.item_product, parent, false);
-
         return new ViewHolder(view);
     }
 
@@ -54,128 +44,89 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         Product product = list.get(position);
 
+        // ===== TEXT =====
         holder.tvName.setText(product.getName());
         holder.tvPrice.setText("$" + product.getPrice());
-
-        // loading image bằng URL nếu có, else dùng resource local
-        if (product.getImageUrl() != null && !product.getImageUrl().isEmpty()) {
-            ImageRequest imageRequest = new ImageRequest(
-                    product.getImageUrl(),
-                    new Response.Listener<Bitmap>() {
-                        @Override
-                        public void onResponse(Bitmap response) {
-                            holder.imgProduct.setImageBitmap(response);
-                        }
-                    },
-                    0,
-                    0,
-                    ImageView.ScaleType.CENTER_CROP,
-                    Bitmap.Config.RGB_565,
-                    error -> {
-                        if (product.getImage() != 0) {
-                            holder.imgProduct.setImageResource(product.getImage());
-                        } else {
-                            holder.imgProduct.setImageResource(R.drawable.bg_image);
-                        }
-                    }
-            );
-            Volley.newRequestQueue(context).add(imageRequest);
-        } else if (product.getImage() != 0) {
-            holder.imgProduct.setImageResource(product.getImage());
-        } else {
-            holder.imgProduct.setImageResource(R.drawable.ic_launcher_foreground);
-        }
-
-        // rating
         holder.tvRating.setText(product.getRating() + " (" + product.getReviewCount() + ")");
 
-        // favorite icon
-        if(product.isFavorite()){
+        // ===== IMAGE (GLIDE) =====
+        String imageUrl = product.getImageUrl();
+
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+
+            android.util.Log.d("IMG_URL", imageUrl);
+
+            Glide.with(context)
+                    .load(imageUrl)
+                    .placeholder(R.drawable.bg_image)
+                    .error(R.drawable.bg_image)
+                    .centerCrop()
+                    .into(holder.imgProduct);
+
+        } else {
+            holder.imgProduct.setImageResource(R.drawable.bg_image);
+        }
+
+        // ===== FAVORITE =====
+        if (product.isFavorite()) {
             holder.imgFavorite.setImageResource(R.drawable.heart_solid_full);
-        }else{
+        } else {
             holder.imgFavorite.setImageResource(R.drawable.heart_regular_full);
         }
 
-        // click favorite
         holder.imgFavorite.setOnClickListener(v -> {
-
             product.setFavorite(!product.isFavorite());
             notifyItemChanged(holder.getAdapterPosition());
-
         });
 
-        // click item → mở detail
+        // ===== CLICK ITEM → DETAIL =====
         holder.itemView.setOnClickListener(v -> {
 
             Intent intent = new Intent(context, DetailActivity.class);
-
             intent.putExtra("id", product.getId());
             intent.putExtra("name", product.getName());
             intent.putExtra("price", product.getPrice());
-            intent.putExtra("image", product.getImage());
+            intent.putExtra("imageUrl", product.getImageUrl());
             intent.putExtra("desc", product.getDescription());
             intent.putExtra("rating", product.getRating());
             intent.putExtra("reviewCount", product.getReviewCount());
 
             context.startActivity(intent);
-
         });
 
-        // ADD TO CART - Show Bottom Sheet
+        // ===== ADD TO CART =====
         holder.btnAdd.setOnClickListener(v -> {
-            // Show bottom sheet to select color, storage, and quantity
-            if (context instanceof AppCompatActivity) {
-                BottomSheetProductOptions bottomSheet = 
-                    BottomSheetProductOptions.newInstance(product, selectedProduct -> {
-                        // Callback: Add to cart with selected options
-                        int userId = SessionManager.getUserId(context);
-                        if (userId <= 0) {
-                            userId = 1;  // Guest cart
-                        }
 
-                        CartDAO cartDAO = new CartDAO(context);
-                        int productId = selectedProduct.getIntId();
-                        if (productId >= 0) {
-                            cartDAO.addToCart(userId, productId);
-                        }
-                        
-                        // Show custom toast
-                        showCustomToast(context, "Added to cart");
-                    });
-                
-                bottomSheet.show(((AppCompatActivity) context).getSupportFragmentManager(), "product_options");
+            if (context instanceof AppCompatActivity) {
+
+                BottomSheetProductOptions sheet =
+                        BottomSheetProductOptions.newInstance(product, selectedProduct -> {
+
+                            int userId = SessionManager.getUserId(context);
+                            if (userId <= 0) userId = 1;
+
+                            CartDAO cartDAO = new CartDAO(context);
+                            cartDAO.addToCart(userId, selectedProduct.getIntId());
+
+                            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show();
+                        });
+
+                sheet.show(((AppCompatActivity) context).getSupportFragmentManager(), "product_options");
             }
         });
-
     }
 
     @Override
     public int getItemCount() {
-        return list.size();
+        return list != null ? list.size() : 0;
     }
 
-    // dùng cho search filter
-    public void setData(List<Product> list){
+    public void setData(List<Product> list) {
         this.list = list;
         notifyDataSetChanged();
     }
 
-    // Custom Toast helper
-    private void showCustomToast(Context context, String message) {
-        Toast toast = new Toast(context);
-        
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View layout = inflater.inflate(R.layout.custom_toast_layout, null);
-        
-        TextView tvMessage = layout.findViewById(R.id.tvToastMessage);
-        tvMessage.setText(message);
-        
-        toast.setView(layout);
-        toast.setDuration(Toast.LENGTH_SHORT);
-        toast.setGravity(android.view.Gravity.BOTTOM | android.view.Gravity.CENTER_HORIZONTAL, 0, 100);
-        toast.show();
-    }
-
+    // ===== VIEW HOLDER =====
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgProduct, imgFavorite;

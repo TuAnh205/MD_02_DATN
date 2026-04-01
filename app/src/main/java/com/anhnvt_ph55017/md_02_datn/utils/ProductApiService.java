@@ -4,8 +4,6 @@ import android.content.Context;
 import android.util.Log;
 
 import com.android.volley.Request;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
@@ -26,6 +24,7 @@ public class ProductApiService {
 
     public static void fetchProducts(Context context, String query, ProductCallback callback) {
         String url = NetworkConstants.API_BASE_URL + "/api/products";
+
         if (query != null && !query.isEmpty()) {
             try {
                 url += "?q=" + URLEncoder.encode(query, "UTF-8");
@@ -39,19 +38,27 @@ public class ProductApiService {
                     try {
                         List<Product> products = new ArrayList<>();
                         JSONArray data = response.optJSONArray("data");
+
                         if (data == null) {
-                            callback.onError("Null data from server");
+                            callback.onError("No data from server");
                             return;
                         }
 
                         for (int i = 0; i < data.length(); i++) {
                             JSONObject item = data.getJSONObject(i);
-                            String id = item.optString("_id", "");
-                            String name = item.optString("name", "Unknown");
-                            double price = item.optDouble("price", 0);
-                            String description = item.optString("description", "");
-                            int stock = item.optInt("stock", 0);
-                            String imageUrl = item.optString("image", "");
+
+                            String id = item.optString("_id");
+                            String name = item.optString("name");
+                            double price = item.optDouble("price");
+                            String description = item.optString("description");
+                            int stock = item.optInt("stock");
+
+                            JSONArray images = item.optJSONArray("images");
+                            String imageUrl = "";
+
+                            if (images != null && images.length() > 0) {
+                                imageUrl = images.optString(0);
+                            }
 
                             Product product = new Product(id, name, price, imageUrl, description, stock);
 
@@ -65,21 +72,40 @@ public class ProductApiService {
                         }
 
                         callback.onSuccess(products);
+
                     } catch (Exception e) {
-                        e.printStackTrace();
-                        callback.onError("Parsing error: " + e.getMessage());
+                        callback.onError("Parse error: " + e.getMessage());
                     }
                 },
                 error -> {
-                    Log.e("ProductApiService", "fetchProducts error", error);
-                    if (error instanceof VolleyError && error.networkResponse != null) {
-                        callback.onError("Server error code: " + error.networkResponse.statusCode);
-                    } else {
-                        callback.onError(error.getMessage() != null ? error.getMessage() : "Unknown error");
-                    }
+                    Log.e("API_ERROR", error.toString());
+                    callback.onError("API error");
                 }
         );
 
+        Volley.newRequestQueue(context).add(request);
+    }
+    public interface ProductDetailCallback {
+        void onSuccess(JSONObject productJson);
+        void onError(String error);
+    }
+
+    public static void fetchProductById(Context context, String id, ProductDetailCallback callback) {
+        String url = NetworkConstants.API_BASE_URL + "/api/products/" + id;
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
+                response -> {
+                    try {
+                        callback.onSuccess(response);
+                    } catch (Exception e) {
+                        callback.onError("Parse error: " + e.getMessage());
+                    }
+                },
+                error -> {
+                    Log.e("API_ERROR", error.toString());
+                    callback.onError("API error");
+                }
+        );
         Volley.newRequestQueue(context).add(request);
     }
 }

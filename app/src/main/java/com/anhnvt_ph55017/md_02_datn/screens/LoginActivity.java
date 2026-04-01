@@ -106,11 +106,8 @@ public class LoginActivity extends AppCompatActivity {
                             return;
                         }
 
-                        // Lưu token
-                        getSharedPreferences("auth", MODE_PRIVATE)
-                                .edit()
-                                .putString("token", token)
-                                .apply();
+                        // Lưu token vào SessionManager để các màn khác dùng đúng
+                        SessionManager.saveToken(this, token);
 
                         // Lưu session theo user backend để app và web dùng chung account.
                         SessionManager.saveUserSession(this, userId, userEmail, userName);
