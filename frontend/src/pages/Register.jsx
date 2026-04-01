@@ -14,6 +14,22 @@ export default function Register({ accountType = 'user' }) {
   const { register, registerShop } = useAuth();
   const isShopAccount = accountType === 'shop';
 
+  const redirectByRole = (registeredUser) => {
+    const role = registeredUser?.role;
+
+    if (role === 'shop') {
+      navigate('/shop');
+      return;
+    }
+
+    if (role === 'admin') {
+      navigate('/admin');
+      return;
+    }
+
+    navigate('/');
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     try {
@@ -35,12 +51,11 @@ export default function Register({ accountType = 'user' }) {
         return;
       }
 
-      if (isShopAccount) {
-        await registerShop(name.trim(), email.trim(), password);
-      } else {
-        await register(name.trim(), email.trim(), password);
-      }
-      navigate('/');
+      const response = isShopAccount
+        ? await registerShop(name.trim(), email.trim(), password)
+        : await register(name.trim(), email.trim(), password);
+
+      redirectByRole(response?.user);
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng ký thất bại');
     } finally {

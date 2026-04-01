@@ -3,6 +3,24 @@ import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import notificationService from '../services/notificationService';
 
+const coretechVisuals = [
+  {
+    id: 'ct-1',
+    title: 'CoreTech Retail Hub',
+    image: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'ct-2',
+    title: 'CoreTech Device Lab',
+    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80'
+  },
+  {
+    id: 'ct-3',
+    title: 'CoreTech Service Center',
+    image: 'https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?auto=format&fit=crop&w=800&q=80'
+  }
+];
+
 export default function ShopDashboard() {
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -148,12 +166,6 @@ export default function ShopDashboard() {
                 </div>
               )}
 
-              <Link
-                to="/"
-                className="text-gray-500 hover:text-gray-700 px-3 py-2 rounded-md text-sm font-medium"
-              >
-                Về trang chủ
-              </Link>
               <button
                 onClick={handleLogout}
                 className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
@@ -200,6 +212,43 @@ export default function ShopDashboard() {
         {/* Main content */}
         <div className="flex-1 md:ml-0">
           <main className="p-6">
+            <section className="mb-6 rounded-2xl overflow-hidden border border-blue-100 shadow-sm bg-white">
+              <div className="relative">
+                <div className="h-36 md:h-44 bg-gradient-to-r from-slate-900 via-blue-900 to-cyan-700" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.22),transparent_45%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.15),transparent_40%)]" />
+
+                <div className="absolute left-5 top-5 flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold tracking-wide backdrop-blur">
+                    CORETECH VERIFIED SHOP
+                  </span>
+                  <span className="px-3 py-1 rounded-full bg-emerald-400/90 text-slate-900 text-xs font-bold">
+                    MANAGED BY CORETECH
+                  </span>
+                </div>
+
+                <div className="absolute left-5 bottom-5 right-5 text-white">
+                  <h2 className="text-xl md:text-2xl font-bold">{user?.name} thuộc hệ thống vận hành CORETECH</h2>
+                  <p className="text-sm text-white/90 mt-1">
+                    Không gian quản trị dành riêng cho đối tác shop chính thức trong mạng lưới CORETECH Commerce.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50">
+                {coretechVisuals.map((item) => (
+                  <div key={item.id} className="relative rounded-xl overflow-hidden h-24 group">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <p className="absolute left-3 bottom-2 text-xs font-semibold text-white tracking-wide">{item.title}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
             <Outlet />
           </main>
         </div>
