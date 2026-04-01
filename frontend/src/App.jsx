@@ -2,6 +2,7 @@ import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Header';
+import Footer from './components/Footer';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Home from './pages/Home';
@@ -28,34 +29,46 @@ import ShopRevenue from './pages/ShopRevenue';
 import ShopOrders from './pages/ShopOrders';
 import ShopReviews from './pages/ShopReviews';
 
+function getStoredUser() {
+  try {
+    const rawUser = localStorage.getItem('user');
+    return rawUser ? JSON.parse(rawUser) : null;
+  } catch {
+    return null;
+  }
+}
+
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const effectiveUser = user || getStoredUser();
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  return user ? children : <Navigate to="/login" />;
+  return effectiveUser ? children : <Navigate to="/login" />;
 }
 
 function AdminProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const effectiveUser = user || getStoredUser();
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  return user && user.role === 'admin' ? children : <Navigate to="/login" />;
+  return effectiveUser && effectiveUser.role === 'admin' ? children : <Navigate to="/login" />;
 }
 
 function ShopProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const effectiveUser = user || getStoredUser();
 
   if (loading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
-  return user && user.role === 'shop' ? children : <Navigate to="/login" />;
+  return effectiveUser && effectiveUser.role === 'shop' ? children : <Navigate to="/login" />;
 }
 
 function AppContent() {
@@ -143,6 +156,7 @@ function AppContent() {
           <Route path="vouchers" element={<AdminVouchers />} />
         </Route>
       </Routes>
+      <Footer />
     </Router>
   );
 }

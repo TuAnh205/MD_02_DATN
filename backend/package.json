@@ -7,7 +7,8 @@
     "start": "node app.js",
     "dev": "nodemon app.js",
     "test": "jest",
-    "seed": "node seeds/seed.js"
+    "seed": "node seeds/seed.js",
+    "seed:reviews": "node seeds/seedRandomReviews.js"
   },
   "author": "",
   "license": "MIT",

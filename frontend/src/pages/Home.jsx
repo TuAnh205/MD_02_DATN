@@ -73,8 +73,28 @@ const promotions = [
   },
 ];
 
+const sideBanners = {
+  left: {
+    title: 'Siêu Sale Laptop',
+    subtitle: 'Đồng giá ưu đãi mỗi ngày',
+    cta: 'Xem deal ngay',
+    link: '/products?category=Máy tính',
+    image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1000&q=80',
+    accent: 'from-rose-700/80 via-orange-600/75 to-amber-500/70'
+  },
+  right: {
+    title: 'Phụ Kiện Chính Hãng',
+    subtitle: 'Giảm sâu tai nghe, loa, gear',
+    cta: 'Mua ngay',
+    link: '/products?category=Phụ kiện',
+    image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
+    accent: 'from-indigo-800/80 via-blue-700/75 to-cyan-600/70'
+  }
+};
+
 export default function Home() {
   const [products, setProducts] = useState([]);
+  const [showAllProducts, setShowAllProducts] = useState(false);
   const [hotProducts, setHotProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
@@ -108,6 +128,10 @@ export default function Home() {
       fetchProducts(searchQuery, filterCategory);
     }, 300);
     return () => clearTimeout(timer);
+  }, [searchQuery, filterCategory, filterBrand, minPrice, maxPrice, minRating, sortBy]);
+
+  useEffect(() => {
+    setShowAllProducts(false);
   }, [searchQuery, filterCategory, filterBrand, minPrice, maxPrice, minRating, sortBy]);
 
   const fetchCategories = async () => {
@@ -168,8 +192,46 @@ export default function Home() {
     return Math.round((1 - product.price / original) * 100);
   };
 
+  const visibleProducts = showAllProducts ? products : products.slice(0, 12);
+
   return (
-    <div className="min-h-screen bg-light">
+    <div className="relative min-h-screen bg-light overflow-hidden">
+      <div className="hidden 2xl:block pointer-events-none absolute inset-0 z-0">
+        <div className="absolute left-0 top-0 bottom-0 w-56 border-r border-white/30">
+          <img src={sideBanners.left.image} alt={sideBanners.left.title} className="w-full h-full object-cover" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${sideBanners.left.accent}`} />
+          <div className="absolute inset-0 bg-black/15" />
+          <div className="absolute left-4 right-4 top-28">
+            <p className="text-white/85 text-xs uppercase tracking-wider">Khuyến mãi nổi bật</p>
+            <h3 className="text-white text-2xl font-bold leading-tight mt-2">{sideBanners.left.title}</h3>
+            <p className="text-white/90 text-sm mt-2">{sideBanners.left.subtitle}</p>
+          </div>
+          <Link
+            to={sideBanners.left.link}
+            className="pointer-events-auto absolute left-4 right-4 bottom-10 text-center text-white font-semibold bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl px-4 py-3 transition"
+          >
+            {sideBanners.left.cta}
+          </Link>
+        </div>
+
+        <div className="absolute right-0 top-0 bottom-0 w-56 border-l border-white/30">
+          <img src={sideBanners.right.image} alt={sideBanners.right.title} className="w-full h-full object-cover" />
+          <div className={`absolute inset-0 bg-gradient-to-b ${sideBanners.right.accent}`} />
+          <div className="absolute inset-0 bg-black/20" />
+          <div className="absolute left-4 right-4 top-28">
+            <p className="text-white/85 text-xs uppercase tracking-wider">Ưu đãi công nghệ</p>
+            <h3 className="text-white text-2xl font-bold leading-tight mt-2">{sideBanners.right.title}</h3>
+            <p className="text-white/90 text-sm mt-2">{sideBanners.right.subtitle}</p>
+          </div>
+          <Link
+            to={sideBanners.right.link}
+            className="pointer-events-auto absolute left-4 right-4 bottom-10 text-center text-white font-semibold bg-white/20 hover:bg-white/30 backdrop-blur rounded-xl px-4 py-3 transition"
+          >
+            {sideBanners.right.cta}
+          </Link>
+        </div>
+      </div>
+
       {/* Hero Carousel */}
       <div className="relative h-96 md:h-[500px] overflow-hidden z-10">
         {heroSlides.map((slide, index) => (
@@ -516,8 +578,9 @@ export default function Home() {
                 <p className="text-gray-500 text-lg">Chưa có sản phẩm nào</p>
               </div>
             ) : (
+              <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {products.map((product) => {
+                {visibleProducts.map((product) => {
                   const discount = getDiscountPercent(product);
 
                   return (
@@ -602,6 +665,19 @@ export default function Home() {
                   );
                 })}
               </div>
+
+              {!showAllProducts && products.length > 12 && (
+                <div className="mt-8 flex justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowAllProducts(true)}
+                    className="px-6 py-3 rounded-lg bg-primary text-white font-semibold hover:bg-primary/90 transition"
+                  >
+                    Xem thêm sản phẩm
+                  </button>
+                </div>
+              )}
+              </>
             )}
           </section>
         </div>
