@@ -106,7 +106,7 @@ const seedProducts = async () => {
         shopId: shopUser._id
       },
       {
-        name: 'iPhone 15 Pro',
+        name: 'iPhone 15 Pro 123456789',
         price: 999000,
         category: 'Điện thoại',
         description: 'Điện thoại thông minh mới nhất',
@@ -119,7 +119,7 @@ const seedProducts = async () => {
         shopId: shopUser._id
       },
       {
-        name: 'Samsung Galaxy Watch',
+        name: 'iPhone 15 Pro 123456789',
         price: 299000,
         category: 'Đồng hồ',
         description: 'Đồng hồ thông minh cao cấp',

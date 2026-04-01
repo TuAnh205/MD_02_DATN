@@ -64,7 +64,9 @@ function AppContent() {
       <Header />
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<Navigate to="/register/user" replace />} />
+        <Route path="/register/user" element={<Register accountType="user" />} />
+        <Route path="/register/shop" element={<Register accountType="shop" />} />
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />

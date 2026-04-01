@@ -95,13 +95,13 @@ export default function Login() {
         <div className="mt-6 space-y-2 text-center">
           <p className="text-sm text-gray-600">
             Chưa có tài khoản?{' '}
-            <Link to="/register" className="text-primary font-semibold hover:underline">
+            <Link to="/register/user" className="text-primary font-semibold hover:underline">
               Đăng Ký Người Mua
             </Link>
           </p>
           <p className="text-sm text-gray-600">
             Bạn là chủ shop?{' '}
-            <Link to="/register?role=shop" className="text-secondary font-semibold hover:underline">
+            <Link to="/register/shop" className="text-secondary font-semibold hover:underline">
               Đăng Ký Tài Khoản Shop
             </Link>
           </p>

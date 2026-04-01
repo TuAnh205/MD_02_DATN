@@ -1,26 +1,18 @@
 import React, { useState } from 'react';
-import { useNavigate, Link, useSearchParams } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-export default function Register() {
+export default function Register({ accountType = 'user' }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [role, setRole] = useState('user');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const { register, registerShop } = useAuth();
-
-  React.useEffect(() => {
-    const roleParam = searchParams.get('role');
-    if (roleParam === 'shop') {
-      setRole('shop');
-    }
-  }, [searchParams]);
+  const isShopAccount = accountType === 'shop';
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -43,7 +35,7 @@ export default function Register() {
         return;
       }
 
-      if (role === 'shop') {
+      if (isShopAccount) {
         await registerShop(name.trim(), email.trim(), password);
       } else {
         await register(name.trim(), email.trim(), password);
@@ -57,11 +49,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-secondary">
+    <div className={`min-h-screen flex items-center justify-center ${isShopAccount ? 'bg-gradient-to-br from-slate-900 via-slate-800 to-secondary' : 'bg-gradient-to-br from-primary to-secondary'}`}>
       <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md">
         <h1 className="text-3xl font-bold text-center text-dark mb-8">
-          {role === 'shop' ? 'Đăng Ký Tài Khoản Shop' : 'Đăng Ký Người Mua'}
+          {isShopAccount ? 'Đăng Ký Tài Khoản Shop' : 'Đăng Ký Người Dùng'}
         </h1>
+
+        <p className="text-sm text-gray-600 text-center mb-6">
+          {isShopAccount
+            ? 'Tạo tài khoản nhà bán để quản lý sản phẩm, đơn hàng và doanh thu.'
+            : 'Tạo tài khoản mua sắm để đặt hàng và theo dõi đơn hàng dễ dàng.'}
+        </p>
 
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
@@ -70,34 +68,6 @@ export default function Register() {
         )}
 
         <form onSubmit={handleRegister} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-dark mb-2">Loại Tài Khoản</label>
-            <div className="flex space-x-4">
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="user"
-                  checked={role === 'user'}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mr-2"
-                  disabled={loading}
-                />
-                Người Mua
-              </label>
-              <label className="flex items-center">
-                <input
-                  type="radio"
-                  value="shop"
-                  checked={role === 'shop'}
-                  onChange={(e) => setRole(e.target.value)}
-                  className="mr-2"
-                  disabled={loading}
-                />
-                Chủ Shop
-              </label>
-            </div>
-          </div>
-
           <div>
             <label className="block text-sm font-medium text-dark mb-2">Họ Tên</label>
             <input
@@ -151,15 +121,24 @@ export default function Register() {
             disabled={loading}
             className="w-full btn-primary font-semibold disabled:opacity-50"
           >
-            {loading ? 'Đang đăng ký...' : role === 'shop' ? 'Đăng Ký Shop' : 'Đăng Ký Người Mua'}
+            {loading ? 'Đang đăng ký...' : isShopAccount ? 'Tạo Tài Khoản Shop' : 'Tạo Tài Khoản Người Dùng'}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 space-y-2 text-center">
           <p className="text-sm text-gray-600">
             Đã có tài khoản?{' '}
             <Link to="/login" className="text-primary font-semibold hover:underline">
               Đăng Nhập
+            </Link>
+          </p>
+          <p className="text-sm text-gray-600">
+            {isShopAccount ? 'Đăng ký cho người dùng?' : 'Đăng ký cho shop?'}{' '}
+            <Link
+              to={isShopAccount ? '/register/user' : '/register/shop'}
+              className="text-secondary font-semibold hover:underline"
+            >
+              {isShopAccount ? 'Đăng Ký Người Dùng' : 'Đăng Ký Shop'}
             </Link>
           </p>
         </div>

@@ -7,7 +7,9 @@ export default function Header() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
+  const [isRegisterMenuOpen, setIsRegisterMenuOpen] = React.useState(false);
   const dropdownRef = React.useRef(null);
+  const registerMenuRef = React.useRef(null);
 
   // Hide header on admin and shop routes
   if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/shop')) {
@@ -19,6 +21,10 @@ export default function Header() {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsDropdownOpen(false);
+      }
+
+      if (registerMenuRef.current && !registerMenuRef.current.contains(event.target)) {
+        setIsRegisterMenuOpen(false);
       }
     };
 
@@ -106,16 +112,50 @@ export default function Header() {
               )}
             </div>
           ) : (
-            <div className="flex gap-3">
-              <Link to="/login" className="btn-secondary text-sm">
+            <div className="relative flex items-center gap-3" ref={registerMenuRef}>
+              <Link to="/login" className="btn-secondary text-sm font-medium">
                 Đăng Nhập
               </Link>
-              <Link to="/register" className="btn-primary text-sm">
-                ĐK Người Mua
-              </Link>
-              <Link to="/register?role=shop" className="btn-primary text-sm">
-                ĐK Shop
-              </Link>
+
+              <button
+                onClick={() => setIsRegisterMenuOpen(!isRegisterMenuOpen)}
+                className="btn-primary text-sm font-medium inline-flex items-center gap-2"
+                aria-haspopup="menu"
+                aria-expanded={isRegisterMenuOpen}
+              >
+                Đăng Ký
+                <svg
+                  className={`w-4 h-4 transition-transform ${isRegisterMenuOpen ? 'rotate-180' : ''}`}
+                  viewBox="0 0 20 20"
+                  fill="currentColor"
+                  aria-hidden="true"
+                >
+                  <path
+                    fillRule="evenodd"
+                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.51a.75.75 0 01-1.08 0l-4.25-4.51a.75.75 0 01.02-1.06z"
+                    clipRule="evenodd"
+                  />
+                </svg>
+              </button>
+
+              {isRegisterMenuOpen && (
+                <div className="absolute left-0 right-0 md:left-auto md:right-0 top-full mt-2 w-full md:w-56 bg-white rounded-xl shadow-lg border border-gray-200 z-50 overflow-hidden">
+                  <Link
+                    to="/register/user"
+                    onClick={() => setIsRegisterMenuOpen(false)}
+                    className="block px-4 py-3 text-sm text-gray-700 hover:bg-slate-50 transition"
+                  >
+                    Đăng ký Người dùng
+                  </Link>
+                  <Link
+                    to="/register/shop"
+                    onClick={() => setIsRegisterMenuOpen(false)}
+                    className="block px-4 py-3 text-sm text-gray-700 hover:bg-slate-50 transition border-t border-gray-100"
+                  >
+                    Đăng ký Shop
+                  </Link>
+                </div>
+              )}
             </div>
           )}
         </nav>
