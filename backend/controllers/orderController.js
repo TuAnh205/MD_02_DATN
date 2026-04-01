@@ -20,6 +20,29 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'shipping address is required' });
         }
 
+        const shippingName = String(shipping.address.name || '').trim().replace(/\s+/g, ' ');
+        const shippingPhone = String(shipping.address.phone || '').trim();
+        const shippingAddress = String(shipping.address.address || '').trim();
+        const shippingCity = String(shipping.address.city || '').trim().replace(/\s+/g, ' ');
+        const shippingDistrict = String(shipping.address.district || '').trim().replace(/\s+/g, ' ');
+        const shippingWard = String(shipping.address.ward || '').trim().replace(/\s+/g, ' ');
+
+        if (!shippingName || !shippingPhone || !shippingAddress || !shippingCity || !shippingDistrict || !shippingWard) {
+            return res.status(400).json({ message: 'Thông tin giao hàng không hợp lệ' });
+        }
+
+        if (/\d/.test(shippingName)) {
+            return res.status(400).json({ message: 'Họ và tên người nhận không được chứa số' });
+        }
+
+        if (!/^0\d{9,10}$/.test(shippingPhone)) {
+            return res.status(400).json({ message: 'Số điện thoại giao hàng không hợp lệ' });
+        }
+
+        if (/\d/.test(shippingCity)) {
+            return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
+        }
+
         const productIds = items.map(item => item.product);
         const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId');
 
@@ -51,12 +74,12 @@ exports.createOrder = async (req, res) => {
             total: total || 0,
             shipping: {
                 address: {
-                    name: shipping.address.name || '',
-                    phone: shipping.address.phone || '',
-                    address: shipping.address.address || '',
-                    city: shipping.address.city || 'N/A',
-                    district: shipping.address.district || 'N/A',
-                    ward: shipping.address.ward || 'N/A'
+                    name: shippingName,
+                    phone: shippingPhone,
+                    address: shippingAddress,
+                    city: shippingCity,
+                    district: shippingDistrict,
+                    ward: shippingWard
                 },
                 method: shipping.method || 'standard',
                 fee: shipping.fee || 0
