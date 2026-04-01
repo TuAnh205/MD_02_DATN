@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +17,9 @@ import android.widget.TextView;
 import android.content.Intent;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
-import com.anhnvt_ph55017.md_02_datn.DAO.OrderDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
+import com.anhnvt_ph55017.md_02_datn.models.OrderItem;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 
@@ -34,7 +35,6 @@ public class OrdersFragment extends Fragment {
     OrderAdapter adapter;
     static List<Order> orderList;    // shared history
     List<Order> filteredList;
-    OrderDAO orderDAO;
     
     TextView tvAll, tvPending, tvProcessing, tvShipping, tvDelivered, tvCancelled;
     String selectedStatus = "ALL";
@@ -65,42 +65,8 @@ public class OrdersFragment extends Fragment {
         tvDelivered = view.findViewById(R.id.tvDelivered);
         tvCancelled = view.findViewById(R.id.tvCancelled);
 
-        // Initialize OrderDAO and load orders from database
-        if (getContext() != null) {
-            orderDAO = new OrderDAO(getContext());
-            
-            if (orderList == null) {
-                orderList = new ArrayList<>();
-            }
-            
-            // Load orders from database for current user
-            int userId = SessionManager.getUserId(getContext());
-            if (userId <= 0) userId = 1;  // Fallback to user 1 if not logged in
-            
-            List<Order> dbOrders = orderDAO.getOrdersByUserId(userId);
-            orderList.clear();
-            orderList.addAll(dbOrders);
-            
-            // If no orders in database, add sample data for demo
-            if (orderList.isEmpty()) {
-                orderList.add(new Order("OD-9021", "Oct 20 2023", 1499, "Đang giao hàng", "Oct 24", 2,
-                        "123 Đường ABC, Phường XYZ, Quận 1, TP.HCM", null, "Thanh toán khi nhận hàng"));
-                orderList.add(new Order("OD-8955", "Oct 18 2023", 899, "Đang giao hàng", "Oct 26", 1,
-                        "456 Đường DEF, Phường UVW, Quận 2, TP.HCM", null, "Thanh toán khi nhận hàng"));
-                orderList.add(new Order("OD-8842", "Oct 15 2023", 450, "Đã nhận", "Oct 21", 2,
-                        "789 Đường GHI, Phường RST, Quận 3, TP.HCM", null, "Thanh toán khi nhận hàng"));
-                orderList.add(new Order("OD-8700", "Sep 28 2023", 2140, "Đã nhận", "Oct 2", 1,
-                        "321 Đường JKL, Phường OPQ, Quận 4, TP.HCM", null, "Thanh toán khi nhận hàng"));
-                orderList.add(new Order("OD-8600", "Nov 1 2023", 1200, "Chưa thanh toán", "Nov 5", 3,
-                        "654 Đường MNO, Phường XYZ, Quận 5, TP.HCM", null, "Thanh toán khi nhận hàng"));
-                orderList.add(new Order("OD-8501", "Oct 25 2023", 750, "Đang xử lý", "Oct 30", 1,
-                        "987 Đường PQR, Phường ABC, Quận 6, TP.HCM", null, "Thanh toán khi nhận hàng"));
-            }
-        }
-
-        filteredList = new ArrayList<>(orderList);
-        
-        // supply listener so we can start activity for result
+        // Lấy token từ SessionManager
+        filteredList = new ArrayList<>();
         adapter = new OrderAdapter(getContext(), filteredList, order -> {
             Intent intent = new Intent(getContext(), com.anhnvt_ph55017.md_02_datn.screens.OrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
@@ -115,7 +81,109 @@ public class OrdersFragment extends Fragment {
             intent.putExtra("productDesc", order.getProductDesc());
             intent.putExtra("shippingAddress", order.getShippingAddress());
             intent.putExtra("paymentMethod", order.getPaymentMethod());
+            // Truyền list<OrderItem> qua intent
+            if (order.getItems() != null) {
+                java.io.Serializable itemsSerializable = (java.io.Serializable) order.getItems();
+                intent.putExtra("orderItems", itemsSerializable);
+            }
             startActivityForResult(intent, REQUEST_CODE_DETAIL);
+        });
+
+        // Gọi API lấy đơn hàng từ backend
+        String token = SessionManager.getToken(getContext());
+        com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.getOrders(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.OrdersCallback() {
+            @Override
+            public void onSuccess(org.json.JSONArray ordersJson) {
+                if (orderList == null) orderList = new ArrayList<>();
+                orderList.clear();
+                filteredList.clear();
+                for (int i = 0; i < ordersJson.length(); i++) {
+                    try {
+                        org.json.JSONObject obj = ordersJson.getJSONObject(i);
+                        Log.d("ORDER_PARSE_DEBUG", "Raw order json: " + obj.toString());
+                        String id = obj.optString("_id");
+                        String date = obj.optString("createdAt");
+                        double total = obj.optDouble("total");
+                        String status = obj.optString("status");
+                        String paymentMethod = obj.optJSONObject("payment") != null ? obj.optJSONObject("payment").optString("method", "") : "";
+                        String shippingAddress = "";
+                        if (obj.has("shipping")) {
+                            org.json.JSONObject ship = obj.optJSONObject("shipping");
+                            if (ship != null && ship.has("address")) {
+                                org.json.JSONObject addr = ship.optJSONObject("address");
+                                if (addr != null) {
+                                    shippingAddress = addr.optString("address", "");
+                                }
+                            }
+                        }
+                        int itemCount = obj.has("items") ? obj.getJSONArray("items").length() : 0;
+                        // Lấy imageUrl của sản phẩm đầu tiên trong đơn hàng (nếu có)
+                        String imageUrl = null;
+                        if (obj.has("items")) {
+                            org.json.JSONArray itemsArr = obj.getJSONArray("items");
+                            if (itemsArr.length() > 0) {
+                                org.json.JSONObject firstItem = itemsArr.getJSONObject(0);
+                                // Ưu tiên lấy trường "image" trực tiếp
+                                imageUrl = firstItem.optString("image", null);
+                                // Nếu không có, thử lấy từ product.images[0]
+                                if ((imageUrl == null || imageUrl.isEmpty()) && firstItem.has("product")) {
+                                    org.json.JSONObject productObj = firstItem.optJSONObject("product");
+                                    if (productObj != null && productObj.has("images")) {
+                                        org.json.JSONArray imagesArr = productObj.optJSONArray("images");
+                                        if (imagesArr != null && imagesArr.length() > 0) {
+                                            imageUrl = imagesArr.optString(0, null);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // Parse danh sách hàng hóa
+                        List<OrderItem> orderItems = new ArrayList<>();
+                        if (obj.has("items")) {
+                            org.json.JSONArray itemsArr = obj.getJSONArray("items");
+                            for (int j = 0; j < itemsArr.length(); j++) {
+                                org.json.JSONObject itemObj = itemsArr.getJSONObject(j);
+                                String productName = itemObj.optString("name", "");
+                                double price = itemObj.optDouble("price", 0);
+                                int quantity = itemObj.optInt("quantity", 1);
+                                int imageRes = R.drawable.bg_image;
+                                // Lấy image từ item hoặc product.images[0]
+                                String itemImageUrl = itemObj.optString("image", null);
+                                if ((itemImageUrl == null || itemImageUrl.isEmpty()) && itemObj.has("product")) {
+                                    org.json.JSONObject productObj = itemObj.optJSONObject("product");
+                                    if (productObj != null && productObj.has("images")) {
+                                        org.json.JSONArray imagesArr = productObj.optJSONArray("images");
+                                        if (imagesArr != null && imagesArr.length() > 0) {
+                                            itemImageUrl = imagesArr.optString(0, null);
+                                        }
+                                    }
+                                }
+                                // Nếu muốn truyền imageUrl, cần sửa OrderItem cho phù hợp
+                                OrderItem orderItem = new OrderItem(productName, price, quantity, imageRes, itemImageUrl);
+                                orderItems.add(orderItem);
+                            }
+                        }
+                        Order order = new Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
+                        Log.d("ORDER_PARSE_DEBUG", "Parsed order: id=" + id + ", date=" + date + ", total=" + total + ", status=" + status + ", itemCount=" + itemCount + ", imageUrl=" + imageUrl);
+                        orderList.add(order);
+                        Log.d("ORDER_PARSE_DEBUG", "Order added to orderList: id=" + id);
+                    } catch (Exception e) {
+                        Log.e("ORDER_PARSE", e.getMessage(), e);
+                    }
+                }
+                filteredList.addAll(orderList);
+                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                    adapter.notifyDataSetChanged();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                Log.e("ORDER_API_ERROR", error);
+                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                    // Hiển thị thông báo lỗi nếu muốn
+                });
+            }
         });
 
         rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -124,6 +192,7 @@ public class OrdersFragment extends Fragment {
         // Set up tab click listeners
         setupTabListeners();
         setTabActive(tvAll);
+        if (orderList == null) orderList = new ArrayList<>();
         filterByStatus("ALL");
 
         return view;
@@ -143,6 +212,7 @@ public class OrdersFragment extends Fragment {
     private void filterByStatus(String status) {
         selectedStatus = status;
         filteredList.clear();
+        if (orderList == null) orderList = new ArrayList<>();
         if (status.equals("ALL")) {
             filteredList.addAll(orderList);
             // push cancelled orders to bottom
@@ -176,11 +246,7 @@ public class OrdersFragment extends Fragment {
             String newStatus = data.getStringExtra("newStatus");
             if (id != null && newStatus != null) {
                 // Reload orders from database to get updated status
-                if (orderDAO != null) {
-                    List<Order> dbOrders = orderDAO.getAllOrders();
-                    orderList.clear();
-                    orderList.addAll(dbOrders);
-                }
+                // Không reload từ local DB nữa, chỉ filter lại danh sách đã lấy từ backend
                 filterByStatus(selectedStatus);
             }
         }
@@ -193,12 +259,7 @@ public class OrdersFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // Reload orders from database when fragment resumes
-        if (orderDAO != null) {
-            List<Order> dbOrders = orderDAO.getAllOrders();
-            orderList.clear();
-            orderList.addAll(dbOrders);
-        }
-        // refresh in case orders were added while away
+        // refresh in case orders were added while away (chỉ cần filter lại, không reload local)
         filterByStatus(selectedStatus);
     }
 

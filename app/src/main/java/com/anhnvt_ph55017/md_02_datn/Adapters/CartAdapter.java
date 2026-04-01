@@ -1,3 +1,4 @@
+
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
 import android.content.Context;
@@ -13,24 +14,27 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.R;
-import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 
 import java.util.List;
-
 
 public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
 
     Context context;
     List<Product> list;
-    CartDAO cartDAO;
     Runnable updateTotal;
+    CartActionListener actionListener;
 
-    public CartAdapter(Context context, List<Product> list, CartDAO cartDAO, Runnable updateTotal) {
+    public interface CartActionListener {
+        void onUpdateQuantity(Product product, int newQty);
+        void onRemove(Product product);
+    }
+
+    public CartAdapter(Context context, List<Product> list, Runnable updateTotal, CartActionListener actionListener) {
         this.context = context;
         this.list = list;
-        this.cartDAO = cartDAO;
         this.updateTotal = updateTotal;
+        this.actionListener = actionListener;
     }
 
     @NonNull
@@ -46,58 +50,49 @@ public class CartAdapter extends RecyclerView.Adapter<CartAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
 
+
         Product p = list.get(position);
 
         holder.tvName.setText(p.getName());
-        holder.tvPrice.setText("$" + p.getPrice());
-        holder.img.setImageResource(p.getImage());
+        // Đổi ký hiệu giá sang đ
+        holder.tvPrice.setText(String.format("%,.0f đ", p.getPrice()));
+
+        // Hiển thị ảnh: nếu có imageUrl thì load bằng Glide, không thì dùng resource
+        if (p.getImageUrl() != null && !p.getImageUrl().isEmpty()) {
+            try {
+                android.util.Log.d("IMG_URL", p.getImageUrl());
+                com.bumptech.glide.Glide.with(context)
+                        .load(p.getImageUrl())
+                        .placeholder(R.drawable.bg_image)
+                        .error(R.drawable.bg_image)
+                        .centerCrop()
+                        .into(holder.img);
+            } catch (Exception e) {
+                holder.img.setImageResource(R.drawable.bg_image);
+            }
+        } else {
+            holder.img.setImageResource(p.getImage());
+        }
+
+
 
         holder.tvQty.setText(String.valueOf(p.getQty()));
         // compute and display line total
-        holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
+        holder.tvLineTotal.setText("Tổng: " + String.format("%,.0f đ", p.getPrice() * p.getQty()));
 
         holder.btnPlus.setOnClickListener(v -> {
-            p.setQty(p.getQty() + 1);
-            holder.tvQty.setText(String.valueOf(p.getQty()));
-            holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
-            // Cập nhật số lượng
-            if(cartDAO != null) {
-                int productId = p.getIntId();
-                if (productId >= 0) {
-                    cartDAO.updateQuantity(productId, p.getQty());
-                }
-            }
-            // Cập nhật tổng tiền
-            if(updateTotal != null) updateTotal.run();
+            int newQty = p.getQty() + 1;
+            if (actionListener != null) actionListener.onUpdateQuantity(p, newQty);
         });
 
         holder.btnMinus.setOnClickListener(v -> {
-            if (p.getQty() > 1) {
-                p.setQty(p.getQty() - 1);
-                holder.tvQty.setText(String.valueOf(p.getQty()));
-                holder.tvLineTotal.setText("Total: $" + (p.getPrice() * p.getQty()));
-                if(cartDAO != null) {
-                    int productId = p.getIntId();
-                    if (productId >= 0) {
-                        cartDAO.updateQuantity(productId, p.getQty());
-                    }
-                }
-                if(updateTotal != null) updateTotal.run();
+            if (p.getQty() > 1 && actionListener != null) {
+                actionListener.onUpdateQuantity(p, p.getQty() - 1);
             }
         });
 
         holder.tvRemove.setOnClickListener(v -> {
-
-            if(cartDAO != null){
-                int productId = p.getIntId();
-                if (productId >= 0) {
-                    cartDAO.removeItem(productId);
-                }
-            }
-            list.remove(position);
-            notifyDataSetChanged();
-            if(updateTotal != null) updateTotal.run();
-
+            if (actionListener != null) actionListener.onRemove(p);
         });
         holder.cbItem.setChecked(p.isSelected());
 

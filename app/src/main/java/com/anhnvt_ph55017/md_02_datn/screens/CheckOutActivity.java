@@ -17,7 +17,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.anhnvt_ph55017.md_02_datn.DAO.AddressDAO;
+
 import com.anhnvt_ph55017.md_02_datn.DAO.OrderDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.HomeActivity;
@@ -42,8 +42,6 @@ public class CheckOutActivity extends AppCompatActivity {
     // shipping
     TextView tvShipName, tvShipPhone, tvShipAddress;
     Button btnChangeAddress;
-    AddressDAO addressDAO;
-    OrderDAO orderDAO;
     Address selectedAddress;
     private int userId;
 
@@ -75,9 +73,19 @@ public class CheckOutActivity extends AppCompatActivity {
         tvShipAddress = findViewById(R.id.tvShipAddress);
         btnChangeAddress = findViewById(R.id.btnChangeAddress);
 
-        addressDAO = new AddressDAO(this);
-        orderDAO = new OrderDAO(this);
-        loadDefaultAddress();
+        // Không dùng DAO, lấy địa chỉ từ intent hoặc backend
+        selectedAddress = null;
+        // Nếu có địa chỉ được chọn từ ShippingAddressActivity, lấy từ intent
+        Intent intent = getIntent();
+        if (intent != null && intent.hasExtra("selectedAddressName")) {
+            String name = intent.getStringExtra("selectedAddressName");
+            String phone = intent.getStringExtra("selectedAddressPhone");
+            String addressStr = intent.getStringExtra("selectedAddressDetail");
+            String id = "";
+            String userIdStr = String.valueOf(userId);
+            selectedAddress = new Address(id, userIdStr, name, phone, addressStr, true);
+        }
+        updateAddressDisplay();
 
         cartList = (List<com.anhnvt_ph55017.md_02_datn.models.Product>) getIntent().getSerializableExtra("cart");
         if(cartList == null) cartList = new java.util.ArrayList<>();
@@ -89,7 +97,8 @@ public class CheckOutActivity extends AppCompatActivity {
         calculateTotals();
 
         btnChangeAddress.setOnClickListener(v -> {
-            startActivityForResult(new Intent(CheckOutActivity.this, ShippingAddressActivity.class), REQUEST_CODE_ADDRESS);
+            Intent addressIntent = new Intent(CheckOutActivity.this, ShippingAddressActivity.class);
+            startActivityForResult(addressIntent, REQUEST_CODE_ADDRESS);
         });
 
         btnOrder.setOnClickListener(v -> {
@@ -132,22 +141,11 @@ public class CheckOutActivity extends AppCompatActivity {
                     paymentMethod = "Khác";
                 }
 
-                // ===== ADDRESS =====
-                String address = selectedAddress != null
+                    // ===== ADDRESS =====
+                    String address = selectedAddress != null
                         ? selectedAddress.getAddress()
-                        : "Địa chỉ mặc định";
-
-                // ===== SAVE DB =====
-                long dbId = orderDAO.addOrder(null, userId, subtotal, status, address, paymentMethod, voucher, image);
-                String id = "OD-" + dbId;
-
-                com.anhnvt_ph55017.md_02_datn.models.Order newOrder =
-                        new com.anhnvt_ph55017.md_02_datn.models.Order(
-                                id, date, subtotal, status,
-                                arrival, itemCount, image, name, price, desc
-                        );
-
-                // ===== ADD TO MEMORY =====
+                        : "Chưa chọn địa chỉ";
+                    // TODO: Gọi API đặt hàng backend ở đây, truyền address, paymentMethod, cartList, ...
 
             }
 
@@ -179,23 +177,18 @@ public class CheckOutActivity extends AppCompatActivity {
     }
 
     private void loadDefaultAddress() {
-        // ensure there are at least two sample addresses
-        List<Address> all = addressDAO.getAddresses(userId);
-        if (all.isEmpty()) {
-            addressDAO.addAddress(userId, "Nhà riêng", "0123 456 789", "Số 1, Đường A, Quận 1", true);
-            addressDAO.addAddress(userId, "Công ty", "0987 654 321", "Tầng 7, Tòa nhà B, Quận 3", false);
-            all = addressDAO.getAddresses(userId);
-        }
+        // Đã loại bỏ DAO, không làm gì ở đây
+    }
 
-        selectedAddress = addressDAO.getDefaultAddress(userId);
-        if (selectedAddress == null && !all.isEmpty()) {
-            selectedAddress = all.get(0);
-        }
-
+    private void updateAddressDisplay() {
         if (selectedAddress != null) {
             tvShipName.setText(selectedAddress.getName());
             tvShipPhone.setText(selectedAddress.getPhone());
             tvShipAddress.setText(selectedAddress.getAddress());
+        } else {
+            tvShipName.setText("");
+            tvShipPhone.setText("");
+            tvShipAddress.setText("Chưa chọn địa chỉ");
         }
     }
 
@@ -203,7 +196,13 @@ public class CheckOutActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_ADDRESS && resultCode == RESULT_OK && data != null) {
-            loadDefaultAddress();
+            String name = data.getStringExtra("selectedAddressName");
+            String phone = data.getStringExtra("selectedAddressPhone");
+            String addressStr = data.getStringExtra("selectedAddressDetail");
+            String id = "";
+            String userIdStr = String.valueOf(userId);
+            selectedAddress = new Address(id, userIdStr, name, phone, addressStr, true);
+            updateAddressDisplay();
         }
     }
 }

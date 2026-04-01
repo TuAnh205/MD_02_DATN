@@ -70,10 +70,18 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
         // Đặt màu cho trạng thái đơn hàng
         setStatusColor(holder.tvStatus, o.getStatus());
 
-        // Hiển thị ảnh sản phẩm (sử dụng drawable mặc định)
+        // Hiển thị ảnh sản phẩm: nếu có imageUrl thì load bằng Glide, không thì dùng resource mặc định
         if (holder.imgProduct != null) {
-
-            holder.imgProduct.setImageResource(o.getImageRes());
+            String imageUrl = o.getImageUrl();
+            if (imageUrl != null && !imageUrl.isEmpty()) {
+                com.bumptech.glide.Glide.with(context)
+                        .load(imageUrl)
+                        .placeholder(R.drawable.bg_image)
+                        .error(R.drawable.bg_image)
+                        .into(holder.imgProduct);
+            } else {
+                holder.imgProduct.setImageResource(R.drawable.bg_image);
+            }
         }
 
         // Sự kiện khi nhấn nút xem chi tiết đơn hàng

@@ -1,16 +1,32 @@
 package com.anhnvt_ph55017.md_02_datn.models;
 
-public class OrderItem {
+import java.io.Serializable;
+
+public class OrderItem implements Serializable {
     private String productName;
     private double price;
     private int quantity;
     private int imageRes;
+    private String imageUrl;
 
     public OrderItem(String productName, double price, int quantity, int imageRes) {
+        this(productName, price, quantity, imageRes, null);
+    }
+
+    public OrderItem(String productName, double price, int quantity, int imageRes, String imageUrl) {
         this.productName = productName;
         this.price = price;
         this.quantity = quantity;
         this.imageRes = imageRes;
+        this.imageUrl = imageUrl;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
     }
 
     public String getProductName() {

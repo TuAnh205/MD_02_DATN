@@ -3,6 +3,7 @@ package com.anhnvt_ph55017.md_02_datn.models;
 import java.util.List;
 
 public class Order {
+    String imageUrl;
 
     String id;
     String date;
@@ -28,11 +29,11 @@ public class Order {
     String reviewedAt;  // Ngày đánh giá
 
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount, int imageRes) {
-        this(id, date, total, status, arrivalDate, itemCount, imageRes, "", 0, "");
+        this(id, date, total, status, arrivalDate, itemCount, imageRes, "", 0, "", "");
     }
 
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount, int imageRes,
-                 String productName, double productPrice, String productDesc) {
+                 String productName, double productPrice, String productDesc, String imageUrl) {
         this.id = id;
         this.date = date;
         this.total = total;
@@ -45,11 +46,12 @@ public class Order {
         this.productDesc = productDesc;
         this.shippingAddress = "";
         this.items = null;
+        this.imageUrl = imageUrl;
     }
 
     // new constructor with address and items
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount,
-                 String shippingAddress, List<OrderItem> items) {
+                 String shippingAddress, List<OrderItem> items, String imageUrl) {
         this.id = id;
         this.date = date;
         this.total = total;
@@ -63,11 +65,12 @@ public class Order {
         this.shippingAddress = shippingAddress;
         this.items = items;
         this.paymentMethod = "Thanh toán khi nhận hàng";
+        this.imageUrl = imageUrl;
     }
 
     // new constructor with payment method
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount,
-                 String shippingAddress, List<OrderItem> items, String paymentMethod) {
+                 String shippingAddress, List<OrderItem> items, String paymentMethod, String imageUrl) {
         this.id = id;
         this.date = date;
         this.total = total;
@@ -81,8 +84,15 @@ public class Order {
         this.shippingAddress = shippingAddress;
         this.items = items;
         this.paymentMethod = paymentMethod != null ? paymentMethod : "Thanh toán khi nhận hàng";
-    }
+        this.imageUrl = imageUrl;
 
+    }
+    public String getImageUrl() {
+        return imageUrl;
+    }
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
     public String getId() {
         return id;
     }

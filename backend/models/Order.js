@@ -41,8 +41,8 @@ const orderSchema = new mongoose.Schema({
     total: { type: Number, required: true },
     status: {
         type: String,
-        enum: ['pending', 'confirmed', 'preparing', 'shipped', 'delivered', 'cancelled', 'returned', 'refunded'],
-        default: 'pending'
+        enum: ['chờ xác nhận', 'đã xác nhận', 'đang giao', 'đã nhận', 'đã hủy', 'trả hàng', 'hoàn tiền'],
+        default: 'chờ xác nhận'
     },
     statusHistory: [{
         status: { type: String },

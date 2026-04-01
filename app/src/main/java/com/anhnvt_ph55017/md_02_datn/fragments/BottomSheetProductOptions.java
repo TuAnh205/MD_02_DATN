@@ -22,7 +22,6 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
     private Product product;
     private OnAddToCartListener listener;
 
-    private RadioGroup rgColor, rgStorage;
     private ImageButton btnMinus, btnPlus;
     private TextView tvQty, tvProductName, tvPrice, tvStock;
     private Button btnAdd;
@@ -61,8 +60,8 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
         tvProductName = view.findViewById(R.id.tvProductName);
         tvPrice = view.findViewById(R.id.tvPrice);
         tvStock = view.findViewById(R.id.tvStock);
-        rgColor = view.findViewById(R.id.rgColor);
-        rgStorage = view.findViewById(R.id.rgStorage);
+        // rgColor = view.findViewById(R.id.rgColor); // Removed
+        // rgStorage = view.findViewById(R.id.rgStorage); // Removed
         btnMinus = view.findViewById(R.id.btnMinus);
         btnPlus = view.findViewById(R.id.btnPlus);
         tvQty = view.findViewById(R.id.tvQty);
@@ -75,30 +74,7 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
             tvStock.setText("Stock: " + product.getStock());
         }
 
-        // chọn mặc định
-        if (rgColor.getChildCount() > 0) {
-            ((RadioButton) rgColor.getChildAt(0)).setChecked(true);
-        }
-
-        if (rgStorage.getChildCount() > 0) {
-            ((RadioButton) rgStorage.getChildAt(0)).setChecked(true);
-        }
-
         updateQtyDisplay();
-
-        // listener cho màu
-        rgColor.setOnCheckedChangeListener((group, checkedId) -> {
-            for (int i = 0; i < group.getChildCount(); i++) {
-                ((RadioButton) group.getChildAt(i)).refreshDrawableState();
-            }
-        });
-
-        // listener cho GB
-        rgStorage.setOnCheckedChangeListener((group, checkedId) -> {
-            for (int i = 0; i < group.getChildCount(); i++) {
-                ((RadioButton) group.getChildAt(i)).refreshDrawableState();
-            }
-        });
 
         // xử lý tăng giảm số lượng
         btnPlus.setOnClickListener(v -> {
@@ -125,32 +101,12 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
 
     private void addToCart(View view) {
         if (product == null) return;
-
-        // lấy màu
-        int colorId = rgColor.getCheckedRadioButtonId();
-        RadioButton colorBtn = view.findViewById(colorId);
-        String color = (colorBtn != null) ? colorBtn.getText().toString() : "Black";
-
-        // lấy dung lượng
-        int storageId = rgStorage.getCheckedRadioButtonId();
-        RadioButton storageBtn = view.findViewById(storageId);
-        String storageStr = (storageBtn != null) ? storageBtn.getText().toString() : "64GB";
-
-        int storage = 64;
-        try {
-            storage = Integer.parseInt(storageStr.replace("GB", ""));
-        } catch (Exception ignored) {}
-
         // set dữ liệu
-        product.setColor(color);
-        product.setStorage(storage);
         product.setQty(quantity);
-
         // callback
         if (listener != null) {
             listener.onAddToCart(product);
         }
-
         dismiss();
     }
 

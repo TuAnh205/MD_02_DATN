@@ -1,10 +1,12 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
+
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import com.bumptech.glide.Glide;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -37,7 +39,15 @@ public class OrderItemAdapter extends RecyclerView.Adapter<OrderItemAdapter.Orde
         holder.tvPrice.setText("$" + item.getPrice());
         holder.tvQuantity.setText("x" + item.getQuantity());
         holder.tvTotal.setText("$" + item.getTotal());
-        holder.imgProduct.setImageResource(item.getImageRes());
+        if (item.getImageUrl() != null && !item.getImageUrl().isEmpty()) {
+            Glide.with(holder.imgProduct.getContext())
+                .load(item.getImageUrl())
+                .placeholder(item.getImageRes())
+                .error(item.getImageRes())
+                .into(holder.imgProduct);
+        } else {
+            holder.imgProduct.setImageResource(item.getImageRes());
+        }
     }
 
     @Override

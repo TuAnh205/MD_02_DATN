@@ -48,24 +48,14 @@ public class ProfileFragment extends Fragment {
         btnLogout       = view.findViewById(R.id.btnLogout);
 
         // Lấy thông tin user từ local DB, fallback về Firebase
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            UserDAO userDAO = new UserDAO(getContext());
-            User user = userDAO.getUserByEmail(firebaseUser.getEmail());
-            if (user != null) {
-                tvName.setText(user.getFullname() != null ? user.getFullname() : "Người dùng");
-                tvEmail.setText(user.getEmail() != null ? user.getEmail() : "");
-            } else {
-                // Fallback to Firebase
-                tvName.setText(firebaseUser.getDisplayName() != null ? firebaseUser.getDisplayName() : "Người dùng");
-                tvEmail.setText(firebaseUser.getEmail() != null ? firebaseUser.getEmail() : "");
-            }
-        } else {
-            tvName.setText("Alex Johnson");
-            tvEmail.setText("alex.johnson@coretech.io");
-        }
-        tvOrderCount.setText("24");
-        tvWishlistCount.setText("12");
+            // Lấy thông tin user từ SessionManager (backend)
+            String name = SessionManager.getUserName(getContext());
+            String email = SessionManager.getUserEmail(getContext());
+            tvName.setText(name != null && !name.isEmpty() ? name : "Người dùng");
+            tvEmail.setText(email != null && !email.isEmpty() ? email : "");
+            // Nếu muốn, có thể lấy số đơn hàng, wishlist từ backend hoặc để mặc định
+            tvOrderCount.setText("--");
+            tvWishlistCount.setText("--");
 
         // Menu clicks
         view.findViewById(R.id.rowOrders).setOnClickListener(v ->
@@ -101,16 +91,12 @@ public class ProfileFragment extends Fragment {
 
         // Logout
         btnLogout.setOnClickListener(v -> {
-            // Clear Firebase session
-            FirebaseAuth.getInstance().signOut();
-            
-            // Clear local session
-            SessionManager.clearSession(getContext());
-
-            Intent intent = new Intent(requireActivity(), LoginActivity.class);
-            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-            startActivity(intent);
-            // Không gọi Toast sau startActivity vì Context đã bị destroy
+              // Clear local session
+              SessionManager.clearSession(getContext());
+              Intent intent = new Intent(requireActivity(), LoginActivity.class);
+              intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+              startActivity(intent);
+              // Không gọi Toast sau startActivity vì Context đã bị destroy
         });
 
         return view;

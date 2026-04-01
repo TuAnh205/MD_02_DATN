@@ -15,11 +15,12 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
-import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
+// import com.anhnvt_ph55017.md_02_datn.DAO.CartDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
+import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.bumptech.glide.Glide;
 
@@ -43,7 +44,7 @@ public class DetailActivity extends AppCompatActivity {
     int selectedRating = 5;
     Button btnAddCart;
     RecyclerView rvRelated;
-    CartDAO cartDAO;
+    // CartDAO cartDAO;
     String productId;
 
     @Override
@@ -77,7 +78,7 @@ public class DetailActivity extends AppCompatActivity {
         progress4 = findViewById(R.id.progress4);
         progress5 = findViewById(R.id.progress5);
 
-        cartDAO = new CartDAO(this);
+        // cartDAO = new CartDAO(this);
 
         edtReview = findViewById(R.id.edtReview);
         btnSendReview = findViewById(R.id.btnSendReview);
@@ -198,10 +199,21 @@ public class DetailActivity extends AppCompatActivity {
                             product.setReviewCount(reviewCount);
                             BottomSheetProductOptions sheet =
                                     BottomSheetProductOptions.newInstance(product, selected -> {
-                                        int userId = SessionManager.getUserId(DetailActivity.this);
-                                        if (userId <= 0) userId = 1;
-                                        cartDAO.addToCart(userId, selected.getIntId());
-                                        Toast.makeText(DetailActivity.this, "Added to cart", Toast.LENGTH_SHORT).show();
+                                        String token = SessionManager.getToken(DetailActivity.this);
+                                        if (token == null || token.isEmpty()) {
+                                            Toast.makeText(DetailActivity.this, "Bạn cần đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                                            return;
+                                        }
+                                        CartApiService.addToCart(DetailActivity.this, token, productId, selected.getQty(), new CartApiService.CartCallback() {
+                                            @Override
+                                            public void onSuccess(org.json.JSONObject cartJson) {
+                                                runOnUiThread(() -> Toast.makeText(DetailActivity.this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show());
+                                            }
+                                            @Override
+                                            public void onError(String error) {
+                                                runOnUiThread(() -> Toast.makeText(DetailActivity.this, "Lỗi thêm vào giỏ hàng: " + error, Toast.LENGTH_SHORT).show());
+                                            }
+                                        });
                                     });
                             sheet.show(getSupportFragmentManager(), "sheet");
                         });

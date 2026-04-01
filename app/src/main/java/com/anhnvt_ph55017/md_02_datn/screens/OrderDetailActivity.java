@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.OrderItemAdapter;
-import com.anhnvt_ph55017.md_02_datn.DAO.OrderDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 import com.anhnvt_ph55017.md_02_datn.models.OrderItem;
@@ -41,26 +40,42 @@ public class OrderDetailActivity extends AppCompatActivity {
     RecyclerView rvOrderItems;
     String orderId, orderStatus;
     android.view.View ratingCard, messageCard, productInfoCard, itemsCard, expandableContent;
-    OrderDAO orderDAO;
     OrderItemAdapter orderItemAdapter;
-    Order order;
     boolean isExpanded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_order_detail);
+
+        Intent intent = getIntent();
+
+        // Nhận list<OrderItem> từ intent
+        List<OrderItem> orderItems = null;
+        if (intent.hasExtra("orderItems")) {
+            try {
+                orderItems = (List<OrderItem>) intent.getSerializableExtra("orderItems");
+            } catch (Exception e) {
+                orderItems = new ArrayList<>();
+            }
+        } else {
+            orderItems = new ArrayList<>();
+        }
 
         try {
-            setContentView(R.layout.activity_order_detail);
 
             // Initialize views
-        tvOrderId = findViewById(R.id.tvOrderId);
-        tvOrderDate = findViewById(R.id.tvOrderDate);
-        tvOrderStatus = findViewById(R.id.tvOrderStatus);
-        tvOrderTotal = findViewById(R.id.tvOrderTotal);
-        tvArrivalDate = findViewById(R.id.tvArrivalDate);
-        tvItemCount = findViewById(R.id.tvItemCount);
-        tvStatusDescription = findViewById(R.id.tvStatusDescription);
+            tvOrderId = findViewById(R.id.tvOrderId);
+            tvOrderDate = findViewById(R.id.tvOrderDate);
+            tvOrderStatus = findViewById(R.id.tvOrderStatus);
+            tvOrderTotal = findViewById(R.id.tvOrderTotal);
+            tvArrivalDate = findViewById(R.id.tvArrivalDate);
+            tvItemCount = findViewById(R.id.tvItemCount);
+            tvStatusDescription = findViewById(R.id.tvStatusDescription);
+
+            // Khai báo orderIdInt ở scope ngoài
+            final int[] orderIdIntHolder = new int[]{-1};
         tvProductName = findViewById(R.id.tvProductName);
         tvProductPrice = findViewById(R.id.tvProductPrice);
         tvProductDesc = findViewById(R.id.tvProductDesc);
@@ -87,109 +102,63 @@ public class OrderDetailActivity extends AppCompatActivity {
         ivExpandIcon = findViewById(R.id.ivExpandIcon);
         expandableContent = findViewById(R.id.expandableContent);
 
-        orderDAO = new OrderDAO(this);
+        // Get data from intent (truyền từ OrdersFragment)
 
-        // Get data from intent
-        Intent intent = getIntent();
         orderId = intent.getStringExtra("orderId");
         if (orderId == null) orderId = "#N/A";
-
-        // Parse order ID từ "OD-1" sang số 1
-        int orderIdNum = 1;
-        try {
-            if (orderId.startsWith("OD-")) {
-                orderIdNum = Integer.parseInt(orderId.substring(3));
-            } else if (orderId.startsWith("OD")) {
-                orderIdNum = Integer.parseInt(orderId.substring(2));
-            } else {
-                orderIdNum = Integer.parseInt(orderId);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            orderIdNum = 1;
-        }
-
-        // Lấy full order data từ database
-        order = orderDAO.getOrderById(orderIdNum);
-        if (order == null) {
-            Toast.makeText(this, "Không tìm thấy đơn hàng", Toast.LENGTH_SHORT).show();
-            finish();
-            return;
-        }
-
-        // Lấy order items từ database
-        List<OrderItem> orderItems = orderDAO.getOrderItemsByOrderId(orderIdNum);
-
-        // Lấy dữ liệu từ order object
-        String orderDate = order.getDate();
-        orderStatus = order.getStatus();
-        double orderTotal = 0;
-        
-        // Tính tổng tiền từ all order items
-        for (OrderItem item : orderItems) {
-            orderTotal += item.getTotal();
-        }
-
-        // Tính ngày dự kiến nhận hàng
-        String arrivalDate = orderDAO.calculateExpectedDelivery(
-            order.getCreatedAt(),
-            orderStatus
-        );
-
-        int itemCount = orderItems.size();
-        int imageRes = intent.getIntExtra("imageRes", R.drawable.bg_image);
-        String shippingAddress = order.getShippingAddress();
-        if (shippingAddress == null || shippingAddress.isEmpty()) {
-            shippingAddress = "123 Đường ABC, Quận XYZ, TP.HCM";
-        }
-        String paymentMethod = order.getPaymentMethod();
-        if (paymentMethod == null || paymentMethod.isEmpty()) {
-            paymentMethod = "Thanh toán khi nhận hàng";
-        }
-
+        String orderDate = intent.getStringExtra("orderDate");
+        orderStatus = intent.getStringExtra("orderStatus");
+        double orderTotal = intent.hasExtra("orderTotal") ? intent.getDoubleExtra("orderTotal", 0) : 0;
+        String arrivalDate = intent.getStringExtra("arrivalDate");
+        int itemCount = intent.hasExtra("itemCount") ? intent.getIntExtra("itemCount", 0) : 0;
+        String shippingAddress = intent.getStringExtra("shippingAddress");
+        if (shippingAddress == null || shippingAddress.isEmpty()) shippingAddress = "-";
+        String paymentMethod = intent.getStringExtra("paymentMethod");
+        if (paymentMethod == null || paymentMethod.isEmpty()) paymentMethod = "Thanh toán khi nhận hàng";
+        String cancellationReason = intent.getStringExtra("cancellationReason");
         // Set data to views
         tvOrderId.setText("Đơn #" + orderId);
-        tvOrderDate.setText("Đặt hàng vào: " + orderDate);
+        tvOrderDate.setText("Đặt hàng vào: " + (orderDate != null ? orderDate : "-"));
         tvOrderStatus.setText(getStatusVietnamese(orderStatus));
         tvOrderTotal.setText("$" + String.format("%.2f", orderTotal));
-        tvArrivalDate.setText("Dự kiến nhận: " + arrivalDate);
+        tvArrivalDate.setText("Dự kiến nhận: " + (arrivalDate != null ? arrivalDate : "-"));
         tvItemCount.setText(itemCount + " sản phẩm");
-        
         // Hiển thị lý do hủy nếu đơn hàng đã hủy
         String statusDesc = getStatusDescription(orderStatus);
-        if ("Đã hủy".equals(orderStatus) && order.getCancellationReason() != null && !order.getCancellationReason().isEmpty()) {
-            statusDesc += "\n💔 Lý do: " + order.getCancellationReason();
+        if ("Đã hủy".equals(orderStatus) && cancellationReason != null && !cancellationReason.isEmpty()) {
+            statusDesc += "\n💔 Lý do: " + cancellationReason;
         }
         tvStatusDescription.setText(statusDesc);
-
         // Shipping address
         tvShippingAddress.setText(shippingAddress);
-
         // Expandable section data
         tvOrderCode.setText(orderId);
         tvPaymentMethod.setText(paymentMethod);
-        tvOrderTime.setText(orderDate);
-        tvDeliveryTime.setText(arrivalDate);
-
-        // Setup items list
-        // Always show list mode
+        tvOrderTime.setText(orderDate != null ? orderDate : "-");
+        tvDeliveryTime.setText(arrivalDate != null ? arrivalDate : "-");
+        // Setup items list (nếu muốn truyền list qua intent thì cần serialize)
         productInfoCard.setVisibility(android.view.View.GONE);
         itemsCard.setVisibility(android.view.View.VISIBLE);
-
-        // Setup RecyclerView với real data từ database
+        // Hiển thị danh sách hàng hóa
         orderItemAdapter = new OrderItemAdapter(orderItems);
-        rvOrderItems.setLayoutManager(new LinearLayoutManager(this));
+        rvOrderItems.setLayoutManager(new androidx.recyclerview.widget.LinearLayoutManager(this));
         rvOrderItems.setAdapter(orderItemAdapter);
-
         // Set status color
         setStatusColor(tvOrderStatus, orderStatus);
+
+        // Lấy rating từ intent (nếu có)
+        int rating = intent.hasExtra("rating") ? intent.getIntExtra("rating", 0) : 0;
+        if (rating > 0) {
+            // Hiển thị rating nếu có
+            // TODO: Gán rating vào view hiển thị rating (nếu có)
+        }
 
         // Setup expandable section
         findViewById(R.id.expandableHeader).setOnClickListener(v -> toggleExpandable());
 
         // Show/Hide rating card based on status and review status
         if ("Đã nhận".equals(orderStatus)) {
-            if (order.getRating() > 0) {
+            if (rating > 0) {
                 // Already reviewed - show only review comment, hide input
                 ratingCard.setVisibility(android.view.View.VISIBLE);
                 ratingBar.setVisibility(android.view.View.GONE);
@@ -199,7 +168,8 @@ public class OrderDetailActivity extends AppCompatActivity {
                 // Show review comment
                 TextView tvReviewedComment = ratingCard.findViewById(R.id.tvReviewedComment);
                 if (tvReviewedComment != null) {
-                    tvReviewedComment.setText(order.getReviewComment());
+                    String reviewComment = intent.getStringExtra("reviewComment");
+                    tvReviewedComment.setText(reviewComment != null ? reviewComment : "");
                     tvReviewedComment.setVisibility(android.view.View.VISIBLE);
                 }
             } else {
@@ -330,30 +300,26 @@ public class OrderDetailActivity extends AppCompatActivity {
                 int orderIdInt = -1;
                 try {
                     String cleanedId = orderId.replace("OD-", "").replace("CT-", "").replace("#", "").trim();
-                    orderIdInt = Integer.parseInt(cleanedId);
+                    orderIdIntHolder[0] = Integer.parseInt(cleanedId);
                 } catch (Exception ex) {
                     Log.w("OrderDetailActivity", "Cannot parse orderId for DB update: " + orderId, ex);
                 }
-                boolean success = (orderIdInt > 0) ? orderDAO.updateOrderCancellation(orderIdInt, reason) : false;
 
-                if (success) {
-                    // update status locally
-                    orderStatus = "Đã hủy";
-                    tvOrderStatus.setText(getStatusVietnamese(orderStatus));
-                    tvStatusDescription.setText("💔 Lý do: " + reason);
-                    btnCancel.setVisibility(android.view.View.GONE);
-                    btnBuyAgain.setVisibility(android.view.View.VISIBLE);
-                    Toast.makeText(OrderDetailActivity.this, "Đơn hàng #" + orderId + " đã bị hủy\nLý do: " + reason, Toast.LENGTH_LONG).show();
-                    // return result so fragment can refresh
-                    Intent data = new Intent();
-                    data.putExtra("orderId", orderId);
-                    data.putExtra("newStatus", orderStatus);
-                    setResult(RESULT_OK, data);
-                    dialog.dismiss();
-                    onBackPressed();
-                } else {
-                    Toast.makeText(OrderDetailActivity.this, "Lỗi khi hủy đơn hàng", Toast.LENGTH_SHORT).show();
-                }
+                // TODO: Gọi API backend để hủy đơn hàng ở đây, sau đó cập nhật UI tương tự nếu thành công
+                // Hiện tại, luôn coi là thành công (nếu cần kiểm tra, hãy xử lý response từ backend)
+                orderStatus = "Đã hủy";
+                tvOrderStatus.setText(getStatusVietnamese(orderStatus));
+                tvStatusDescription.setText("💔 Lý do: " + reason);
+                btnCancel.setVisibility(android.view.View.GONE);
+                btnBuyAgain.setVisibility(android.view.View.VISIBLE);
+                Toast.makeText(OrderDetailActivity.this, "Đơn hàng #" + orderId + " đã bị hủy\nLý do: " + reason, Toast.LENGTH_LONG).show();
+                // return result so fragment can refresh
+                Intent data = new Intent();
+                data.putExtra("orderId", orderId);
+                data.putExtra("newStatus", orderStatus);
+                setResult(RESULT_OK, data);
+                dialog.dismiss();
+                onBackPressed();
             });
         });
 
@@ -391,40 +357,26 @@ public class OrderDetailActivity extends AppCompatActivity {
         });
 
         // Create final copy for lambda expression
-        final int finalOrderIdNum = orderIdNum;
+        final int finalOrderIdNum = orderIdIntHolder[0];
 
         // Submit rating button
         btnSubmitRating.setOnClickListener(v -> {
-            float rating = ratingBar.getRating();
+            float ratingValue = ratingBar.getRating();
             String comment = edtRatingComment.getText().toString().trim();
 
-            if (rating == 0) {
+            if (ratingValue == 0) {
                 Toast.makeText(OrderDetailActivity.this, "Vui lòng chọn số sao", Toast.LENGTH_SHORT).show();
             } else if (comment.isEmpty()) {
                 Toast.makeText(OrderDetailActivity.this, "Vui lòng nhập nhận xét", Toast.LENGTH_SHORT).show();
             } else {
-                // Save rating to database
-                OrderDAO orderDAO = new OrderDAO(OrderDetailActivity.this);
-                boolean success = orderDAO.updateOrderReview(finalOrderIdNum, rating, comment);
-                
-                if (success) {
-                    // Update local order object
-                    order.setRating(rating);
-                    order.setReviewComment(comment);
-                    order.setReviewedAt(new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss", java.util.Locale.getDefault()).format(new java.util.Date()));
-                    
-                    Toast.makeText(OrderDetailActivity.this, "Cảm ơn đánh giá của bạn (" + (int)rating + " sao)", Toast.LENGTH_SHORT).show();
-                    
-                    // Update UI - hide rating input, show review
-                    ratingBar.setVisibility(android.view.View.GONE);
-                    edtRatingComment.setVisibility(android.view.View.GONE);
-                    btnSubmitRating.setVisibility(android.view.View.GONE);
-                    
-                    // Refresh display
-                    updateRatingDisplay();
-                } else {
-                    Toast.makeText(OrderDetailActivity.this, "Lỗi khi lưu đánh giá. Vui lòng thử lại", Toast.LENGTH_SHORT).show();
-                }
+                // TODO: Gọi API backend để lưu đánh giá, sau đó cập nhật UI nếu thành công
+                Toast.makeText(OrderDetailActivity.this, "Cảm ơn đánh giá của bạn (" + (int)ratingValue + " sao)", Toast.LENGTH_SHORT).show();
+                // Update UI - hide rating input, show review
+                ratingBar.setVisibility(android.view.View.GONE);
+                edtRatingComment.setVisibility(android.view.View.GONE);
+                btnSubmitRating.setVisibility(android.view.View.GONE);
+                // Refresh display
+                updateRatingDisplay();
             }
         });
         
@@ -471,21 +423,21 @@ public class OrderDetailActivity extends AppCompatActivity {
     private void updateRatingDisplay() {
         // Update status to show rating stars
         String statusText = getStatusVietnamese(orderStatus);
-        if (order.getRating() > 0) {
-            statusText += " • ⭐ " + String.format("%.1f", order.getRating()) + " | ✅ Đã đánh giá";
+        int rating = getIntent().hasExtra("rating") ? getIntent().getIntExtra("rating", 0) : 0;
+        String reviewComment = getIntent().getStringExtra("reviewComment");
+        if (rating > 0) {
+            statusText += " • ⭐ " + rating + " | ✅ Đã đánh giá";
             tvOrderStatus.setText(statusText);
-        }
-        
-        // Hide rating input
-        ratingBar.setVisibility(android.view.View.GONE);
-        edtRatingComment.setVisibility(android.view.View.GONE);
-        btnSubmitRating.setVisibility(android.view.View.GONE);
-        
-        // Show review comment
-        TextView tvReviewedComment = ratingCard.findViewById(R.id.tvReviewedComment);
-        if (tvReviewedComment != null) {
-            tvReviewedComment.setText(order.getReviewComment());
-            tvReviewedComment.setVisibility(android.view.View.VISIBLE);
+            // Hide rating input
+            ratingBar.setVisibility(android.view.View.GONE);
+            edtRatingComment.setVisibility(android.view.View.GONE);
+            btnSubmitRating.setVisibility(android.view.View.GONE);
+            // Show review comment
+            TextView tvReviewedComment = ratingCard.findViewById(R.id.tvReviewedComment);
+            if (tvReviewedComment != null) {
+                tvReviewedComment.setText(reviewComment != null ? reviewComment : "");
+                tvReviewedComment.setVisibility(android.view.View.VISIBLE);
+            }
         }
     }
 
