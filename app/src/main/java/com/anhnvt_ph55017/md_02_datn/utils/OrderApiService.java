@@ -49,4 +49,45 @@ public class OrderApiService {
             }
         }).start();
     }
+    // Hủy đơn hàng
+    public interface CancelOrderCallback {
+        void onSuccess(JSONObject orderJson);
+        void onError(String error);
+    }
+
+    public static void cancelOrder(Context context, String token, String orderId, String reason, CancelOrderCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "/" + orderId + "/cancel");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("PATCH");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setDoOutput(true);
+
+                JSONObject body = new JSONObject();
+                body.put("reason", reason);
+                String bodyStr = body.toString();
+                conn.getOutputStream().write(bodyStr.getBytes("UTF-8"));
+
+                int responseCode = conn.getResponseCode();
+                InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                Scanner scanner = new Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                Log.d("CANCEL_ORDER_RESPONSE", "code=" + responseCode + " | body=" + response);
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    JSONObject obj = new JSONObject(response);
+                    callback.onSuccess(obj);
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                Log.e("CANCEL_ORDER_ERROR", e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
 }

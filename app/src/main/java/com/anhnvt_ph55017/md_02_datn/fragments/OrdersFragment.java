@@ -201,7 +201,7 @@ public class OrdersFragment extends Fragment {
     // Thiết lập sự kiện click cho các tab trạng thái
     private void setupTabListeners() {
         tvAll.setOnClickListener(v -> filterByStatus("ALL"));
-        tvPending.setOnClickListener(v -> filterByStatus("Chưa thanh toán"));
+        tvPending.setOnClickListener(v -> filterByStatus("Đã xác nhận"));
         tvProcessing.setOnClickListener(v -> filterByStatus("Đang xử lý"));
         tvShipping.setOnClickListener(v -> filterByStatus("Đang giao hàng"));
         tvDelivered.setOnClickListener(v -> filterByStatus("Đã nhận"));
@@ -217,24 +217,37 @@ public class OrdersFragment extends Fragment {
             filteredList.addAll(orderList);
             // push cancelled orders to bottom
             filteredList.sort((o1, o2) -> {
-                if (o1.getStatus().equals("Đã hủy") && !o2.getStatus().equals("Đã hủy")) return 1;
-                if (!o1.getStatus().equals("Đã hủy") && o2.getStatus().equals("Đã hủy")) return -1;
+                if (isCancelled(o1.getStatus()) && !isCancelled(o2.getStatus())) return 1;
+                if (!isCancelled(o1.getStatus()) && isCancelled(o2.getStatus())) return -1;
                 return 0;
             });
         } else {
             filteredList.addAll(orderList.stream()
-                    .filter(order -> order.getStatus().equals(status))
+                    .filter(order -> statusMatch(order.getStatus(), status))
                     .collect(Collectors.toList()));
         }
         adapter.notifyDataSetChanged();
-        
-        // Update tab highlights
+
         if (status.equals("ALL")) setTabActive(tvAll);
-        else if (status.equals("Chưa thanh toán")) setTabActive(tvPending);
+        else if (status.equals("Đã xác nhận")) setTabActive(tvPending);
         else if (status.equals("Đang xử lý")) setTabActive(tvProcessing);
         else if (status.equals("Đang giao hàng")) setTabActive(tvShipping);
         else if (status.equals("Đã nhận")) setTabActive(tvDelivered);
         else if (status.equals("Đã hủy")) setTabActive(tvCancelled);
+    }
+
+    // So khớp trạng thái tiếng Anh/Việt
+    private boolean statusMatch(String backendStatus, String tabStatus) {
+        if (tabStatus.equals("Chưa thanh toán")) return backendStatus.equalsIgnoreCase("pending") || backendStatus.equals("Chưa thanh toán");
+        if (tabStatus.equals("Đang xử lý")) return backendStatus.equalsIgnoreCase("processing") || backendStatus.equals("Đang xử lý");
+        if (tabStatus.equals("Đang giao hàng")) return backendStatus.equalsIgnoreCase("shipping") || backendStatus.equals("Đang giao hàng");
+        if (tabStatus.equals("Đã nhận")) return backendStatus.equalsIgnoreCase("delivered") || backendStatus.equals("Đã nhận");
+        if (tabStatus.equals("Đã hủy")) return isCancelled(backendStatus);
+        return backendStatus.equals(tabStatus);
+    }
+
+    private boolean isCancelled(String status) {
+        return status.equalsIgnoreCase("cancelled") || status.equals("Đã hủy");
     }
     
     // Nhận kết quả trả về từ OrderDetailActivity (thay đổi trạng thái)
