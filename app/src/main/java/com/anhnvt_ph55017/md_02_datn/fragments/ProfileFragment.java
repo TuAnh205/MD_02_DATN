@@ -15,7 +15,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
+import com.anhnvt_ph55017.md_02_datn.utils.ProfileApiService;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.User;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
@@ -47,15 +47,51 @@ public class ProfileFragment extends Fragment {
         switchDark      = view.findViewById(R.id.switchDark);
         btnLogout       = view.findViewById(R.id.btnLogout);
 
-        // Lấy thông tin user từ local DB, fallback về Firebase
-            // Lấy thông tin user từ SessionManager (backend)
-            String name = SessionManager.getUserName(getContext());
-            String email = SessionManager.getUserEmail(getContext());
-            tvName.setText(name != null && !name.isEmpty() ? name : "Người dùng");
-            tvEmail.setText(email != null && !email.isEmpty() ? email : "");
-            // Nếu muốn, có thể lấy số đơn hàng, wishlist từ backend hoặc để mặc định
-            tvOrderCount.setText("--");
-            tvWishlistCount.setText("--");
+                // Lấy thông tin user từ SessionManager (backend)
+                                // Luôn lấy thông tin user mới nhất từ backend
+                                String token = SessionManager.getToken(getContext());
+                                ProfileApiService.fetchProfile(getContext(), token, new ProfileApiService.ProfileCallback() {
+                                        @Override
+                                        public void onSuccess(org.json.JSONObject userJson) {
+                                                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                                                        String name = userJson.optString("name", "");
+                                                        String email = userJson.optString("email", "");
+                                                        tvName.setText(!name.isEmpty() ? name : "Người dùng");
+                                                        tvEmail.setText(!email.isEmpty() ? email : "");
+                                                });
+                                        }
+                                        @Override
+                                        public void onError(String error) {
+                                                if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                                                        tvName.setText("Người dùng");
+                                                        tvEmail.setText("");
+                                                });
+                                        }
+                                });
+                tvOrderCount.setText("--");
+                tvWishlistCount.setText("--");
+                // Lấy số đơn hàng
+                com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.getOrders(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.OrdersCallback() {
+                        @Override
+                        public void onSuccess(org.json.JSONArray ordersJson) {
+                                if (getActivity() != null) getActivity().runOnUiThread(() -> tvOrderCount.setText(String.valueOf(ordersJson.length())));
+                        }
+                        @Override
+                        public void onError(String error) {
+                                if (getActivity() != null) getActivity().runOnUiThread(() -> tvOrderCount.setText("--"));
+                        }
+                });
+                // Lấy số sản phẩm yêu thích
+                com.anhnvt_ph55017.md_02_datn.utils.FavoriteApiService.getFavorites(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.FavoriteApiService.FavoritesCallback() {
+                        @Override
+                        public void onSuccess(org.json.JSONArray favoritesJson) {
+                                if (getActivity() != null) getActivity().runOnUiThread(() -> tvWishlistCount.setText(String.valueOf(favoritesJson.length())));
+                        }
+                        @Override
+                        public void onError(String error) {
+                                if (getActivity() != null) getActivity().runOnUiThread(() -> tvWishlistCount.setText("--"));
+                        }
+                });
 
         // Menu clicks
         view.findViewById(R.id.rowOrders).setOnClickListener(v ->

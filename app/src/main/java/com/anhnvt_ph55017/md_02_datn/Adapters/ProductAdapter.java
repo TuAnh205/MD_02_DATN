@@ -1,5 +1,6 @@
-package com.anhnvt_ph55017.md_02_datn.Adapters;
 
+package com.anhnvt_ph55017.md_02_datn.Adapters;
+import com.anhnvt_ph55017.md_02_datn.utils.FavoriteApiService;
 import android.content.Context;
 import android.content.Intent;
 import android.view.LayoutInflater;
@@ -76,8 +77,41 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         }
 
         holder.imgFavorite.setOnClickListener(v -> {
-            product.setFavorite(!product.isFavorite());
+            boolean newState = !product.isFavorite();
+            product.setFavorite(newState);
             notifyItemChanged(holder.getAdapterPosition());
+
+            // Gọi API thêm/xóa yêu thích
+            String token = SessionManager.getToken(context);
+            if (newState) {
+                // Thêm vào danh sách yêu thích
+                new Thread(() -> {
+                    try {
+                        java.net.URL url = new java.net.URL("http://10.0.2.2:5000/api/favorites");
+                        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                        conn.setRequestMethod("POST");
+                        conn.setRequestProperty("Authorization", "Bearer " + token);
+                        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                        conn.setDoOutput(true);
+                        String body = "{\"productId\":\"" + product.getId() + "\"}";
+                        conn.getOutputStream().write(body.getBytes("UTF-8"));
+                        conn.getResponseCode(); // Đọc để gửi request
+                        conn.disconnect();
+                    } catch (Exception ignored) {}
+                }).start();
+            } else {
+                // Xóa khỏi danh sách yêu thích
+                new Thread(() -> {
+                    try {
+                        java.net.URL url = new java.net.URL("http://10.0.2.2:5000/api/favorites/" + product.getId());
+                        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                        conn.setRequestMethod("DELETE");
+                        conn.setRequestProperty("Authorization", "Bearer " + token);
+                        conn.getResponseCode();
+                        conn.disconnect();
+                    } catch (Exception ignored) {}
+                }).start();
+            }
         });
 
         // ===== CLICK ITEM → DETAIL =====

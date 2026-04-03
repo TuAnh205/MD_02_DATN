@@ -10,7 +10,8 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.anhnvt_ph55017.md_02_datn.DAO.UserDAO;
+import com.anhnvt_ph55017.md_02_datn.utils.ProfileApiService;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.User;
 import com.google.firebase.auth.FirebaseAuth;
@@ -47,74 +48,55 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     private void loadCurrentProfile() {
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            UserDAO userDAO = new UserDAO(this);
-            User user = userDAO.getUserByEmail(firebaseUser.getEmail());
-            if (user != null) {
-                etFullName.setText(user.getFullname() != null ? user.getFullname() : "");
-                etEmail.setText(user.getEmail() != null ? user.getEmail() : "");
-                etPhone.setText(user.getPhone() != null ? user.getPhone() : "");
-            } else {
-                // Fallback to Firebase
-                etFullName.setText(firebaseUser.getDisplayName() != null ? firebaseUser.getDisplayName() : "");
-                etEmail.setText(firebaseUser.getEmail() != null ? firebaseUser.getEmail() : "");
-                etPhone.setText("");
+        String token = SessionManager.getToken(this);
+        ProfileApiService.fetchProfile(this, token, new ProfileApiService.ProfileCallback() {
+            @Override
+            public void onSuccess(org.json.JSONObject userJson) {
+                runOnUiThread(() -> {
+                    etFullName.setText(userJson.optString("name", ""));
+                    etEmail.setText(userJson.optString("email", ""));
+                    etPhone.setText(userJson.optString("phone", ""));
+                    // Nếu backend có bio/avatar thì set thêm
+                });
             }
-        }
-        etBio.setText(""); // Bio not stored yet
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(EditProfileActivity.this, "Lỗi tải thông tin: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 
     private void saveProfile() {
         String fullName = etFullName.getText().toString().trim();
-        String email = etEmail.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
-        String bio = etBio.getText().toString().trim();
-
-        if (fullName.isEmpty() || email.isEmpty()) {
-            Toast.makeText(this, "Vui lòng điền tên và email", Toast.LENGTH_SHORT).show();
+        if (fullName.isEmpty()) {
+            Toast.makeText(this, "Vui lòng điền tên", Toast.LENGTH_SHORT).show();
             return;
         }
-
-        // Save to local DB
-        UserDAO userDAO = new UserDAO(this);
-        boolean dbSuccess = userDAO.insertOrUpdateUser(fullName, email, phone);
-
-        if (!dbSuccess) {
-            Toast.makeText(this, "Lỗi lưu vào database", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
-        // Update Firebase display name
-        FirebaseUser firebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (firebaseUser != null) {
-            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                    .setDisplayName(fullName)
-                    .build();
-
-            firebaseUser.updateProfile(profileUpdates).addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
+        String token = SessionManager.getToken(this);
+        ProfileApiService.updateProfile(this, token, fullName, phone, new ProfileApiService.ProfileCallback() {
+            @Override
+            public void onSuccess(org.json.JSONObject userJson) {
+                runOnUiThread(() -> {
                     Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
+                    // Cập nhật lại session nếu cần
+                    SessionManager.saveUserSession(EditProfileActivity.this,
+                            userJson.optString("_id", ""),
+                            userJson.optString("email", ""),
+                            userJson.optString("name", "")
+                    );
                     Intent result = new Intent();
-                    result.putExtra("name", fullName);
-                    result.putExtra("email", email);
-                    result.putExtra("phone", phone);
-                    result.putExtra("bio", bio);
+                    result.putExtra("name", userJson.optString("name", ""));
+                    result.putExtra("email", userJson.optString("email", ""));
+                    result.putExtra("phone", userJson.optString("phone", ""));
                     setResult(RESULT_OK, result);
                     finish();
-                } else {
-                    Toast.makeText(EditProfileActivity.this, "Cập nhật Firebase không thành công", Toast.LENGTH_SHORT).show();
-                }
-            });
-        } else {
-            Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-            Intent result = new Intent();
-            result.putExtra("name", fullName);
-            result.putExtra("email", email);
-            result.putExtra("phone", phone);
-            result.putExtra("bio", bio);
-            setResult(RESULT_OK, result);
-            finish();
-        }
+                });
+            }
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> Toast.makeText(EditProfileActivity.this, "Lỗi cập nhật: " + error, Toast.LENGTH_SHORT).show());
+            }
+        });
     }
 }
