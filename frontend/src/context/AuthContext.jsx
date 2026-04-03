@@ -47,6 +47,17 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
+  const sendGoogleRegistrationCode = async (idToken, role = 'user') => {
+    return authService.sendGoogleRegistrationCode(idToken, role);
+  };
+
+  const verifyGoogleRegistrationCode = async (email, code) => {
+    const response = await authService.verifyGoogleRegistrationCode(email, code);
+    setUser(response.user);
+    setToken(response.token);
+    return response;
+  };
+
   const sendVerificationCode = async (name, email, password, role = 'user', phone = '') => {
     return authService.sendVerificationCode(name, email, password, role, phone);
   };
@@ -71,7 +82,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, googleLogin, register, registerShop, sendVerificationCode, verifyEmailCode, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, token, loading, login, googleLogin, register, registerShop, sendGoogleRegistrationCode, verifyGoogleRegistrationCode, sendVerificationCode, verifyEmailCode, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

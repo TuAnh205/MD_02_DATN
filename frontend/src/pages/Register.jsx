@@ -1,18 +1,24 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { signInWithGooglePopup, isFirebaseAuthConfigured } from '../services/firebaseAuth';
 
 export default function Register({ accountType = 'user' }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [googleEmail, setGoogleEmail] = useState('');
+  const [googleCode, setGoogleCode] = useState('');
+  const [googleCodeSent, setGoogleCodeSent] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { register, registerShop } = useAuth();
+  const { register, registerShop, sendGoogleRegistrationCode, verifyGoogleRegistrationCode } = useAuth();
   const isShopAccount = accountType === 'shop';
+  const canUseGoogleRegister = isFirebaseAuthConfigured;
 
   const redirectByRole = (registeredUser) => {
     const role = registeredUser?.role;
@@ -60,6 +66,39 @@ export default function Register({ accountType = 'user' }) {
       setError(err.response?.data?.message || 'Đăng ký thất bại');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setError('');
+      setGoogleLoading(true);
+      const { idToken } = await signInWithGooglePopup();
+      const response = await sendGoogleRegistrationCode(idToken, isShopAccount ? 'shop' : 'user');
+      setGoogleEmail(response?.email || '');
+      setGoogleCodeSent(true);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Không thể gửi mã xác nhận Google');
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
+
+  const handleGoogleVerify = async () => {
+    try {
+      if (!googleEmail || !googleCode.trim()) {
+        setError('Vui lòng nhập mã xác nhận đã gửi về email Google');
+        return;
+      }
+
+      setError('');
+      setGoogleLoading(true);
+      const response = await verifyGoogleRegistrationCode(googleEmail, googleCode.trim());
+      redirectByRole(response?.user);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Xác nhận mã Google thất bại');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -139,6 +178,56 @@ export default function Register({ accountType = 'user' }) {
             {loading ? 'Đang đăng ký...' : isShopAccount ? 'Tạo Tài Khoản Shop' : 'Tạo Tài Khoản Người Dùng'}
           </button>
         </form>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px bg-gray-200 flex-1" />
+          <span className="text-xs text-gray-500">hoặc</span>
+          <div className="h-px bg-gray-200 flex-1" />
+        </div>
+
+        <div className="space-y-3">
+          <p className="text-sm font-medium text-dark">Đăng ký bằng Google</p>
+
+          {canUseGoogleRegister ? (
+            <button
+              type="button"
+              onClick={handleGoogleSignUp}
+              disabled={googleLoading}
+              className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+            >
+              {googleLoading ? 'Đang kết nối Google...' : 'Đăng ký với Google'}
+            </button>
+          ) : (
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              Chưa bật Firebase Google Auth. Vui lòng cấu hình VITE_FIREBASE_* trong file .env của frontend rồi khởi động lại Vite.
+            </div>
+          )}
+
+          {googleCodeSent && (
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+              <p className="text-xs text-gray-600">
+                Mã xác nhận đã gửi đến <span className="font-semibold">{googleEmail}</span>
+              </p>
+              <input
+                type="text"
+                value={googleCode}
+                onChange={(e) => setGoogleCode(e.target.value)}
+                placeholder="Nhập mã xác nhận 6 số"
+                className="input-field"
+                maxLength={6}
+                disabled={googleLoading}
+              />
+              <button
+                type="button"
+                onClick={handleGoogleVerify}
+                disabled={googleLoading}
+                className="w-full btn-secondary font-semibold disabled:opacity-50"
+              >
+                {googleLoading ? 'Đang xác nhận...' : 'Xác nhận mã Google'}
+              </button>
+            </div>
+          )}
+        </div>
 
         <div className="mt-6 space-y-2 text-center">
           <p className="text-sm text-gray-600">

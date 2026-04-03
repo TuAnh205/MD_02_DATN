@@ -19,6 +19,20 @@ const authService = {
     return response.data;
   },
 
+  sendGoogleRegistrationCode: async (idToken, role = 'user') => {
+    const response = await api.post('/auth/send-google-registration-code', { idToken, role });
+    return response.data;
+  },
+
+  verifyGoogleRegistrationCode: async (email, code) => {
+    const response = await api.post('/auth/verify-google-registration-code', { email, code });
+    if (response.data.token) {
+      localStorage.setItem('token', response.data.token);
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+    }
+    return response.data;
+  },
+
   login: async (email, password) => {
     const response = await api.post('/auth/login', { email, password });
     if (response.data.token) {

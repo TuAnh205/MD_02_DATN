@@ -7,6 +7,8 @@ router.post("/register", ctrl.register);
 router.post("/register-shop", ctrl.registerShop);
 router.post("/send-verification-code", ctrl.emailRegistrationDisabled);
 router.post("/verify-email-code", ctrl.emailRegistrationDisabled);
+router.post("/send-google-registration-code", ctrl.sendGoogleRegistrationCode);
+router.post("/verify-google-registration-code", ctrl.verifyGoogleRegistrationCode);
 router.post("/login", ctrl.login);
 router.post("/google-login", ctrl.googleLogin);
 router.post("/forgot-password", ctrl.forgotPassword);

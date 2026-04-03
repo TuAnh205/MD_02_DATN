@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { signInWithGooglePopup, isFirebaseAuthConfigured } from '../services/firebaseAuth';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, googleLogin } = useAuth();
 
   const redirectByRole = () => {
     const user = JSON.parse(localStorage.getItem('user'));
@@ -44,6 +46,20 @@ export default function Login() {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      setError('');
+      setGoogleLoading(true);
+      const { idToken } = await signInWithGooglePopup();
+      await googleLogin(idToken);
+      redirectByRole();
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Đăng nhập Google thất bại');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -91,6 +107,27 @@ export default function Login() {
             {loading ? 'Đang đăng nhập...' : 'Đăng Nhập'}
           </button>
         </form>
+
+        <div className="my-6 flex items-center gap-3">
+          <div className="h-px bg-gray-200 flex-1" />
+          <span className="text-xs text-gray-500">hoặc</span>
+          <div className="h-px bg-gray-200 flex-1" />
+        </div>
+
+        {isFirebaseAuthConfigured ? (
+          <button
+            type="button"
+            onClick={handleGoogleLogin}
+            disabled={googleLoading}
+            className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+          >
+            {googleLoading ? 'Đang kết nối Google...' : 'Đăng nhập với Google'}
+          </button>
+        ) : (
+          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Chưa bật Firebase Google Auth. Vui lòng cấu hình VITE_FIREBASE_* trong file .env của frontend.
+          </div>
+        )}
 
         <div className="mt-6 space-y-2 text-center">
           <p className="text-sm text-gray-600">

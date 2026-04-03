@@ -114,6 +114,111 @@ exports.emailRegistrationDisabled = async (req, res) => {
   });
 };
 
+// ================= GOOGLE REGISTER: SEND CODE =================
+exports.sendGoogleRegistrationCode = async (req, res) => {
+  try {
+    const { idToken, role = "user" } = req.body;
+
+    if (!idToken) {
+      return res.status(400).json({ message: "Missing idToken" });
+    }
+
+    const googleData = await verifyGoogleToken(idToken);
+    const normalizedEmail = String(googleData.email || "").trim().toLowerCase();
+
+    if (!normalizedEmail) {
+      return res.status(400).json({ message: "Google account has no email" });
+    }
+
+    const exist = await User.findOne({ email: normalizedEmail });
+    if (exist) {
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const code = generateOtpCode();
+    const storeKey = `google-register:${normalizedEmail}`;
+
+    otpStore.set(storeKey, {
+      code,
+      expiresAt: Date.now() + OTP_TTL_MS,
+      payload: {
+        email: normalizedEmail,
+        name: googleData.name || "User",
+        firebaseUid: googleData.uid,
+        role: role === "shop" ? "shop" : "user",
+      },
+    });
+
+    await sendOtpMail(normalizedEmail, code);
+
+    return res.json({
+      message: "Verification code sent",
+      email: normalizedEmail,
+    });
+  } catch (err) {
+    console.error("SEND GOOGLE REGISTRATION CODE ERROR:", err);
+    return res.status(500).json({ message: err.message || "Cannot send verification code" });
+  }
+};
+
+// ================= GOOGLE REGISTER: VERIFY CODE =================
+exports.verifyGoogleRegistrationCode = async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ message: "email and code are required" });
+    }
+
+    const normalizedEmail = String(email).trim().toLowerCase();
+    const storeKey = `google-register:${normalizedEmail}`;
+    const cached = otpStore.get(storeKey);
+
+    if (!cached) {
+      return res.status(400).json({ message: "Verification code not found" });
+    }
+
+    if (Date.now() > cached.expiresAt) {
+      otpStore.delete(storeKey);
+      return res.status(400).json({ message: "Verification code expired" });
+    }
+
+    if (String(code).trim() !== String(cached.code).trim()) {
+      return res.status(400).json({ message: "Invalid verification code" });
+    }
+
+    const exist = await User.findOne({ email: normalizedEmail });
+    if (exist) {
+      otpStore.delete(storeKey);
+      return res.status(400).json({ message: "Email already registered" });
+    }
+
+    const user = new User({
+      name: cached.payload.name,
+      email: cached.payload.email,
+      firebaseUid: cached.payload.firebaseUid,
+      googleId: cached.payload.firebaseUid,
+      role: cached.payload.role,
+      isVerified: true,
+      password: null,
+    });
+
+    await user.save();
+    otpStore.delete(storeKey);
+
+    const token = generateToken(user);
+
+    return res.status(201).json({
+      message: "Google registration success",
+      token,
+      user,
+    });
+  } catch (err) {
+    console.error("VERIFY GOOGLE REGISTRATION CODE ERROR:", err);
+    return res.status(500).json({ message: err.message || "Google registration failed" });
+  }
+};
+
 // ================= REGISTER =================
 exports.register = async (req, res) => {
   try {
