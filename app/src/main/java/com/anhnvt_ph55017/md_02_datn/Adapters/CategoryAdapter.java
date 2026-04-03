@@ -48,7 +48,35 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         Category category = list.get(position);
 
         holder.tvName.setText(category.getName());
-        holder.imgIcon.setImageResource(category.getImage());
+        // Chỉ hiển thị đúng 6 danh mục, đúng thứ tự bạn yêu cầu
+        int iconRes = -1;
+        String name = category.getName().toLowerCase();
+        // Loại bỏ máy tính bảng, microphone và các loại khác
+        if ((name.contains("máy tính") || name.contains("may tinh") || name.contains("pc")) && !name.contains("bảng") && !name.contains("tablet")) {
+            iconRes = R.drawable.ic_laptop;
+        } else if (name.contains("điện thoại") || name.contains("dien thoai") || name.contains("phone")) {
+            iconRes = R.drawable.ic_phone;
+        } else if (name.contains("tai nghe") || name.contains("tainghe") || name.contains("headphone")) {
+            iconRes = R.drawable.ic_headphone;
+        } else if (name.contains("phụ kiện") || name.contains("phu kien") || name.contains("accessory")) {
+            iconRes = R.drawable.ic_phukien;
+        } else if (name.contains("màn hình") || name.contains("man hinh") || name.contains("monitor")) {
+            iconRes = R.drawable.ic_pc;
+        } else if (name.contains("loa")) {
+            iconRes = R.drawable.volume_solid_full;
+        }
+        // Nếu không thuộc 6 loại trên thì ẩn item
+        if (iconRes == -1 || name.contains("bảng") || name.contains("tablet") || name.contains("micro") || name.contains("microphone")) {
+            holder.itemView.setVisibility(View.GONE);
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
+            return;
+        } else {
+            holder.itemView.setVisibility(View.VISIBLE);
+            // Đặt width các category bằng nhau (4 category trên 1 hàng)
+            int equalWidth = holder.itemView.getResources().getDisplayMetrics().widthPixels / 4;
+            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(equalWidth, ViewGroup.LayoutParams.WRAP_CONTENT));
+        }
+        holder.imgIcon.setImageResource(iconRes);
 
         int id = category.getId();
 

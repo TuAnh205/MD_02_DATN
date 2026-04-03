@@ -44,7 +44,7 @@
 
             <TextView
                 android:id="@+id/tvPending"
-                android:text="Chưa thanh toán"
+                android:text="Chờ xác nhận"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:padding="8dp"
@@ -56,7 +56,7 @@
 
             <TextView
                 android:id="@+id/tvProcessing"
-                android:text="Đang xử lý"
+                android:text="Xác nhận"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:padding="8dp"
@@ -68,7 +68,7 @@
 
             <TextView
                 android:id="@+id/tvShipping"
-                android:text="Đang giao hàng"
+                android:text="Chưa thanh toán"
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:padding="8dp"
@@ -78,9 +78,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/tvDelivered"
-                android:text="Đã nhận"
+            <!-- Đã nhận tab bỏ đi, chỉ còn 5 tab như yêu cầu -->
                 android:textColor="#FFFFFF"
                 android:textSize="13sp"
                 android:padding="8dp"

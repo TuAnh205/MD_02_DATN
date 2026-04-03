@@ -88,13 +88,33 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
                 listener.onDetail(o);
             } else {
                 Intent intent = new Intent(context, OrderDetailActivity.class);
-
                 intent.putExtra("orderId", o.getId());
                 intent.putExtra("orderDate", o.getDate());
                 intent.putExtra("orderTotal", o.getTotal());
                 intent.putExtra("orderStatus", rawStatus); // ⚠️ vẫn là EN
                 intent.putExtra("arrivalDate", o.getArrivalDate());
-
+                intent.putExtra("shippingAddress", o.getShippingAddress());
+                intent.putExtra("itemCount", o.getItemCount());
+                // Luôn truyền đủ 3 trường address, district, city (nếu không có thì truyền rỗng)
+                String address = null, district = null, city = null;
+                try {
+                    java.lang.reflect.Method getAddress = o.getClass().getMethod("getAddress");
+                    address = (String) getAddress.invoke(o);
+                } catch (Exception ignored) {}
+                try {
+                    java.lang.reflect.Method getDistrict = o.getClass().getMethod("getDistrict");
+                    district = (String) getDistrict.invoke(o);
+                } catch (Exception ignored) {}
+                try {
+                    java.lang.reflect.Method getCity = o.getClass().getMethod("getCity");
+                    city = (String) getCity.invoke(o);
+                } catch (Exception ignored) {}
+                intent.putExtra("address", address != null ? address : "");
+                intent.putExtra("district", district != null ? district : "");
+                intent.putExtra("city", city != null ? city : "");
+                if (o.getItems() != null && o.getItems() instanceof java.io.Serializable) {
+                    intent.putExtra("orderItems", (java.io.Serializable) o.getItems());
+                }
                 context.startActivity(intent);
             }
         });

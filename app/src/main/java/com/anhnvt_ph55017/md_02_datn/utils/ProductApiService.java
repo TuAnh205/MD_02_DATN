@@ -22,15 +22,25 @@ public class ProductApiService {
         void onError(String error);
     }
 
-    public static void fetchProducts(Context context, String query, ProductCallback callback) {
+    public static void fetchProducts(Context context, String query, String category, ProductCallback callback) {
         String url = NetworkConstants.API_BASE_URL + "/api/products";
-
-        if (query != null && !query.isEmpty()) {
-            try {
-                url += "?q=" + URLEncoder.encode(query, "UTF-8");
-            } catch (Exception e) {
-                e.printStackTrace();
+        boolean hasQuery = query != null && !query.isEmpty();
+        boolean hasCategory = category != null && !category.isEmpty();
+        try {
+            StringBuilder sb = new StringBuilder(url);
+            boolean first = true;
+            if (hasQuery) {
+                sb.append(first ? "?" : "&");
+                sb.append("q=").append(URLEncoder.encode(query, "UTF-8"));
+                first = false;
             }
+            if (hasCategory) {
+                sb.append(first ? "?" : "&");
+                sb.append("category=").append(URLEncoder.encode(category, "UTF-8"));
+            }
+            url = sb.toString();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null,
@@ -84,6 +94,11 @@ public class ProductApiService {
         );
 
         Volley.newRequestQueue(context).add(request);
+    }
+
+    // Backward compatibility
+    public static void fetchProducts(Context context, String query, ProductCallback callback) {
+        fetchProducts(context, query, "", callback);
     }
     public interface ProductDetailCallback {
         void onSuccess(JSONObject productJson);

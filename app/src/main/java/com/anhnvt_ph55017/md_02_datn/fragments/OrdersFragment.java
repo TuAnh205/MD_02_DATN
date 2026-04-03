@@ -36,9 +36,10 @@ public class OrdersFragment extends Fragment {
     static List<Order> orderList;    // shared history
     List<Order> filteredList;
     
-    TextView tvAll, tvPending, tvProcessing, tvShipping, tvDelivered, tvCancelled;
+    TextView tvAll, tvPending, tvProcessing, tvShipping, tvCancelled;
     String selectedStatus = "ALL";
-    String[] statusValues = {"Chưa thanh toán", "Đang xử lý", "Đang giao hàng", "Đã nhận", "Đã hủy"};
+    // Các trạng thái mới
+    // Tất cả, Chờ xác nhận, Xác nhận, Chưa thanh toán, Đã hủy
 
     // keep single reference for callbacks
 
@@ -62,7 +63,7 @@ public class OrdersFragment extends Fragment {
         tvPending = view.findViewById(R.id.tvPending);
         tvProcessing = view.findViewById(R.id.tvProcessing);
         tvShipping = view.findViewById(R.id.tvShipping);
-        tvDelivered = view.findViewById(R.id.tvDelivered);
+        // Không còn tab Đã nhận
         tvCancelled = view.findViewById(R.id.tvCancelled);
 
         // Lấy token từ SessionManager
@@ -201,10 +202,9 @@ public class OrdersFragment extends Fragment {
     // Thiết lập sự kiện click cho các tab trạng thái
     private void setupTabListeners() {
         tvAll.setOnClickListener(v -> filterByStatus("ALL"));
-        tvPending.setOnClickListener(v -> filterByStatus("Đã xác nhận"));
-        tvProcessing.setOnClickListener(v -> filterByStatus("Đang xử lý"));
-        tvShipping.setOnClickListener(v -> filterByStatus("Đang giao hàng"));
-        tvDelivered.setOnClickListener(v -> filterByStatus("Đã nhận"));
+        tvPending.setOnClickListener(v -> filterByStatus("Chờ xác nhận"));
+        tvProcessing.setOnClickListener(v -> filterByStatus("Xác nhận"));
+        tvShipping.setOnClickListener(v -> filterByStatus("Chưa thanh toán"));
         tvCancelled.setOnClickListener(v -> filterByStatus("Đã hủy"));
     }
     
@@ -215,12 +215,6 @@ public class OrdersFragment extends Fragment {
         if (orderList == null) orderList = new ArrayList<>();
         if (status.equals("ALL")) {
             filteredList.addAll(orderList);
-            // push cancelled orders to bottom
-            filteredList.sort((o1, o2) -> {
-                if (isCancelled(o1.getStatus()) && !isCancelled(o2.getStatus())) return 1;
-                if (!isCancelled(o1.getStatus()) && isCancelled(o2.getStatus())) return -1;
-                return 0;
-            });
         } else {
             filteredList.addAll(orderList.stream()
                     .filter(order -> statusMatch(order.getStatus(), status))
@@ -229,19 +223,27 @@ public class OrdersFragment extends Fragment {
         adapter.notifyDataSetChanged();
 
         if (status.equals("ALL")) setTabActive(tvAll);
-        else if (status.equals("Đã xác nhận")) setTabActive(tvPending);
-        else if (status.equals("Đang xử lý")) setTabActive(tvProcessing);
-        else if (status.equals("Đang giao hàng")) setTabActive(tvShipping);
-        else if (status.equals("Đã nhận")) setTabActive(tvDelivered);
+        else if (status.equals("Chờ xác nhận")) setTabActive(tvPending);
+        else if (status.equals("Xác nhận")) setTabActive(tvProcessing);
+        else if (status.equals("Chưa thanh toán")) setTabActive(tvShipping);
         else if (status.equals("Đã hủy")) setTabActive(tvCancelled);
     }
 
     // So khớp trạng thái tiếng Anh/Việt
     private boolean statusMatch(String backendStatus, String tabStatus) {
-        if (tabStatus.equals("Chưa thanh toán")) return backendStatus.equalsIgnoreCase("pending") || backendStatus.equals("Chưa thanh toán");
-        if (tabStatus.equals("Đang xử lý")) return backendStatus.equalsIgnoreCase("processing") || backendStatus.equals("Đang xử lý");
-        if (tabStatus.equals("Đang giao hàng")) return backendStatus.equalsIgnoreCase("shipping") || backendStatus.equals("Đang giao hàng");
-        if (tabStatus.equals("Đã nhận")) return backendStatus.equalsIgnoreCase("delivered") || backendStatus.equals("Đã nhận");
+        backendStatus = backendStatus.trim().toLowerCase();
+        if (tabStatus.equals("Chờ xác nhận")) {
+            // Các trạng thái chờ xác nhận phổ biến
+            return backendStatus.equals("pending") || backendStatus.equals("chờ xác nhận") || backendStatus.equals("chua xac nhan") || backendStatus.equals("cho xac nhan");
+        }
+        if (tabStatus.equals("Xác nhận")) {
+            // Các trạng thái đã xác nhận phổ biến
+            return backendStatus.equals("processing") || backendStatus.equals("xác nhận") || backendStatus.equals("da xac nhan") || backendStatus.equals("xac nhan") || backendStatus.equals("confirmed");
+        }
+        if (tabStatus.equals("Chưa thanh toán")) {
+            // Các trạng thái chưa thanh toán phổ biến
+            return backendStatus.equals("unpaid") || backendStatus.equals("chưa thanh toán") || backendStatus.equals("chua thanh toan");
+        }
         if (tabStatus.equals("Đã hủy")) return isCancelled(backendStatus);
         return backendStatus.equals(tabStatus);
     }
@@ -292,11 +294,8 @@ public class OrdersFragment extends Fragment {
         tvProcessing.setAlpha(0.6f);
         tvShipping.setTextColor(getResources().getColor(R.color.white, null));
         tvShipping.setAlpha(0.6f);
-        tvDelivered.setTextColor(getResources().getColor(R.color.white, null));
-        tvDelivered.setAlpha(0.6f);
         tvCancelled.setTextColor(getResources().getColor(R.color.white, null));
         tvCancelled.setAlpha(0.6f);
-        
         // đánh dấu tab đang hoạt động
         activeTab.setTextColor(getResources().getColor(android.R.color.holo_blue_light));
         activeTab.setAlpha(1f);

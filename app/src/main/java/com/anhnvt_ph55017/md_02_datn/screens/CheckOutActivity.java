@@ -295,9 +295,12 @@ public class CheckOutActivity extends AppCompatActivity {
             String name = data.getStringExtra("selectedAddressName");
             String phone = data.getStringExtra("selectedAddressPhone");
             String addressStr = data.getStringExtra("selectedAddressDetail");
-            String id = "";
+            String city = data.getStringExtra("selectedAddressCity");
+            String district = data.getStringExtra("selectedAddressDistrict");
+            String ward = data.getStringExtra("selectedAddressWard");
+            String id = data.getStringExtra("selectedAddressId");
             String userIdStr = String.valueOf(userId);
-            selectedAddress = new Address(id, userIdStr, name, phone, addressStr, true);
+            selectedAddress = new Address(id != null ? id : "", userIdStr, name, phone, addressStr, city, district, ward, true);
             updateAddressDisplay();
         }
     }

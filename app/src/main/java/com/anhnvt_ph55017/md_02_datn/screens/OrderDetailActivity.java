@@ -19,7 +19,7 @@ import java.util.List;
 
 public class OrderDetailActivity extends AppCompatActivity {
 
-    TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal, tvStatusDescription;
+    TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal, tvStatusDescription, tvShippingAddress, tvItemCount, tvArrivalDate;
     Button btnCancel, btnBuyAgain, btnSubmitRating;
     RatingBar ratingBar;
     EditText edtRatingComment;
@@ -41,9 +41,52 @@ public class OrderDetailActivity extends AppCompatActivity {
             tvStatusDescription = findViewById(R.id.tvStatusDescription);
             btnCancel = findViewById(R.id.btnCancel);
             btnBuyAgain = findViewById(R.id.btnBuyAgain);
-            btnSubmitRating = findViewById(R.id.btnSubmitRating);
-            ratingBar = findViewById(R.id.ratingBar);
-            edtRatingComment = findViewById(R.id.edtRatingComment);
+            // Ẩn các view đánh giá (ratingCard đã bị xóa khỏi layout, không cần xử lý)
+                        // Địa chỉ giao hàng
+                        tvShippingAddress = findViewById(R.id.tvShippingAddress);
+                        // Lấy địa chỉ từ 3 trường nếu có
+                        String address = getIntent().getStringExtra("address");
+                        String district = getIntent().getStringExtra("district");
+                        String city = getIntent().getStringExtra("city");
+                        String shippingAddress = getIntent().getStringExtra("shippingAddress");
+                        String fullAddress = "";
+                        if (address != null && !address.isEmpty()) fullAddress += address;
+                        if (district != null && !district.isEmpty()) fullAddress += (fullAddress.isEmpty() ? "" : ", ") + district;
+                        if (city != null && !city.isEmpty()) fullAddress += (fullAddress.isEmpty() ? "" : ", ") + city;
+                        if (fullAddress.isEmpty() && shippingAddress != null && !shippingAddress.isEmpty()) {
+                            fullAddress = shippingAddress;
+                        }
+                        if (fullAddress.isEmpty()) fullAddress = "Không có thông tin";
+                        tvShippingAddress.setText(fullAddress);
+
+                        // Số lượng sản phẩm
+                        tvItemCount = findViewById(R.id.tvItemCount);
+                        int itemCount = getIntent().getIntExtra("itemCount", 0);
+                        tvItemCount.setText(String.valueOf(itemCount));
+
+                        // Dự kiến nhận
+                        tvArrivalDate = findViewById(R.id.tvArrivalDate);
+                        String arrivalDate = getIntent().getStringExtra("arrivalDate");
+                        // Nếu chưa có thì hiển thị "Chưa có"
+                        if (arrivalDate == null || arrivalDate.isEmpty()) {
+                            tvArrivalDate.setText("Chưa có");
+                        } else {
+                            // Nếu trạng thái là đã xác nhận thì cộng thêm 4 ngày
+                            if (orderStatus.equalsIgnoreCase("processing") || orderStatus.equalsIgnoreCase("xác nhận") || orderStatus.equalsIgnoreCase("confirmed")) {
+                                try {
+                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                                    java.util.Calendar cal = java.util.Calendar.getInstance();
+                                    cal.setTime(sdf.parse(arrivalDate));
+                                    cal.add(java.util.Calendar.DATE, 4);
+                                    String newDate = sdf.format(cal.getTime());
+                                    tvArrivalDate.setText(newDate);
+                                } catch (Exception e) {
+                                    tvArrivalDate.setText(arrivalDate);
+                                }
+                            } else {
+                                tvArrivalDate.setText(arrivalDate);
+                            }
+                        }
             rvOrderItems = findViewById(R.id.rvOrderItems);
 
             // ===== GET DATA =====
@@ -68,29 +111,31 @@ public class OrderDetailActivity extends AppCompatActivity {
             tvStatusDescription.setText(getStatusDescription(orderStatus));
 
             // ===== LIST ITEM =====
-            List<OrderItem> list = (List<OrderItem>) intent.getSerializableExtra("orderItems");
+            List<OrderItem> list = (List<OrderItem>) getIntent().getSerializableExtra("orderItems");
             if (list == null) list = new ArrayList<>();
-
             OrderItemAdapter adapter = new OrderItemAdapter(list);
             rvOrderItems.setLayoutManager(new LinearLayoutManager(this));
             rvOrderItems.setAdapter(adapter);
 
             // ===== CANCEL BUTTON =====
-            if (isCancelled(orderStatus) || orderStatus.equalsIgnoreCase("delivered")) {
-                btnCancel.setVisibility(android.view.View.GONE);
-                btnBuyAgain.setVisibility(android.view.View.VISIBLE);
-            } else {
-                btnCancel.setVisibility(android.view.View.VISIBLE);
-                btnBuyAgain.setVisibility(android.view.View.GONE);
+            if (btnCancel != null && btnBuyAgain != null) {
+                if (isCancelled(orderStatus) || orderStatus.equalsIgnoreCase("delivered")) {
+                    btnCancel.setVisibility(android.view.View.GONE);
+                    btnBuyAgain.setVisibility(android.view.View.VISIBLE);
+                } else {
+                    btnCancel.setVisibility(android.view.View.VISIBLE);
+                    btnBuyAgain.setVisibility(android.view.View.GONE);
+                }
+                btnCancel.setOnClickListener(v -> cancelOrder());
             }
 
-            btnCancel.setOnClickListener(v -> cancelOrder());
-
             // ===== RATING =====
-            if (orderStatus.equalsIgnoreCase("delivered")) {
-                btnSubmitRating.setVisibility(android.view.View.VISIBLE);
-            } else {
-                btnSubmitRating.setVisibility(android.view.View.GONE);
+            if (btnSubmitRating != null) {
+                if (orderStatus.equalsIgnoreCase("delivered")) {
+                    btnSubmitRating.setVisibility(android.view.View.VISIBLE);
+                } else {
+                    btnSubmitRating.setVisibility(android.view.View.GONE);
+                }
             }
 
         } catch (Exception e) {

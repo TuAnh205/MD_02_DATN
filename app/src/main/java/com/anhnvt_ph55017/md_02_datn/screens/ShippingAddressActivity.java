@@ -1,25 +1,21 @@
+
 package com.anhnvt_ph55017.md_02_datn.screens;
 
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.Toast;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.anhnvt_ph55017.md_02_datn.Adapters.AddressAdapter;
 import com.anhnvt_ph55017.md_02_datn.utils.AddressApiService;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Address;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
-
 import java.util.List;
 import android.widget.Spinner;
 import android.widget.ArrayAdapter;
@@ -28,7 +24,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class ShippingAddressActivity extends AppCompatActivity {
-
     private RecyclerView rvAddresses;
     private Button btnAddAddress;
     private Button btnUseAddress;
@@ -37,6 +32,8 @@ public class ShippingAddressActivity extends AppCompatActivity {
     private List<Address> addresses;
     private AddressAdapter adapter;
     private Address selectedAddress;
+    private static final String PREF_SELECTED_ADDRESS_ID = "selected_address_id";
+    private String pendingSelectedAddressId = null;
     private int userId;
 
     @Override
@@ -53,7 +50,7 @@ public class ShippingAddressActivity extends AppCompatActivity {
         tvSelectedAddressDetail = findViewById(R.id.tvSelectedAddressDetail);
 
         userId = SessionManager.getUserId(this);
-        if (userId <= 0) userId = 1;  // Fallback to user 1 if not logged in
+        if (userId <= 0) userId = 1;
 
         btnBack.setOnClickListener(v -> onBackPressed());
         tvHeaderTitle.setText("Địa chỉ giao hàng");
@@ -61,20 +58,42 @@ public class ShippingAddressActivity extends AppCompatActivity {
         loadAddressesFromBackend();
 
         btnAddAddress.setOnClickListener(v -> showAddressDialog(null));
-        
+
         btnUseAddress.setOnClickListener(v -> {
             if (selectedAddress != null) {
-                Intent resultIntent = new Intent();
-                resultIntent.putExtra("selectedAddressId", selectedAddress.getId());
-                resultIntent.putExtra("selectedAddressName", selectedAddress.getName());
-                resultIntent.putExtra("selectedAddressPhone", selectedAddress.getPhone());
-                resultIntent.putExtra("selectedAddressDetail", selectedAddress.getAddress());
-                resultIntent.putExtra("selectedAddressCity", selectedAddress.getCity());
-                resultIntent.putExtra("selectedAddressDistrict", selectedAddress.getDistrict());
-                resultIntent.putExtra("selectedAddressWard", selectedAddress.getWard());
-                setResult(RESULT_OK, resultIntent);
-                Toast.makeText(this, "Đã chọn địa chỉ: " + selectedAddress.getName(), Toast.LENGTH_SHORT).show();
-                finish();
+                // Đặt địa chỉ này là mặc định
+                String token = SessionManager.getToken(this);
+                JSONObject addressJson = new JSONObject();
+                try {
+                    addressJson.put("isDefault", true);
+                } catch (Exception e) {
+                }
+                AddressApiService.updateAddress(token, selectedAddress.getId(), addressJson, new AddressApiService.AddressCallback() {
+                    @Override
+                    public void onSuccess(JSONObject data) {
+                        getSharedPreferences("address_prefs", MODE_PRIVATE)
+                                .edit().putString(PREF_SELECTED_ADDRESS_ID, selectedAddress.getId()).apply();
+                        runOnUiThread(() -> {
+                            Intent resultIntent = new Intent();
+                            resultIntent.putExtra("selectedAddressId", selectedAddress.getId());
+                            // Only send the name, not name + phone
+                            resultIntent.putExtra("selectedAddressName", selectedAddress.getName());
+                            resultIntent.putExtra("selectedAddressPhone", selectedAddress.getPhone());
+                            resultIntent.putExtra("selectedAddressDetail", selectedAddress.getAddress());
+                            resultIntent.putExtra("selectedAddressCity", selectedAddress.getCity());
+                            resultIntent.putExtra("selectedAddressDistrict", selectedAddress.getDistrict());
+                            resultIntent.putExtra("selectedAddressWard", selectedAddress.getWard());
+                            setResult(RESULT_OK, resultIntent);
+                            Toast.makeText(ShippingAddressActivity.this, "Đã chọn địa chỉ: " + selectedAddress.getName(), Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
+                    }
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() -> Toast.makeText(ShippingAddressActivity.this, "Lỗi cập nhật địa chỉ mặc định: " + error, Toast.LENGTH_SHORT).show());
+                    }
+                });
             } else {
                 Toast.makeText(this, "Vui lòng chọn một địa chỉ", Toast.LENGTH_SHORT).show();
             }
@@ -83,13 +102,29 @@ public class ShippingAddressActivity extends AppCompatActivity {
 
     private void loadDefaultAddress() {
         if (addresses == null) return;
-        for (Address addr : addresses) {
-            if (addr.isDefault()) {
-                selectedAddress = addr;
-                updateSelectedAddressDisplay();
-                break;
+        String savedId = pendingSelectedAddressId != null ? pendingSelectedAddressId :
+                getSharedPreferences("address_prefs", MODE_PRIVATE)
+                        .getString(PREF_SELECTED_ADDRESS_ID, null);
+        boolean found = false;
+        if (savedId != null) {
+            for (Address addr : addresses) {
+                if (addr.getId().equals(savedId)) {
+                    selectedAddress = addr;
+                    found = true;
+                    break;
+                }
+            }
+            pendingSelectedAddressId = null;
+        }
+        if (!found) {
+            for (Address addr : addresses) {
+                if (addr.isDefault()) {
+                    selectedAddress = addr;
+                    break;
+                }
             }
         }
+        updateSelectedAddressDisplay();
     }
 
     private void updateSelectedAddressDisplay() {
@@ -101,23 +136,18 @@ public class ShippingAddressActivity extends AppCompatActivity {
 
     private void loadAddressesFromBackend() {
         String token = SessionManager.getToken(this);
-
         if (token == null || token.isEmpty()) {
             Toast.makeText(this, "Chưa đăng nhập", Toast.LENGTH_SHORT).show();
             return;
         }
-
         AddressApiService.getAddresses(token, new AddressApiService.AddressListCallback() {
             @Override
-            public void onSuccess(org.json.JSONArray addressesJson) {
+            public void onSuccess(JSONArray addressesJson) {
                 runOnUiThread(() -> {
                     addresses = new java.util.ArrayList<>();
-
                     for (int i = 0; i < addressesJson.length(); i++) {
-                        org.json.JSONObject obj = addressesJson.optJSONObject(i);
+                        JSONObject obj = addressesJson.optJSONObject(i);
                         if (obj == null) continue;
-
-                        // ✅ FIX CHUẨN STRING (KHÔNG PARSE INT)
                         String id = obj.optString("_id", "");
                         String userId = obj.optString("userId", "");
                         String name = obj.optString("name", "");
@@ -127,16 +157,15 @@ public class ShippingAddressActivity extends AppCompatActivity {
                         String district = obj.optString("district", "");
                         String ward = obj.optString("ward", "");
                         boolean isDefault = obj.optBoolean("isDefault", false);
-
                         Address addr = new Address(id, userId, name, phone, addressStr, city, district, ward, isDefault);
                         addresses.add(addr);
                     }
-
                     adapter = new AddressAdapter(ShippingAddressActivity.this, addresses, new AddressAdapter.Listener() {
                         @Override
                         public void onSelect(Address address) {
                             selectedAddress = address;
                             updateSelectedAddressDisplay();
+                            if (adapter != null) adapter.setSelectedAddress(address);
                         }
 
                         @Override
@@ -146,22 +175,42 @@ public class ShippingAddressActivity extends AppCompatActivity {
 
                         @Override
                         public void onDelete(Address address) {
-                            Toast.makeText(ShippingAddressActivity.this, "Chưa hỗ trợ xoá", Toast.LENGTH_SHORT).show();
+                            new AlertDialog.Builder(ShippingAddressActivity.this)
+                                    .setTitle("Xoá địa chỉ")
+                                    .setMessage("Bạn có chắc muốn xoá địa chỉ này?")
+                                    .setPositiveButton("Xoá", (dialog, which) -> {
+                                        String token = SessionManager.getToken(ShippingAddressActivity.this);
+                                        AddressApiService.deleteAddress(token, address.getId(), new AddressApiService.AddressCallback() {
+                                            @Override
+                                            public void onSuccess(JSONObject data) {
+                                                runOnUiThread(() -> {
+                                                    Toast.makeText(ShippingAddressActivity.this, "Đã xoá địa chỉ", Toast.LENGTH_SHORT).show();
+                                                    refreshList();
+                                                });
+                                            }
+
+                                            @Override
+                                            public void onError(String error) {
+                                                runOnUiThread(() -> Toast.makeText(ShippingAddressActivity.this, "Lỗi xoá địa chỉ: " + error, Toast.LENGTH_SHORT).show());
+                                            }
+                                        });
+                                    })
+                                    .setNegativeButton("Huỷ", null)
+                                    .show();
                         }
                     });
-
                     rvAddresses.setLayoutManager(new LinearLayoutManager(ShippingAddressActivity.this));
                     rvAddresses.setAdapter(adapter);
-
                     loadDefaultAddress();
+                    if (selectedAddress != null && adapter != null) {
+                        adapter.setSelectedAddress(selectedAddress);
+                    }
                 });
             }
 
             @Override
             public void onError(String error) {
-                runOnUiThread(() ->
-                        Toast.makeText(ShippingAddressActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show()
-                );
+                runOnUiThread(() -> Toast.makeText(ShippingAddressActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -172,7 +221,6 @@ public class ShippingAddressActivity extends AppCompatActivity {
 
     private void showAddressDialog(Address editing) {
         boolean isEdit = editing != null;
-
         View dialogView = LayoutInflater.from(this).inflate(R.layout.dialog_address, null);
         com.google.android.material.textfield.TextInputEditText etName = dialogView.findViewById(R.id.etName);
         com.google.android.material.textfield.TextInputEditText etPhone = dialogView.findViewById(R.id.etPhone);
@@ -193,7 +241,6 @@ public class ShippingAddressActivity extends AppCompatActivity {
                     if (cityObj != null) cityAdapter.add(cityObj.optString("name", ""));
                 }
                 spinnerCity.setAdapter(cityAdapter);
-
                 spinnerCity.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
@@ -204,11 +251,11 @@ public class ShippingAddressActivity extends AppCompatActivity {
                         if (districts != null) {
                             for (int j = 0; j < districts.length(); j++) {
                                 JSONObject districtObj = districts.optJSONObject(j);
-                                if (districtObj != null) districtAdapter.add(districtObj.optString("name", ""));
+                                if (districtObj != null)
+                                    districtAdapter.add(districtObj.optString("name", ""));
                             }
                         }
                         spinnerDistrict.setAdapter(districtAdapter);
-
                         spinnerDistrict.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(android.widget.AdapterView<?> parent2, View view2, int pos2, long id2) {
@@ -223,12 +270,19 @@ public class ShippingAddressActivity extends AppCompatActivity {
                                 }
                                 spinnerWard.setAdapter(wardAdapter);
                             }
-                            @Override public void onNothingSelected(android.widget.AdapterView<?> parent2) {}
+
+                            @Override
+                            public void onNothingSelected(android.widget.AdapterView<?> parent2) {
+                            }
                         });
                     }
-                    @Override public void onNothingSelected(android.widget.AdapterView<?> parent) {}
+
+                    @Override
+                    public void onNothingSelected(android.widget.AdapterView<?> parent) {
+                    }
                 });
             }
+
             @Override
             public void onError(String error) {
                 Toast.makeText(ShippingAddressActivity.this, "Lỗi tải địa lý: " + error, Toast.LENGTH_SHORT).show();
@@ -240,65 +294,83 @@ public class ShippingAddressActivity extends AppCompatActivity {
             etPhone.setText(editing.getPhone());
             etAddress.setText(editing.getAddress());
             cbDefault.setChecked(editing.isDefault());
-            // TODO: set selection cho Spinner nếu muốn sửa địa chỉ
         }
 
         AlertDialog.Builder builder = new AlertDialog.Builder(this, R.style.AlertDialogTheme);
         builder.setTitle(isEdit ? "Sửa địa chỉ" : "Thêm địa chỉ mới");
         builder.setView(dialogView);
-
         builder.setPositiveButton(isEdit ? "Cập nhật" : "Thêm", null);
         builder.setNegativeButton("Hủy", null);
-
         AlertDialog dialog = builder.create();
         dialog.setOnShowListener(d -> {
             if (dialog.getWindow() != null) {
                 dialog.getWindow().setBackgroundDrawable(new android.graphics.drawable.ColorDrawable(android.graphics.Color.TRANSPARENT));
                 dialog.getWindow().getDecorView().setBackgroundResource(R.drawable.bg_card);
                 int screenWidth = getResources().getDisplayMetrics().widthPixels;
-                dialog.getWindow().setLayout(
-                        (int)(screenWidth * 0.9),
-                        android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-                );
+                dialog.getWindow().setLayout((int) (screenWidth * 0.9), android.view.ViewGroup.LayoutParams.WRAP_CONTENT);
             }
             dialog.getButton(AlertDialog.BUTTON_POSITIVE).setOnClickListener(v -> {
                 String name = etName.getText().toString().trim();
                 String phone = etPhone.getText().toString().trim();
                 String addr = etAddress.getText().toString().trim();
                 boolean isDefault = cbDefault.isChecked();
-
                 String city = spinnerCity.getSelectedItem() != null ? spinnerCity.getSelectedItem().toString() : "";
                 String district = spinnerDistrict.getSelectedItem() != null ? spinnerDistrict.getSelectedItem().toString() : "";
                 String ward = spinnerWard.getSelectedItem() != null ? spinnerWard.getSelectedItem().toString() : "";
-
                 if (name.isEmpty() || phone.isEmpty() || addr.isEmpty() || city.isEmpty() || district.isEmpty() || ward.isEmpty()) {
                     Toast.makeText(ShippingAddressActivity.this, "Vui lòng điền đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                // Không cho tên chứa số
+                if (name.matches(".*\\d.*")) {
+                    Toast.makeText(ShippingAddressActivity.this, "Tên không được chứa số!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                // Số điện thoại phải đủ 10 số và bắt đầu bằng 0
+                if (!phone.matches("0\\d{9}")) {
+                    Toast.makeText(ShippingAddressActivity.this, "Số điện thoại phải đủ 10 số và bắt đầu bằng 0!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                String token = SessionManager.getToken(ShippingAddressActivity.this);
+                JSONObject addressJson = new JSONObject();
+                try {
+                    addressJson.put("name", name);
+                    addressJson.put("phone", phone);
+                    addressJson.put("address", addr);
+                    addressJson.put("isDefault", isDefault);
+                    addressJson.put("city", city);
+                    addressJson.put("district", district);
+                    addressJson.put("ward", ward);
+                } catch (Exception e) {
+                }
                 if (isEdit) {
-                    Toast.makeText(ShippingAddressActivity.this, "Chức năng sửa chưa hỗ trợ backend", Toast.LENGTH_SHORT).show();
+                    AddressApiService.updateAddress(token, editing.getId(), addressJson, new AddressApiService.AddressCallback() {
+                        @Override
+                        public void onSuccess(JSONObject addressJson) {
+                            runOnUiThread(() -> {
+                                Toast.makeText(ShippingAddressActivity.this, "Đã cập nhật địa chỉ", Toast.LENGTH_SHORT).show();
+                                refreshList();
+                                dialog.dismiss();
+                            });
+                        }
+
+                        @Override
+                        public void onError(String error) {
+                            runOnUiThread(() -> Toast.makeText(ShippingAddressActivity.this, "Lỗi cập nhật địa chỉ: " + error, Toast.LENGTH_SHORT).show());
+                        }
+                    });
                 } else {
-                    String token = SessionManager.getToken(ShippingAddressActivity.this);
-                    org.json.JSONObject addressJson = new org.json.JSONObject();
-                    try {
-                        addressJson.put("name", name);
-                        addressJson.put("phone", phone);
-                        addressJson.put("address", addr);
-                        addressJson.put("isDefault", isDefault);
-                        addressJson.put("city", city);
-                        addressJson.put("district", district);
-                        addressJson.put("ward", ward);
-                    } catch (Exception e) {}
                     AddressApiService.addAddress(token, addressJson, new AddressApiService.AddressCallback() {
                         @Override
-                        public void onSuccess(org.json.JSONObject addressJson) {
+                        public void onSuccess(JSONObject addressJson) {
+                            pendingSelectedAddressId = addressJson.optString("_id", null);
                             runOnUiThread(() -> {
                                 Toast.makeText(ShippingAddressActivity.this, "Đã thêm địa chỉ mới", Toast.LENGTH_SHORT).show();
                                 refreshList();
                                 dialog.dismiss();
                             });
                         }
+
                         @Override
                         public void onError(String error) {
                             runOnUiThread(() -> Toast.makeText(ShippingAddressActivity.this, "Lỗi thêm địa chỉ: " + error, Toast.LENGTH_SHORT).show());
@@ -310,3 +382,4 @@ public class ShippingAddressActivity extends AppCompatActivity {
         dialog.show();
     }
 }
+// ...existing code...

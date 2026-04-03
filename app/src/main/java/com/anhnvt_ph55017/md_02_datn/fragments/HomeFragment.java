@@ -33,6 +33,46 @@ import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
 public class HomeFragment extends Fragment {
 
+    // Thêm lại hàm loadCategoriesFromApi
+    private void loadCategoriesFromApi() {
+        if (getContext() == null) return;
+        com.anhnvt_ph55017.md_02_datn.utils.CategoryApiService.fetchCategories(getContext(), new com.anhnvt_ph55017.md_02_datn.utils.CategoryApiService.CategoryCallback() {
+            @Override
+            public void onSuccess(List<com.anhnvt_ph55017.md_02_datn.models.Category> categories) {
+                listCategories = categories;
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        rvCategory.setAdapter(
+                                new com.anhnvt_ph55017.md_02_datn.Adapters.CategoryAdapter(categories, selectedCategory -> {
+                                    // Only allow single selection for backend filtering
+                                    if (selectedCategory.isEmpty()) {
+                                        selectedCategoryName = "";
+                                    } else {
+                                        int idx = selectedCategory.iterator().next();
+                                        if (idx >= 0 && idx < listCategories.size()) {
+                                            selectedCategoryName = listCategories.get(idx).getName();
+                                        } else {
+                                            selectedCategoryName = "";
+                                        }
+                                    }
+                                    loadProductsFromApi();
+                                })
+                        );
+                    });
+                }
+            }
+
+            @Override
+            public void onError(String error) {
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() ->
+                            android.widget.Toast.makeText(getContext(), "Load categories failed: " + error, android.widget.Toast.LENGTH_SHORT).show()
+                    );
+                }
+            }
+        });
+    }
+
     RecyclerView rvCategory, rvProduct;
     ImageView imgCart, imgNotification;
     TextView tvNotificationBadge;
@@ -41,6 +81,8 @@ public class HomeFragment extends Fragment {
     EditText edtSearchHome;
 
     List<Product> listProducts;
+    List<com.anhnvt_ph55017.md_02_datn.models.Category> listCategories = new java.util.ArrayList<>();
+    String selectedCategoryName = "";
 
     private final Handler bannerHandler = new Handler(Looper.getMainLooper());
     private final int bannerIntervalMs = 3500;
@@ -87,29 +129,26 @@ public class HomeFragment extends Fragment {
                 }
             });
 
-            CategoryDAO categoryDAO = new CategoryDAO(getContext());
-            listProducts = new java.util.ArrayList<>();
+                listProducts = new java.util.ArrayList<>();
 
-            setupBanner();
-            setupSearch();
+                setupBanner();
+                setupSearch();
 
-            // Recycler category
-            rvCategory.setLayoutManager(
+                // Recycler category
+                rvCategory.setLayoutManager(
                     new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false)
-            );
+                );
 
-            rvCategory.setAdapter(
-                    new CategoryAdapter(categoryDAO.getAll(), selectedCategory -> {
-                        // For now, show all products when category selected
-                        loadProductsFromApi();
-                    })
-            );
 
-            // Recycler product
-            rvProduct.setLayoutManager(new GridLayoutManager(getContext(),2));
+                // Fetch categories from backend
+                loadCategoriesFromApi();
 
-            // Load products from API
-            loadProductsFromApi();
+                // Recycler product
+                rvProduct.setLayoutManager(new GridLayoutManager(getContext(),2));
+
+                // Load products from API
+                loadProductsFromApi();
+            // ...existing code...
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -200,7 +239,7 @@ public class HomeFragment extends Fragment {
     private void loadProductsFromApi() {
         if (getContext() == null) return;
 
-        ProductApiService.fetchProducts(getContext(), "", new ProductApiService.ProductCallback() {
+        ProductApiService.fetchProducts(getContext(), edtSearchHome.getText().toString().trim(), selectedCategoryName, new ProductApiService.ProductCallback() {
             @Override
             public void onSuccess(List<Product> products) {
                 listProducts = products;

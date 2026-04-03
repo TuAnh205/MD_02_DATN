@@ -104,4 +104,68 @@ public class AddressApiService {
             }
         }).start();
     }
+
+    // Update address by id
+    public static void updateAddress(String token, String addressId, JSONObject body, AddressCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "/" + addressId);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Content-Type", "application/json");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setDoOutput(true);
+
+                OutputStream os = conn.getOutputStream();
+                os.write(body.toString().getBytes());
+                os.close();
+
+                int code = conn.getResponseCode();
+
+                Scanner sc = new Scanner(
+                        code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()
+                ).useDelimiter("\\A");
+
+                String res = sc.hasNext() ? sc.next() : "";
+                sc.close();
+
+                if (code >= 200 && code < 300) {
+                    callback.onSuccess(new JSONObject(res));
+                } else {
+                    callback.onError(res);
+                }
+            } catch (Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
+    // Delete address by id
+    public static void deleteAddress(String token, String addressId, AddressCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "/" + addressId);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("DELETE");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+
+                int code = conn.getResponseCode();
+
+                Scanner sc = new Scanner(
+                        code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()
+                ).useDelimiter("\\A");
+
+                String res = sc.hasNext() ? sc.next() : "";
+                sc.close();
+
+                if (code >= 200 && code < 300) {
+                    callback.onSuccess(new JSONObject(res));
+                } else {
+                    callback.onError(res);
+                }
+            } catch (Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
 }
