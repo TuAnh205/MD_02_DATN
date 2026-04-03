@@ -78,10 +78,75 @@
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Address -->
+
+    <!-- City Spinner -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Địa chỉ"
+        android:text="Tỉnh/Thành phố"
+        android:textColor="#E5E7EB"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
+
+    <Spinner
+        android:id="@+id/spinnerCity"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="#1F2937"
+        android:padding="6dp"
+        android:textColor="#E5E7EB"
+        android:textSize="14sp" />
+
+    <!-- District Spinner -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Quận/Huyện"
+        android:textColor="#E5E7EB"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
+
+    <Spinner
+        android:id="@+id/spinnerDistrict"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="12dp"
+        android:background="#1F2937"
+        android:padding="6dp"
+        android:textColor="#E5E7EB"
+        android:textSize="14sp" />
+
+    <!-- Ward Spinner -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Phường/Xã"
+        android:textColor="#E5E7EB"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05" />
+
+    <Spinner
+        android:id="@+id/spinnerWard"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="20dp"
+        android:background="#1F2937"
+        android:padding="6dp"
+        android:textColor="#E5E7EB"
+        android:textSize="14sp" />
+
+    <!-- Số nhà, tên đường -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Số nhà, tên đường"
         android:textColor="#E5E7EB"
         android:textSize="12sp"
         android:textStyle="bold"
@@ -104,7 +169,7 @@
             android:id="@+id/etAddress"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:hint="Ví dụ: 123 Đường Lê Lợi, Quận 1, TP.HCM"
+            android:hint="Ví dụ: 123 Đường Lê Lợi"
             android:textColor="@android:color/white"
             android:inputType="text"
             android:paddingStart="12dp"

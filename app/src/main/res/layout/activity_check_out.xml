@@ -31,56 +31,88 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
+
         <LinearLayout
             android:id="@+id/addressCard"
             android:background="@drawable/bg_card"
             android:padding="16dp"
             android:layout_marginTop="8dp"
-            android:orientation="vertical"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <ImageView
+                android:src="@android:drawable/ic_menu_mylocation"
+                android:tint="#2F80FF"
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="12dp" />
+
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="wrap_content">
 
                 <TextView
                     android:id="@+id/tvShipName"
-                    android:text="Alex Johnson"
+                    android:text="Tên người nhận"
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_width="0dp"
-                    android:layout_weight="1"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <Button
-                    android:id="@+id/btnChangeAddress"
-                    android:text="Thay đổi"
-                    android:textColor="#FFFFFF"
-                    android:background="@drawable/bg_btn_blue"
+                <TextView
+                    android:id="@+id/tvShipPhone"
+                    android:text="Số điện thoại"
+                    android:textColor="#BBBBBB"
+                    android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
-                    android:layout_height="40dp" />
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tvShipAddress"
+                    android:text="Địa chỉ chi tiết"
+                    android:textColor="#BBBBBB"
+                    android:layout_marginTop="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tvShipWard"
+                    android:text="Phường/Xã"
+                    android:textColor="#BBBBBB"
+                    android:layout_marginTop="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tvShipDistrict"
+                    android:text="Quận/Huyện"
+                    android:textColor="#BBBBBB"
+                    android:layout_marginTop="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+                <TextView
+                    android:id="@+id/tvShipCity"
+                    android:text="Tỉnh/Thành phố"
+                    android:textColor="#BBBBBB"
+                    android:layout_marginTop="2dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
-            <TextView
-                android:id="@+id/tvShipPhone"
-                android:text="+1 (555) 012-3456"
-                android:textColor="#BBBBBB"
-                android:layout_marginTop="4dp"
+            <Button
+                android:id="@+id/btnChangeAddress"
+                android:text="Thay đổi"
+                android:textColor="#FFFFFF"
+                android:background="@drawable/bg_btn_blue"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-            <TextView
-                android:id="@+id/tvShipAddress"
-                android:text="123 Tech Lane, Silicon District"
-                android:textColor="#BBBBBB"
-                android:layout_marginTop="2dp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
+                android:layout_height="40dp" />
 
         </LinearLayout>
 

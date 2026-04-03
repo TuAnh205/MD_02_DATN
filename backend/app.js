@@ -14,6 +14,8 @@ const feedbackRoutes = require('./routes/feedbackRoutes');
 const adminRoutes = require('./routes/adminRoutes');
 const promotionRoutes = require('./routes/promotionRoutes');
 const shopRoutes = require('./routes/shopRoutes');
+const addressRoutes = require('./routes/addressRoutes');
+const locationRoutes = require('./routes/locationRoutes');
 const { seedDatabase } = require('./seeds/seed');
 
 const app = express();
@@ -35,6 +37,8 @@ app.use('/api/feedback', feedbackRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/promotions', promotionRoutes);
 app.use('/api/shop', shopRoutes);
+app.use('/api/user/addresses', addressRoutes);
+app.use('/api/locations', locationRoutes);
 
 // Basic health
 app.get('/health', (req, res) => res.json({ status: 'ok' }));

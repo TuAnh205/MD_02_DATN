@@ -1,4 +1,5 @@
-package com.anhnvt_ph55017.md_02_datn.utils;
+
+    package com.anhnvt_ph55017.md_02_datn.utils;
 
 import android.content.Context;
 import android.util.Log;
@@ -13,6 +14,46 @@ import java.util.Scanner;
 
 public class OrderApiService {
     private static final String BASE_URL = "http://10.0.2.2:5000/api/orders";
+
+    // Tạo đơn hàng mới
+    public interface CreateOrderCallback {
+        void onSuccess(JSONObject orderJson);
+        void onError(String error);
+    }
+
+    public static void createOrder(Context context, String token, JSONObject orderBody, CreateOrderCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setDoOutput(true);
+
+                String bodyStr = orderBody.toString();
+                conn.getOutputStream().write(bodyStr.getBytes("UTF-8"));
+
+                int responseCode = conn.getResponseCode();
+                InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                Scanner scanner = new Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                Log.d("CREATE_ORDER_RESPONSE", "code=" + responseCode + " | body=" + response);
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    JSONObject obj = new JSONObject(response);
+                    callback.onSuccess(obj);
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                Log.e("CREATE_ORDER_ERROR", e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
 
     public interface OrdersCallback {
         void onSuccess(JSONArray ordersJson);

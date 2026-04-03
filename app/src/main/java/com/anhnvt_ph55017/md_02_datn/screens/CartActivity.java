@@ -99,7 +99,8 @@ public class CartActivity extends AppCompatActivity {
     private void updateCartItem(Product product, int newQty) {
         String token = SessionManager.getToken(this);
         if (token == null || token.isEmpty()) return;
-        CartApiService.updateCartItem(this, token, product.getId(), newQty, new CartApiService.CartCallback() {
+        // Truyền cartItemId thay vì productId
+        CartApiService.updateCartItem(this, token, product.getCartItemId(), newQty, new CartApiService.CartCallback() {
             @Override
             public void onSuccess(org.json.JSONObject cartJson) {
                 runOnUiThread(() -> loadCartFromBackend());
@@ -114,7 +115,8 @@ public class CartActivity extends AppCompatActivity {
     private void removeCartItem(Product product) {
         String token = SessionManager.getToken(this);
         if (token == null || token.isEmpty()) return;
-        CartApiService.removeFromCart(this, token, product.getId(), new CartApiService.CartCallback() {
+        // Truyền cartItemId thay vì productId
+        CartApiService.removeFromCart(this, token, product.getCartItemId(), new CartApiService.CartCallback() {
             @Override
             public void onSuccess(org.json.JSONObject cartJson) {
                 runOnUiThread(() -> loadCartFromBackend());
@@ -189,14 +191,17 @@ public class CartActivity extends AppCompatActivity {
                             int stock = prod.optInt("stock", 0);
                             int qty = obj.optInt("qty", 1);
 
-                            // ===== TẠO PRODUCT =====
-                            Product p = new Product(id, name, price, imageUrl, desc, stock);
-                            p.setQty(qty);
+                                // ===== TẠO PRODUCT =====
+                                Product p = new Product(id, name, price, imageUrl, desc, stock);
+                                p.setQty(qty);
+                                // Lưu _id của item trong cart
+                                String cartItemId = obj.optString("_id");
+                                p.setCartItemId(cartItemId);
 
-                            cartList.add(p);
+                                cartList.add(p);
 
-                            android.util.Log.d("CART_PARSE_DEBUG",
-                                    "Added: " + name + " | img=" + imageUrl);
+                                android.util.Log.d("CART_PARSE_DEBUG",
+                                    "Added: " + name + " | img=" + imageUrl + " | cartItemId=" + cartItemId);
                         }
                     }
 

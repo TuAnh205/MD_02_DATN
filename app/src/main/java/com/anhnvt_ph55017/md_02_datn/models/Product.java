@@ -1,3 +1,4 @@
+
 package com.anhnvt_ph55017.md_02_datn.models;
 
 import java.io.Serializable;
@@ -17,7 +18,11 @@ public class Product implements Serializable {
 
     int qty = 1;
     boolean selected = true;
-    
+    // Lưu _id của item trong cart (dùng cho xóa/sửa)
+    String cartItemId;
+
+    public String getCartItemId() { return cartItemId; }
+    public void setCartItemId(String cartItemId) { this.cartItemId = cartItemId; }
     String color = "Black";  // Default color
     int storage = 64;        // Default storage in GB
 

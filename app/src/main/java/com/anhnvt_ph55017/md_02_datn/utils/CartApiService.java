@@ -1,3 +1,4 @@
+
 package com.anhnvt_ph55017.md_02_datn.utils;
 
 import android.content.Context;
@@ -18,7 +19,29 @@ public class CartApiService {
         void onSuccess(JSONObject cartJson);
         void onError(String error);
     }
-
+    // ✅ CLEAR CART
+    public static void clearCart(Context context, String token, CartCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "/clear");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                int code = conn.getResponseCode();
+                Scanner sc = new Scanner(
+                        code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()
+                ).useDelimiter("\\A");
+                String res = sc.hasNext() ? sc.next() : "";
+                sc.close();
+                Log.d("CLEAR_CART", res);
+                if (code >= 200 && code < 300) {
+                    callback.onSuccess(new JSONObject(res));
+                } else callback.onError(res);
+            } catch (Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
     // ✅ ADD TO CART
     public static void addToCart(Context context, String token, String productId, int qty, CartCallback callback) {
         new Thread(() -> {
@@ -186,7 +209,7 @@ public class CartApiService {
 
                 String res = sc.hasNext() ? sc.next() : "";
                 sc.close();
-
+                Log.d("DEBUG_ID", productId);
                 Log.d("DELETE_CART", res);
 
                 if (code >= 200 && code < 300) {

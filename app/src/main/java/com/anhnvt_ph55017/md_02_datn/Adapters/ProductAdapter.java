@@ -16,6 +16,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.DetailActivity;
+import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.bumptech.glide.Glide;
 
@@ -98,19 +99,33 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.btnAdd.setOnClickListener(v -> {
 
             if (context instanceof AppCompatActivity) {
-
+                // Mở bottom sheet chọn số lượng, sau đó gọi API addToCart
                 BottomSheetProductOptions sheet =
                         BottomSheetProductOptions.newInstance(product, selectedProduct -> {
-
-                            int userId = SessionManager.getUserId(context);
-                            if (userId <= 0) userId = 1;
-
-                            CartDAO cartDAO = new CartDAO(context);
-                            cartDAO.addToCart(userId, selectedProduct.getIntId());
-
-                            Toast.makeText(context, "Added to cart", Toast.LENGTH_SHORT).show();
+                            String token = SessionManager.getToken(context);
+                            if (token == null || token.isEmpty()) {
+                                Toast.makeText(context, "Bạn cần đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                                return;
+                            }
+                            CartApiService.addToCart(context, token, selectedProduct.getId(), selectedProduct.getQty(), new com.anhnvt_ph55017.md_02_datn.utils.CartApiService.CartCallback() {
+                                @Override
+                                public void onSuccess(org.json.JSONObject cartJson) {
+                                    if (context instanceof AppCompatActivity) {
+                                        ((AppCompatActivity) context).runOnUiThread(() ->
+                                                Toast.makeText(context, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show()
+                                        );
+                                    }
+                                }
+                                @Override
+                                public void onError(String error) {
+                                    if (context instanceof AppCompatActivity) {
+                                        ((AppCompatActivity) context).runOnUiThread(() ->
+                                                Toast.makeText(context, "Lỗi thêm vào giỏ hàng: " + error, Toast.LENGTH_SHORT).show()
+                                        );
+                                    }
+                                }
+                            });
                         });
-
                 sheet.show(((AppCompatActivity) context).getSupportFragmentManager(), "product_options");
             }
         });

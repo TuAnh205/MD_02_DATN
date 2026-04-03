@@ -1,0 +1,20 @@
+[
+  {
+    "name": "Hà Nội",
+    "districts": [
+      {
+        "name": "Cầu Giấy",
+        "wards": ["Dịch Vọng", "Nghĩa Đô"]
+      }
+    ]
+  },
+  {
+    "name": "Hồ Chí Minh",
+    "districts": [
+      {
+        "name": "Quận 1",
+        "wards": ["Bến Nghé", "Bến Thành"]
+      }
+    ]
+  }
+]
