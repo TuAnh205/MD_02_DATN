@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { signInWithGooglePopup, isFirebaseAuthConfigured } from '../services/firebaseAuth';
@@ -11,23 +11,16 @@ export default function Login() {
   const [googleLoading, setGoogleLoading] = useState(false);
   
   const navigate = useNavigate();
-  const { login, googleLogin } = useAuth();
+  const { login, googleLogin, user, loading: authLoading } = useAuth();
 
-  const redirectByRole = () => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (!user) {
-      navigate('/');
-      return;
+  // Navigate sau khi user state được cập nhật (tránh blank page)
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (user.role === 'admin') navigate('/admin', { replace: true });
+      else if (user.role === 'shop') navigate('/shop', { replace: true });
+      else navigate('/', { replace: true });
     }
-
-    if (user.role === 'admin') {
-      navigate('/admin');
-    } else if (user.role === 'shop') {
-      navigate('/shop');
-    } else {
-      navigate('/');
-    }
-  };
+  }, [user, authLoading]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -41,7 +34,6 @@ export default function Login() {
       }
 
       await login(email, password);
-      redirectByRole();
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');
     } finally {
@@ -55,7 +47,6 @@ export default function Login() {
       setGoogleLoading(true);
       const { idToken } = await signInWithGooglePopup();
       await googleLogin(idToken);
-      redirectByRole();
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Đăng nhập Google thất bại');
     } finally {

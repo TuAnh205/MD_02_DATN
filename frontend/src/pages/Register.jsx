@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { signInWithGooglePopup, isFirebaseAuthConfigured } from '../services/firebaseAuth';
@@ -16,25 +16,18 @@ export default function Register({ accountType = 'user' }) {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { register, registerShop, sendGoogleRegistrationCode, verifyGoogleRegistrationCode } = useAuth();
+  const { register, registerShop, sendGoogleRegistrationCode, verifyGoogleRegistrationCode, user, loading: authLoading } = useAuth();
   const isShopAccount = accountType === 'shop';
   const canUseGoogleRegister = isFirebaseAuthConfigured;
 
-  const redirectByRole = (registeredUser) => {
-    const role = registeredUser?.role;
-
-    if (role === 'shop') {
-      navigate('/shop');
-      return;
+  // Navigate sau khi user state được cập nhật (tránh blank page)
+  useEffect(() => {
+    if (!authLoading && user) {
+      if (user.role === 'admin') navigate('/admin', { replace: true });
+      else if (user.role === 'shop') navigate('/shop', { replace: true });
+      else navigate('/', { replace: true });
     }
-
-    if (role === 'admin') {
-      navigate('/admin');
-      return;
-    }
-
-    navigate('/');
-  };
+  }, [user, authLoading]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -57,11 +50,9 @@ export default function Register({ accountType = 'user' }) {
         return;
       }
 
-      const response = isShopAccount
-        ? await registerShop(name.trim(), email.trim(), password)
-        : await register(name.trim(), email.trim(), password);
-
-      redirectByRole(response?.user);
+      await (isShopAccount
+        ? registerShop(name.trim(), email.trim(), password)
+        : register(name.trim(), email.trim(), password));
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng ký thất bại');
     } finally {
@@ -93,8 +84,7 @@ export default function Register({ accountType = 'user' }) {
 
       setError('');
       setGoogleLoading(true);
-      const response = await verifyGoogleRegistrationCode(googleEmail, googleCode.trim());
-      redirectByRole(response?.user);
+      await verifyGoogleRegistrationCode(googleEmail, googleCode.trim());
     } catch (err) {
       setError(err.response?.data?.message || 'Xác nhận mã Google thất bại');
     } finally {

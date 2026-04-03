@@ -10,9 +10,10 @@ export default function AdminVouchers() {
   const [editingVoucher, setEditingVoucher] = useState(null);
   const [formData, setFormData] = useState({
     code: '',
+    name: '',
     description: '',
-    discountType: 'percentage',
-    discountValue: '',
+    type: 'percentage',
+    value: '',
     minOrderValue: '',
     maxDiscount: '',
     usageLimit: '',
@@ -58,9 +59,10 @@ export default function AdminVouchers() {
   const resetForm = () => {
     setFormData({
       code: '',
+      name: '',
       description: '',
-      discountType: 'percentage',
-      discountValue: '',
+      type: 'percentage',
+      value: '',
       minOrderValue: '',
       maxDiscount: '',
       usageLimit: '',
@@ -77,9 +79,10 @@ export default function AdminVouchers() {
     setEditingVoucher(voucher);
     setFormData({
       code: voucher.code,
-      description: voucher.description,
-      discountType: voucher.discountType,
-      discountValue: voucher.discountValue,
+      name: voucher.name || '',
+      description: voucher.description || '',
+      type: voucher.type,
+      value: voucher.value,
       minOrderValue: voucher.minOrderValue || '',
       maxDiscount: voucher.maxDiscount || '',
       usageLimit: voucher.usageLimit || '',
@@ -147,7 +150,7 @@ export default function AdminVouchers() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Mã voucher</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mã voucher *</label>
                 <input
                   type="text"
                   value={formData.code}
@@ -158,10 +161,10 @@ export default function AdminVouchers() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Loại giảm giá</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Loại giảm giá *</label>
                 <select
-                  value={formData.discountType}
-                  onChange={(e) => setFormData({ ...formData, discountType: e.target.value })}
+                  value={formData.type}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="percentage">Phần trăm (%)</option>
@@ -170,26 +173,39 @@ export default function AdminVouchers() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-              <input
-                type="text"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                placeholder="Giảm giá mùa hè"
-              />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tên voucher *</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Giảm giá mùa hè"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
+                <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="Mô tả ngắn về voucher"
+                />
+              </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Giá trị giảm {formData.discountType === 'percentage' ? '(%)' : '(VNĐ)'}
+                  Giá trị giảm {formData.type === 'percentage' ? '(%)' : '(VNĐ)'} *
                 </label>
                 <input
                   type="number"
-                  value={formData.discountValue}
-                  onChange={(e) => setFormData({ ...formData, discountValue: e.target.value })}
+                  value={formData.value}
+                  onChange={(e) => setFormData({ ...formData, value: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 />
@@ -307,21 +323,22 @@ export default function AdminVouchers() {
                 <tr key={voucher._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div>
-                      <div className="text-sm font-medium text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded">
+                      <div className="text-sm font-medium text-gray-900 font-mono bg-gray-100 px-2 py-1 rounded inline-block">
                         {voucher.code}
                       </div>
-                      <div className="text-sm text-gray-500 mt-1">{voucher.description}</div>
+                      <div className="text-sm font-medium text-gray-800 mt-1">{voucher.name}</div>
+                      <div className="text-xs text-gray-500">{voucher.description}</div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {voucher.discountType === 'percentage'
-                        ? `${voucher.discountValue}%`
-                        : `${voucher.discountValue?.toLocaleString()}₫`
+                      {voucher.type === 'percentage'
+                        ? `${voucher.value}%`
+                        : `${voucher.value?.toLocaleString()}₫`
                       }
                     </div>
-                    {voucher.minOrderValue && (
-                      <div className="text-sm text-gray-500">
+                    {voucher.minOrderValue > 0 && (
+                      <div className="text-xs text-gray-500">
                         Từ {voucher.minOrderValue.toLocaleString()}₫
                       </div>
                     )}
