@@ -130,7 +130,24 @@ public class ShippingAddressActivity extends AppCompatActivity {
     private void updateSelectedAddressDisplay() {
         if (selectedAddress != null) {
             tvSelectedAddressName.setText(selectedAddress.getName());
-            tvSelectedAddressDetail.setText(selectedAddress.getPhone() + "\n" + selectedAddress.getAddress());
+            // Địa chỉ tổng hợp: số nhà, phường/xã, quận/huyện, tỉnh/thành
+            StringBuilder fullAddress = new StringBuilder();
+            if (selectedAddress.getAddress() != null && !selectedAddress.getAddress().isEmpty()) {
+                fullAddress.append(selectedAddress.getAddress());
+            }
+            if (selectedAddress.getWard() != null && !selectedAddress.getWard().isEmpty()) {
+                if (fullAddress.length() > 0) fullAddress.append(", ");
+                fullAddress.append(selectedAddress.getWard());
+            }
+            if (selectedAddress.getDistrict() != null && !selectedAddress.getDistrict().isEmpty()) {
+                if (fullAddress.length() > 0) fullAddress.append(", ");
+                fullAddress.append(selectedAddress.getDistrict());
+            }
+            if (selectedAddress.getCity() != null && !selectedAddress.getCity().isEmpty()) {
+                if (fullAddress.length() > 0) fullAddress.append(", ");
+                fullAddress.append(selectedAddress.getCity());
+            }
+            tvSelectedAddressDetail.setText(selectedAddress.getPhone() + "\n" + fullAddress.toString());
         }
     }
 
@@ -263,9 +280,12 @@ public class ShippingAddressActivity extends AppCompatActivity {
                                 JSONArray wards = districtObj != null ? districtObj.optJSONArray("wards") : null;
                                 ArrayAdapter<String> wardAdapter = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item);
                                 wardAdapter.setDropDownViewResource(R.layout.spinner_item);
-                                if (wards != null) {
+                                if (wards != null && wards.length() > 0) {
                                     for (int k = 0; k < wards.length(); k++) {
-                                        wardAdapter.add(wards.optString(k, ""));
+                                        JSONObject wardObj = wards.optJSONObject(k);
+                                        if (wardObj != null) {
+                                            wardAdapter.add(wardObj.optString("name", ""));
+                                        }
                                     }
                                 }
                                 spinnerWard.setAdapter(wardAdapter);
@@ -317,6 +337,8 @@ public class ShippingAddressActivity extends AppCompatActivity {
                 String city = spinnerCity.getSelectedItem() != null ? spinnerCity.getSelectedItem().toString() : "";
                 String district = spinnerDistrict.getSelectedItem() != null ? spinnerDistrict.getSelectedItem().toString() : "";
                 String ward = spinnerWard.getSelectedItem() != null ? spinnerWard.getSelectedItem().toString() : "";
+                // Log ra thành phố, quận, phường khi chọn địa chỉ
+                android.util.Log.d("ADDRESS_DIALOG", "Chọn địa chỉ: Thành phố=" + city + ", Quận/Huyện=" + district + ", Phường/Xã=" + ward);
                 if (name.isEmpty() || phone.isEmpty() || addr.isEmpty() || city.isEmpty() || district.isEmpty() || ward.isEmpty()) {
                     Toast.makeText(ShippingAddressActivity.this, "Vui lòng điền đủ thông tin", Toast.LENGTH_SHORT).show();
                     return;

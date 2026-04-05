@@ -12,7 +12,7 @@ import java.net.URL;
 import java.util.Scanner;
 
 public class LocationApiService {
-    private static final String BASE_URL = "http://10.0.2.2:5000/api/locations";
+    private static final String API_URL = "https://provinces.open-api.vn/api/?depth=3";
 
     public interface LocationCallback {
         void onSuccess(JSONArray locations);
@@ -22,7 +22,7 @@ public class LocationApiService {
     public static void getLocations(LocationCallback callback) {
         new Thread(() -> {
             try {
-                URL url = new URL(BASE_URL);
+                URL url = new URL(API_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("GET");
                 int code = conn.getResponseCode();
@@ -31,8 +31,8 @@ public class LocationApiService {
                 String res = sc.hasNext() ? sc.next() : "";
                 sc.close();
                 if (code >= 200 && code < 300) {
-                    JSONObject obj = new JSONObject(res);
-                    JSONArray arr = obj.optJSONArray("locations");
+                    // API trả về 1 JSONArray các tỉnh/thành, mỗi tỉnh có districts, mỗi district có wards
+                    JSONArray arr = new JSONArray(res);
                     new Handler(Looper.getMainLooper()).post(() -> callback.onSuccess(arr));
                 } else {
                     new Handler(Looper.getMainLooper()).post(() -> callback.onError(res));

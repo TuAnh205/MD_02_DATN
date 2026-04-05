@@ -72,7 +72,24 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
 
         holder.tvName.setText(a.getName());
         holder.tvPhone.setText(a.getPhone());
-        holder.tvAddress.setText(a.getAddress());
+        // Địa chỉ tổng hợp: số nhà, phường/xã, quận/huyện, tỉnh/thành
+        StringBuilder fullAddress = new StringBuilder();
+        if (a.getAddress() != null && !a.getAddress().isEmpty()) {
+            fullAddress.append(a.getAddress());
+        }
+        if (a.getWard() != null && !a.getWard().isEmpty()) {
+            if (fullAddress.length() > 0) fullAddress.append(", ");
+            fullAddress.append(a.getWard());
+        }
+        if (a.getDistrict() != null && !a.getDistrict().isEmpty()) {
+            if (fullAddress.length() > 0) fullAddress.append(", ");
+            fullAddress.append(a.getDistrict());
+        }
+        if (a.getCity() != null && !a.getCity().isEmpty()) {
+            if (fullAddress.length() > 0) fullAddress.append(", ");
+            fullAddress.append(a.getCity());
+        }
+        holder.tvAddress.setText(fullAddress.toString());
         holder.rbDefault.setChecked(position == selectedPosition);
 
         // Set tag visibility and text

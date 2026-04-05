@@ -22,7 +22,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
-        app:boxBackgroundColor="#1F2937"
+        app:boxBackgroundColor="@android:color/white"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
         app:boxCornerRadiusBottomEnd="8dp"
@@ -35,10 +35,12 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Ví dụ: Nguyễn Văn A"
-            android:textColor="@android:color/white"
+            android:textColor="#222222"
+            android:textColorHint="#9CA3AF"
             android:inputType="text"
             android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:paddingEnd="12dp"
+            android:background="@android:color/white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -57,7 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
-        app:boxBackgroundColor="#1F2937"
+        app:boxBackgroundColor="@android:color/white"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
         app:boxCornerRadiusBottomEnd="8dp"
@@ -70,10 +72,12 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Ví dụ: 0912 345 678"
-            android:textColor="@android:color/white"
+            android:textColor="#222222"
+            android:textColorHint="#9CA3AF"
             android:inputType="phone"
             android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:paddingEnd="12dp"
+            android:background="@android:color/white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -95,7 +99,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="12dp"
-        android:background="#1F2937"
+        android:background="#FFFFFF"
         android:padding="6dp"
         android:textColor="#E5E7EB"
         android:textSize="14sp" />
@@ -116,7 +120,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="12dp"
-        android:background="#1F2937"
+        android:background="#FFFFFF"
         android:padding="6dp"
         android:textColor="#E5E7EB"
         android:textSize="14sp" />
@@ -137,7 +141,7 @@
         android:layout_height="50dp"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="20dp"
-        android:background="#1F2937"
+        android:background="#FFFFFF"
         android:padding="6dp"
         android:textColor="#E5E7EB"
         android:textSize="14sp" />
@@ -157,7 +161,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="20dp"
-        app:boxBackgroundColor="#1F2937"
+        app:boxBackgroundColor="@android:color/white"
         app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusTopStart="8dp"
         app:boxCornerRadiusBottomEnd="8dp"
@@ -170,10 +174,12 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Ví dụ: 123 Đường Lê Lợi"
-            android:textColor="@android:color/white"
+            android:textColor="#222222"
+            android:textColorHint="#9CA3AF"
             android:inputType="text"
             android:paddingStart="12dp"
-            android:paddingEnd="12dp" />
+            android:paddingEnd="12dp"
+            android:background="@android:color/white" />
 
     </com.google.android.material.textfield.TextInputLayout>
 

@@ -164,8 +164,31 @@ exports.updateStatus = async (req, res) => {
         // Only admin can update status
         if (req.user.role !== 'admin') return res.status(403).json({ message: 'Forbidden' });
         const { status } = req.body;
-        const order = await Order.findByIdAndUpdate(req.params.id, { status }, { new: true });
+        console.log('[ADMIN UPDATE ORDER STATUS] status nhận được:', status);
+        // Nếu admin duyệt đơn (status là 'đã xác nhận'), trừ số lượng kho
+        let order = await Order.findById(req.params.id);
         if (!order) return res.status(404).json({ message: 'Order not found' });
+
+        // Chỉ trừ kho khi chuyển sang trạng thái 'đã xác nhận'
+        const shouldReduceStock = (status === 'đã xác nhận') && order.status !== status;
+        if (shouldReduceStock) {
+            const Product = require('../models/Product');
+            // Kiểm tra tồn kho trước khi trừ
+            for (const item of order.items) {
+                const product = await Product.findById(item.product);
+                if (!product) return res.status(400).json({ message: `Sản phẩm không tồn tại: ${item.name}` });
+                if (product.stock < item.qty) {
+                    return res.status(400).json({ message: `Sản phẩm '${product.name}' không đủ hàng trong kho. Hiện còn: ${product.stock}` });
+                }
+            }
+            // Trừ kho
+            for (const item of order.items) {
+                await Product.findByIdAndUpdate(item.product, { $inc: { stock: -item.qty } });
+            }
+        }
+        // Cập nhật trạng thái đơn hàng
+        order.status = status;
+        await order.save();
         res.json(order);
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });
