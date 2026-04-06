@@ -56,6 +56,8 @@ public class EditProfileActivity extends AppCompatActivity {
                     etFullName.setText(userJson.optString("name", ""));
                     etEmail.setText(userJson.optString("email", ""));
                     etPhone.setText(userJson.optString("phone", ""));
+                    etEmail.setEnabled(false);
+                    etEmail.setTextIsSelectable(false);
                     // Nếu backend có bio/avatar thì set thêm
                 });
             }
@@ -76,8 +78,12 @@ public class EditProfileActivity extends AppCompatActivity {
         String token = SessionManager.getToken(this);
         ProfileApiService.updateProfile(this, token, fullName, phone, new ProfileApiService.ProfileCallback() {
             @Override
-            public void onSuccess(org.json.JSONObject userJson) {
+            public void onSuccess(org.json.JSONObject responseJson) {
                 runOnUiThread(() -> {
+                    org.json.JSONObject userJson = responseJson.optJSONObject("user");
+                    if (userJson == null) {
+                        userJson = responseJson;
+                    }
                     Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
                     // Cập nhật lại session nếu cần
                     SessionManager.saveUserSession(EditProfileActivity.this,

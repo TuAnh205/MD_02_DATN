@@ -16,7 +16,8 @@ const mailPass = process.env.MAIL_PASS || "";
 const mailFrom = process.env.MAIL_FROM || mailUser;
 const mailHost = process.env.MAIL_HOST || "smtp.gmail.com";
 const mailPort = Number(process.env.MAIL_PORT || 465);
-const mailSecure = String(process.env.MAIL_SECURE || "true").toLowerCase() === "true";
+const mailSecure =
+  String(process.env.MAIL_SECURE || "true").toLowerCase() === "true";
 
 const otpStore = new Map();
 const OTP_TTL_MS = 10 * 60 * 1000;
@@ -41,7 +42,8 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-const generateOtpCode = () => String(Math.floor(100000 + Math.random() * 900000));
+const generateOtpCode = () =>
+  String(Math.floor(100000 + Math.random() * 900000));
 
 const validateMailConfig = () => {
   if (!mailUser || !mailPass) {
@@ -110,7 +112,8 @@ const generateToken = (user) => {
 
 exports.emailRegistrationDisabled = async (req, res) => {
   return res.status(410).json({
-    message: "Dang ky bang email da duoc tat. Vui long su dung Google de tao tai khoan.",
+    message:
+      "Dang ky bang email da duoc tat. Vui long su dung Google de tao tai khoan.",
   });
 };
 
@@ -124,7 +127,9 @@ exports.sendGoogleRegistrationCode = async (req, res) => {
     }
 
     const googleData = await verifyGoogleToken(idToken);
-    const normalizedEmail = String(googleData.email || "").trim().toLowerCase();
+    const normalizedEmail = String(googleData.email || "")
+      .trim()
+      .toLowerCase();
 
     if (!normalizedEmail) {
       return res.status(400).json({ message: "Google account has no email" });
@@ -157,7 +162,9 @@ exports.sendGoogleRegistrationCode = async (req, res) => {
     });
   } catch (err) {
     console.error("SEND GOOGLE REGISTRATION CODE ERROR:", err);
-    return res.status(500).json({ message: err.message || "Cannot send verification code" });
+    return res
+      .status(500)
+      .json({ message: err.message || "Cannot send verification code" });
   }
 };
 
@@ -215,7 +222,9 @@ exports.verifyGoogleRegistrationCode = async (req, res) => {
     });
   } catch (err) {
     console.error("VERIFY GOOGLE REGISTRATION CODE ERROR:", err);
-    return res.status(500).json({ message: err.message || "Google registration failed" });
+    return res
+      .status(500)
+      .json({ message: err.message || "Google registration failed" });
   }
 };
 
@@ -301,14 +310,19 @@ exports.sendVerificationCode = async (req, res) => {
   } catch (err) {
     console.error("SEND VERIFICATION CODE ERROR:", err);
     const lowered = String(err.message || "").toLowerCase();
-    if (lowered.includes("badcredentials") || lowered.includes("invalid login")) {
+    if (
+      lowered.includes("badcredentials") ||
+      lowered.includes("invalid login")
+    ) {
       return res.status(500).json({
         message:
           "Gmail authentication failed. Set MAIL_USER to your Gmail and MAIL_PASS to a Gmail App Password (not normal account password).",
       });
     }
 
-    res.status(500).json({ message: err.message || "Cannot send verification code" });
+    res
+      .status(500)
+      .json({ message: err.message || "Cannot send verification code" });
   }
 };
 
@@ -531,7 +545,8 @@ exports.googleLogin = async (req, res) => {
 
     if (!user) {
       return res.status(400).json({
-        message: "Tai khoan chua ton tai. Vui long dang ky bang email/mat khau.",
+        message:
+          "Tai khoan chua ton tai. Vui long dang ky bang email/mat khau.",
       });
     } else {
       user.firebaseUid = firebaseUid;
@@ -565,18 +580,24 @@ exports.me = async (req, res) => {
 // ================= UPDATE PROFILE =================
 exports.updateProfile = async (req, res) => {
   try {
-    const { name, phone } = req.body;
+    const { name, phone, avatar } = req.body;
 
     const user = await User.findById(req.user.id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    if (name) user.name = name;
-    if (phone) user.phone = phone;
+    if (name && name.trim()) user.name = name.trim();
+    if (phone !== undefined) user.phone = phone.trim();
+    if (avatar !== undefined) user.avatar = avatar.trim();
 
     await user.save();
 
+    const updatedUser = await User.findById(req.user.id).select("-password");
+
     res.json({
       message: "Update success",
-      user,
+      user: updatedUser,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });

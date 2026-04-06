@@ -9,9 +9,9 @@ import android.widget.*;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
-import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
@@ -36,6 +36,7 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SessionManager.applyTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 

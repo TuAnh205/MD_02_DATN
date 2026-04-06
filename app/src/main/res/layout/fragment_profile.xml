@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#0B1A2B"
+    android:background="?attr/colorBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -37,7 +37,7 @@
         <TextView
             android:id="@+id/tvName"
             android:text="Alex Johnson"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginTop="8dp"
@@ -48,10 +48,40 @@
         <TextView
             android:id="@+id/tvEmail"
             android:text="alex.johnson@coretech.io"
-            android:textColor="#AAAAAA"
+            android:textColor="?attr/colorOnBackground"
             android:layout_gravity="center_horizontal"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:id="@+id/loginRegisterContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/btnLogin"
+                android:text="Đăng nhập"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginEnd="8dp"
+                android:background="@drawable/bg_btn_blue"
+                android:textColor="@android:color/white" />
+
+            <Button
+                android:id="@+id/btnRegister"
+                android:text="Đăng ký"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_button"
+                android:textColor="@android:color/white" />
+
+        </LinearLayout>
 
         <!-- stats boxes -->
         <LinearLayout
@@ -70,7 +100,7 @@
                 android:layout_height="wrap_content">
                 <TextView
                     android:text="Đơn HÀNG"
-                    android:textColor="#AAAAAA"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="12sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
@@ -94,7 +124,7 @@
                 android:layout_height="wrap_content">
                 <TextView
                     android:text="YÊ THÍCH"
-                    android:textColor="#AAAAAA"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="12sp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
@@ -112,7 +142,7 @@
         <!-- menu items -->
         <TextView
             android:text="TÀI KHOẢN"
-            android:textColor="#AAAAAA"
+            android:textColor="?attr/colorOnBackground"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
             android:layout_width="wrap_content"
@@ -136,17 +166,19 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_cart"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Đơn hàng của tôi"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -163,17 +195,19 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_location"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Địa chỉ giao hàng"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -189,17 +223,19 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_payment"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Phương thức thanh toán"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -214,17 +250,19 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_heart"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Sản phẩm yêu thích"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -233,7 +271,7 @@
         <!-- settings section -->
         <TextView
             android:text="CÀI ĐẶT"
-            android:textColor="#AAAAAA"
+            android:textColor="?attr/colorOnBackground"
             android:textStyle="bold"
             android:layout_marginTop="24dp"
             android:layout_width="wrap_content"
@@ -256,17 +294,19 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_notifications"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Thông báo"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -282,17 +322,19 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_privacy"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Quyền riêng tư &amp; Bảo mật"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -308,11 +350,12 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_language"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Ngôn ngữ"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"
@@ -326,6 +369,7 @@
                     android:layout_height="wrap_content"/>
                 <ImageView
                     android:src="@drawable/ic_right_arrow"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="16dp"
                     android:layout_height="16dp"/>
             </LinearLayout>
@@ -340,11 +384,12 @@
                 android:layout_height="wrap_content">
                 <ImageView
                     android:src="@drawable/ic_dark_mode"
+                    android:tint="?attr/colorOnSurface"
                     android:layout_width="24dp"
                     android:layout_height="24dp"/>
                 <TextView
                     android:text="Chế độ tối"
-                    android:textColor="#FFFFFF"
+                    android:textColor="?attr/colorOnSurface"
                     android:layout_marginStart="12dp"
                     android:layout_weight="1"
                     android:layout_width="0dp"

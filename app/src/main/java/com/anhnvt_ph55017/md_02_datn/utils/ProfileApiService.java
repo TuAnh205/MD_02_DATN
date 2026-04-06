@@ -62,7 +62,11 @@ public class ProfileApiService {
                 scanner.close();
 
                 if (responseCode >= 200 && responseCode < 300) {
-                    JSONObject userJson = new JSONObject(response);
+                    JSONObject jsonResponse = new JSONObject(response);
+                    JSONObject userJson = jsonResponse.optJSONObject("user");
+                    if (userJson == null) {
+                        userJson = jsonResponse;
+                    }
                     callback.onSuccess(userJson);
                 } else {
                     callback.onError(response);

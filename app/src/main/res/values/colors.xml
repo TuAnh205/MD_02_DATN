@@ -4,4 +4,8 @@
     <color name="white">#FFFFFFFF</color>
     <color name="blue">#2196F3</color>
     <color name="primary">#FF6200EE</color>
+    <color name="background">#FFFFFFFF</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="onBackground">#FF000000</color>
+    <color name="onSurface">#FF000000</color>
 </resources>

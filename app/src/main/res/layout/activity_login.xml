@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0B1C2D">
+    android:background="?attr/colorBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="CORE-TECH"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:textStyle="bold"
             android:textSize="16sp"
             android:layout_marginTop="20dp"
@@ -28,7 +28,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Welcome to CORE-\nTECH"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:textSize="32sp"
             android:textStyle="bold"/>
 
@@ -47,7 +47,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email or Phone Number"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:textSize="14sp"/>
 
         <EditText
@@ -56,12 +56,11 @@
             android:layout_height="50dp"
             android:hint="Enter your email"
             android:inputType="textEmailAddress"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:textColorHint="#7A8896"
             android:background="@drawable/edt_email"
             android:padding="16dp"
             android:layout_marginTop="8dp"/>
-
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSavedAccounts"
             android:layout_width="match_parent"
@@ -81,7 +80,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Password"
-                android:textColor="#FFFFFF"
+                android:textColor="?attr/colorOnBackground"
                 android:textSize="14sp"/>
 
             <TextView
@@ -100,7 +99,7 @@
             android:layout_height="50dp"
             android:hint="Enter your password"
             android:inputType="textPassword"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:textColorHint="#7A8896"
             android:background="@drawable/edt_email"
             android:padding="16dp"
@@ -113,7 +112,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Remember me"
-            android:textColor="#FFFFFF"
+            android:textColor="?attr/colorOnBackground"
             android:layout_marginTop="12dp"/>
 
         <!-- Login button -->

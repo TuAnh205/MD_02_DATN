@@ -28,6 +28,7 @@ import com.anhnvt_ph55017.md_02_datn.DAO.CategoryDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.CartActivity;
+import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
 import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
@@ -114,6 +115,12 @@ public class HomeFragment extends Fragment {
             updateNotificationBadge();
 
             imgCart.setOnClickListener(v -> {
+                if (getContext() == null) return;
+                if (!com.anhnvt_ph55017.md_02_datn.utils.SessionManager.isLoggedIn(getContext())) {
+                    Toast.makeText(getContext(), "Bạn cần đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
+                    startActivity(new Intent(getActivity(), LoginActivity.class));
+                    return;
+                }
                 Intent intent = new Intent(getActivity(), CartActivity.class);
                 startActivity(intent);
             });

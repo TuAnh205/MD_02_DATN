@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import authService from '../services/authService';
+import React, { createContext, useContext, useState, useEffect } from "react";
+import authService from "../services/authService";
 
 const AuthContext = createContext();
 
@@ -9,9 +9,9 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedUser = localStorage.getItem('user');
-    const savedToken = localStorage.getItem('token');
-    
+    const savedUser = localStorage.getItem("user");
+    const savedToken = localStorage.getItem("token");
+
     if (savedUser && savedToken) {
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
@@ -47,18 +47,27 @@ export const AuthProvider = ({ children }) => {
     return response;
   };
 
-  const sendGoogleRegistrationCode = async (idToken, role = 'user') => {
+  const sendGoogleRegistrationCode = async (idToken, role = "user") => {
     return authService.sendGoogleRegistrationCode(idToken, role);
   };
 
   const verifyGoogleRegistrationCode = async (email, code) => {
-    const response = await authService.verifyGoogleRegistrationCode(email, code);
+    const response = await authService.verifyGoogleRegistrationCode(
+      email,
+      code,
+    );
     setUser(response.user);
     setToken(response.token);
     return response;
   };
 
-  const sendVerificationCode = async (name, email, password, role = 'user', phone = '') => {
+  const sendVerificationCode = async (
+    name,
+    email,
+    password,
+    role = "user",
+    phone = "",
+  ) => {
     return authService.sendVerificationCode(name, email, password, role, phone);
   };
 
@@ -75,14 +84,45 @@ export const AuthProvider = ({ children }) => {
     setToken(null);
   };
 
+  const fetchProfile = async () => {
+    const profile = await authService.getProfile();
+    setUser(profile);
+    return profile;
+  };
+
   const updateProfile = async (data) => {
     const response = await authService.updateProfile(data);
-    setUser(response.user);
+    if (response.user) {
+      setUser(response.user);
+      localStorage.setItem("user", JSON.stringify(response.user));
+    }
     return response;
   };
 
+  const setPassword = async (password) => {
+    return authService.setPassword(password);
+  };
+
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, googleLogin, register, registerShop, sendGoogleRegistrationCode, verifyGoogleRegistrationCode, sendVerificationCode, verifyEmailCode, logout, updateProfile }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        token,
+        loading,
+        login,
+        googleLogin,
+        register,
+        registerShop,
+        sendGoogleRegistrationCode,
+        verifyGoogleRegistrationCode,
+        sendVerificationCode,
+        verifyEmailCode,
+        logout,
+        fetchProfile,
+        updateProfile,
+        setPassword,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -91,7 +131,7 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
+    throw new Error("useAuth must be used within AuthProvider");
   }
   return context;
 };

@@ -22,6 +22,7 @@ public class LoadingActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SessionManager.applyTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_loading);
 
@@ -41,14 +42,7 @@ public class LoadingActivity extends AppCompatActivity {
                     txtPercent.setText(progress + "%");
                     handler.postDelayed(this, 30);
                 } else {
-                    FirebaseAuth mAuth = FirebaseAuth.getInstance();
-                    Intent nextIntent;
-                    // Check both Firebase auth and local session
-                    if (mAuth.getCurrentUser() != null && SessionManager.isLoggedIn(LoadingActivity.this)) {
-                        nextIntent = new Intent(LoadingActivity.this, MainActivity.class);
-                    } else {
-                        nextIntent = new Intent(LoadingActivity.this, LoginActivity.class);
-                    }
+                    Intent nextIntent = new Intent(LoadingActivity.this, MainActivity.class);
                     nextIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(nextIntent);
                     finish();

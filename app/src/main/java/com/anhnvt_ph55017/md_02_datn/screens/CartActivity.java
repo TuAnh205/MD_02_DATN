@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anhnvt_ph55017.md_02_datn.Adapters.CartAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
 import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
@@ -34,6 +35,12 @@ public class CartActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (!SessionManager.isLoggedIn(this)) {
+            Toast.makeText(this, "Bạn cần đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
+            return;
+        }
         setContentView(R.layout.activity_cart);
 
         // ánh xạ view

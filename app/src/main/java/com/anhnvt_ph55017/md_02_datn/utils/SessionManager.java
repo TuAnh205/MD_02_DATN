@@ -3,6 +3,8 @@ package com.anhnvt_ph55017.md_02_datn.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.appcompat.app.AppCompatDelegate;
+
 public class SessionManager {
 
     private static final String PREF_NAME = "AppSession";
@@ -11,6 +13,7 @@ public class SessionManager {
     private static final String KEY_USER_EMAIL = "userEmail";
     private static final String KEY_USER_NAME = "userName";
     private static final String KEY_TOKEN = "token";
+    private static final String KEY_DARK_MODE = "darkMode";
 
     private static final int DEFAULT_USER_ID = -1;
 
@@ -88,6 +91,21 @@ public class SessionManager {
     // ===== CHECK LOGIN =====
     public static boolean isLoggedIn(Context context) {
         return getUserId(context) != DEFAULT_USER_ID;
+    }
+
+    public static boolean isDarkModeEnabled(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return pref.getBoolean(KEY_DARK_MODE, true);
+    }
+
+    public static void saveDarkModeEnabled(Context context, boolean enabled) {
+        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        pref.edit().putBoolean(KEY_DARK_MODE, enabled).apply();
+    }
+
+    public static void applyTheme(Context context) {
+        boolean enabled = isDarkModeEnabled(context);
+        AppCompatDelegate.setDefaultNightMode(enabled ? AppCompatDelegate.MODE_NIGHT_YES : AppCompatDelegate.MODE_NIGHT_NO);
     }
 
     // ===== LOGOUT =====

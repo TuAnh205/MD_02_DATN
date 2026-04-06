@@ -5,6 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BrowseFragment;
 import com.anhnvt_ph55017.md_02_datn.fragments.HomeFragment;
@@ -19,16 +20,9 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        SessionManager.applyTheme(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        // Check if user is logged in
-        if (!SessionManager.isLoggedIn(this)) {
-            Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-            startActivity(loginIntent);
-            finish();
-            return;
-        }
 
         bottomNav = findViewById(R.id.bottomNav);
 

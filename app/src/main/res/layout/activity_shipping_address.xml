@@ -6,7 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#0F172A"
+    android:background="?attr/colorBackground"
     tools:context=".screens.ShippingAddressActivity">
 
     <!-- Header -->
@@ -96,7 +96,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="#0F172A">
+        android:background="?attr/colorSurface">
 
         <TextView
             android:layout_width="wrap_content"

@@ -1,15 +1,23 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
     <style name="Base.Theme.MD_02_DATN" parent="Theme.Material3.DayNight.NoActionBar">
-        <!-- Customize your light theme here. -->
-        <!-- <item name="colorPrimary">@color/my_light_primary</item> -->
+        <item name="android:colorBackground">@color/background</item>
+        <item name="colorBackground">@color/background</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnBackground">@color/onBackground</item>
+        <item name="colorOnSurface">@color/onSurface</item>
+        <item name="android:textColorPrimary">?attr/colorOnBackground</item>
+        <item name="android:textColorSecondary">?attr/colorOnSurface</item>
+        <item name="android:colorControlNormal">?attr/colorOnSurface</item>
+        <item name="android:navigationBarColor">@color/background</item>
+        <item name="android:statusBarColor">@color/background</item>
     </style>
 
     <style name="Theme.MD_02_DATN" parent="Base.Theme.MD_02_DATN" />
 
     <!-- Custom Alert Dialog Theme -->
     <style name="AlertDialogTheme" parent="Theme.Material3.Dark.Dialog">
-        <item name="android:colorBackground">#162233</item>
+        <item name="android:colorBackground">?attr/colorSurface</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">#9CA3AF</item>
         <item name="buttonBarButtonStyle">@style/DialogButtonStyle</item>

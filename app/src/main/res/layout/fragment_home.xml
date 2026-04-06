@@ -1,5 +1,5 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="#0E1620"
+    android:background="?attr/colorBackground"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -26,7 +26,7 @@
                 android:text="Core-Tech"
                 android:textSize="18sp"
                 android:textStyle="bold"
-                android:textColor="@android:color/white"
+                android:textColor="?attr/colorOnBackground"
                 android:layout_marginStart="10dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"/>
@@ -36,6 +36,7 @@
                 android:layout_height="0dp"
                 android:layout_weight="1"/>
 
+            <!-- Notification -->
             <FrameLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -45,7 +46,8 @@
                     android:id="@+id/imgNotification"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:src="@drawable/ic_notifications" />
+                    android:src="@drawable/ic_notifications"
+                    android:tint="?attr/colorOnSurface" />
 
                 <TextView
                     android:id="@+id/tvNotificationBadge"
@@ -59,15 +61,17 @@
                     android:background="@drawable/bg_notification_badge"
                     android:layout_gravity="top|end"
                     android:layout_marginTop="-4dp"
-                    android:layout_marginEnd="-4dp" />
+                    android:layout_marginEnd="-4dp"
+                    android:visibility="gone"/>
             </FrameLayout>
 
+            <!-- Cart -->
             <ImageView
                 android:id="@+id/imgCart"
                 android:layout_width="24dp"
                 android:layout_height="24dp"
-                android:src="@drawable/ic_cart" />
-
+                android:src="@drawable/ic_cart"
+                android:tint="?attr/colorOnSurface" />
 
         </LinearLayout>
 
@@ -78,7 +82,6 @@
             android:layout_width="match_parent"
             android:layout_height="48dp"
             android:hint="Tìm kiếm công nghệ, thương hiệu..."
-
             android:textColor="@color/black"
             android:textColorHint="#7A8896"
             android:padding="12dp"
@@ -86,7 +89,7 @@
             android:imeOptions="actionSearch"
             android:inputType="text"/>
 
-        <!-- BANNER SLIDESHOW -->
+        <!-- BANNER -->
         <FrameLayout
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
@@ -112,7 +115,7 @@
             android:text="Danh mục"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/colorOnBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -128,7 +131,7 @@
             android:text="Sản phẩm nổi bật"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
+            android:textColor="?attr/colorOnBackground"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
@@ -137,5 +140,6 @@
             android:layout_marginTop="12dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"/>
+
     </LinearLayout>
 </ScrollView>

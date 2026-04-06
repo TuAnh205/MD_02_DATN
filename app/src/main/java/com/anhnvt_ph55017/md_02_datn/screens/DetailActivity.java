@@ -22,6 +22,7 @@ import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
+import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
 import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
@@ -102,10 +103,10 @@ public class DetailActivity extends AppCompatActivity {
                 Toast.makeText(this, "Vui lòng nhập nhận xét", Toast.LENGTH_SHORT).show();
                 return;
             }
-            // TODO: Lấy token đăng nhập thực tế
             String token = SessionManager.getToken(this);
             if (token == null || token.isEmpty()) {
                 Toast.makeText(this, "Bạn cần đăng nhập để đánh giá", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(DetailActivity.this, LoginActivity.class));
                 return;
             }
             btnSendReview.setEnabled(false);
@@ -120,6 +121,7 @@ public class DetailActivity extends AppCompatActivity {
                         loadReviews();
                     });
                 }
+
                 @Override
                 public void onError(String error) {
                     runOnUiThread(() -> {
@@ -194,16 +196,17 @@ public class DetailActivity extends AppCompatActivity {
                         // Số lượng breakdown sẽ cập nhật ở loadReviews()
 
                         btnAddCart.setOnClickListener(v -> {
+                            String token = SessionManager.getToken(DetailActivity.this);
+                            if (token == null || token.isEmpty()) {
+                                Toast.makeText(DetailActivity.this, "Bạn cần đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
+                                startActivity(new Intent(DetailActivity.this, LoginActivity.class));
+                                return;
+                            }
                             Product product = new Product(productId, name, price, imageUrlArr[0], description, 100);
                             product.setRating(rating);
                             product.setReviewCount(reviewCount);
                             BottomSheetProductOptions sheet =
                                     BottomSheetProductOptions.newInstance(product, selected -> {
-                                        String token = SessionManager.getToken(DetailActivity.this);
-                                        if (token == null || token.isEmpty()) {
-                                            Toast.makeText(DetailActivity.this, "Bạn cần đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
-                                            return;
-                                        }
                                         CartApiService.addToCart(DetailActivity.this, token, productId, selected.getQty(), new CartApiService.CartCallback() {
                                             @Override
                                             public void onSuccess(org.json.JSONObject cartJson) {
