@@ -264,7 +264,7 @@ exports.cancelOrder = async (req, res) => {
         }
 
         // cannot cancel once shipped/delivered/returned/refunded
-        const nonCancelable = ['shipped', 'delivered', 'returned', 'refunded'];
+        const nonCancelable = ['đang giao', 'đã nhận', 'trả hàng', 'hoàn tiền'];
         if (nonCancelable.includes(order.status)) {
             return res.status(400).json({ message: `Cannot cancel order with status '${order.status}'` });
         }

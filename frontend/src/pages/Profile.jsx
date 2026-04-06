@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 import { orderService } from '../services/orderService';
@@ -6,6 +7,7 @@ import { favoriteService } from '../services/favoriteService';
 
 export default function Profile() {
   const { user, updateProfile } = useAuth();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -63,15 +65,21 @@ export default function Profile() {
         <div className="bg-white rounded-lg shadow p-6">
           <h1 className="text-2xl font-bold text-gray-900 mb-6">Thông tin cá nhân</h1>
 
-          <div className="flex gap-8 mb-6">
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-semibold text-blue-700">{orderCount}</span>
-              <span className="text-gray-500 text-sm">Đơn hàng</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-lg font-semibold text-pink-600">{wishlistCount}</span>
-              <span className="text-gray-500 text-sm">Đã yêu thích</span>
-            </div>
+          <div className="flex gap-6 mb-6">
+            <button
+              onClick={() => navigate('/orders')}
+              className="flex flex-col items-center p-3 rounded-lg hover:bg-blue-50 transition-colors group"
+            >
+              <span className="text-2xl font-bold text-blue-700 group-hover:text-blue-800">{orderCount}</span>
+              <span className="text-gray-500 text-sm mt-1">📦 Đơn hàng</span>
+            </button>
+            <button
+              onClick={() => navigate('/favorites')}
+              className="flex flex-col items-center p-3 rounded-lg hover:bg-pink-50 transition-colors group"
+            >
+              <span className="text-2xl font-bold text-pink-600 group-hover:text-pink-700">{wishlistCount}</span>
+              <span className="text-gray-500 text-sm mt-1">❤️ Yêu thích</span>
+            </button>
           </div>
 
           {message && (
@@ -145,6 +153,53 @@ export default function Profile() {
               </button>
             </div>
           </form>
+
+          {/* Quick access */}
+          <div className="mt-8 border-t pt-6">
+            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Truy cập nhanh</h2>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => navigate('/orders')}
+                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-left transition-colors"
+              >
+                <span className="text-xl">📦</span>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Đơn hàng của tôi</p>
+                  <p className="text-xs text-gray-500">Theo dõi đơn hàng</p>
+                </div>
+              </button>
+              <button
+                onClick={() => navigate('/favorites')}
+                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-left transition-colors"
+              >
+                <span className="text-xl">❤️</span>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Sản phẩm yêu thích</p>
+                  <p className="text-xs text-gray-500">Xem danh sách yêu thích</p>
+                </div>
+              </button>
+              <button
+                onClick={() => navigate('/products')}
+                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-left transition-colors"
+              >
+                <span className="text-xl">🛍️</span>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Mua sắm</p>
+                  <p className="text-xs text-gray-500">Khám phá sản phẩm</p>
+                </div>
+              </button>
+              <button
+                onClick={() => navigate('/')}
+                className="flex items-center gap-3 p-3 rounded-lg border border-gray-200 hover:bg-gray-50 text-left transition-colors"
+              >
+                <span className="text-xl">🏠</span>
+                <div>
+                  <p className="font-medium text-gray-800 text-sm">Trang chủ</p>
+                  <p className="text-xs text-gray-500">Quay về trang chủ</p>
+                </div>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
