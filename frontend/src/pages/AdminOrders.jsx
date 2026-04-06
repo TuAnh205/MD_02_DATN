@@ -33,17 +33,6 @@ export default function AdminOrders() {
     }
   };
 
-  const updateOrderStatus = async (orderId, newStatus) => {
-    try {
-      // Admin API expects PUT /admin/orders/:id/status
-      await api.put(`/admin/orders/${orderId}/status`, { status: newStatus });
-      fetchOrders();
-    } catch (error) {
-      console.error('Error updating order status:', error);
-      alert('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng');
-    }
-  };
-
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800';
@@ -80,7 +69,7 @@ export default function AdminOrders() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Quản lý Đơn hàng</h1>
-          <p className="text-gray-600 mt-1">Xem và cập nhật trạng thái đơn hàng</p>
+          <p className="text-gray-600 mt-1">Xem tất cả đơn hàng trong hệ thống</p>
         </div>
         <div className="flex items-center space-x-3">
           <select
@@ -125,9 +114,7 @@ export default function AdminOrders() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Ngày đặt
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hành động
-                </th>
+
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -176,19 +163,7 @@ export default function AdminOrders() {
                       {new Date(order.createdAt).toLocaleTimeString('vi-VN')}
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <select
-                      value={order.status}
-                      onChange={(e) => updateOrderStatus(order._id, e.target.value)}
-                      className="px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                    >
-                      <option value="pending">Chờ xác nhận</option>
-                      <option value="confirmed">Xác nhận</option>
-                      <option value="shipped">Đang giao</option>
-                      <option value="delivered">Đã giao</option>
-                      <option value="cancelled">Hủy đơn</option>
-                    </select>
-                  </td>
+
                 </tr>
               ))}
             </tbody>

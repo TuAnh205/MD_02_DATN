@@ -91,6 +91,33 @@ exports.getShopOrders = async (req, res) => {
   }
 };
 
+// ================= UPDATE SHOP ORDER STATUS =================
+exports.updateShopOrderStatus = async (req, res) => {
+  try {
+    const shopId = req.user.id;
+    const { id } = req.params;
+    const { status } = req.body;
+
+    const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+    }
+
+    // Chỉ cho phép shop cập nhật đơn hàng có sản phẩm của shop đó
+    const order = await Order.findOne({ _id: id, 'items.shopId': shopId });
+    if (!order) {
+      return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+    }
+
+    order.status = status;
+    await order.save();
+
+    res.json({ message: 'Cập nhật trạng thái thành công', order });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // ================= SHOP NOTIFICATIONS =================
 exports.getShopNotifications = async (req, res) => {
   try {

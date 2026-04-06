@@ -631,3 +631,58 @@ exports.getRevenue = async (req, res) => {
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };
+
+exports.getRevenueByShop = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+
+    if (!year) {
+      return res.status(400).json({ message: 'Year is required' });
+    }
+
+    const yearNum = parseInt(year);
+    const monthNum = month ? parseInt(month) : null;
+
+    const orders = await Order.find({ 'payment.status': 'paid' })
+      .populate('items.shopId', 'name email');
+
+    // Aggregate revenue per shop
+    const shopMap = {};
+
+    orders.forEach(order => {
+      const orderDate = new Date(order.createdAt);
+      const matchYear = orderDate.getFullYear() === yearNum;
+      const matchMonth = monthNum ? orderDate.getMonth() + 1 === monthNum : true;
+      if (!matchYear || !matchMonth) return;
+
+      order.items.forEach(item => {
+        const shopId = item.shopId?._id?.toString() || item.shopId?.toString();
+        if (!shopId) return;
+        if (!shopMap[shopId]) {
+          shopMap[shopId] = {
+            shopId,
+            shopName: item.shopId?.name || 'Shop không xác định',
+            shopEmail: item.shopId?.email || '',
+            revenue: 0,
+            orders: new Set(),
+            itemsSold: 0
+          };
+        }
+        shopMap[shopId].revenue += (item.price || 0) * (item.qty || 1);
+        shopMap[shopId].orders.add(order._id.toString());
+        shopMap[shopId].itemsSold += item.qty || 1;
+      });
+    });
+
+    const shops = Object.values(shopMap)
+      .map(s => ({ ...s, orderCount: s.orders.size, orders: undefined }))
+      .sort((a, b) => b.revenue - a.revenue);
+
+    const total = shops.reduce((sum, s) => sum + s.revenue, 0);
+
+    res.json({ shops, total, year: yearNum, ...(monthNum && { month: monthNum }) });
+  } catch (error) {
+    console.error('Error fetching shop revenue:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
