@@ -18,12 +18,9 @@ router.get('/shops', adminController.getShops);
 router.get('/shops/count', adminController.getShopCount);
 router.put('/shops/:id/status', adminController.updateShopStatus);
 
-// Product management routes
+// Product management routes (view only)
 router.get('/products', adminController.getProducts);
 router.get('/products/count', adminController.getProductCount);
-router.post('/products', adminController.createProduct);
-router.put('/products/:id', adminController.updateProduct);
-router.delete('/products/:id', adminController.deleteProduct);
 
 // Order management routes
 router.get('/orders', adminController.getOrders);
@@ -55,5 +52,6 @@ router.delete('/vouchers/:id', adminController.deleteVoucher);
 
 // Revenue analytics routes
 router.get('/revenue', adminController.getRevenue);
+router.get('/revenue/shops', adminController.getRevenueByShop);
 
 module.exports = router;

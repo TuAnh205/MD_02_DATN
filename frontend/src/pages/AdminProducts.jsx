@@ -6,16 +6,6 @@ export default function AdminProducts() {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingProduct, setEditingProduct] = useState(null);
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    price: '',
-    category: '',
-    stock: '',
-    images: [],
-  });
 
   useEffect(() => {
     fetchProducts();
@@ -34,59 +24,7 @@ export default function AdminProducts() {
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      if (editingProduct) {
-        await api.put(`/admin/products/${editingProduct._id}`, formData);
-      } else {
-        await api.post('/admin/products', formData);
-      }
-      fetchProducts();
-      resetForm();
-    } catch (error) {
-      console.error('Error saving product:', error);
-      alert('Có lỗi xảy ra khi lưu sản phẩm');
-    }
-  };
 
-  const resetForm = () => {
-    setFormData({
-      name: '',
-      description: '',
-      price: '',
-      category: '',
-      stock: '',
-      images: [],
-    });
-    setEditingProduct(null);
-    setShowCreateForm(false);
-  };
-
-  const editProduct = (product) => {
-    setEditingProduct(product);
-    setFormData({
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      category: product.category,
-      stock: product.stock,
-      images: product.images || [],
-    });
-    setShowCreateForm(true);
-  };
-
-  const deleteProduct = async (productId) => {
-    if (!window.confirm('Bạn có chắc muốn xóa sản phẩm này?')) return;
-
-    try {
-      await api.delete(`/admin/products/${productId}`);
-      fetchProducts();
-    } catch (error) {
-      console.error('Error deleting product:', error);
-      alert('Có lỗi xảy ra khi xóa sản phẩm');
-    }
-  };
 
   if (loading) {
     return (
@@ -101,105 +39,10 @@ export default function AdminProducts() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Sản phẩm</h1>
-          <p className="text-gray-600 mt-1">Thêm, sửa, xóa và quản lý sản phẩm</p>
+          <h1 className="text-2xl font-bold text-gray-900">Danh sách Sản phẩm</h1>
+          <p className="text-gray-600 mt-1">Xem tất cả sản phẩm từ các shop đã đăng ký</p>
         </div>
-        <button
-          onClick={() => setShowCreateForm(!showCreateForm)}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors flex items-center space-x-2"
-        >
-          <span>{showCreateForm ? '✕' : '+'}</span>
-          <span>{showCreateForm ? 'Hủy' : 'Thêm sản phẩm'}</span>
-        </button>
       </div>
-
-      {/* Create/Edit Form */}
-      {showCreateForm && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            {editingProduct ? 'Chỉnh sửa sản phẩm' : 'Thêm sản phẩm mới'}
-          </h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tên sản phẩm</label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Danh mục</label>
-                <input
-                  type="text"
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                />
-              </div>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mô tả</label>
-              <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                rows={3}
-              />
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Giá (VNĐ)</label>
-                <input
-                  type="number"
-                  value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tồn kho</label>
-                <input
-                  type="number"
-                  value={formData.stock}
-                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Hình ảnh URL</label>
-                <input
-                  type="url"
-                  value={formData.images[0] || ''}
-                  onChange={(e) => setFormData({ ...formData, images: [e.target.value] })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="https://..."
-                />
-              </div>
-            </div>
-            <div className="flex justify-end space-x-3">
-              <button
-                type="button"
-                onClick={resetForm}
-                className="px-4 py-2 text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Hủy
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {editingProduct ? 'Cập nhật' : 'Thêm'}
-              </button>
-            </div>
-          </form>
-        </div>
-      )}
 
       {/* Products Table */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -222,9 +65,7 @@ export default function AdminProducts() {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                   Tồn kho
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Hành động
-                </th>
+
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -280,20 +121,7 @@ export default function AdminProducts() {
                       {product.stock}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                    <button
-                      onClick={() => editProduct(product)}
-                      className="text-blue-600 hover:text-blue-800 transition-colors"
-                    >
-                      Sửa
-                    </button>
-                    <button
-                      onClick={() => deleteProduct(product._id)}
-                      className="text-red-600 hover:text-red-800 transition-colors"
-                    >
-                      Xóa
-                    </button>
-                  </td>
+
                 </tr>
               ))}
             </tbody>
@@ -304,7 +132,7 @@ export default function AdminProducts() {
           <div className="text-center py-12">
             <div className="text-gray-400 text-6xl mb-4">📦</div>
             <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có sản phẩm nào</h3>
-            <p className="text-gray-500">Bắt đầu thêm sản phẩm đầu tiên của bạn</p>
+            <p className="text-gray-500">Các sản phẩm từ shop đã đăng ký sẽ hiển thị ở đây</p>
           </div>
         )}
       </div>

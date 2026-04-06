@@ -15,6 +15,7 @@ router.delete('/products/:id', shopController.deleteProduct);
 
 // Order management routes
 router.get('/orders', shopController.getShopOrders);
+router.put('/orders/:id/status', shopController.updateShopOrderStatus);
 
 // Review management routes
 router.get('/reviews', shopController.getShopReviews);
