@@ -6,9 +6,9 @@
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnBackground">@color/onBackground</item>
         <item name="colorOnSurface">@color/onSurface</item>
-        <item name="android:textColorPrimary">?attr/colorOnBackground</item>
-        <item name="android:textColorSecondary">?attr/colorOnSurface</item>
-        <item name="android:colorControlNormal">?attr/colorOnSurface</item>
+        <item name="android:textColorPrimary">@color/onBackground</item>
+        <item name="android:textColorSecondary">@color/onSurface</item>
+        <item name="android:colorControlNormal">@color/onSurface</item>
         <item name="android:navigationBarColor">@color/background</item>
         <item name="android:statusBarColor">@color/background</item>
     </style>
@@ -17,7 +17,7 @@
 
     <!-- Custom Alert Dialog Theme -->
     <style name="AlertDialogTheme" parent="Theme.Material3.Dark.Dialog">
-        <item name="android:colorBackground">?attr/colorSurface</item>
+        <item name="android:colorBackground">@color/surface</item>
         <item name="android:textColorPrimary">@android:color/white</item>
         <item name="android:textColorSecondary">#9CA3AF</item>
         <item name="buttonBarButtonStyle">@style/DialogButtonStyle</item>
@@ -28,3 +28,5 @@
     </style>
 
 </resources>
+
+

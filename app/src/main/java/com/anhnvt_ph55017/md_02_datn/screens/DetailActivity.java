@@ -2,6 +2,7 @@ package com.anhnvt_ph55017.md_02_datn.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
@@ -106,7 +107,7 @@ public class DetailActivity extends AppCompatActivity {
             String token = SessionManager.getToken(this);
             if (token == null || token.isEmpty()) {
                 Toast.makeText(this, "Bạn cần đăng nhập để đánh giá", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(DetailActivity.this, LoginActivity.class));
+                redirectToLogin("review");
                 return;
             }
             btnSendReview.setEnabled(false);
@@ -140,6 +141,11 @@ public class DetailActivity extends AppCompatActivity {
         loadProductDetail();
         loadReviews();
         loadRelatedProducts();
+    }
+
+    private void redirectToLogin(String reason) {
+        Log.d("DetailActivity", "Redirecting to LoginActivity because: " + reason);
+        startActivity(new Intent(DetailActivity.this, LoginActivity.class));
     }
 
     private void loadProductDetail() {

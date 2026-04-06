@@ -3,3 +3,5 @@
     <item android:drawable="@drawable/bg_category_selected" android:state_checked="true" />
     <item android:drawable="@drawable/bg_category_normal" android:state_checked="false" />
 </selector>
+
+

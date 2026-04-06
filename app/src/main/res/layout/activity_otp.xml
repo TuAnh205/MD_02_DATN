@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground"
+    android:background="@color/background"
     android:fillViewport="true">
 
     <LinearLayout
@@ -18,7 +18,7 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_back"
-            android:tint="?attr/colorOnBackground"/>
+            android:tint="@color/onBackground"/>
 
         <!-- Image -->
         <ImageView
@@ -37,7 +37,7 @@
             android:textSize="28sp"
             android:layout_gravity="center"
             android:textStyle="bold"
-            android:textColor="?attr/colorOnBackground"/>
+            android:textColor="@color/onBackground"/>
 
         <!-- Desc -->
         <TextView
@@ -114,3 +114,5 @@
 
     </LinearLayout>
 </ScrollView>
+
+

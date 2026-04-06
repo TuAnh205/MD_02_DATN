@@ -72,7 +72,7 @@
             android:layout_height="40dp"
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="?attr/colorSurface"
+            android:background="@color/surface"
             android:layout_marginBottom="12dp">
 
             <ImageButton
@@ -81,7 +81,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_minus"
                 android:scaleType="centerInside"
-                android:background="?attr/selectableItemBackground"
+                android:background="?android:attr/selectableItemBackground"
                 android:contentDescription="Decrease Quantity" />
 
             <TextView
@@ -101,7 +101,7 @@
                 android:layout_height="match_parent"
                 android:src="@drawable/ic_plus"
                 android:scaleType="centerInside"
-                android:background="?attr/selectableItemBackground"
+                android:background="?android:attr/selectableItemBackground"
                 android:contentDescription="Increase Quantity" />
         </LinearLayout>
 
@@ -118,3 +118,5 @@
     </LinearLayout>
 
 </LinearLayout>
+
+

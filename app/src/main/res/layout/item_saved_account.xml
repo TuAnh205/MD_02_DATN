@@ -4,7 +4,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:padding="12dp"
-    android:background="?attr/colorSurface">
+    android:background="@color/surface">
 
     <TextView
         android:id="@+id/txtAccount"
@@ -14,3 +14,5 @@
         android:textSize="14sp" />
 
 </LinearLayout>
+
+

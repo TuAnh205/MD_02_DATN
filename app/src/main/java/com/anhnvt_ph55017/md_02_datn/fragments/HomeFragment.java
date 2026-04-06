@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -118,6 +119,7 @@ public class HomeFragment extends Fragment {
                 if (getContext() == null) return;
                 if (!com.anhnvt_ph55017.md_02_datn.utils.SessionManager.isLoggedIn(getContext())) {
                     Toast.makeText(getContext(), "Bạn cần đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
+                    Log.d("HomeFragment", "Cart icon clicked without login, redirecting to LoginActivity");
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     return;
                 }

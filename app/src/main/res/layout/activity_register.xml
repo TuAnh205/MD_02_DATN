@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="?attr/colorBackground">
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -16,7 +16,7 @@
             android:layout_width="24dp"
             android:layout_height="24dp"
             android:src="@drawable/ic_back"
-            android:tint="?attr/colorOnBackground"/>
+            android:tint="@color/onBackground"/>
 
         <TextView
 
@@ -24,7 +24,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Register"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textSize="18sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -34,7 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Create Account"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textSize="30sp"
             android:textStyle="bold"
             android:layout_marginTop="40dp"/>
@@ -52,7 +52,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Full Name"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:layout_marginTop="30dp"/>
 
 
@@ -65,7 +65,7 @@
             android:hint="Enter your full name"
             android:inputType="text"
             android:padding="14dp"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textColorHint="#7F8C99"/>
 
         <!-- Email -->
@@ -73,7 +73,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Email"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:layout_marginTop="30dp"/>
 
         <EditText
@@ -85,7 +85,7 @@
             android:hint="example@coretech.com"
             android:inputType="textEmailAddress"
             android:padding="14dp"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textColorHint="#7F8C99"/>
 
         <!-- Phone -->
@@ -93,7 +93,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Phone Number"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:layout_marginTop="30dp"/>
 
         <EditText
@@ -104,7 +104,7 @@
             android:hint="+1 (555) 000-0000"
             android:inputType="phone"
             android:padding="14dp"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textColorHint="#7F8C99"
             android:layout_marginTop="10dp"/>
 
@@ -113,7 +113,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Password"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:layout_marginTop="30dp"/>
 
         <EditText
@@ -124,7 +124,7 @@
             android:hint="Create a strong password"
             android:inputType="textPassword"
             android:padding="14dp"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textColorHint="#7F8C99"
             android:layout_marginTop="10dp"
             android:drawableEnd="@drawable/ic_eye"/>
@@ -134,7 +134,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Confirm Password"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:layout_marginTop="30dp"/>
 
         <EditText
@@ -148,7 +148,7 @@
             android:drawablePadding="10dp"
             android:paddingEnd="16dp"
             android:background="@drawable/edt_email"
-            android:textColor="?attr/colorOnBackground"
+            android:textColor="@color/onBackground"
             android:textColorHint="#7F8C99"/>
 
 
@@ -178,3 +178,5 @@
 
     </LinearLayout>
 </ScrollView>
+
+

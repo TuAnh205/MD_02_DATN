@@ -2,6 +2,7 @@ package com.anhnvt_ph55017.md_02_datn.screens;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.CheckBox;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,6 +38,7 @@ public class CartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         if (!SessionManager.isLoggedIn(this)) {
             Toast.makeText(this, "Bạn cần đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
+            Log.d("CartActivity", "CartActivity opened without login, redirecting to LoginActivity");
             startActivity(new Intent(this, LoginActivity.class));
             finish();
             return;
@@ -85,6 +87,7 @@ public class CartActivity extends AppCompatActivity {
             int userId = SessionManager.getUserId(this);
             if (userId <= 0) {
                 Toast.makeText(this, "Please login to checkout", Toast.LENGTH_SHORT).show();
+                Log.d("CartActivity", "Checkout clicked without login, redirecting to LoginActivity");
                 startActivity(new Intent(this, LoginActivity.class));
                 return;
             }

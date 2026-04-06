@@ -2,7 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="?attr/colorBackground"
+    android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -19,7 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_gravity="bottom"
-        android:background="?attr/colorSurface"
+        android:background="@color/surface"
 
         app:menu="@menu/menu"
 
@@ -29,3 +29,5 @@
         app:itemBackground="@null"
       />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+
