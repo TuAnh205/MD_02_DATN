@@ -34,14 +34,14 @@ export default function AdminDashboard() {
       label: 'Quản lý Sản phẩm',
       path: '/admin/products',
       icon: '📦',
-      description: 'Thêm, sửa, xóa sản phẩm'
+      description: 'Xem sản phẩm từ các shop'
     },
     {
       id: 'orders',
       label: 'Quản lý Đơn hàng',
       path: '/admin/orders',
       icon: '📋',
-      description: 'Theo dõi và xử lý đơn hàng'
+      description: 'Theo dõi đơn hàng'
     },
     {
       id: 'reviews',

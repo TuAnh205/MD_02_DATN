@@ -35,22 +35,22 @@ export default function AdminOrders() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'shipping': return 'bg-purple-100 text-purple-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'ch\u1edd x\u00e1c nh\u1eadn': return 'bg-yellow-100 text-yellow-800';
+      case '\u0111\u00e3 x\u00e1c nh\u1eadn': return 'bg-blue-100 text-blue-800';
+      case '\u0111ang giao': return 'bg-purple-100 text-purple-800';
+      case '\u0111\u00e3 nh\u1eadn': return 'bg-green-100 text-green-800';
+      case '\u0111\u00e3 h\u1ee7y': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pending': return 'Chờ xác nhận';
-      case 'confirmed': return 'Đã xác nhận';
-      case 'shipping': return 'Đang giao';
-      case 'delivered': return 'Đã giao';
-      case 'cancelled': return 'Đã hủy';
+      case 'ch\u1edd x\u00e1c nh\u1eadn': return 'Ch\u1edd x\u00e1c nh\u1eadn';
+      case '\u0111\u00e3 x\u00e1c nh\u1eadn': return '\u0110\u00e3 x\u00e1c nh\u1eadn';
+      case '\u0111ang giao': return '\u0110ang giao';
+      case '\u0111\u00e3 nh\u1eadn': return '\u0110\u00e3 giao';
+      case '\u0111\u00e3 h\u1ee7y': return '\u0110\u00e3 h\u1ee7y';
       default: return status;
     }
   };
@@ -124,8 +124,15 @@ export default function AdminOrders() {
                     <div className="text-sm font-medium text-gray-900">#{order._id.slice(-8)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{order.user?.name}</div>
-                    <div className="text-sm text-gray-500">{order.user?.email}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {order.user?.name || order.shipping?.address?.name || 'N/A'}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {order.user?.email || ''}
+                    </div>
+                    {!order.user && (
+                      <div className="text-xs text-orange-500 mt-0.5">Tài khoản đã bị xóa</div>
+                    )}
                   </td>
                   <td className="px-6 py-4">
                     <div className="text-sm text-gray-900">

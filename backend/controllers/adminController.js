@@ -226,14 +226,28 @@ exports.getOrders = async (req, res) => {
     const limit = parseInt(req.query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const orders = await Order.find()
-      .populate('user', 'name email')
+    // Map English filter values to Vietnamese status stored in DB
+    const statusMap = {
+      pending: 'ch\u1edd x\u00e1c nh\u1eadn',
+      confirmed: '\u0111\u00e3 x\u00e1c nh\u1eadn',
+      shipped: '\u0111ang giao',
+      delivered: '\u0111\u00e3 nh\u1eadn',
+      cancelled: '\u0111\u00e3 h\u1ee7y',
+    };
+
+    const filter = {};
+    if (req.query.status && req.query.status !== 'all') {
+      filter.status = statusMap[req.query.status] || req.query.status;
+    }
+
+    const orders = await Order.find(filter)
+      .populate('user', 'name email role')
       .populate('items.product', 'name price')
       .skip(skip)
       .limit(limit)
       .sort({ createdAt: -1 });
 
-    const total = await Order.countDocuments();
+    const total = await Order.countDocuments(filter);
 
     res.json({
       orders,

@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Product = require('../models/Product');
 const User = require('../models/User');
 const Order = require('../models/Order');
@@ -98,18 +99,30 @@ exports.updateShopOrderStatus = async (req, res) => {
     const { id } = req.params;
     const { status } = req.body;
 
-    const validStatuses = ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'];
-    if (!validStatuses.includes(status)) {
+    // Map English values from frontend → Vietnamese enum stored in DB
+    const statusMap = {
+      pending: 'chờ xác nhận',
+      confirmed: 'đã xác nhận',
+      shipped: 'đang giao',
+      delivered: 'đã nhận',
+      cancelled: 'đã hủy',
+    };
+
+    // Accept both English (legacy) and Vietnamese directly
+    const mappedStatus = statusMap[status] || status;
+
+    const validStatuses = ['chờ xác nhận', 'đã xác nhận', 'đang giao', 'đã nhận', 'đã hủy'];
+    if (!validStatuses.includes(mappedStatus)) {
       return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
     }
 
     // Chỉ cho phép shop cập nhật đơn hàng có sản phẩm của shop đó
-    const order = await Order.findOne({ _id: id, 'items.shopId': shopId });
+    const order = await Order.findOne({ _id: id, 'items.shopId': new mongoose.Types.ObjectId(shopId) });
     if (!order) {
       return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
     }
 
-    order.status = status;
+    order.status = mappedStatus;
     await order.save();
 
     res.json({ message: 'Cập nhật trạng thái thành công', order });
@@ -244,10 +257,12 @@ exports.getShopRevenue = async (req, res) => {
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
     }
 
+    const shopObjectId = new mongoose.Types.ObjectId(shopId);
+
     const revenueData = await Order.aggregate([
       {
         $match: {
-          status: 'delivered',
+          'payment.status': 'paid',
           createdAt: { $gte: startDate }
         }
       },
@@ -255,19 +270,8 @@ exports.getShopRevenue = async (req, res) => {
         $unwind: '$items'
       },
       {
-        $lookup: {
-          from: 'products',
-          localField: 'items.product',
-          foreignField: '_id',
-          as: 'productInfo'
-        }
-      },
-      {
-        $unwind: '$productInfo'
-      },
-      {
         $match: {
-          'productInfo.shopId': shopId
+          'items.shopId': shopObjectId
         }
       },
       {

@@ -34,29 +34,38 @@ export default function ShopOrders() {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'confirmed': return 'bg-blue-100 text-blue-800';
-      case 'shipped': return 'bg-purple-100 text-purple-800';
-      case 'delivered': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'chờ xác nhận': return 'bg-yellow-100 text-yellow-800';
+      case 'đã xác nhận': return 'bg-blue-100 text-blue-800';
+      case 'đang giao': return 'bg-purple-100 text-purple-800';
+      case 'đã nhận': return 'bg-green-100 text-green-800';
+      case 'đã hủy': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'pending': return 'Chờ xác nhận';
-      case 'confirmed': return 'Đã xác nhận';
-      case 'shipped': return 'Đang giao';
-      case 'delivered': return 'Đã giao';
-      case 'cancelled': return 'Đã hủy';
+      case 'chờ xác nhận': return 'Chờ xác nhận';
+      case 'đã xác nhận': return 'Đã xác nhận';
+      case 'đang giao': return 'Đang giao';
+      case 'đã nhận': return 'Đã giao';
+      case 'đã hủy': return 'Đã hủy';
       default: return status;
     }
   };
 
+  // Map filter value (English) sang status TV trong DB
+  const statusFilterMap = {
+    pending: 'chờ xác nhận',
+    confirmed: 'đã xác nhận',
+    shipped: 'đang giao',
+    delivered: 'đã nhận',
+    cancelled: 'đã hủy',
+  };
+
   const filteredOrders = statusFilter === 'all'
     ? orders
-    : orders.filter((o) => o.status === statusFilter);
+    : orders.filter((o) => o.status === (statusFilterMap[statusFilter] || statusFilter));
 
   if (loading) {
     return (
@@ -172,11 +181,11 @@ export default function ShopOrders() {
                       onChange={(e) => updateOrderStatus(order._id, e.target.value)}
                       className="px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
-                      <option value="pending">Chờ xác nhận</option>
-                      <option value="confirmed">Xác nhận</option>
-                      <option value="shipped">Đang giao</option>
-                      <option value="delivered">Đã giao</option>
-                      <option value="cancelled">Hủy đơn</option>
+                      <option value="chờ xác nhận">Chờ xác nhận</option>
+                      <option value="đã xác nhận">Xác nhận</option>
+                      <option value="đang giao">Đang giao</option>
+                      <option value="đã nhận">Đã giao</option>
+                      <option value="đã hủy">Hủy đơn</option>
                     </select>
                   </td>
                 </tr>

@@ -227,14 +227,7 @@ export default function AdminHome() {
       {/* Quick Actions */}
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
         <h3 className="text-lg font-semibold text-gray-900 mb-4">Hành động nhanh</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Link
-            to="/admin/products"
-            className="flex flex-col items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-          >
-            <span className="text-2xl mb-2">📦</span>
-            <span className="text-sm font-medium text-blue-700">Thêm sản phẩm</span>
-          </Link>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Link
             to="/admin/orders"
             className="flex flex-col items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 transition-colors"
