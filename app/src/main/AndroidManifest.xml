@@ -35,14 +35,6 @@
             android:exported="false" />
         <activity
             android:name=".screens.LoadingActivity"
-            android:exported="true">
-
-        </activity>
-        <activity
-            android:name=".MainActivityTEST"
-            android:exported="false" />
-        <activity
-            android:name=".screens.MainActivity"
             android:exported="true" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -50,21 +42,35 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingActivity"
-            android:exported="false" />
+            android:name=".screens.MainActivity"
+            android:exported="true" >
+        </activity>
         <activity
             android:name=".screens.CartActivity"
             android:exported="false" />
-        <activity
-            android:name=".HomeActivity"
-            android:exported="true" >
-
-        </activity>
         <activity
             android:name=".screens.RegisterActivity"
             android:exported="false" />
         <activity
             android:name=".screens.LoginActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.ShopMainActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.ShopProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.AddProductActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.CategoriesActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.AddCategoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.OrdersActivity"
             android:exported="false" />
         <activity
             android:name=".screens.EditProfileActivity"

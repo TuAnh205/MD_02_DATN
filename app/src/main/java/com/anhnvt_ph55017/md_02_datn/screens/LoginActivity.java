@@ -110,11 +110,17 @@ public class LoginActivity extends AppCompatActivity {
                         // Lưu token vào SessionManager để các màn khác dùng đúng
                         SessionManager.saveToken(this, token);
 
+                        String userRole = userObj.optString("role", "user").trim().toLowerCase();
                         // Lưu session theo user backend để app và web dùng chung account.
-                        SessionManager.saveUserSession(this, userId, userEmail, userName);
+                        SessionManager.saveUserSession(this, userId, userEmail, userName, userRole);
 
                         Toast.makeText(this, "Login thành công", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, MainActivity.class));
+
+                        if ("shop".equals(userRole)) {
+                            startActivity(new Intent(this, ShopMainActivity.class));
+                        } else {
+                            startActivity(new Intent(this, MainActivity.class));
+                        }
                         finish();
                     },
                     error -> {
@@ -214,6 +220,7 @@ public class LoginActivity extends AppCompatActivity {
                         String userId = userObj.optString("_id", "");
                         String email = userObj.optString("email", "");
                         String name = userObj.optString("name", "User");
+                        String userRole = userObj.optString("role", "user").trim().toLowerCase();
 
                         if (userId.isEmpty() || email.isEmpty()) {
                             Toast.makeText(this, "Thiếu thông tin user từ server", Toast.LENGTH_LONG).show();
@@ -226,10 +233,15 @@ public class LoginActivity extends AppCompatActivity {
                                 .putString("token", token)
                                 .apply();
 
-                        SessionManager.saveUserSession(this, userId, email, name);
+                        SessionManager.saveUserSession(this, userId, email, name, userRole);
 
                         Toast.makeText(this, "Google login thành công", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(this, MainActivity.class));
+
+                        if ("shop".equals(userRole)) {
+                            startActivity(new Intent(this, ShopMainActivity.class));
+                        } else {
+                            startActivity(new Intent(this, MainActivity.class));
+                        }
                         finish();
                     },
                     error -> {

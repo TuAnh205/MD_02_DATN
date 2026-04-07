@@ -20,6 +20,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.util.ArrayList;
 import java.util.List;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.BannerAdapter;
@@ -34,6 +36,23 @@ import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
 public class HomeFragment extends Fragment {
+
+    RecyclerView rvCategory, rvProduct;
+    ImageView imgCart, imgNotification;
+    TextView tvNotificationBadge;
+    ViewPager2 vpBanner;
+    LinearLayout dotsContainer;
+    EditText edtSearchHome;
+
+    List<Product> listProducts;
+    List<com.anhnvt_ph55017.md_02_datn.models.Category> listCategories = new java.util.ArrayList<>();
+    String selectedCategoryName = "";
+
+    private final Handler bannerHandler = new Handler(Looper.getMainLooper());
+    private final int bannerIntervalMs = 3500;
+    private int bannerCurrentIndex = 0;
+    private Runnable bannerRunnable;
+    private ImageView[] dots;
 
     // Thêm lại hàm loadCategoriesFromApi
     private void loadCategoriesFromApi() {
@@ -75,23 +94,6 @@ public class HomeFragment extends Fragment {
         });
     }
 
-    RecyclerView rvCategory, rvProduct;
-    ImageView imgCart, imgNotification;
-    TextView tvNotificationBadge;
-    ViewPager2 vpBanner;
-    LinearLayout dotsContainer;
-    EditText edtSearchHome;
-
-    List<Product> listProducts;
-    List<com.anhnvt_ph55017.md_02_datn.models.Category> listCategories = new java.util.ArrayList<>();
-    String selectedCategoryName = "";
-
-    private final Handler bannerHandler = new Handler(Looper.getMainLooper());
-    private final int bannerIntervalMs = 3500;
-    private int bannerCurrentIndex = 0;
-    private Runnable bannerRunnable;
-    private ImageView[] dots;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -99,14 +101,14 @@ public class HomeFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
         try {
-            edtSearchHome = view.findViewById(R.id.edtSearchHome);
-            vpBanner = view.findViewById(R.id.vpBanner);
-            dotsContainer = view.findViewById(R.id.dotsContainer);
-            rvCategory = view.findViewById(R.id.rvCategory);
-            rvProduct = view.findViewById(R.id.rvProduct);
-            imgCart = view.findViewById(R.id.imgCart);
-            imgNotification = view.findViewById(R.id.imgNotification);
-            tvNotificationBadge = view.findViewById(R.id.tvNotificationBadge);
+            edtSearchHome = (EditText) view.findViewById(R.id.edtSearchHome);
+            vpBanner = (ViewPager2) view.findViewById(R.id.vpBanner);
+            dotsContainer = (LinearLayout) view.findViewById(R.id.dotsContainer);
+            rvCategory = (RecyclerView) view.findViewById(R.id.rvCategory);
+            rvProduct = (RecyclerView) view.findViewById(R.id.rvProduct);
+            imgCart = (ImageView) view.findViewById(R.id.imgCart);
+            imgNotification = (ImageView) view.findViewById(R.id.imgNotification);
+            tvNotificationBadge = (TextView) view.findViewById(R.id.tvNotificationBadge);
 
             if (getContext() == null) {
                 return view;
@@ -147,13 +149,14 @@ public class HomeFragment extends Fragment {
                 rvCategory.setLayoutManager(
                     new LinearLayoutManager(getContext(), RecyclerView.HORIZONTAL, false)
                 );
-
+                rvCategory.setNestedScrollingEnabled(true);
 
                 // Fetch categories from backend
                 loadCategoriesFromApi();
 
                 // Recycler product
                 rvProduct.setLayoutManager(new GridLayoutManager(getContext(),2));
+                rvProduct.setNestedScrollingEnabled(true);
 
                 // Load products from API
                 loadProductsFromApi();
@@ -261,14 +264,26 @@ public class HomeFragment extends Fragment {
 
             @Override
             public void onError(String error) {
+                Log.e("HomeFragment", "Product load error: " + error);
                 if (getActivity() != null) {
-                    getActivity().runOnUiThread(() ->
-                        Toast.makeText(getContext(), "Load products failed: " + error, Toast.LENGTH_SHORT).show()
-                    );
+                    getActivity().runOnUiThread(() -> {
+                        Toast.makeText(getContext(), "Load products failed: " + error, Toast.LENGTH_LONG).show();
+                        // Fallback to local DB
+                        loadLocalProducts();
+                    });
                 }
             }
         });
     }
+
+    private void loadLocalProducts() {
+        Log.d("HomeFragment", "Loading fallback local products");
+        // TODO: Load from SQLite DBHelper
+        listProducts = new ArrayList<>();
+        ProductAdapter adapter = new ProductAdapter(getContext(), listProducts);
+        rvProduct.setAdapter(adapter);
+    }
+
 
     private void hideKeyboard() {
         try {
@@ -364,3 +379,4 @@ public class HomeFragment extends Fragment {
         }
     }
 }
+    

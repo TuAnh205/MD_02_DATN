@@ -12,6 +12,7 @@ public class SessionManager {
     private static final String KEY_USER_ID_STR = "userIdStr";
     private static final String KEY_USER_EMAIL = "userEmail";
     private static final String KEY_USER_NAME = "userName";
+    private static final String KEY_USER_ROLE = "userRole";
     private static final String KEY_TOKEN = "token";
     private static final String KEY_DARK_MODE = "darkMode";
 
@@ -26,6 +27,21 @@ public class SessionManager {
         editor.putString(KEY_USER_ID_STR, String.valueOf(userId));
         editor.putString(KEY_USER_EMAIL, email);
         editor.putString(KEY_USER_NAME, fullname);
+        editor.putString(KEY_USER_ROLE, "user");
+
+        editor.apply();
+    }
+
+    // ===== SAVE USER SESSION WITH ROLE (INT ID - LOCAL) =====
+    public static void saveUserSession(Context context, int userId, String email, String fullname, String role) {
+        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+
+        editor.putInt(KEY_USER_ID, userId);
+        editor.putString(KEY_USER_ID_STR, String.valueOf(userId));
+        editor.putString(KEY_USER_EMAIL, email);
+        editor.putString(KEY_USER_NAME, fullname);
+        editor.putString(KEY_USER_ROLE, role != null ? role : "user");
 
         editor.apply();
     }
@@ -50,6 +66,31 @@ public class SessionManager {
         editor.putInt(KEY_USER_ID, legacyId);
         editor.putString(KEY_USER_EMAIL, email);
         editor.putString(KEY_USER_NAME, fullname);
+        editor.putString(KEY_USER_ROLE, "user");
+
+        editor.apply();
+    }
+
+    // ===== SAVE USER SESSION WITH ROLE (STRING ID - MONGO) =====
+    public static void saveUserSession(Context context, String userId, String email, String fullname, String role) {
+        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = pref.edit();
+
+        editor.putString(KEY_USER_ID_STR, userId);
+
+        int legacyId = DEFAULT_USER_ID;
+        try {
+            legacyId = Integer.parseInt(userId);
+        } catch (Exception e) {
+            if (userId != null) {
+                legacyId = Math.abs(userId.hashCode());
+            }
+        }
+
+        editor.putInt(KEY_USER_ID, legacyId);
+        editor.putString(KEY_USER_EMAIL, email);
+        editor.putString(KEY_USER_NAME, fullname);
+        editor.putString(KEY_USER_ROLE, role != null ? role : "user");
 
         editor.apply();
     }
@@ -101,6 +142,12 @@ public class SessionManager {
     public static void saveDarkModeEnabled(Context context, boolean enabled) {
         SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
         pref.edit().putBoolean(KEY_DARK_MODE, enabled).apply();
+    }
+
+    // ===== GET USER ROLE =====
+    public static String getUserRole(Context context) {
+        SharedPreferences pref = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
+        return pref.getString(KEY_USER_ROLE, "user");
     }
 
     public static void applyTheme(Context context) {

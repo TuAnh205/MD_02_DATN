@@ -6,89 +6,88 @@
     android:background="@drawable/bg_card"
     android:layout_margin="8dp">
 
-    <!-- ẢNH + TIM -->
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="140dp">
+        android:layout_height="150dp">
 
         <ImageView
             android:id="@+id/imgProduct"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"/>
+            android:scaleType="centerCrop" />
 
-        <!-- TIM -->
         <ImageView
             android:id="@+id/imgFavorite"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
             android:layout_gravity="top|end"
-            android:layout_margin="8dp"
-            android:src="@drawable/heart_regular_full"/>
+            android:layout_margin="10dp"
+            android:src="@drawable/heart_regular_full"
+            android:background="@drawable/bg_circle_blue"
+            android:padding="6dp" />
     </FrameLayout>
 
-    <!-- TÊN -->
     <TextView
         android:id="@+id/tvProductName"
-        android:layout_marginTop="8dp"
-        android:textColor="@android:color/white"
+        android:layout_marginTop="10dp"
+        android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="14sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
+        android:maxLines="2"
+        android:ellipsize="end"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
-    <!-- SAO + SỐ -->
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:layout_marginTop="4dp">
+        android:layout_marginTop="6dp">
 
         <ImageView
             android:layout_width="14dp"
             android:layout_height="14dp"
-            android:src="@drawable/ic_star"/>
+            android:src="@drawable/ic_star" />
 
         <TextView
             android:id="@+id/tvRating"
             android:text="4.8 (210)"
-            android:textColor="#BDBDBD"
+            android:textColor="#7A8BB2"
             android:textSize="12sp"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="6dp"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <!-- GIÁ + ADD -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_vertical"
         android:orientation="horizontal"
-        android:layout_marginTop="6dp">
+        android:gravity="center_vertical"
+        android:layout_marginTop="10dp">
 
         <TextView
             android:id="@+id/tvProductPrice"
-            android:textColor="#2F80FF"
-            android:textSize="14sp"
+            android:textColor="@color/blue"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content" />
 
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_weight="1"/>
+            android:layout_weight="1" />
 
         <ImageButton
             android:id="@+id/btnAdd"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:src="@drawable/ic_add"
-            android:background="@drawable/bg_circle_blue"/>
+            android:background="@drawable/bg_circle_blue"
+            android:contentDescription="Thêm vào giỏ hàng" />
     </LinearLayout>
-
 </LinearLayout>
 
 

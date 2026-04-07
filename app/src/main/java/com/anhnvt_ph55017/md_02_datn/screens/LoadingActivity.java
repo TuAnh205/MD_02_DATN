@@ -42,7 +42,17 @@ public class LoadingActivity extends AppCompatActivity {
                     txtPercent.setText(progress + "%");
                     handler.postDelayed(this, 30);
                 } else {
-                    Intent nextIntent = new Intent(LoadingActivity.this, MainActivity.class);
+                    Intent nextIntent;
+                    if (!SessionManager.isLoggedIn(LoadingActivity.this)) {
+                        nextIntent = new Intent(LoadingActivity.this, LoginActivity.class);
+                    } else {
+                        String role = SessionManager.getUserRole(LoadingActivity.this);
+                        if ("shop".equalsIgnoreCase(role)) {
+                            nextIntent = new Intent(LoadingActivity.this, ShopMainActivity.class);
+                        } else {
+                            nextIntent = new Intent(LoadingActivity.this, MainActivity.class);
+                        }
+                    }
                     nextIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
                     startActivity(nextIntent);
                     finish();

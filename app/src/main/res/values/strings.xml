@@ -3,6 +3,16 @@
     <!-- Firebase Google Sign-In client ID: Replace with the value from your Firebase console -->
     <string name="default_web_client_id">YOUR_DEFAULT_WEB_CLIENT_ID_HERE</string>
     <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string-array name="product_categories">
+        <item>Chọn danh mục</item>
+        <item>Máy tính</item>
+        <item>Điện thoại</item>
+        <item>Tai nghe</item>
+        <item>Phụ kiện</item>
+        <item>Màn hình</item>
+        <item>Loa</item>
+    </string-array>
 </resources>
 
 

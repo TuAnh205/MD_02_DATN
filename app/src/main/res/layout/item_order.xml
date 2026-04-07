@@ -1,127 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:background="@drawable/bg_card"
-    android:layout_margin="10dp"
-    android:padding="12dp"
-    android:orientation="horizontal"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp">
 
-    <!-- PRODUCT IMAGE -->
-    <ImageView
-        android:id="@+id/imgProduct"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bg_image"
-        android:layout_marginEnd="12dp" />
-
-    <!-- ORDER INFO -->
-    <LinearLayout
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1"
-        android:orientation="vertical"
-        android:gravity="center_vertical">
-
-    <!-- STATUS BADGE -->
-    <TextView
-        android:id="@+id/tvStatus"
-        android:textColor="#2F80FF"
-        android:textStyle="bold"
-        android:textSize="12sp"
-        android:padding="6dp"
-        android:layout_marginBottom="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <!-- ORDER ID AND PRICE IN ROW -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:layout_marginBottom="8dp">
-
-        <TextView
-            android:id="@+id/tvOrderId"
-            android:textColor="#FFFFFF"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_weight="1"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/tvPrice"
-            android:textColor="#2F80FF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-    </LinearLayout>
-
-    <!-- ORDER DATE -->
-    <TextView
-        android:id="@+id/tvDate"
-        android:textColor="#AAAAAA"
-        android:textSize="12sp"
-        android:layout_marginBottom="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <!-- ITEM COUNT -->
-    <TextView
-        android:id="@+id/tvItemCount"
-        android:textColor="#888888"
-        android:textSize="12sp"
-        android:layout_marginBottom="8dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <!-- ARRIVAL DATE -->
-    <TextView
-        android:id="@+id/tvArrivalDate"
-        android:textColor="#AAAAAA"
-        android:textSize="11sp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"/>
-
-    <!-- RATING BADGE (shown when order is reviewed) -->
-    <TextView
-        android:id="@+id/tvRatingBadge"
-        android:text="⭐ 4.5 | ✅ Đã đánh giá"
-        android:textColor="#FF8C00"
-        android:textSize="11sp"
-        android:textStyle="bold"
-        android:layout_marginTop="4dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:visibility="gone" />
-
-    </LinearLayout>
-
-    <!-- DETAIL BUTTON -->
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
-        android:layout_marginStart="8dp">
+        android:padding="16dp"
+        android:background="@drawable/bg_card"
+        android:layout_marginBottom="12dp">
 
-        <androidx.appcompat.widget.AppCompatButton
-            android:id="@+id/btnDetail"
-            android:text="Chi tiết"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:padding="8dp"
-            android:background="#2F80FF"
+        <!-- Order Header: ID and Status -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
 
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" >
+            <TextView
+                android:id="@+id/tvOrderId"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="#CT-99281"
+                android:textColor="#0A6ED8"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
-        </androidx.appcompat.widget.AppCompatButton>
+            <TextView
+                android:id="@+id/tvStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp"
+                android:text="MỚI"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold"
+                android:background="#22C55E"
+                android:gravity="center" />
+        </LinearLayout>
 
+        <!-- Order Date/Time -->
+        <TextView
+            android:id="@+id/tvDate"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="14/10/2023 • 14:30"
+            android:textColor="#64748B"
+            android:textSize="13sp"
+            android:layout_marginBottom="12dp" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E6EDF8"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Customer Info -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <ImageView
+                android:id="@+id/imgProduct"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/ic_user"
+                android:tint="#0A6ED8"
+                android:background="#EBF2FF"
+                android:padding="8dp"
+                android:contentDescription="Avatar" />
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical"
+                android:layout_marginStart="12dp">
+
+                <TextView
+                    android:id="@+id/tvItemCount"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Nguyễn Văn A"
+                    android:textColor="#122046"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:id="@+id/tvPrice"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="1 sản phẩm • MacBook Air M2 + 2 phụ"
+                    android:textColor="#64748B"
+                    android:textSize="12sp"
+                    android:layout_marginTop="2dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- Order Total -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="12dp">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Tổng tiền:"
+                android:textColor="#64748B"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/tvArrivalDate"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="25.500.000đ"
+                android:textColor="#0A6ED8"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#E6EDF8"
+            android:layout_marginBottom="12dp" />
+
+        <!-- Order Status -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TRẠNG THÁI ĐƠN HÀNG"
+                android:textColor="#64748B"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/tvRatingBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Đang giao"
+                android:textColor="#122046"
+                android:textSize="14sp" />
+        </LinearLayout>
     </LinearLayout>
-
 </LinearLayout>
 
 

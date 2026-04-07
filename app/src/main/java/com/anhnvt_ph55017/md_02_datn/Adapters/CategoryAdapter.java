@@ -1,5 +1,7 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
+import android.app.AlertDialog;
+import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,88 +22,97 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
 
     List<Category> list;
     OnCategoryClick listener;
-
+    OnCategoryActionListener actionListener;
+    Context context;
     Set<Integer> selected = new HashSet<>();
 
-    public interface OnCategoryClick{
+    private final int[] iconColors = {
+            0xFF6366F1, // Blue
+            0xFFD946EF, // Purple
+            0xFFFB923C, // Orange
+            0xFFEC4899, // Pink
+            0xFF06B6D4, // Cyan
+            0xFF10B981  // Green
+    };
+
+    private final int[] icons = {
+            R.drawable.ic_laptop,
+            R.drawable.ic_phone,
+            R.drawable.ic_headphone,
+            R.drawable.ic_box,
+            R.drawable.ic_pc,
+            R.drawable.ic_phukien
+    };
+
+    public interface OnCategoryClick {
         void onClick(Set<Integer> selectedCategory);
     }
 
-    public CategoryAdapter(List<Category> list, OnCategoryClick listener){
+    public interface OnCategoryActionListener {
+        void onAction(Category category, String action);
+    }
+
+    // Constructor for selection mode
+    public CategoryAdapter(List<Category> list, OnCategoryClick listener) {
         this.list = list;
         this.listener = listener;
+        this.actionListener = null;
+        this.context = null;
+    }
+
+    // Constructor for management mode
+    public CategoryAdapter(Context context, List<Category> list, OnCategoryActionListener listener) {
+        this.context = context;
+        this.list = list;
+        this.actionListener = listener;
+        this.listener = null;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
         View v = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.item_category,parent,false);
-
+                .inflate(R.layout.item_category, parent, false);
         return new ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-
         Category category = list.get(position);
 
-        holder.tvName.setText(category.getName());
-        // Chỉ hiển thị đúng 6 danh mục, đúng thứ tự bạn yêu cầu
-        int iconRes = -1;
-        String name = category.getName().toLowerCase();
-        // Loại bỏ máy tính bảng, microphone và các loại khác
-        if ((name.contains("máy tính") || name.contains("may tinh") || name.contains("pc")) && !name.contains("bảng") && !name.contains("tablet")) {
-            iconRes = R.drawable.ic_laptop;
-        } else if (name.contains("điện thoại") || name.contains("dien thoai") || name.contains("phone")) {
-            iconRes = R.drawable.ic_phone;
-        } else if (name.contains("tai nghe") || name.contains("tainghe") || name.contains("headphone")) {
-            iconRes = R.drawable.ic_headphone;
-        } else if (name.contains("phụ kiện") || name.contains("phu kien") || name.contains("accessory")) {
-            iconRes = R.drawable.ic_phukien;
-        } else if (name.contains("màn hình") || name.contains("man hinh") || name.contains("monitor")) {
-            iconRes = R.drawable.ic_pc;
-        } else if (name.contains("loa")) {
-            iconRes = R.drawable.volume_solid_full;
-        }
-        // Nếu không thuộc 6 loại trên thì ẩn item
-        if (iconRes == -1 || name.contains("bảng") || name.contains("tablet") || name.contains("micro") || name.contains("microphone")) {
-            holder.itemView.setVisibility(View.GONE);
-            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(0, 0));
-            return;
+        // Set icon and color if management mode
+        if (actionListener != null) {
+            int iconIndex = position % icons.length;
+            holder.ivIcon.setVisibility(View.VISIBLE);
+            holder.ivIcon.setImageResource(icons[iconIndex]);
+            holder.ivIcon.setBackgroundColor(iconColors[iconIndex]);
+
+            holder.tvCategoryName.setText(category.getName());
+            holder.tvProductCount.setText(category.getProductCount() + " sản phẩm");
+            holder.tvProductCount.setVisibility(View.VISIBLE);
+
+            // Edit button
+            holder.ivEdit.setVisibility(View.VISIBLE);
+            holder.ivEdit.setOnClickListener(v -> actionListener.onAction(category, "edit"));
+
+            // Delete button
+            holder.ivDelete.setVisibility(View.VISIBLE);
+            holder.ivDelete.setOnClickListener(v -> {
+                new AlertDialog.Builder(context)
+                        .setTitle("Xóa danh mục")
+                        .setMessage("Bạn chắc chắn muốn xóa danh mục này?")
+                        .setPositiveButton("Xóa", (dialog, which) -> actionListener.onAction(category, "delete"))
+                        .setNegativeButton("Hủy", null)
+                        .show();
+            });
         } else {
-            holder.itemView.setVisibility(View.VISIBLE);
-            // Đặt width các category bằng nhau (4 category trên 1 hàng)
-            int equalWidth = holder.itemView.getResources().getDisplayMetrics().widthPixels / 4;
-            holder.itemView.setLayoutParams(new RecyclerView.LayoutParams(equalWidth, ViewGroup.LayoutParams.WRAP_CONTENT));
+            // Selection mode
+            holder.tvCategoryName.setText(category.getName());
+            holder.ivIcon.setVisibility(View.GONE);
+            holder.tvProductCount.setVisibility(View.GONE);
+            holder.ivEdit.setVisibility(View.GONE);
+            holder.ivDelete.setVisibility(View.GONE);
         }
-        holder.imgIcon.setImageResource(iconRes);
-
-        int id = category.getId();
-
-        // đổi màu khi chọn
-        if(selected.contains(id)){
-            holder.itemView.setBackgroundResource(R.drawable.bg_category_selected);
-        }else{
-            holder.itemView.setBackgroundResource(R.drawable.bg_category_normal);
-        }
-
-        holder.itemView.setOnClickListener(v -> {
-
-            if(selected.contains(id)){
-                selected.remove(id); // bỏ lọc
-            }else{
-                selected.add(id); // thêm lọc
-            }
-
-            notifyDataSetChanged();
-
-            if(listener != null){
-                listener.onClick(selected);
-            }
-
-        });
     }
 
     @Override
@@ -109,16 +120,20 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
         return list.size();
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        private final ImageView ivIcon;
+        private final TextView tvCategoryName;
+        private final TextView tvProductCount;
+        private final ImageView ivEdit;
+        private final ImageView ivDelete;
 
-        ImageView imgIcon;
-        TextView tvName;
-
-        public ViewHolder(@NonNull View itemView){
+        public ViewHolder(@NonNull View itemView) {
             super(itemView);
-
-            imgIcon = itemView.findViewById(R.id.imgCategoryIcon);
-            tvName = itemView.findViewById(R.id.tvCategoryName);
+            ivIcon = itemView.findViewById(R.id.ivIcon);
+            tvCategoryName = itemView.findViewById(R.id.tvCategoryName);
+            tvProductCount = itemView.findViewById(R.id.tvProductCount);
+            ivEdit = itemView.findViewById(R.id.ivEdit);
+            ivDelete = itemView.findViewById(R.id.ivDelete);
         }
     }
 }
