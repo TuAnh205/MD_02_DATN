@@ -212,8 +212,8 @@ public class DetailActivity extends AppCompatActivity {
                             product.setRating(rating);
                             product.setReviewCount(reviewCount);
                             BottomSheetProductOptions sheet =
-                                    BottomSheetProductOptions.newInstance(product, selected -> {
-                                        CartApiService.addToCart(DetailActivity.this, token, productId, selected.getQty(), new CartApiService.CartCallback() {
+                                    BottomSheetProductOptions.newInstance(product, (selectedProduct, qty) -> {
+                                        CartApiService.addToCart(DetailActivity.this, token, productId, qty, new CartApiService.CartCallback() {
                                             @Override
                                             public void onSuccess(org.json.JSONObject cartJson) {
                                                 runOnUiThread(() -> Toast.makeText(DetailActivity.this, "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show());

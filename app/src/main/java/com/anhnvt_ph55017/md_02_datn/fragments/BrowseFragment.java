@@ -20,7 +20,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.anhnvt_ph55017.md_02_datn.Adapters.ProductAdapter;
+import com.anhnvt_ph55017.md_02_datn.Adapters.SuggestionProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.SearchHistoryAdapter;
 import com.anhnvt_ph55017.md_02_datn.DAO.SearchHistoryDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
@@ -31,11 +31,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class BrowseFragment extends Fragment {
-
+    TextView tvSeeAllSuggestion;
+    boolean isShowAll = false;
     RecyclerView rvProducts, rvSearchHistory;
     SearchHistoryDAO searchHistoryDAO;
     List<Product> listProduct;
-    ProductAdapter adapter;
+    SuggestionProductAdapter adapter;
     SearchHistoryAdapter searchHistoryAdapter;
     EditText editSearch;
 
@@ -46,6 +47,13 @@ public class BrowseFragment extends Fragment {
                              @Nullable Bundle savedInstanceState) {
 
         View view = inflater.inflate(R.layout.fragment_browse, container, false);
+
+        tvSeeAllSuggestion = view.findViewById(R.id.tvSeeAllSuggestion);
+        tvSeeAllSuggestion.setOnClickListener(v -> {
+            isShowAll = !isShowAll;
+            updateSuggestionList();
+            tvSeeAllSuggestion.setText(isShowAll ? "Thu gọn" : "Xem tất cả");
+        });
 
         rvProducts = view.findViewById(R.id.rvSearchProducts);
         rvSearchHistory = view.findViewById(R.id.rvSearchHistory);
@@ -59,8 +67,58 @@ public class BrowseFragment extends Fragment {
         searchHistoryDAO = new SearchHistoryDAO(getContext());
 
         listProduct = new ArrayList<>();
-        adapter = new ProductAdapter(getContext(), listProduct);
-        rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 2));
+        adapter = new SuggestionProductAdapter(getContext(), listProduct, new SuggestionProductAdapter.OnProductListener() {
+            @Override
+            public void onAddToCart(Product product) {
+                // Mở bottom sheet chọn số lượng, giống Home
+                BottomSheetProductOptions bottomSheet = BottomSheetProductOptions.newInstance(product, (selectedProduct, qty) -> {
+                    String token = com.anhnvt_ph55017.md_02_datn.utils.SessionManager.getToken(getContext());
+                    com.anhnvt_ph55017.md_02_datn.utils.CartApiService.addToCart(getContext(), token, selectedProduct.getId(), qty, new com.anhnvt_ph55017.md_02_datn.utils.CartApiService.CartCallback() {
+                        @Override
+                        public void onSuccess(org.json.JSONObject cartJson) {
+                            if (getActivity() != null) getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Đã thêm vào giỏ hàng!", Toast.LENGTH_SHORT).show()
+                            );
+                        }
+                        @Override
+                        public void onError(String error) {
+                            if (getActivity() != null) getActivity().runOnUiThread(() ->
+                                Toast.makeText(getContext(), "Lỗi thêm giỏ hàng!", Toast.LENGTH_SHORT).show()
+                            );
+                        }
+                    });
+                });
+                bottomSheet.show(getParentFragmentManager(), bottomSheet.getTag());
+            }
+            @Override
+            public void onFavorite(Product product) {
+                int pos = listProduct.indexOf(product);
+                boolean newState = !product.isFavorite();
+                product.setFavorite(newState);
+                if (pos >= 0) adapter.notifyItemChanged(pos);
+                String token = com.anhnvt_ph55017.md_02_datn.utils.SessionManager.getToken(getContext());
+                new Thread(() -> {
+                    try {
+                        java.net.URL url = new java.net.URL("http://10.0.2.2:5000/api/favorites");
+                        java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                        conn.setRequestMethod(newState ? "POST" : "DELETE");
+                        conn.setRequestProperty("Authorization", "Bearer " + token);
+                        conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                        conn.setDoOutput(true);
+                        String body = "{\"productId\":\"" + product.getId() + "\"}";
+                        conn.getOutputStream().write(body.getBytes("UTF-8"));
+                        conn.getResponseCode();
+                        conn.disconnect();
+                    } catch (Exception ignored) {}
+                }).start();
+            }
+            @Override
+            public void onProductClick(Product product) {
+                // TODO: Mở DetailActivity
+                Toast.makeText(getContext(), "Xem chi tiết: " + product.getName(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        rvProducts.setLayoutManager(new GridLayoutManager(getContext(), 1));
         rvProducts.setAdapter(adapter);
 
         loadProductsFromApi();
@@ -69,7 +127,7 @@ public class BrowseFragment extends Fragment {
         loadSearchHistory();
 
         // Load trending keywords
-        loadTrendingKeywords(view);
+
 
         // Tìm kiếm theo chữ
         editSearch.addTextChangedListener(new TextWatcher() {
@@ -112,14 +170,14 @@ public class BrowseFragment extends Fragment {
         if (getContext() == null) {
             return;
         }
-
         ProductApiService.fetchProducts(getContext(), "", new ProductApiService.ProductCallback() {
             @Override
             public void onSuccess(List<Product> products) {
                 listProduct = products;
-                adapter.setData(products);
+                isShowAll = false;
+                updateSuggestionList();
+                tvSeeAllSuggestion.setText("Xem tất cả");
             }
-
             @Override
             public void onError(String error) {
                 if (getContext() != null) {
@@ -127,6 +185,14 @@ public class BrowseFragment extends Fragment {
                 }
             }
         });
+    }
+
+    private void updateSuggestionList() {
+        if (isShowAll || listProduct.size() <= 5) {
+            adapter.setData(listProduct);
+        } else {
+            adapter.setData(listProduct.subList(0, 5));
+        }
     }
 
     private void loadSearchHistory() {
@@ -158,47 +224,17 @@ public class BrowseFragment extends Fragment {
 
     private void filter(String text){
         List<Product> filtered = new ArrayList<>();
-
         for(Product p : listProduct){
             if(p.getName().toLowerCase().contains(text.toLowerCase())){
                 filtered.add(p);
             }
         }
-
         adapter.setData(filtered);
     }
 
     /**
      * Load và hiển thị xu hướng tìm kiếm
      */
-    private void loadTrendingKeywords(View view) {
-        LinearLayout trendingContainer = view.findViewById(R.id.trendingKeywordsContainer);
-        trendingContainer.removeAllViews();
 
-        // Dữ liệu xu hướng tìm kiếm mẫu - chỉ 4 items để gọn nhẹ
-        String[] trendingKeywords = {
-                "🔥 iPhone 15",
-                "🔥 MacBook Pro M3",
-                "🔥 Tai nghe Sony",
-                "🔥 Samsung Galaxy S25"
-        };
-
-        for (String keyword : trendingKeywords) {
-            View itemView = LayoutInflater.from(getContext()).inflate(
-                    R.layout.item_trending_keyword, trendingContainer, false);
-
-            TextView tvKeyword = itemView.findViewById(R.id.tvKeyword);
-            tvKeyword.setText(keyword);
-
-            itemView.setOnClickListener(v -> {
-                String cleanKeyword = keyword.replaceAll("🔥 ", "").trim();
-                editSearch.setText(cleanKeyword);
-                editSearch.setSelection(cleanKeyword.length());
-                filter(cleanKeyword);
-            });
-
-            trendingContainer.addView(itemView);
-        }
-    }
 }
 

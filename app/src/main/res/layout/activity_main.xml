@@ -13,21 +13,25 @@
         android:layout_height="match_parent"
         android:layout_marginBottom="70dp"/>
 
+    <!-- Viền đen trên bottom menu -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_gravity="bottom"
+        android:layout_marginBottom="70dp"
+        android:background="@drawable/bg_shadow_top"/>
+
     <!-- Bottom Navigation -->
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNav"
         android:layout_width="match_parent"
         android:layout_height="70dp"
         android:layout_gravity="bottom"
-        android:background="@color/surface"
-
+        android:background="@color/bottom_nav_bg"
         app:menu="@menu/menu"
-
-        app:itemIconTint="@color/bottom_nav_color"
-        app:itemTextColor="@color/bottom_nav_color"
-
-        app:itemBackground="@null"
-      />
+        app:itemIconTint="@color/bottom_nav_selector"
+        app:itemTextColor="@color/bottom_nav_selector"
+        app:itemBackground="@null" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
 
 

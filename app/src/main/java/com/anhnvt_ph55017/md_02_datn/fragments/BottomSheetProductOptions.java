@@ -101,16 +101,13 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
 
     private void addToCart(View view) {
         if (product == null) return;
-        // set dữ liệu
-        product.setQty(quantity);
-        // callback
         if (listener != null) {
-            listener.onAddToCart(product);
+            listener.onAddToCart(product, quantity);
         }
         dismiss();
     }
 
     public interface OnAddToCartListener {
-        void onAddToCart(Product product);
+        void onAddToCart(Product product, int qty);
     }
 }

@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="bottom_nav_selected">#1976D2</color>
+    <color name="bottom_nav_unselected">#757575</color>
+    <color name="bottom_nav_bg">#FFFFFF</color>
     <color name="primary">#FF6200EE</color>
-    <color name="background">#0B1220</color>
+    <color name="background">#F5F6FA</color>
     <color name="surface">#0E1620</color>
     <color name="onBackground">#FFFFFFFF</color>
     <color name="onSurface">#FFFFFFFF</color>

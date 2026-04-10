@@ -47,7 +47,7 @@
 
                 <TextView
                     android:text="Khám phá công nghệ mới"
-                    android:textColor="@color/onBackground"
+                    android:textColor="@color/black"
                     android:textStyle="bold"
                     android:textSize="20sp"
                     android:layout_width="wrap_content"
@@ -64,7 +64,7 @@
                     android:layout_width="24dp"
                     android:layout_height="24dp"
                     android:src="@drawable/ic_notifications"
-                    android:tint="@color/onSurface" />
+                 />
 
                 <TextView
                     android:id="@+id/tvNotificationBadge"
@@ -82,12 +82,7 @@
                     android:visibility="gone" />
             </FrameLayout>
 
-            <ImageView
-                android:id="@+id/imgCart"
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:src="@drawable/ic_cart"
-                android:tint="@color/onSurface" />
+
         </LinearLayout>
 
         <!-- Search -->
@@ -132,7 +127,7 @@
 
             <TextView
                 android:text="Danh mục"
-                android:textColor="@color/onBackground"
+                android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_width="0dp"
@@ -152,7 +147,7 @@
             android:id="@+id/rvCategory"
             android:layout_marginTop="12dp"
             android:layout_width="match_parent"
-            android:layout_height="130dp"
+            android:layout_height="80dp"
             android:nestedScrollingEnabled="true" />
 
         <!-- Products Header -->
@@ -165,7 +160,7 @@
 
             <TextView
                 android:text="Sản phẩm nổi bật"
-                android:textColor="@color/onBackground"
+                android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_width="0dp"

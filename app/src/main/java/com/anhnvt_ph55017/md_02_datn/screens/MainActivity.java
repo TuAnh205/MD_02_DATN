@@ -44,18 +44,23 @@ public class MainActivity extends AppCompatActivity {
 
         bottomNav.setOnItemSelectedListener(item -> {
             Fragment fragment = null;
-
             if (item.getItemId() == R.id.nav_home) {
                 fragment = new HomeFragment();
+                return loadFragment(fragment);
             } else if (item.getItemId() == R.id.nav_browse) {
                 fragment = new BrowseFragment();
+                return loadFragment(fragment);
+            } else if (item.getItemId() == R.id.nav_cart) {
+                fragment = new com.anhnvt_ph55017.md_02_datn.fragments.CartFragment();
+                return loadFragment(fragment);
             } else if (item.getItemId() == R.id.nav_orders) {
                 fragment = new OrdersFragment();
+                return loadFragment(fragment);
             } else if (item.getItemId() == R.id.nav_profile) {
                 fragment = new ProfileFragment();
+                return loadFragment(fragment);
             }
-
-            return loadFragment(fragment);
+            return false;
         });
     }
 

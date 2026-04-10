@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="8dp"
+    app:cardCornerRadius="12dp"
+    app:cardElevation="4dp">
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@android:color/white">
+
+        <ImageView
+            android:id="@+id/imgProduct"
+            android:layout_width="80dp"
+            android:layout_height="80dp"
+            android:scaleType="centerCrop"
+            android:src="@drawable/ic_launcher_background" />
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_marginStart="12dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1">
+
+            <TextView
+                android:id="@+id/tvName"
+                android:text="MacBook Pro M3 14"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#222"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <!-- Bỏ các tag phụ, chỉ giữ thông tin chính -->
+
+            <TextView
+                android:id="@+id/tvDesc"
+                android:text="Thiết kế mỏng nhẹ,hiệu năng cực đỉnh cho dân công nghệ."
+                android:textSize="13sp"
+                android:textColor="#666"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/tvPrice"
+                android:text="39.990.000 đ"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:textColor="#1976D2"
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:gravity="end"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent">
+            <ImageView
+                android:id="@+id/imgFavorite"
+                android:src="@drawable/ic_heart"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:tint="#B0B0B0"
+                android:layout_marginBottom="8dp" />
+            <ImageButton
+                android:id="@+id/btnAddToCart"
+                android:layout_width="36dp"
+                android:layout_height="36dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/ic_add"
+                android:background="@drawable/bg_circle_blue"
+                android:contentDescription="Thêm vào giỏ hàng" />
+        </LinearLayout>
+    </LinearLayout>
+</androidx.cardview.widget.CardView>

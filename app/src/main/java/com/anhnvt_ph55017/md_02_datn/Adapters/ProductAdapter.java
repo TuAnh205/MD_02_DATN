@@ -1,4 +1,3 @@
-
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 import com.anhnvt_ph55017.md_02_datn.utils.FavoriteApiService;
 import android.content.Context;
@@ -131,17 +130,16 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         // ===== ADD TO CART =====
         holder.btnAdd.setOnClickListener(v -> {
-
             if (context instanceof AppCompatActivity) {
                 // Mở bottom sheet chọn số lượng, sau đó gọi API addToCart
                 BottomSheetProductOptions sheet =
-                        BottomSheetProductOptions.newInstance(product, selectedProduct -> {
+                        BottomSheetProductOptions.newInstance(product, (selectedProduct, qty) -> {
                             String token = SessionManager.getToken(context);
                             if (token == null || token.isEmpty()) {
                                 Toast.makeText(context, "Bạn cần đăng nhập để thêm vào giỏ hàng", Toast.LENGTH_SHORT).show();
                                 return;
                             }
-                            CartApiService.addToCart(context, token, selectedProduct.getId(), selectedProduct.getQty(), new com.anhnvt_ph55017.md_02_datn.utils.CartApiService.CartCallback() {
+                            CartApiService.addToCart(context, token, selectedProduct.getId(), qty, new com.anhnvt_ph55017.md_02_datn.utils.CartApiService.CartCallback() {
                                 @Override
                                 public void onSuccess(org.json.JSONObject cartJson) {
                                     if (context instanceof AppCompatActivity) {
@@ -160,7 +158,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                                 }
                             });
                         });
-                sheet.show(((AppCompatActivity) context).getSupportFragmentManager(), "product_options");
+                sheet.show(((AppCompatActivity) context).getSupportFragmentManager(), sheet.getTag());
             }
         });
     }

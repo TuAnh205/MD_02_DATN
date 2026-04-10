@@ -38,7 +38,7 @@ import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 public class HomeFragment extends Fragment {
 
     RecyclerView rvCategory, rvProduct;
-    ImageView imgCart, imgNotification;
+    ImageView imgNotification;
     TextView tvNotificationBadge;
     ViewPager2 vpBanner;
     LinearLayout dotsContainer;
@@ -106,7 +106,6 @@ public class HomeFragment extends Fragment {
             dotsContainer = (LinearLayout) view.findViewById(R.id.dotsContainer);
             rvCategory = (RecyclerView) view.findViewById(R.id.rvCategory);
             rvProduct = (RecyclerView) view.findViewById(R.id.rvProduct);
-            imgCart = (ImageView) view.findViewById(R.id.imgCart);
             imgNotification = (ImageView) view.findViewById(R.id.imgNotification);
             tvNotificationBadge = (TextView) view.findViewById(R.id.tvNotificationBadge);
 
@@ -117,17 +116,7 @@ public class HomeFragment extends Fragment {
             // Update notification badge
             updateNotificationBadge();
 
-            imgCart.setOnClickListener(v -> {
-                if (getContext() == null) return;
-                if (!com.anhnvt_ph55017.md_02_datn.utils.SessionManager.isLoggedIn(getContext())) {
-                    Toast.makeText(getContext(), "Bạn cần đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
-                    Log.d("HomeFragment", "Cart icon clicked without login, redirecting to LoginActivity");
-                    startActivity(new Intent(getActivity(), LoginActivity.class));
-                    return;
-                }
-                Intent intent = new Intent(getActivity(), CartActivity.class);
-                startActivity(intent);
-            });
+
 
             imgNotification.setOnClickListener(v -> {
                 int count = NotificationManager.getNotificationCount(getContext());

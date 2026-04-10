@@ -2,6 +2,7 @@ package com.anhnvt_ph55017.md_02_datn.Adapters;
 
 import android.app.AlertDialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,7 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     OnCategoryClick listener;
     OnCategoryActionListener actionListener;
     Context context;
-    Set<Integer> selected = new HashSet<>();
+    int selectedPosition = -1;
 
     private final int[] iconColors = {
             0xFF6366F1, // Blue
@@ -36,12 +37,22 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     };
 
     private final int[] icons = {
-            R.drawable.ic_laptop,
-            R.drawable.ic_phone,
-            R.drawable.ic_headphone,
+            R.drawable.ic_camera,
+            R.drawable.volume_solid_full,
             R.drawable.ic_box,
+            R.drawable.ic_mycrophone,
             R.drawable.ic_pc,
-            R.drawable.ic_phukien
+            R.drawable.ic_laptop,
+            R.drawable.ic_laptop,
+            R.drawable.ic_wifi,
+            R.drawable.ic_phukien,
+
+            R.drawable.ic_headphone,
+            R.drawable.ic_phone,
+            R.drawable.ic_oclock,
+
+
+
     };
 
     public interface OnCategoryClick {
@@ -79,40 +90,42 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         Category category = list.get(position);
+        int iconIndex = position % icons.length;
+        holder.ivIcon.setVisibility(View.VISIBLE);
+        holder.ivIcon.setImageResource(icons[iconIndex]);
+        holder.tvCategoryName.setText(category.getName());
 
-        // Set icon and color if management mode
-        if (actionListener != null) {
-            int iconIndex = position % icons.length;
-            holder.ivIcon.setVisibility(View.VISIBLE);
-            holder.ivIcon.setImageResource(icons[iconIndex]);
-            holder.ivIcon.setBackgroundColor(iconColors[iconIndex]);
-
-            holder.tvCategoryName.setText(category.getName());
-            holder.tvProductCount.setText(category.getProductCount() + " sản phẩm");
-            holder.tvProductCount.setVisibility(View.VISIBLE);
-
-            // Edit button
-            holder.ivEdit.setVisibility(View.VISIBLE);
-            holder.ivEdit.setOnClickListener(v -> actionListener.onAction(category, "edit"));
-
-            // Delete button
-            holder.ivDelete.setVisibility(View.VISIBLE);
-            holder.ivDelete.setOnClickListener(v -> {
-                new AlertDialog.Builder(context)
-                        .setTitle("Xóa danh mục")
-                        .setMessage("Bạn chắc chắn muốn xóa danh mục này?")
-                        .setPositiveButton("Xóa", (dialog, which) -> actionListener.onAction(category, "delete"))
-                        .setNegativeButton("Hủy", null)
-                        .show();
-            });
+        // Xử lý đổi màu khi chọn
+        if (selectedPosition == position) {
+            holder.layout.setBackgroundResource(R.drawable.bg_category_selected);
+            holder.tvCategoryName.setTextColor(Color.WHITE);
+            holder.ivIcon.setColorFilter(Color.WHITE);
         } else {
-            // Selection mode
-            holder.tvCategoryName.setText(category.getName());
-            holder.ivIcon.setVisibility(View.GONE);
-            holder.tvProductCount.setVisibility(View.GONE);
-            holder.ivEdit.setVisibility(View.GONE);
-            holder.ivDelete.setVisibility(View.GONE);
+            holder.layout.setBackgroundResource(R.drawable.bg_category_unselected);
+            holder.tvCategoryName.setTextColor(Color.parseColor("#64748B"));
+            holder.ivIcon.setColorFilter(Color.parseColor("#64748B"));
         }
+
+        holder.layout.setOnClickListener(v -> {
+            int oldPos = selectedPosition;
+            if (selectedPosition == position) {
+                // Bỏ chọn nếu nhấn lần 2
+                selectedPosition = -1;
+                notifyItemChanged(oldPos);
+                if (listener != null) {
+                    listener.onClick(new HashSet<>()); // Gửi set rỗng để báo bỏ lọc
+                }
+            } else {
+                selectedPosition = position;
+                notifyItemChanged(oldPos);
+                notifyItemChanged(selectedPosition);
+                if (listener != null) {
+                    Set<Integer> sel = new HashSet<>();
+                    sel.add(position);
+                    listener.onClick(sel);
+                }
+            }
+        });
     }
 
     @Override
@@ -121,19 +134,14 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.ViewHo
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        private final ImageView ivIcon;
-        private final TextView tvCategoryName;
-        private final TextView tvProductCount;
-        private final ImageView ivEdit;
-        private final ImageView ivDelete;
-
+        public final View layout;
+        public final ImageView ivIcon;
+        public final TextView tvCategoryName;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            layout = itemView;
             ivIcon = itemView.findViewById(R.id.ivIcon);
             tvCategoryName = itemView.findViewById(R.id.tvCategoryName);
-            tvProductCount = itemView.findViewById(R.id.tvProductCount);
-            ivEdit = itemView.findViewById(R.id.ivEdit);
-            ivDelete = itemView.findViewById(R.id.ivDelete);
         }
     }
 }

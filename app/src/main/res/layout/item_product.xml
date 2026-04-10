@@ -23,7 +23,7 @@
             android:layout_gravity="top|end"
             android:layout_margin="10dp"
             android:src="@drawable/heart_regular_full"
-            android:background="@drawable/bg_circle_blue"
+
             android:padding="6dp" />
     </FrameLayout>
 
