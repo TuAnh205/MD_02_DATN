@@ -47,12 +47,36 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
         Order o = list.get(position);
 
         String rawStatus = o.getStatus();
-
         holder.tvOrderId.setText(o.getId());
         holder.tvDate.setText(o.getDate());
         holder.tvPrice.setText(o.getItemCount() + " sản phẩm");
         holder.tvStatus.setText(getStatusText(rawStatus));
-        holder.tvStatus.setBackgroundColor(getStatusColor(rawStatus));
+        // Đổi màu nền trạng thái
+        if (rawStatus != null) {
+            switch (rawStatus.toLowerCase()) {
+                case "cancelled":
+                case "hủy":
+                    holder.tvStatus.setBackgroundResource(R.drawable.bg_status_red);
+                    holder.tvStatus.setTextColor(0xFFFFFFFF);
+                    break;
+                case "confirmed":
+                case "đã xác nhận":
+                    holder.tvStatus.setBackgroundResource(R.drawable.bg_status_green);
+                    holder.tvStatus.setTextColor(0xFFFFFFFF);
+                    break;
+                case "pending":
+                case "chờ xác nhận":
+                    holder.tvStatus.setBackgroundResource(R.drawable.bg_status_yellow);
+                    holder.tvStatus.setTextColor(0xFF222222);
+                    break;
+                default:
+                    holder.tvStatus.setBackgroundResource(R.drawable.bg_status_gray);
+                    holder.tvStatus.setTextColor(0xFF222222);
+            }
+        } else {
+            holder.tvStatus.setBackgroundResource(R.drawable.bg_status_gray);
+            holder.tvStatus.setTextColor(0xFF222222);
+        }
         holder.tvArrivalDate.setText(formatPrice(o.getTotal()));
         holder.tvRatingBadge.setText(getStatusText(rawStatus));
         holder.tvItemCount.setText(o.getProductName() != null ? o.getProductName() : "Admin Shop");

@@ -6,6 +6,8 @@ import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
+
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import com.anhnvt_ph55017.md_02_datn.Adapters.ReviewAdapter;
 import com.anhnvt_ph55017.md_02_datn.models.Review;
@@ -44,7 +46,7 @@ public class DetailActivity extends AppCompatActivity {
     ReviewAdapter reviewAdapter;
     List<Review> reviewList = new java.util.ArrayList<>();
     int selectedRating = 5;
-    Button btnAddCart;
+    AppCompatButton btnAddCart;
     RecyclerView rvRelated;
     // CartDAO cartDAO;
     String productId;

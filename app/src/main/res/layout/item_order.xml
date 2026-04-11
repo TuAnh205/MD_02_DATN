@@ -56,7 +56,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="14/10/2023 • 14:30"
-            android:textColor="#64748B"
+            android:textColor="#040404"
             android:textSize="13sp"
             android:layout_marginBottom="12dp" />
 
@@ -105,7 +105,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="1 sản phẩm • MacBook Air M2 + 2 phụ"
-                    android:textColor="#64748B"
+                    android:textColor="#424343"
                     android:textSize="12sp"
                     android:layout_marginTop="2dp" />
             </LinearLayout>
@@ -124,7 +124,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Tổng tiền:"
-                android:textColor="#64748B"
+                android:textColor="#424343"
                 android:textSize="14sp" />
 
             <TextView
@@ -155,7 +155,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="TRẠNG THÁI ĐƠN HÀNG"
-                android:textColor="#64748B"
+                android:textColor="#424343"
                 android:textSize="12sp"
                 android:textStyle="bold" />
 

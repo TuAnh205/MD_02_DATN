@@ -1,7 +1,7 @@
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- nền -->
-    <solid android:color="@color/surface"/>
+    <solid android:color="@color/white"/>
 
     <!-- bo góc -->
     <corners

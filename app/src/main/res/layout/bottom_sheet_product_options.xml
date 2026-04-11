@@ -20,7 +20,7 @@
             android:text="Product Name"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
+            android:textColor="@color/black"
             android:layout_marginBottom="4dp" />
 
         <LinearLayout
@@ -43,7 +43,7 @@
                 android:layout_height="wrap_content"
                 android:text="Stock: 0"
                 android:textSize="12sp"
-                android:textColor="#aaaaaa"
+                android:textColor="#000000"
                 android:layout_marginStart="12dp" />
         </LinearLayout>
     </LinearLayout>
@@ -64,7 +64,7 @@
             android:text="Quantity"
             android:textSize="12sp"
             android:textStyle="bold"
-            android:textColor="@android:color/white"
+            android:textColor="@color/black"
             android:layout_marginBottom="6dp" />
 
         <LinearLayout
@@ -72,7 +72,7 @@
             android:layout_height="40dp"
             android:orientation="horizontal"
             android:gravity="center"
-            android:background="@color/surface"
+            android:background="@color/white"
             android:layout_marginBottom="12dp">
 
             <ImageButton
@@ -93,7 +93,7 @@
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:gravity="center"
-                android:textColor="@android:color/white" />
+                android:textColor="@android:color/black" />
 
             <ImageButton
                 android:id="@+id/btnPlus"
@@ -113,7 +113,7 @@
             android:text="+ ADD TO CART"
             android:textSize="14sp"
             android:textStyle="bold"
-            android:textColor="#000000"
+            android:textColor="#FFFFFF"
             android:background="@drawable/bg_btn_blue" />
     </LinearLayout>
 

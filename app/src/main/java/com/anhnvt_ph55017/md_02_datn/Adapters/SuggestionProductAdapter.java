@@ -2,6 +2,7 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.screens.DetailActivity;
 import com.bumptech.glide.Glide;
 
 import java.util.List;
@@ -83,7 +85,17 @@ public class SuggestionProductAdapter extends RecyclerView.Adapter<SuggestionPro
 
         // Click vào item
         holder.itemView.setOnClickListener(v -> {
-            if (listener != null) listener.onProductClick(product);
+
+            Intent intent = new Intent(context, DetailActivity.class);
+            intent.putExtra("id", product.getId());
+            intent.putExtra("name", product.getName());
+            intent.putExtra("price", product.getPrice());
+            intent.putExtra("imageUrl", product.getImageUrl());
+            intent.putExtra("desc", product.getDescription());
+            intent.putExtra("rating", product.getRating());
+            intent.putExtra("reviewCount", product.getReviewCount());
+
+            context.startActivity(intent);
         });
     }
 

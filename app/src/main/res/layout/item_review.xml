@@ -35,7 +35,7 @@
         android:id="@+id/tvReviewContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#fff"
+        android:textColor="#000000"
         android:text="Nội dung đánh giá"
         android:layout_marginTop="4dp"/>
 
@@ -43,7 +43,7 @@
         android:id="@+id/tvReviewDate"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#B0BEC5"
+        android:textColor="#000000"
         android:textSize="12sp"
         android:layout_marginTop="2dp"
         android:text="01/04/2026"/>

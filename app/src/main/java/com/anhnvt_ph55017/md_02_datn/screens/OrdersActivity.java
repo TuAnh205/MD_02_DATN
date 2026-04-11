@@ -80,11 +80,15 @@ public class OrdersActivity extends AppCompatActivity {
 
     private void setTab(String filter) {
         currentFilter = filter;
-        tabAll.setTextColor(getResources().getColor(filter.equals("all") ? android.R.color.holo_blue_light : android.R.color.darker_gray, null));
-        tabPreparing.setTextColor(getResources().getColor(filter.equals("preparing") ? android.R.color.holo_blue_light : android.R.color.darker_gray, null));
-        tabShipping.setTextColor(getResources().getColor(filter.equals("shipping") ? android.R.color.holo_blue_light : android.R.color.darker_gray, null));
-        tabDelivered.setTextColor(getResources().getColor(filter.equals("delivered") ? android.R.color.holo_blue_light : android.R.color.darker_gray, null));
-        
+
+        int selectedColor = 0xFF000000; // đen
+        int normalColor = 0xFF000000;   // cũng đen luôn
+
+        tabAll.setTextColor(filter.equals("all") ? selectedColor : normalColor);
+        tabPreparing.setTextColor(filter.equals("preparing") ? selectedColor : normalColor);
+        tabShipping.setTextColor(filter.equals("shipping") ? selectedColor : normalColor);
+        tabDelivered.setTextColor(filter.equals("delivered") ? selectedColor : normalColor);
+
         filterOrders();
     }
 

@@ -54,7 +54,11 @@ public class HomeFragment extends Fragment {
     private Runnable bannerRunnable;
     private ImageView[] dots;
 
-    // Thêm lại hàm loadCategoriesFromApi
+    boolean isShowAllCategory = false;
+    boolean isShowAllProduct = false;
+    TextView tvSeeAllCategory, tvSeeAllProduct;
+
+    // Sửa loadCategoriesFromApi gọi updateCategoryList thay vì setAdapter trực tiếp
     private void loadCategoriesFromApi() {
         if (getContext() == null) return;
         com.anhnvt_ph55017.md_02_datn.utils.CategoryApiService.fetchCategories(getContext(), new com.anhnvt_ph55017.md_02_datn.utils.CategoryApiService.CategoryCallback() {
@@ -63,26 +67,10 @@ public class HomeFragment extends Fragment {
                 listCategories = categories;
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        rvCategory.setAdapter(
-                                new com.anhnvt_ph55017.md_02_datn.Adapters.CategoryAdapter(categories, selectedCategory -> {
-                                    // Only allow single selection for backend filtering
-                                    if (selectedCategory.isEmpty()) {
-                                        selectedCategoryName = "";
-                                    } else {
-                                        int idx = selectedCategory.iterator().next();
-                                        if (idx >= 0 && idx < listCategories.size()) {
-                                            selectedCategoryName = listCategories.get(idx).getName();
-                                        } else {
-                                            selectedCategoryName = "";
-                                        }
-                                    }
-                                    loadProductsFromApi();
-                                })
-                        );
+                        updateCategoryList();
                     });
                 }
             }
-
             @Override
             public void onError(String error) {
                 if (getActivity() != null) {
@@ -93,6 +81,7 @@ public class HomeFragment extends Fragment {
             }
         });
     }
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,6 +97,9 @@ public class HomeFragment extends Fragment {
             rvProduct = (RecyclerView) view.findViewById(R.id.rvProduct);
             imgNotification = (ImageView) view.findViewById(R.id.imgNotification);
             tvNotificationBadge = (TextView) view.findViewById(R.id.tvNotificationBadge);
+
+            tvSeeAllCategory = view.findViewById(R.id.tvSeeAllCategory);
+            tvSeeAllProduct = view.findViewById(R.id.tvSeeAllProduct);
 
             if (getContext() == null) {
                 return view;
@@ -167,7 +159,16 @@ public class HomeFragment extends Fragment {
                             R.drawable.bannerapp3
                     )
             );
-
+            tvSeeAllCategory.setOnClickListener(v -> {
+                isShowAllCategory = !isShowAllCategory;
+                updateCategoryList();
+                tvSeeAllCategory.setText(isShowAllCategory ? "Thu gọn" : "Xem tất cả");
+            });
+            tvSeeAllProduct.setOnClickListener(v -> {
+                isShowAllProduct = !isShowAllProduct;
+                updateProductList();
+                tvSeeAllProduct.setText(isShowAllProduct ? "Thu gọn" : "Xem tất cả");
+            });
             vpBanner.setAdapter(adapter);
             vpBanner.setOffscreenPageLimit(1);
 
@@ -246,7 +247,7 @@ public class HomeFragment extends Fragment {
                 listProducts = products;
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        rvProduct.setAdapter(new ProductAdapter(getContext(), products));
+                        updateProductList();
                     });
                 }
             }
@@ -367,5 +368,35 @@ public class HomeFragment extends Fragment {
             e.printStackTrace();
         }
     }
+
+    private void updateCategoryList() {
+        List<com.anhnvt_ph55017.md_02_datn.models.Category> showList = listCategories;
+        if (!isShowAllCategory && listCategories.size() > 6) {
+            showList = listCategories.subList(0, 6);
+        }
+        rvCategory.setAdapter(new com.anhnvt_ph55017.md_02_datn.Adapters.CategoryAdapter(showList, selectedCategory -> {
+            // Only allow single selection for backend filtering
+            if (selectedCategory.isEmpty()) {
+                selectedCategoryName = "";
+            } else {
+                int idx = selectedCategory.iterator().next();
+                if (idx >= 0 && idx < listCategories.size()) {
+                    selectedCategoryName = listCategories.get(idx).getName();
+                } else {
+                    selectedCategoryName = "";
+                }
+            }
+            loadProductsFromApi();
+        }));
+    }
+
+    private void updateProductList() {
+        List<Product> showList = listProducts;
+        if (!isShowAllProduct && listProducts != null && listProducts.size() > 10) {
+            showList = listProducts.subList(0, 10);
+        }
+        rvProduct.setAdapter(new ProductAdapter(getContext(), showList));
+    }
+
+
 }
-    
