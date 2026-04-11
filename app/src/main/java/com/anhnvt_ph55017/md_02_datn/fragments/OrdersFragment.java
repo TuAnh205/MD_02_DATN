@@ -33,20 +33,14 @@ public class OrdersFragment extends Fragment {
 
     RecyclerView rvOrders;
     OrderAdapter adapter;
-    static List<Order> orderList;    // shared history
+    List<Order> orderList;    // instance variable, avoid static
     List<Order> filteredList;
-    
+
     TextView tvAll, tvPending, tvProcessing, tvShipping, tvCancelled;
     String selectedStatus = "ALL";
-    // Các trạng thái mới
-    // Tất cả, Chờ xác nhận, Xác nhận, Chưa thanh toán, Đã hủy
-
-    // keep single reference for callbacks
-
 
     public OrdersFragment() {
         // Required empty public constructor
-
     }
 
     // Hàm khởi tạo giao diện fragment, thiết lập recycler và dữ liệu
@@ -57,6 +51,8 @@ public class OrdersFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_orders, container, false);
 
         rvOrders = view.findViewById(R.id.rvOrders);
+        // Always re-init orderList to avoid static bugs
+        orderList = new ArrayList<>();
         
         // Initialize status tabs
         tvAll = view.findViewById(R.id.tvAll);
@@ -95,7 +91,6 @@ public class OrdersFragment extends Fragment {
         com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.getOrders(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.OrdersCallback() {
             @Override
             public void onSuccess(org.json.JSONArray ordersJson) {
-                if (orderList == null) orderList = new ArrayList<>();
                 orderList.clear();
                 filteredList.clear();
                 for (int i = 0; i < ordersJson.length(); i++) {
@@ -189,11 +184,10 @@ public class OrdersFragment extends Fragment {
 
         rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
         rvOrders.setAdapter(adapter);
-        
+
         // Set up tab click listeners
         setupTabListeners();
         setTabActive(tvAll);
-        if (orderList == null) orderList = new ArrayList<>();
         filterByStatus("ALL");
 
         return view;
@@ -249,7 +243,7 @@ public class OrdersFragment extends Fragment {
     }
 
     private boolean isCancelled(String status) {
-        return status.equalsIgnoreCase("cancelled") || status.equals("Đã hủy");
+        return status.equalsIgnoreCase("canceled") || status.equals("Đã hủy");
     }
     
     // Nhận kết quả trả về từ OrderDetailActivity (thay đổi trạng thái)
@@ -257,12 +251,94 @@ public class OrdersFragment extends Fragment {
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == REQUEST_CODE_DETAIL && resultCode == getActivity().RESULT_OK && data != null) {
-            String id = data.getStringExtra("orderId");
-            String newStatus = data.getStringExtra("newStatus");
-            if (id != null && newStatus != null) {
-                // Reload orders from database to get updated status
-                // Không reload từ local DB nữa, chỉ filter lại danh sách đã lấy từ backend
-                filterByStatus(selectedStatus);
+            boolean cancelled = data.getBooleanExtra("orderCancelled", false);
+            if (cancelled) {
+                // Gọi lại API để lấy danh sách đơn hàng mới nhất từ backend
+                String token = com.anhnvt_ph55017.md_02_datn.utils.SessionManager.getToken(getContext());
+                com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.getOrders(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.OrdersCallback() {
+                    @Override
+                    public void onSuccess(org.json.JSONArray ordersJson) {
+                        orderList.clear();
+                        filteredList.clear();
+                        for (int i = 0; i < ordersJson.length(); i++) {
+                            try {
+                                org.json.JSONObject obj = ordersJson.getJSONObject(i);
+                                // ...parse order như cũ...
+                                String id = obj.optString("_id");
+                                String date = obj.optString("createdAt");
+                                double total = obj.optDouble("total");
+                                String status = obj.optString("status");
+                                String paymentMethod = obj.optJSONObject("payment") != null ? obj.optJSONObject("payment").optString("method", "") : "";
+                                String shippingAddress = "";
+                                if (obj.has("shipping")) {
+                                    org.json.JSONObject ship = obj.optJSONObject("shipping");
+                                    if (ship != null && ship.has("address")) {
+                                        org.json.JSONObject addr = ship.optJSONObject("address");
+                                        if (addr != null) {
+                                            shippingAddress = addr.optString("address", "");
+                                        }
+                                    }
+                                }
+                                int itemCount = obj.has("items") ? obj.getJSONArray("items").length() : 0;
+                                String imageUrl = null;
+                                if (obj.has("items")) {
+                                    org.json.JSONArray itemsArr = obj.getJSONArray("items");
+                                    if (itemsArr.length() > 0) {
+                                        org.json.JSONObject firstItem = itemsArr.getJSONObject(0);
+                                        imageUrl = firstItem.optString("image", null);
+                                        if ((imageUrl == null || imageUrl.isEmpty()) && firstItem.has("product")) {
+                                            org.json.JSONObject productObj = firstItem.optJSONObject("product");
+                                            if (productObj != null && productObj.has("images")) {
+                                                org.json.JSONArray imagesArr = productObj.optJSONArray("images");
+                                                if (imagesArr != null && imagesArr.length() > 0) {
+                                                    imageUrl = imagesArr.optString(0, null);
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                java.util.List<com.anhnvt_ph55017.md_02_datn.models.OrderItem> orderItems = new java.util.ArrayList<>();
+                                if (obj.has("items")) {
+                                    org.json.JSONArray itemsArr = obj.getJSONArray("items");
+                                    for (int j = 0; j < itemsArr.length(); j++) {
+                                        org.json.JSONObject itemObj = itemsArr.getJSONObject(j);
+                                        String productName = itemObj.optString("name", "");
+                                        double price = itemObj.optDouble("price", 0);
+                                        int quantity = itemObj.optInt("quantity", 1);
+                                        int imageRes = com.anhnvt_ph55017.md_02_datn.R.drawable.bg_image;
+                                        String itemImageUrl = itemObj.optString("image", null);
+                                        if ((itemImageUrl == null || itemImageUrl.isEmpty()) && itemObj.has("product")) {
+                                            org.json.JSONObject productObj = itemObj.optJSONObject("product");
+                                            if (productObj != null && productObj.has("images")) {
+                                                org.json.JSONArray imagesArr = productObj.optJSONArray("images");
+                                                if (imagesArr != null && imagesArr.length() > 0) {
+                                                    itemImageUrl = imagesArr.optString(0, null);
+                                                }
+                                            }
+                                        }
+                                        com.anhnvt_ph55017.md_02_datn.models.OrderItem orderItem = new com.anhnvt_ph55017.md_02_datn.models.OrderItem(productName, price, quantity, imageRes, itemImageUrl);
+                                        orderItems.add(orderItem);
+                                    }
+                                }
+                                com.anhnvt_ph55017.md_02_datn.models.Order order = new com.anhnvt_ph55017.md_02_datn.models.Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
+                                orderList.add(order);
+                            } catch (Exception e) {
+                                android.util.Log.e("ORDER_PARSE", e.getMessage(), e);
+                            }
+                        }
+                        filteredList.addAll(orderList);
+                        if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                            adapter.notifyDataSetChanged();
+                        });
+                    }
+                    @Override
+                    public void onError(String error) {
+                        android.util.Log.e("ORDER_API_ERROR", error);
+                        if (getActivity() != null) getActivity().runOnUiThread(() -> {
+                            // Hiển thị thông báo lỗi nếu muốn
+                        });
+                    }
+                });
             }
         }
     }

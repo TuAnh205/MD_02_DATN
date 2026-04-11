@@ -14,7 +14,7 @@
 
         <TextView
             android:text="Checkout"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold"
             android:layout_width="wrap_content"
@@ -25,7 +25,7 @@
 
         <TextView
             android:text="Shipping Address"
-            android:textColor="#A0A0A0"
+            android:textColor="#757575"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
@@ -46,7 +46,6 @@
                 android:src="@android:drawable/ic_menu_mylocation"
                 android:tint="#2F80FF"
                 android:layout_width="32dp"
-                android:layout_height="32dp"
                 android:layout_marginEnd="12dp" />
 
             <LinearLayout
@@ -58,7 +57,7 @@
                 <TextView
                     android:id="@+id/tvShipName"
                     android:text="Tên người nhận"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/black"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_width="wrap_content"
@@ -67,7 +66,7 @@
                 <TextView
                     android:id="@+id/tvShipPhone"
                     android:text="Số điện thoại"
-                    android:textColor="#BBBBBB"
+                    android:textColor="#757575"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -75,7 +74,7 @@
                 <TextView
                     android:id="@+id/tvShipAddress"
                     android:text="Địa chỉ chi tiết"
-                    android:textColor="#BBBBBB"
+                    android:textColor="#757575"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -83,7 +82,7 @@
                 <TextView
                     android:id="@+id/tvShipWard"
                     android:text="Phường/Xã"
-                    android:textColor="#BBBBBB"
+                    android:textColor="#757575"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -91,7 +90,7 @@
                 <TextView
                     android:id="@+id/tvShipDistrict"
                     android:text="Quận/Huyện"
-                    android:textColor="#BBBBBB"
+                    android:textColor="#757575"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -99,7 +98,7 @@
                 <TextView
                     android:id="@+id/tvShipCity"
                     android:text="Tỉnh/Thành phố"
-                    android:textColor="#BBBBBB"
+                    android:textColor="#757575"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -109,8 +108,8 @@
             <Button
                 android:id="@+id/btnChangeAddress"
                 android:text="Thay đổi"
-                android:textColor="#FFFFFF"
-                android:background="@drawable/bg_btn_blue"
+                android:textColor="@color/white"
+                android:background="@drawable/bg_button"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp" />
 
@@ -121,7 +120,7 @@
 
         <TextView
             android:text="Payment Method"
-            android:textColor="#A0A0A0"
+            android:textColor="#757575"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
@@ -138,7 +137,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/payCOD"
                 android:text="Thanh toán sau khi nhận hàng"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/black"
                 android:buttonTint="#2F80FF"
                 android:background="@drawable/bg_card"
                 android:padding="16dp"
@@ -149,7 +148,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/payCard"
                 android:text="Sử dụng thẻ"
-                android:textColor="#FFFFFF"
+                android:textColor="@color/black"
                 android:buttonTint="#2F80FF"
                 android:background="@drawable/bg_card"
                 android:padding="16dp"
@@ -158,11 +157,11 @@
         </RadioGroup>
 
 
-        <!-- ORDER SUMMARY -->
+
 
         <TextView
             android:text="Your Items"
-            android:textColor="#A0A0A0"
+            android:textColor="#757575"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
@@ -179,23 +178,21 @@
         <TextView
             android:id="@+id/tvSubtotal"
             android:text="Subtotal: $0.00"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/black"
             android:layout_marginTop="10dp"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/tvTax"
             android:text="Tax: $0.00"
-            android:textColor="#FFFFFF"
-            android:layout_marginTop="4dp"
+            android:textColor="@color/black"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
         <TextView
             android:id="@+id/tvTotal"
             android:text="Total: $1249"
-            android:textColor="#2F80FF"
+            android:textColor="@color/blue"
             android:textSize="20sp"
             android:textStyle="bold"
             android:layout_marginTop="10dp"
@@ -206,7 +203,7 @@
 
         <TextView
             android:text="Voucher"
-            android:textColor="#A0A0A0"
+            android:textColor="#757575"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
@@ -216,7 +213,7 @@
             android:id="@+id/edVoucher"
             android:hint="Enter voucher code"
             android:inputType="text"
-            android:textColor="#FFFFFF"
+            android:textColor="@color/black"
             android:textColorHint="#888"
             android:background="@drawable/bg_card"
             android:padding="12dp"
@@ -226,11 +223,10 @@
 
 
 
-
         <Button
             android:id="@+id/btnOrder"
             android:text="Đặt hàng"
-            android:textColor="#fff"
+            android:textColor="@color/white"
             android:textSize="16sp"
             android:background="@drawable/bg_button"
             android:layout_marginTop="16dp"

@@ -269,11 +269,25 @@ exports.cancelOrder = async (req, res) => {
             return res.status(400).json({ message: `Cannot cancel order with status '${order.status}'` });
         }
 
-        order.status = 'cancelled';
+        order.status = 'đã hủy';
         const reason = req.body.reason || '';
         if (reason) order.cancellationReason = reason;
-        order.statusHistory.push({ status: 'cancelled', note: reason });
+        order.statusHistory.push({ status: 'đã hủy', note: reason });
         await order.save();
+
+        // Gửi thông báo cho user
+        try {
+            await Notification.create({
+                user: order.user,
+                type: 'order_status',
+                title: 'Đơn hàng đã bị hủy',
+                message: reason ? `Đơn hàng của bạn đã bị hủy. Lý do: ${reason}` : 'Đơn hàng của bạn đã bị hủy.',
+                data: { orderId: order._id, status: 'đã hủy' }
+            });
+        } catch (notifyErr) {
+            console.error('Lỗi gửi thông báo:', notifyErr);
+        }
+
         res.json(order);
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });

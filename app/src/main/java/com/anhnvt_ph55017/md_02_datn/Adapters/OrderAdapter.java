@@ -54,7 +54,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
         // Đổi màu nền trạng thái
         if (rawStatus != null) {
             switch (rawStatus.toLowerCase()) {
-                case "cancelled":
+                case "canceled":
                 case "hủy":
                     holder.tvStatus.setBackgroundResource(R.drawable.bg_status_red);
                     holder.tvStatus.setTextColor(0xFFFFFFFF);
@@ -116,7 +116,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
                 return "ĐANG GIAO";
             case "delivered":
                 return "ĐÃ GIAO";
-            case "cancelled":
+            case "canceled":
                 return "HỦY";
             default:
                 return status;
@@ -134,7 +134,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
                 return 0xFF0A6ED8; // Blue
             case "delivered":
                 return 0xFF22C55E; // Green
-            case "cancelled":
+            case "canceled":
                 return 0xFFEF4444; // Red
             default:
                 return 0xFF64748B;

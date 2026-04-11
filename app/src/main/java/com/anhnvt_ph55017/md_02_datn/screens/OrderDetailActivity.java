@@ -126,8 +126,10 @@ public class OrderDetailActivity extends AppCompatActivity {
                     btnCancel.setVisibility(android.view.View.VISIBLE);
                     btnBuyAgain.setVisibility(android.view.View.GONE);
                 }
-                btnCancel.setOnClickListener(v -> cancelOrder());
+                btnCancel.setOnClickListener(v -> showCancelDialog());
             }
+    // Hiện dialog xác nhận hủy đơn hàng
+
 
             // ===== RATING =====
             if (btnSubmitRating != null) {
@@ -146,7 +148,14 @@ public class OrderDetailActivity extends AppCompatActivity {
     }
 
     // ================= STATUS =================
-
+    private void showCancelDialog() {
+        new androidx.appcompat.app.AlertDialog.Builder(this)
+                .setTitle("Xác nhận hủy đơn hàng")
+                .setMessage("Bạn có chắc chắn muốn hủy đơn hàng này không?")
+                .setPositiveButton("Có", (dialog, which) -> cancelOrder())
+                .setNegativeButton("Không", null)
+                .show();
+    }
     private String getStatusVietnamese(String status) {
         if (status == null) return "";
 
@@ -214,23 +223,23 @@ public class OrderDetailActivity extends AppCompatActivity {
     // ================= CANCEL ORDER =================
 
     private void cancelOrder() {
-
         String token = SessionManager.getToken(this);
-
         OrderApiService.cancelOrder(this, token, orderId, "User cancel", new OrderApiService.CancelOrderCallback() {
             @Override
             public void onSuccess(org.json.JSONObject json) {
                 runOnUiThread(() -> {
                     orderStatus = "cancelled";
-
                     tvOrderStatus.setText(getStatusVietnamese(orderStatus));
                     setStatusColor(tvOrderStatus, orderStatus);
                     tvStatusDescription.setText("Đơn đã bị hủy");
-
                     btnCancel.setVisibility(android.view.View.GONE);
                     btnBuyAgain.setVisibility(android.view.View.VISIBLE);
-
                     Toast.makeText(OrderDetailActivity.this, "Đã hủy đơn", Toast.LENGTH_SHORT).show();
+                    // Trả kết quả về fragment để reload danh sách
+                    Intent resultIntent = new Intent();
+                    resultIntent.putExtra("orderCancelled", true);
+                    setResult(RESULT_OK, resultIntent);
+                    finish();
                 });
             }
 

@@ -25,7 +25,7 @@
         <TextView
             android:text="Chi tiết đơn hàng"
             android:textSize="20sp"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:textStyle="bold"
             android:layout_weight="1"
             android:gravity="center"
@@ -59,7 +59,7 @@
         <TextView
             android:id="@+id/tvProductName"
             android:textSize="18sp"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:textStyle="bold"
             android:layout_marginBottom="8dp"
             android:layout_width="wrap_content"
@@ -77,7 +77,7 @@
         <TextView
             android:id="@+id/tvProductDesc"
             android:textSize="14sp"
-            android:textColor="#CCCCCC"
+            android:textColor="#000000"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -96,7 +96,7 @@
         <TextView
             android:text="Danh sách hàng hóa"
             android:textSize="16sp"
-            android:textColor="#FFFFFF"
+            android:textColor="#000000"
             android:textStyle="bold"
             android:layout_marginBottom="12dp"
             android:layout_width="wrap_content"
@@ -133,7 +133,7 @@
                 <TextView
                     android:id="@+id/tvOrderId"
                     android:textSize="22sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#050505"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"
                     android:layout_width="wrap_content"
@@ -142,7 +142,7 @@
                 <TextView
                     android:id="@+id/tvOrderDate"
                     android:textSize="14sp"
-                    android:textColor="#AAAAAA"
+                    android:textColor="#000000"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
@@ -160,7 +160,7 @@
                 <TextView
                     android:text="Trạng thái"
                     android:textSize="14sp"
-                    android:textColor="#AAAAAA"
+                    android:textColor="#000000"
                     android:layout_marginBottom="8dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -177,7 +177,7 @@
                 <TextView
                     android:id="@+id/tvStatusDescription"
                     android:textSize="13sp"
-                    android:textColor="#CCCCCC"
+                    android:textColor="#000000"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
@@ -197,7 +197,7 @@
                 <TextView
                     android:text="Địa chỉ giao hàng"
                     android:textSize="16sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#000000"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"
                     android:layout_width="wrap_content"
@@ -206,7 +206,7 @@
                 <TextView
                     android:id="@+id/tvShippingAddress"
                     android:textSize="14sp"
-                    android:textColor="#CCCCCC"
+                    android:textColor="#000000"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
 
@@ -230,7 +230,7 @@
                     <TextView
                         android:text="Số lượng sản phẩm:"
                         android:textSize="14sp"
-                        android:textColor="#AAAAAA"
+                        android:textColor="#000000"
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
@@ -238,7 +238,7 @@
                     <TextView
                         android:id="@+id/tvItemCount"
                         android:textSize="14sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#000000"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -254,7 +254,7 @@
                     <TextView
                         android:text="Dự kiến nhận:"
                         android:textSize="14sp"
-                        android:textColor="#AAAAAA"
+                        android:textColor="#000000"
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
@@ -262,7 +262,7 @@
                     <TextView
                         android:id="@+id/tvArrivalDate"
                         android:textSize="14sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#000000"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
@@ -272,7 +272,7 @@
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@android:color/darker_gray"
+                    android:background="@color/black"
                     android:layout_marginBottom="12dp" />
 
                 <LinearLayout
@@ -283,7 +283,7 @@
                     <TextView
                         android:text="Tổng tiền:"
                         android:textSize="16sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#000000"
                         android:textStyle="bold"
                         android:layout_weight="1"
                         android:layout_width="0dp"
@@ -314,7 +314,7 @@
                 <TextView
                     android:text="Liên hệ cửa hàng"
                     android:textSize="16sp"
-                    android:textColor="#FFFFFF"
+                    android:textColor="#000000"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"
                     android:layout_width="wrap_content"
@@ -367,7 +367,7 @@
                     <TextView
                         android:text="Chi tiết đơn hàng"
                         android:textSize="16sp"
-                        android:textColor="#FFFFFF"
+                        android:textColor="#000000"
                         android:textStyle="bold"
                         android:layout_weight="1"
                         android:layout_width="0dp"
@@ -393,7 +393,7 @@
                     <View
                         android:layout_width="match_parent"
                         android:layout_height="1dp"
-                        android:background="@android:color/darker_gray" />
+                        android:background="@color/black" />
 
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -410,7 +410,7 @@
                             <TextView
                                 android:text="Mã đơn hàng:"
                                 android:textSize="14sp"
-                                android:textColor="#AAAAAA"
+                                android:textColor="#000000"
                                 android:layout_weight="1"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
@@ -418,7 +418,7 @@
                             <TextView
                                 android:id="@+id/tvOrderCode"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
+                                android:textColor="#000000"
                                 android:textStyle="bold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
@@ -434,7 +434,7 @@
                             <TextView
                                 android:text="Phương thức thanh toán:"
                                 android:textSize="14sp"
-                                android:textColor="#AAAAAA"
+                                android:textColor="#000000"
                                 android:layout_weight="1"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
@@ -442,7 +442,7 @@
                             <TextView
                                 android:id="@+id/tvPaymentMethod"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
+                                android:textColor="#070707"
                                 android:textStyle="bold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
@@ -458,7 +458,7 @@
                             <TextView
                                 android:text="Thời gian đặt:"
                                 android:textSize="14sp"
-                                android:textColor="#AAAAAA"
+                                android:textColor="#000000"
                                 android:layout_weight="1"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
@@ -466,7 +466,7 @@
                             <TextView
                                 android:id="@+id/tvOrderTime"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
+                                android:textColor="#000000"
                                 android:textStyle="bold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
@@ -481,7 +481,7 @@
                             <TextView
                                 android:text="Thời gian nhận:"
                                 android:textSize="14sp"
-                                android:textColor="#AAAAAA"
+                                android:textColor="#000000"
                                 android:layout_weight="1"
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content" />
@@ -489,7 +489,7 @@
                             <TextView
                                 android:id="@+id/tvDeliveryTime"
                                 android:textSize="14sp"
-                                android:textColor="#FFFFFF"
+                                android:textColor="#000000"
                                 android:textStyle="bold"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content" />
