@@ -528,7 +528,7 @@
 
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnBuyAgain"
-            android:text="Mua lại"
+            android:text="Mua sắm tiếp"
             android:textSize="16sp"
             android:textStyle="bold"
             android:backgroundTint="@null"

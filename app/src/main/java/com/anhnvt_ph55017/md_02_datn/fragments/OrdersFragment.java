@@ -243,7 +243,9 @@ public class OrdersFragment extends Fragment {
     }
 
     private boolean isCancelled(String status) {
-        return status.equalsIgnoreCase("canceled") || status.equals("Đã hủy");
+        status = status.trim().toLowerCase();
+        // Các biến thể phổ biến của trạng thái đã hủy
+        return status.equals("canceled") || status.equals("cancelled") || status.equals("đã hủy") || status.equals("da huy") || status.equals("huy") || status.equals("cancel") || status.equals("đã bị hủy") || status.equals("da bi huy");
     }
     
     // Nhận kết quả trả về từ OrderDetailActivity (thay đổi trạng thái)
@@ -361,18 +363,19 @@ public class OrdersFragment extends Fragment {
     
     // Cập nhật kiểu hiển thị khi tab được chọn, tất cả tab khác mờ đi
     private void setTabActive(TextView activeTab) {
-        // reset tất cả
-        tvAll.setTextColor(getResources().getColor(R.color.white, null));
+        // reset tất cả về màu đen mờ
+        int black = getResources().getColor(R.color.black, null);
+        tvAll.setTextColor(black);
         tvAll.setAlpha(0.6f);
-        tvPending.setTextColor(getResources().getColor(R.color.white, null));
+        tvPending.setTextColor(black);
         tvPending.setAlpha(0.6f);
-        tvProcessing.setTextColor(getResources().getColor(R.color.white, null));
+        tvProcessing.setTextColor(black);
         tvProcessing.setAlpha(0.6f);
-        tvShipping.setTextColor(getResources().getColor(R.color.white, null));
+        tvShipping.setTextColor(black);
         tvShipping.setAlpha(0.6f);
-        tvCancelled.setTextColor(getResources().getColor(R.color.white, null));
+        tvCancelled.setTextColor(black);
         tvCancelled.setAlpha(0.6f);
-        // đánh dấu tab đang hoạt động
+        // đánh dấu tab đang hoạt động: màu xanh, đậm
         activeTab.setTextColor(getResources().getColor(android.R.color.holo_blue_light));
         activeTab.setAlpha(1f);
     }

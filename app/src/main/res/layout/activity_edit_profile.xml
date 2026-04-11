@@ -29,7 +29,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Sửa hồ sơ"
-                android:textColor="#FFFFFF"
+                android:textColor="#101010"
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:layout_marginStart="8dp"/>
@@ -62,8 +62,8 @@
         </FrameLayout>
 
         <TextView
-            android:text="Full Name"
-            android:textColor="#9BB3E0"
+            android:text="Tên đầy đủ"
+            android:textColor="#000000"
             android:textSize="12sp"
             android:layout_marginTop="16dp"
             android:layout_width="wrap_content"
@@ -75,13 +75,13 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_card"
             android:padding="12dp"
-            android:textColor="#FFFFFF"
-            android:hint="Alex Johnson"
+            android:textColor="#000000"
+            android:hint="Nguyen Van A"
           />
 
         <TextView
-            android:text="Email Address"
-            android:textColor="#9BB3E0"
+            android:text="Địa chỉ Email"
+            android:textColor="#000000"
             android:textSize="12sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -94,15 +94,15 @@
             android:background="@drawable/bg_card"
             android:padding="12dp"
             android:textColor="#FFFFFF"
-            android:hint="alex.johnson@coretech.io"
+            android:hint="nguyenvana@gmail.com"
             android:inputType="textEmailAddress"
             android:enabled="false"
             android:focusable="false"
             android:cursorVisible="false" />
 
         <TextView
-            android:text="Phone Number"
-            android:textColor="#9BB3E0"
+            android:text="Số điện thoại"
+            android:textColor="#000000"
             android:textSize="12sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -115,13 +115,13 @@
             android:background="@drawable/bg_card"
             android:padding="12dp"
             android:textColor="#FFFFFF"
-            android:hint="+1 555-0123-4567"
+            android:hint="0312345678"
 
             android:inputType="phone" />
 
         <TextView
             android:text="Professional Bio"
-            android:textColor="#9BB3E0"
+            android:textColor="#000000"
             android:textSize="12sp"
             android:layout_marginTop="12dp"
             android:layout_width="wrap_content"
@@ -139,7 +139,7 @@
             android:gravity="top"
             android:inputType="textMultiLine" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnSaveChanges"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -148,7 +148,7 @@
             android:background="@drawable/bg_btn_blue"
             android:textColor="#FFFFFF" />
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnCancel"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

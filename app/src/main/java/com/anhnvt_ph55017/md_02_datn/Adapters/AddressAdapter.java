@@ -102,8 +102,9 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
 
         holder.itemView.setBackgroundColor(position == selectedPosition
                 ? Color.parseColor("#2F80FF")
-                : Color.parseColor("#162233"));
-
+                : Color.parseColor("#FFFFFF"));
+        holder.btnEdit.setColorFilter(Color.BLACK);
+        holder.btnDelete.setColorFilter(Color.BLACK);
 
         View.OnClickListener selectListener = v -> {
             int oldPosition = selectedPosition;

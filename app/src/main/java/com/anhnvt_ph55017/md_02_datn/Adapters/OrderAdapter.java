@@ -81,16 +81,19 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder>{
         holder.tvRatingBadge.setText(getStatusText(rawStatus));
         holder.tvItemCount.setText(o.getProductName() != null ? o.getProductName() : "Admin Shop");
 
-        String imageUrl = o.getImageUrl();
-        if (imageUrl != null && !imageUrl.isEmpty()) {
-            Glide.with(context)
-                    .load(imageUrl)
-                    .placeholder(R.drawable.bg_image)
-                    .error(R.drawable.bg_image)
-                    .into(holder.imgProduct);
-        } else {
-            holder.imgProduct.setImageResource(R.drawable.ic_user);
+        // Lấy hình ảnh sản phẩm đầu tiên trong đơn (nếu có)
+        String imageUrl = null;
+        if (o.getItems() != null && !o.getItems().isEmpty()) {
+            imageUrl = o.getItems().get(0).getImageUrl();
         }
+        if ((imageUrl == null || imageUrl.isEmpty()) && o.getImageUrl() != null && !o.getImageUrl().isEmpty()) {
+            imageUrl = o.getImageUrl();
+        }
+        Glide.with(context)
+                .load(imageUrl)
+                .placeholder(R.drawable.bg_image)
+                .error(R.drawable.bg_image)
+                .into(holder.imgProduct);
 
         // Click on item to view detail
         holder.itemView.setOnClickListener(v -> {

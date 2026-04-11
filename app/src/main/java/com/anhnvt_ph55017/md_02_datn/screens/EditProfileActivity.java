@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 
 import com.anhnvt_ph55017.md_02_datn.utils.ProfileApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
@@ -23,7 +24,7 @@ public class EditProfileActivity extends AppCompatActivity {
     private ImageButton btnBack;
     private ImageView imgAvatar;
     private EditText etFullName, etEmail, etPhone, etBio;
-    private Button btnSaveChanges, btnCancel;
+    private AppCompatButton btnSaveChanges, btnCancel;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

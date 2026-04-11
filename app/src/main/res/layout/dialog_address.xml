@@ -4,15 +4,25 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="@color/surface"
+    android:background="#F3F4F6"
     android:padding="32dp">
 
     <!-- Recipient Name -->
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Thêm đia chỉ"
+        android:textColor="#000000"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.05"
+        android:layout_gravity="center"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Tên người nhận"
-        android:textColor="#E5E7EB"
+        android:layout_marginTop="10dp"
+        android:textColor="#000000"
         android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="0.05" />
@@ -22,12 +32,16 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
-        app:boxBackgroundColor="@android:color/white"
-        app:boxCornerRadiusTopEnd="8dp"
+
+        app:boxBackgroundMode="filled"
+        app:boxBackgroundColor="#F3F4F6"
+
         app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
-        app:boxStrokeColor="#374151"
+        app:boxCornerRadiusBottomEnd="8dp"
+
+        app:boxStrokeColor="#E5E7EB"
         app:hintTextColor="#9CA3AF">
 
         <com.google.android.material.textfield.TextInputEditText
@@ -40,7 +54,7 @@
             android:inputType="text"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:background="@android:color/white" />
+            android:background="@android:color/white"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -49,7 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Số điện thoại"
-        android:textColor="#E5E7EB"
+        android:textColor="#000000"
         android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="0.05" />
@@ -59,25 +73,29 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginBottom="16dp"
-        app:boxBackgroundColor="@android:color/white"
-        app:boxCornerRadiusTopEnd="8dp"
+
+        app:boxBackgroundMode="filled"
+        app:boxBackgroundColor="#F3F4F6"
+
         app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
-        app:boxStrokeColor="#374151"
+        app:boxCornerRadiusBottomEnd="8dp"
+
+        app:boxStrokeColor="#E5E7EB"
         app:hintTextColor="#9CA3AF">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etPhone"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:hint="Ví dụ: 0912 345 678"
+            android:hint="Ví dụ: Nguyễn Văn A"
             android:textColor="#222222"
             android:textColorHint="#9CA3AF"
-            android:inputType="phone"
+            android:inputType="text"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:background="@android:color/white" />
+            android:background="@android:color/white"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -88,7 +106,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Tỉnh/Thành phố"
-        android:textColor="#E5E7EB"
+        android:textColor="#0F0F0F"
         android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="0.05" />
@@ -101,7 +119,7 @@
         android:layout_marginBottom="12dp"
         android:background="#FFFFFF"
         android:padding="6dp"
-        android:textColor="#E5E7EB"
+        android:textColor="#222222"
         android:textSize="14sp" />
 
     <!-- District Spinner -->
@@ -109,7 +127,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Quận/Huyện"
-        android:textColor="#E5E7EB"
+        android:textColor="#000000"
         android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="0.05" />
@@ -122,7 +140,7 @@
         android:layout_marginBottom="12dp"
         android:background="#FFFFFF"
         android:padding="6dp"
-        android:textColor="#E5E7EB"
+        android:textColor="#222222"
         android:textSize="14sp" />
 
     <!-- Ward Spinner -->
@@ -130,7 +148,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Phường/Xã"
-        android:textColor="#E5E7EB"
+        android:textColor="#000000"
         android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="0.05" />
@@ -143,7 +161,7 @@
         android:layout_marginBottom="20dp"
         android:background="#FFFFFF"
         android:padding="6dp"
-        android:textColor="#E5E7EB"
+        android:textColor="#222222"
         android:textSize="14sp" />
 
     <!-- Số nhà, tên đường -->
@@ -151,7 +169,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Số nhà, tên đường"
-        android:textColor="#E5E7EB"
+        android:textColor="#000000"
         android:textSize="12sp"
         android:textStyle="bold"
         android:letterSpacing="0.05" />
@@ -160,26 +178,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="20dp"
-        app:boxBackgroundColor="@android:color/white"
-        app:boxCornerRadiusTopEnd="8dp"
+        android:layout_marginBottom="16dp"
+
+        app:boxBackgroundMode="filled"
+        app:boxBackgroundColor="#F3F4F6"
+
         app:boxCornerRadiusTopStart="8dp"
-        app:boxCornerRadiusBottomEnd="8dp"
+        app:boxCornerRadiusTopEnd="8dp"
         app:boxCornerRadiusBottomStart="8dp"
-        app:boxStrokeColor="#374151"
+        app:boxCornerRadiusBottomEnd="8dp"
+
+        app:boxStrokeColor="#E5E7EB"
         app:hintTextColor="#9CA3AF">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/etAddress"
             android:layout_width="match_parent"
             android:layout_height="48dp"
-            android:hint="Ví dụ: 123 Đường Lê Lợi"
+            android:hint="Ví dụ: Nguyễn Văn A"
             android:textColor="#222222"
             android:textColorHint="#9CA3AF"
             android:inputType="text"
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
-            android:background="@android:color/white" />
+            android:background="@android:color/white"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -202,7 +224,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Sử dụng làm địa chỉ mặc định"
-            android:textColor="#D1D5DB"
+            android:textColor="#020202"
             android:textSize="14sp"
             android:layout_marginStart="12dp" />
 

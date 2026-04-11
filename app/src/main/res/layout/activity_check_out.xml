@@ -46,6 +46,7 @@
                 android:src="@android:drawable/ic_menu_mylocation"
                 android:tint="#2F80FF"
                 android:layout_width="32dp"
+                android:layout_height="32dp"
                 android:layout_marginEnd="12dp" />
 
             <LinearLayout
@@ -66,7 +67,7 @@
                 <TextView
                     android:id="@+id/tvShipPhone"
                     android:text="Số điện thoại"
-                    android:textColor="#757575"
+                    android:textColor="#000000"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -74,42 +75,20 @@
                 <TextView
                     android:id="@+id/tvShipAddress"
                     android:text="Địa chỉ chi tiết"
-                    android:textColor="#757575"
+                    android:textColor="#070707"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
 
-                <TextView
-                    android:id="@+id/tvShipWard"
-                    android:text="Phường/Xã"
-                    android:textColor="#757575"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
 
-                <TextView
-                    android:id="@+id/tvShipDistrict"
-                    android:text="Quận/Huyện"
-                    android:textColor="#757575"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
-
-                <TextView
-                    android:id="@+id/tvShipCity"
-                    android:text="Tỉnh/Thành phố"
-                    android:textColor="#757575"
-                    android:layout_marginTop="2dp"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
 
             </LinearLayout>
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnChangeAddress"
                 android:text="Thay đổi"
                 android:textColor="@color/white"
-                android:background="@drawable/bg_button"
+                android:background="@drawable/bg_btn_blue"
                 android:layout_width="wrap_content"
                 android:layout_height="40dp" />
 
@@ -161,7 +140,7 @@
 
         <TextView
             android:text="Your Items"
-            android:textColor="#757575"
+            android:textColor="@color/black"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
@@ -180,7 +159,8 @@
             android:text="Subtotal: $0.00"
             android:textColor="@color/black"
             android:layout_marginTop="10dp"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"/>
 
         <TextView
             android:id="@+id/tvTax"
@@ -223,12 +203,12 @@
 
 
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnOrder"
             android:text="Đặt hàng"
             android:textColor="@color/white"
             android:textSize="16sp"
-            android:background="@drawable/bg_button"
+            android:background="@drawable/bg_btn_blue"
             android:layout_marginTop="16dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"/>

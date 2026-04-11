@@ -119,14 +119,26 @@ public class OrderDetailActivity extends AppCompatActivity {
 
             // ===== CANCEL BUTTON =====
             if (btnCancel != null && btnBuyAgain != null) {
-                if (isCancelled(orderStatus) || orderStatus.equalsIgnoreCase("delivered")) {
-                    btnCancel.setVisibility(android.view.View.GONE);
-                    btnBuyAgain.setVisibility(android.view.View.VISIBLE);
-                } else {
+                // Chỉ cho phép hủy khi trạng thái là 'pending' hoặc tương đương
+                boolean canCancel = false;
+                if (orderStatus != null) {
+                    String s = orderStatus.trim().toLowerCase();
+                    canCancel = s.equals("pending") || s.equals("chờ xác nhận") || s.equals("cho xac nhan") || s.equals("chua xac nhan");
+                }
+                if (canCancel) {
                     btnCancel.setVisibility(android.view.View.VISIBLE);
                     btnBuyAgain.setVisibility(android.view.View.GONE);
+                    btnCancel.setOnClickListener(v -> showCancelDialog());
+                } else {
+                    btnCancel.setVisibility(android.view.View.GONE);
+                    btnBuyAgain.setVisibility(android.view.View.VISIBLE);
+                    btnBuyAgain.setOnClickListener(v -> {
+                        Intent intentHome = new Intent(OrderDetailActivity.this, MainActivity.class);
+                        intentHome.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                        startActivity(intentHome);
+                        finish();
+                    });
                 }
-                btnCancel.setOnClickListener(v -> showCancelDialog());
             }
     // Hiện dialog xác nhận hủy đơn hàng
 

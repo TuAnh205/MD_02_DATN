@@ -15,6 +15,9 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 public class MainActivity extends AppCompatActivity {
 
+    private long lastBackPressed = 0;
+    private static final int BACK_PRESS_INTERVAL = 2000; // 2s
+
     BottomNavigationView bottomNav;
 
     @Override
@@ -63,6 +66,28 @@ public class MainActivity extends AppCompatActivity {
             return false;
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        // Nếu là activity root (không còn activity nào phía sau), xử lý double back để thoát app
+        if (isTaskRoot()) {
+            if (System.currentTimeMillis() - lastBackPressed < BACK_PRESS_INTERVAL) {
+                finishAffinity(); // Thoát toàn bộ app
+            } else {
+                lastBackPressed = System.currentTimeMillis();
+                android.widget.Toast.makeText(this, "Nhấn back lần nữa để thoát ứng dụng", android.widget.Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            // Nếu không phải activity root, back bình thường
+            super.onBackPressed();
+        }
+    }
+
+    // HƯỚNG DẪN: Khi chuyển về MainActivity từ các màn khác (đặt hàng, sửa profile, đăng nhập thành công), hãy dùng:
+    // Intent intent = new Intent(context, MainActivity.class);
+    // intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+    // context.startActivity(intent);
+    // ((Activity) context).finish();
 
     private boolean loadFragment(Fragment fragment) {
         if (fragment != null) {

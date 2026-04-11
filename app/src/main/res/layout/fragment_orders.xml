@@ -33,7 +33,7 @@
             <TextView
                 android:id="@+id/tvAll"
                 android:text="Tất cả"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:textSize="13sp"
                 android:padding="8dp"
                 android:gravity="center"
@@ -45,7 +45,7 @@
             <TextView
                 android:id="@+id/tvPending"
                 android:text="Chờ xác nhận"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:textSize="13sp"
                 android:padding="8dp"
                 android:gravity="center"
@@ -57,7 +57,7 @@
             <TextView
                 android:id="@+id/tvProcessing"
                 android:text="Xác nhận"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:textSize="13sp"
                 android:padding="8dp"
                 android:gravity="center"
@@ -69,7 +69,7 @@
             <TextView
                 android:id="@+id/tvShipping"
                 android:text="Chưa thanh toán"
-                android:textColor="#211C1C"
+                android:textColor="@color/black"
                 android:textSize="13sp"
                 android:padding="8dp"
                 android:gravity="center"
@@ -83,7 +83,7 @@
             <TextView
                 android:id="@+id/tvCancelled"
                 android:text="Đã hủy"
-                android:textColor="#000000"
+                android:textColor="@color/black"
                 android:textSize="13sp"
                 android:padding="8dp"
                 android:gravity="center"

@@ -13,6 +13,7 @@ import java.util.List;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -36,7 +37,7 @@ public class CheckOutActivity extends AppCompatActivity {
 
     RadioGroup paymentGroup;
     EditText edVoucher;
-    Button btnOrder;
+    AppCompatButton btnOrder;
     TextView tvSubtotal, tvTax, tvTotal;
     androidx.recyclerview.widget.RecyclerView rvSummary;
     List<com.anhnvt_ph55017.md_02_datn.models.Product> cartList;
@@ -44,7 +45,8 @@ public class CheckOutActivity extends AppCompatActivity {
 
     // shipping
     TextView tvShipName, tvShipPhone, tvShipAddress;
-    Button btnChangeAddress;
+    AppCompatButton btnChangeAddress;
+
     Address selectedAddress;
     private int userId;
 
