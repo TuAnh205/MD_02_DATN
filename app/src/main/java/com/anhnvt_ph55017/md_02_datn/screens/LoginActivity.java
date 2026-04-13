@@ -27,9 +27,9 @@ public class LoginActivity extends AppCompatActivity {
     private static final int RC_SIGN_IN = 1001;
 
     EditText edtEmail, edtPass;
-    Button btnLogin, btnGoogle;
+    Button btnLogin;
     TextView tvSignUp, tvReset;
-
+    ImageButton  btnGoogle;
     GoogleSignInClient googleSignInClient;
 
     boolean isPasswordVisible = false;

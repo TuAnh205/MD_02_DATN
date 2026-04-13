@@ -2,7 +2,7 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background">
+    android:background="@color/white">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -11,56 +11,49 @@
         android:padding="24dp">
 
         <!-- Header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="CORE-TECH"
-            android:textColor="@color/onBackground"
-            android:textStyle="bold"
-            android:textSize="16sp"
-            android:layout_marginTop="20dp"
-            android:layout_gravity="center_horizontal"
-            android:layout_marginBottom="32dp"/>
 
         <!-- Welcome -->
         <TextView
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="100dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Welcome to CORE-\nTECH"
+            android:text="Chào mừng bạn"
             android:textColor="@color/onBackground"
-            android:textSize="32sp"
-            android:textStyle="bold"/>
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:gravity="center"/>
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Your gateway to the next generation of electronics."
-            android:textColor="#9AA7B2"
+            android:text="Đăng nhập tài khoản"
+            android:textColor="#666666"
             android:textSize="14sp"
-            android:layout_marginTop="8dp"
-            android:layout_marginBottom="32dp"/>
+            android:gravity="center"
+            android:layout_marginTop="6dp"
+            android:layout_marginBottom="28dp"/>
 
         <!-- Email -->
-        <TextView
-            android:layout_marginTop="20dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Email or Phone Number"
-            android:textColor="@color/onBackground"
-            android:textSize="14sp"/>
+
 
         <EditText
             android:id="@+id/edt_Email"
             android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Enter your email"
+            android:layout_height="52dp"
+            android:hint="Email của bạn"
             android:inputType="textEmailAddress"
             android:textColor="@color/onBackground"
             android:textColorHint="#7A8896"
-            android:background="@drawable/edt_email"
-            android:padding="16dp"
-            android:layout_marginTop="8dp"/>
+            android:background="@drawable/edittext_bg"
+
+            android:gravity="center_vertical"
+
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
+            android:paddingTop="0dp"
+            android:paddingBottom="0dp"
+
+            android:layout_marginTop="60dp"/>
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSavedAccounts"
             android:layout_width="match_parent"
@@ -69,63 +62,73 @@
             android:visibility="gone" />
 
         <!-- Password title -->
+
+
+        <EditText
+            android:id="@+id/edt_Pass"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:hint="Mật khẩu"
+            android:inputType="textPassword"
+            android:textColor="@color/onBackground"
+            android:textColorHint="#7A8896"
+            android:background="@drawable/edittext_bg"
+
+            android:gravity="center_vertical"
+
+            android:paddingStart="12dp"
+            android:paddingEnd="40dp"
+        android:paddingTop="0dp"
+        android:paddingBottom="0dp"
+
+        android:drawableEnd="@drawable/ic_eye"
+        android:drawablePadding="8dp"
+
+        android:layout_marginTop="12dp"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="20dp">
+            android:layout_marginTop="15dp">
 
-            <TextView
+            <RadioButton
+                android:id="@+id/checkRemember"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Nhớ tài khoản"
+                android:scaleX="0.9"
+                android:scaleY="0.9"
+                android:textColor="@color/onBackground"/>
+
+            <!-- View đẩy -->
+            <View
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Password"
-                android:textColor="@color/onBackground"
-                android:textSize="14sp"/>
+                android:layout_weight="1"/>
 
             <TextView
                 android:id="@+id/tvResetPass"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Forgot Password?"
+                android:text="Quên mật khẩu ?"
                 android:textColor="#2F80FF"
                 android:textSize="13sp"/>
+
         </LinearLayout>
-
-        <!-- Password input -->
-        <EditText
-            android:id="@+id/edt_Pass"
-            android:layout_width="match_parent"
-            android:layout_height="50dp"
-            android:hint="Enter your password"
-            android:inputType="textPassword"
-            android:textColor="@color/onBackground"
-            android:textColorHint="#7A8896"
-            android:background="@drawable/edt_email"
-            android:padding="16dp"
-            android:drawableEnd="@drawable/ic_eye"
-            android:layout_marginTop="8dp"/>
-
         <!-- Remember me -->
-        <CheckBox
-            android:id="@+id/checkRemember"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Remember me"
-            android:textColor="@color/onBackground"
-            android:layout_marginTop="12dp"/>
+
 
         <!-- Login button -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btn_login"
-            android:text="Login"
+            android:text="Đăng nhập"
             android:textSize="16sp"
             android:textStyle="bold"
             android:backgroundTint="@null"
             android:stateListAnimator="@null"
             android:textColor="#FFFFFF"
 
-            android:background="@drawable/btn_login"
+            android:background="@drawable/btn_login1"
             android:layout_marginTop="32dp"
             android:layout_width="match_parent"
             android:layout_height="56dp">
@@ -134,47 +137,67 @@
 
 
         <!-- OR -->
-        <TextView
-
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="OR CONTINUE WITH"
-            android:textColor="#7A8896"
-            android:textSize="12sp"
+            android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginTop="52dp"
-            android:layout_marginBottom="16dp"/>
+            android:layout_marginTop="20dp"
+            android:layout_marginBottom="16dp">
+
+            <!-- Line trái -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#14486B"/>
+
+            <!-- Text -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Hoặc"
+                android:textSize="12sp"
+                android:textColor="#000000"
+                android:layout_marginHorizontal="8dp"/>
+
+            <!-- Line phải -->
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"
+                android:background="#14486B"/>
+
+        </LinearLayout>
+
 
         <!-- Social -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:layout_marginTop="52dp"
-            >
-            <androidx.appcompat.widget.AppCompatButton
+
+            android:gravity="center">
+
+            <ImageButton
                 android:id="@+id/btn_google_sign_in"
-                android:layout_width="0dp"
+                android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
-                android:text="  Google"
-                android:textColor="#FFFFFF"
                 android:layout_margin="10dp"
-                android:drawablePadding="8dp"
-                android:gravity="center"
-                android:background="@drawable/btn_ggfb"/>
+                android:src="@drawable/google1"
+                android:background="@drawable/btn_ggfb"
+                android:scaleType="centerInside"
+                android:padding="10dp"/>
 
-            <androidx.appcompat.widget.AppCompatButton
-                android:layout_width="0dp"
+            <ImageButton
+                android:id="@+id/btn_facebook_sign_in"
+                android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_weight="1"
-                android:text="  FaceBook"
-                android:textColor="#FFFFFF"
                 android:layout_margin="10dp"
-                android:drawablePadding="8dp"
-                android:gravity="center"
-                android:background="@drawable/btn_ggfb"/>
-
+                android:src="@drawable/facebook1"
+                android:background="@drawable/btn_ggfb"
+                android:scaleType="centerInside"
+                android:padding="10dp"/>
 
         </LinearLayout>
 
@@ -183,13 +206,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="10dp"
             android:orientation="horizontal">
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Don’t have an account?"
-                android:textColor="#9AA7B2"
+                android:text="Bạn không có tài khoản?"
+                android:textColor="#383838"
                 android:textSize="14sp"
                 android:gravity="center"
               />
@@ -197,7 +220,7 @@
                 android:id="@+id/tvSignUp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="  Sign Up"
+                android:text="Tao tài khoản"
                 android:textColor="#034DFF"
                 android:textSize="14sp"
                 android:gravity="center"
