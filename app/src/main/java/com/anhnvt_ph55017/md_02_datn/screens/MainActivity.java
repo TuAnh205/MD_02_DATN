@@ -25,12 +25,6 @@ public class MainActivity extends AppCompatActivity {
         SessionManager.applyTheme(this);
         super.onCreate(savedInstanceState);
 
-        if (!SessionManager.isLoggedIn(this)) {
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-            return;
-        }
-
         String role = SessionManager.getUserRole(this);
         if ("shop".equalsIgnoreCase(role)) {
             startActivity(new Intent(this, ShopMainActivity.class));

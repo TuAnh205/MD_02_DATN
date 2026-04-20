@@ -135,8 +135,14 @@ public class DetailActivity extends AppCompatActivity {
             });
         });
 
+
+        // Lấy productId đúng chuẩn (giống Home/Search/Favorite)
         Intent intent = getIntent();
-        productId = intent.getStringExtra("id");
+        productId = intent.getStringExtra("productId");
+        if (productId == null || productId.isEmpty()) {
+            // fallback nếu truyền key khác
+            productId = intent.getStringExtra("id");
+        }
 
         btnBack.setOnClickListener(v -> finish());
 

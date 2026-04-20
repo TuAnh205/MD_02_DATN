@@ -46,14 +46,6 @@ public class CartFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.activity_cart, container, false);
 
-        // check login
-        if (!SessionManager.isLoggedIn(requireContext())) {
-            Toast.makeText(requireContext(), "Bạn cần đăng nhập để xem giỏ hàng", Toast.LENGTH_SHORT).show();
-            startActivity(new Intent(requireContext(), LoginActivity.class));
-            requireActivity().finish();
-            return view;
-        }
-
         // ánh xạ view
         rvCart = view.findViewById(R.id.rvCart);
         tvSubtotal = view.findViewById(R.id.tvSubtotal);
@@ -66,7 +58,12 @@ public class CartFragment extends Fragment {
 
         setupAdapter();
         setupListeners();
-        loadCartFromBackend();
+
+        if (SessionManager.isLoggedIn(requireContext())) {
+            loadCartFromBackend();
+        } else {
+            loadCartFromLocal();
+        }
 
         return view;
     }
@@ -96,10 +93,11 @@ public class CartFragment extends Fragment {
         });
 
         btnCheckOut.setOnClickListener(v -> {
-            int userId = SessionManager.getUserId(requireContext());
-
-            if (userId <= 0) {
-                Toast.makeText(requireContext(), "Please login to checkout", Toast.LENGTH_SHORT).show();
+            // Kiểm tra đăng nhập khi đặt hàng
+            if (!SessionManager.isLoggedIn(requireContext())) {
+                // Lưu lại cart local trước khi chuyển sang đăng nhập
+                com.anhnvt_ph55017.md_02_datn.utils.CartLocalManager.saveCart(requireContext(), cartList);
+                Toast.makeText(requireContext(), "Vui lòng đăng nhập để đặt hàng", Toast.LENGTH_SHORT).show();
                 startActivity(new Intent(requireContext(), LoginActivity.class));
                 return;
             }
@@ -120,45 +118,68 @@ public class CartFragment extends Fragment {
         });
     }
 
+    private void loadCartFromLocal() {
+        cartList.clear();
+        cartList.addAll(com.anhnvt_ph55017.md_02_datn.utils.CartLocalManager.loadCart(requireContext()));
+        if (adapter != null) adapter.notifyDataSetChanged();
+        calculateTotal();
+    }
+
+
     private void updateCartItem(Product product, int newQty) {
-        String token = SessionManager.getToken(requireContext());
-        if (token == null || token.isEmpty()) return;
-
-        CartApiService.updateCartItem(requireContext(), token, product.getCartItemId(), newQty, new CartApiService.CartCallback() {
-            @Override
-            public void onSuccess(org.json.JSONObject cartJson) {
-                requireActivity().runOnUiThread(() -> loadCartFromBackend());
-            }
-
-            @Override
-            public void onError(String error) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Lỗi cập nhật: " + error, Toast.LENGTH_SHORT).show());
-            }
-        });
+        if (SessionManager.isLoggedIn(requireContext())) {
+            String token = SessionManager.getToken(requireContext());
+            if (token == null || token.isEmpty()) return;
+            CartApiService.updateCartItem(requireContext(), token, product.getCartItemId(), newQty, new CartApiService.CartCallback() {
+                @Override
+                public void onSuccess(org.json.JSONObject cartJson) {
+                    requireActivity().runOnUiThread(() -> loadCartFromBackend());
+                }
+                @Override
+                public void onError(String error) {
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), "Lỗi cập nhật: " + error, Toast.LENGTH_SHORT).show());
+                }
+            });
+        } else {
+            product.setQuantity(newQty);
+            com.anhnvt_ph55017.md_02_datn.utils.CartLocalManager.saveCart(requireContext(), cartList);
+            adapter.notifyDataSetChanged();
+            calculateTotal();
+        }
     }
 
     private void removeCartItem(Product product) {
-        String token = SessionManager.getToken(requireContext());
-        if (token == null || token.isEmpty()) return;
-
-        CartApiService.removeFromCart(requireContext(), token, product.getCartItemId(), new CartApiService.CartCallback() {
-            @Override
-            public void onSuccess(org.json.JSONObject cartJson) {
-                requireActivity().runOnUiThread(() -> loadCartFromBackend());
-            }
-
-            @Override
-            public void onError(String error) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Lỗi xoá: " + error, Toast.LENGTH_SHORT).show());
-            }
-        });
+        if (SessionManager.isLoggedIn(requireContext())) {
+            String token = SessionManager.getToken(requireContext());
+            if (token == null || token.isEmpty()) return;
+            CartApiService.removeFromCart(requireContext(), token, product.getCartItemId(), new CartApiService.CartCallback() {
+                @Override
+                public void onSuccess(org.json.JSONObject cartJson) {
+                    requireActivity().runOnUiThread(() -> loadCartFromBackend());
+                }
+                @Override
+                public void onError(String error) {
+                    requireActivity().runOnUiThread(() ->
+                            Toast.makeText(requireContext(), "Lỗi xoá: " + error, Toast.LENGTH_SHORT).show());
+                }
+            });
+        } else {
+            cartList.remove(product);
+            com.anhnvt_ph55017.md_02_datn.utils.CartLocalManager.saveCart(requireContext(), cartList);
+            adapter.notifyDataSetChanged();
+            calculateTotal();
+        }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        if (SessionManager.isLoggedIn(requireContext())) {
+            loadCartFromBackend();
+        } else {
+            loadCartFromLocal();
+        }
         calculateTotal();
     }
 

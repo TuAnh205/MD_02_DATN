@@ -1,0 +1,75 @@
+<com.google.android.material.card.MaterialCardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_margin="8dp"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    app:cardCornerRadius="16dp"
+    app:cardElevation="2dp"
+    app:cardBackgroundColor="#FFFFFF"
+
+    app:strokeColor="#000000"
+    app:strokeWidth="1dp">
+
+    <LinearLayout
+        android:padding="12dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:id="@+id/imgProduct"
+            android:layout_width="90dp"
+            android:layout_height="90dp"
+            android:scaleType="centerCrop"/>
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvName"
+                android:text="Tên sản phẩm"
+                android:textStyle="bold"
+                android:textSize="16sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvPrice"
+                android:text="39.990.000 đ"
+                android:textColor="#2F80FF"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_marginBottom="20dp"
+                android:id="@+id/imgDelete"
+                android:src="@drawable/ic_delete"
+                android:layout_width="22dp"
+                android:layout_height="22dp"/>
+
+            <ImageView
+                android:id="@+id/imgAddCart"
+                android:src="@drawable/ic_add"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_alignParentEnd="true"
+                android:layout_below="@id/imgDelete"
+                android:layout_marginTop="8dp"/>
+        </LinearLayout>
+
+    </LinearLayout>
+
+</com.google.android.material.card.MaterialCardView>

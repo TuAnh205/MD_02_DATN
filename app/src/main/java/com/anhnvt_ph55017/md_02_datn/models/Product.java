@@ -45,6 +45,14 @@ public class Product implements Serializable {
         this.description = description;
         this.stock = stock;
     }
+    // Đảm bảo tương thích với CartFragment: setQuantity/getQuantity
+    public void setQuantity(int quantity) {
+        this.qty = quantity;
+    }
+
+    public int getQuantity() {
+        return this.qty;
+    }
 
     public int getImage() {
         return image;

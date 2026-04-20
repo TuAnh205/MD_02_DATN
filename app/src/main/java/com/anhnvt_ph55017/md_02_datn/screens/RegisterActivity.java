@@ -14,8 +14,10 @@ import com.android.volley.toolbox.Volley;
 
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
+import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONObject;
+
 
 public class RegisterActivity extends AppCompatActivity {
 
@@ -37,11 +39,13 @@ public class RegisterActivity extends AppCompatActivity {
         edtConfirm = findViewById(R.id.edtPass2);
         btnRegister = findViewById(R.id.btnRegister);
 
+        // Ánh xạ icon back (ImageView đầu tiên)
         btnBack = findViewById(R.id.btnBack);
         if (btnBack != null) {
             btnBack.setOnClickListener(v -> gotoLogin());
         }
 
+        // Ánh xạ TextView "Đăng nhập" (TextView cuối cùng trong layout)
         tvLogin = findViewById(R.id.tvLogin);
         if (tvLogin != null) {
             tvLogin.setOnClickListener(v -> gotoLogin());
@@ -51,7 +55,8 @@ public class RegisterActivity extends AppCompatActivity {
     }
 
     private void gotoLogin() {
-        startActivity(new Intent(this, LoginActivity.class));
+        Intent intent = new Intent(this, LoginActivity.class);
+        startActivity(intent);
         finish();
     }
 
@@ -72,18 +77,21 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        if (pass.length() < 6) {
-            Toast.makeText(this, "Mật khẩu phải ≥ 6 ký tự", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
         if (!pass.equals(confirm)) {
             Toast.makeText(this, "Mật khẩu không khớp", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        // 🔥 GỌI THẲNG API (KHÔNG FIREBASE)
-        registerToServer(name, email, pass);
+        FirebaseAuth.getInstance()
+                .createUserWithEmailAndPassword(email, pass)
+                .addOnCompleteListener(task -> {
+
+                    if (task.isSuccessful()) {
+                        registerToServer(name, email, pass);
+                    } else {
+                        Toast.makeText(this, "Firebase lỗi: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 
     private void registerToServer(String name, String email, String password) {
@@ -93,6 +101,7 @@ public class RegisterActivity extends AppCompatActivity {
             body.put("name", name);
             body.put("email", email);
             body.put("password", password);
+            // ❌ KHÔNG GỬI PHONE
 
             String url = BASE_URL + "/auth/register";
 
@@ -112,32 +121,12 @@ public class RegisterActivity extends AppCompatActivity {
                     },
                     error -> {
 
-                        String message = "Có lỗi xảy ra, thử lại";
-
                         if (error.networkResponse != null) {
-
                             String err = new String(error.networkResponse.data);
-                            int statusCode = error.networkResponse.statusCode;
-
                             android.util.Log.e("REGISTER_ERROR", err);
-
-                            if (statusCode == 400) {
-                                // lỗi client (email trùng)
-                                if (err.contains("Email already exists") || err.contains("duplicate")) {
-                                    message = "Email đã tồn tại";
-                                } else {
-                                    message = "Dữ liệu không hợp lệ";
-                                }
-
-                            } else if (statusCode == 500) {
-                                message = "Lỗi server";
-                            }
-
-                        } else {
-                            message = "Không có kết nối mạng";
                         }
 
-                        Toast.makeText(this, message, Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Email đã tồn tại hoặc lỗi server", Toast.LENGTH_LONG).show();
                     }
             );
 

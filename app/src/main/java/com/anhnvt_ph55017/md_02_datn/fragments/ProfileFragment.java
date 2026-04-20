@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatDelegate;
 
+import com.anhnvt_ph55017.md_02_datn.screens.FavoriteActivity;
 import com.anhnvt_ph55017.md_02_datn.utils.ProfileApiService;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.User;
@@ -156,7 +157,9 @@ public class ProfileFragment extends Fragment {
 
         view.findViewById(R.id.rowWishlist).setOnClickListener(v -> {
             if (!ensureLoggedIn()) return;
-            Toast.makeText(getContext(), "Sản phẩm yêu thích", Toast.LENGTH_SHORT).show();
+
+            Intent intent = new Intent(requireActivity(), FavoriteActivity.class);
+            startActivity(intent);
         });
 
         view.findViewById(R.id.rowNotifications).setOnClickListener(v -> {

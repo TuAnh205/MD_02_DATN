@@ -15,7 +15,21 @@ public class FavoriteApiService {
         void onSuccess(JSONArray favoritesJson);
         void onError(String error);
     }
+    public static void removeFavorite(Context context, String token, String productId) {
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL("http://10.0.2.2:5000/api/favorites/" + productId);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("DELETE");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
 
+                conn.getResponseCode();
+                conn.disconnect();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
     public static void getFavorites(Context context, String token, FavoritesCallback callback) {
         new Thread(() -> {
             try {

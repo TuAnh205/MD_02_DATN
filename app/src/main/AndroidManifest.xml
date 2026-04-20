@@ -6,15 +6,18 @@
 
     <application
         android:allowBackup="true"
+        android:allowClearUserData="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
-        android:usesCleartextTraffic="true"
         android:label="Core-Tech"
-        android:allowClearUserData="true"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/Theme.MD_02_DATN">
+        android:theme="@style/Theme.MD_02_DATN"
+        android:usesCleartextTraffic="true">
+        <activity
+            android:name=".screens.FavoriteActivity"
+            android:exported="false" />
         <activity
             android:name=".screens.ShippingAddressActivity"
             android:exported="false" />
@@ -35,16 +38,16 @@
             android:exported="false" />
         <activity
             android:name=".screens.LoadingActivity"
-            android:exported="true" >
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".screens.MainActivity"
-            android:exported="true" >
-        </activity>
+            android:exported="true"></activity>
         <activity
             android:name=".screens.CartActivity"
             android:exported="false" />
