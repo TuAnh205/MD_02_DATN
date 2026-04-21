@@ -11,26 +11,23 @@
         android:layout_height="wrap_content">
 
         <!-- TITLE -->
-
         <TextView
-            android:text="Checkout"
+            android:text="Thanh toán"
             android:textColor="@color/black"
             android:textSize="22sp"
             android:textStyle="bold"
+            android:layout_marginBottom="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-
-        <!-- SHIPPING ADDRESS -->
-
+        <!-- ADDRESS -->
         <TextView
-            android:text="Shipping Address"
+            android:text="Địa chỉ nhận hàng"
             android:textColor="#757575"
             android:textStyle="bold"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-
 
         <LinearLayout
             android:id="@+id/addressCard"
@@ -45,8 +42,8 @@
             <ImageView
                 android:src="@android:drawable/ic_menu_mylocation"
                 android:tint="#2F80FF"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:layout_marginEnd="12dp" />
 
             <LinearLayout
@@ -67,7 +64,7 @@
                 <TextView
                     android:id="@+id/tvShipPhone"
                     android:text="Số điện thoại"
-                    android:textColor="#000000"
+                    android:textColor="#444"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
@@ -75,36 +72,30 @@
                 <TextView
                     android:id="@+id/tvShipAddress"
                     android:text="Địa chỉ chi tiết"
-                    android:textColor="#070707"
+                    android:textColor="#444"
                     android:layout_marginTop="2dp"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content" />
-
-
-
             </LinearLayout>
 
             <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnChangeAddress"
-                android:text="Thay đổi"
+                android:text="Đổi"
+                android:textAllCaps="false"
                 android:textColor="@color/white"
                 android:background="@drawable/bg_btn_blue"
                 android:layout_width="wrap_content"
-                android:layout_height="40dp" />
-
+                android:layout_height="36dp" />
         </LinearLayout>
 
-
-        <!-- PAYMENT METHOD -->
-
+        <!-- PAYMENT -->
         <TextView
-            android:text="Payment Method"
+            android:text="Phương thức thanh toán"
             android:textColor="#757575"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
-
 
         <RadioGroup
             android:id="@+id/paymentGroup"
@@ -112,34 +103,31 @@
             android:layout_height="wrap_content">
 
             <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/payCOD"
-                android:text="Thanh toán sau khi nhận hàng"
+                android:text="Thanh toán khi nhận hàng (COD)"
                 android:textColor="@color/black"
                 android:buttonTint="#2F80FF"
                 android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:layout_marginTop="8dp"/>
+                android:padding="14dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
 
             <RadioButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
                 android:id="@+id/payCard"
-                android:text="Sử dụng thẻ"
+                android:text="Thanh toán bằng thẻ"
                 android:textColor="@color/black"
                 android:buttonTint="#2F80FF"
                 android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:layout_marginTop="8dp"/>
-
+                android:padding="14dp"
+                android:layout_marginTop="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
         </RadioGroup>
 
-
-
-
+        <!-- PRODUCTS -->
         <TextView
-            android:text="Your Items"
+            android:text="Sản phẩm"
             android:textColor="@color/black"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
@@ -149,73 +137,106 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvSummary"
             android:layout_width="match_parent"
-            android:layout_height="150dp"
-            android:layout_marginTop="8dp" />
-
-        <!-- SUMMARY TOTALS -->
-
-        <TextView
-            android:id="@+id/tvSubtotal"
-            android:text="Subtotal: $0.00"
-            android:textColor="@color/black"
-            android:layout_marginTop="10dp"
             android:layout_height="wrap_content"
-            android:layout_width="wrap_content"/>
-
-        <TextView
-            android:id="@+id/tvTax"
-            android:text="Tax: $0.00"
-            android:textColor="@color/black"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
-
-        <TextView
-            android:id="@+id/tvTotal"
-            android:text="Total: $1249"
-            android:textColor="@color/blue"
-            android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:nestedScrollingEnabled="false"
+            android:layout_marginTop="8dp"/>
 
         <!-- VOUCHER -->
-
         <TextView
-            android:text="Voucher"
+            android:text="Mã giảm giá"
             android:textColor="#757575"
             android:textStyle="bold"
             android:layout_marginTop="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
-        <EditText
-            android:id="@+id/edVoucher"
-            android:hint="Enter voucher code"
-            android:inputType="text"
-            android:textColor="@color/black"
-            android:textColorHint="#888"
+        <LinearLayout
+            android:id="@+id/layoutVoucherSelect"
+            android:orientation="horizontal"
             android:background="@drawable/bg_card"
-            android:padding="12dp"
+            android:padding="14dp"
             android:layout_marginTop="8dp"
+            android:gravity="center_vertical"
             android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/tvVoucherTitle"
+                android:text="Chọn voucher"
+                android:textColor="#222"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/tvVoucherValue"
+                android:text=""
+                android:textColor="#2F80FF"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginStart="8dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <View
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:layout_weight="1"/>
+
+            <ImageView
+                android:src="@drawable/ic_right_arrow"
+                android:tint="#000000"
+                android:layout_width="20dp"
+                android:layout_height="20dp"/>
+        </LinearLayout>
+
+        <!-- PRICE -->
+        <TextView
+            android:id="@+id/tvSubtotal"
+            android:text="Tạm tính: 0đ"
+            android:textColor="@color/black"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"/>
 
+        <TextView
+            android:id="@+id/tvTax"
+            android:text="Thuế: 0đ"
+            android:textColor="@color/black"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
+        <TextView
+            android:id="@+id/tvVoucher"
+            android:text="Giảm giá: -0đ"
+            android:textColor="#E53935"
+            android:textStyle="bold"
+            android:visibility="gone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
 
+        <TextView
+            android:id="@+id/tvTotal"
+            android:text="Tổng thanh toán: 0đ"
+            android:textColor="#2F80FF"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <!-- BUTTON -->
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnOrder"
             android:text="Đặt hàng"
+            android:textAllCaps="false"
             android:textColor="@color/white"
             android:textSize="16sp"
             android:background="@drawable/bg_btn_blue"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="50dp"/>
 
-
     </LinearLayout>
-
 </ScrollView>
-
-

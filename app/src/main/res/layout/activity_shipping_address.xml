@@ -78,12 +78,13 @@
         android:paddingEnd="0dp" />
 
     <!-- Add Address Button -->
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnAddAddress"
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="+ Thêm địa chỉ mới"
-        android:background="@null"
+
+        android:background="@drawable/bg_btn_blue"
         android:textColor="#FFFFFF"
         android:textSize="16sp"
         android:layout_margin="16dp"
@@ -102,7 +103,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="ĐỊA CHỈ ĐÃ CHỌN"
-            android:textColor="#6B7280"
+            android:textColor="#37383A"
             android:textSize="12sp"
             android:textStyle="bold"
             android:letterSpacing="0.05" />
@@ -146,7 +147,7 @@
     </LinearLayout>
 
     <!-- Use This Address Button -->
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnUseAddress"
         android:layout_width="match_parent"
         android:layout_height="56dp"

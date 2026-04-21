@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Màu nền xám nhạt -->
+    <solid android:color="#007DFF"/>
+
+    <!-- Bo tròn 100% -->
+    <corners android:radius="50dp"/>
+
+</shape>
+
+

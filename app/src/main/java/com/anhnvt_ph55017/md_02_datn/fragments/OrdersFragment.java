@@ -53,7 +53,7 @@ public class OrdersFragment extends Fragment {
         rvOrders = view.findViewById(R.id.rvOrders);
         // Always re-init orderList to avoid static bugs
         orderList = new ArrayList<>();
-        
+
         // Initialize status tabs
         tvAll = view.findViewById(R.id.tvAll);
         tvPending = view.findViewById(R.id.tvPending);
@@ -192,7 +192,7 @@ public class OrdersFragment extends Fragment {
 
         return view;
     }
-    
+
     // Thiết lập sự kiện click cho các tab trạng thái
     private void setupTabListeners() {
         tvAll.setOnClickListener(v -> filterByStatus("ALL"));
@@ -201,7 +201,7 @@ public class OrdersFragment extends Fragment {
         tvShipping.setOnClickListener(v -> filterByStatus("Chưa thanh toán"));
         tvCancelled.setOnClickListener(v -> filterByStatus("Đã hủy"));
     }
-    
+
     // Lọc danh sách đơn theo trạng thái được chọn
     private void filterByStatus(String status) {
         selectedStatus = status;
@@ -247,7 +247,7 @@ public class OrdersFragment extends Fragment {
         // Các biến thể phổ biến của trạng thái đã hủy
         return status.equals("canceled") || status.equals("cancelled") || status.equals("đã hủy") || status.equals("da huy") || status.equals("huy") || status.equals("cancel") || status.equals("đã bị hủy") || status.equals("da bi huy");
     }
-    
+
     // Nhận kết quả trả về từ OrderDetailActivity (thay đổi trạng thái)
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -360,7 +360,7 @@ public class OrdersFragment extends Fragment {
     private String getStatusVietnamese(String status) {
         return status;
     }
-    
+
     // Cập nhật kiểu hiển thị khi tab được chọn, tất cả tab khác mờ đi
     private void setTabActive(TextView activeTab) {
         // reset tất cả về màu đen mờ

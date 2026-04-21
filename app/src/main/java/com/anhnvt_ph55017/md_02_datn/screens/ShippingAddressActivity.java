@@ -9,6 +9,7 @@ import android.widget.Button;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.anhnvt_ph55017.md_02_datn.Adapters.AddressAdapter;
@@ -25,8 +26,8 @@ import org.json.JSONObject;
 
 public class ShippingAddressActivity extends AppCompatActivity {
     private RecyclerView rvAddresses;
-    private Button btnAddAddress;
-    private Button btnUseAddress;
+    private AppCompatButton btnAddAddress;
+    private AppCompatButton btnUseAddress;
     private android.widget.TextView tvSelectedAddressName;
     private android.widget.TextView tvSelectedAddressDetail;
     private List<Address> addresses;

@@ -10,6 +10,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.R;
@@ -21,7 +22,6 @@ import java.util.List;
 public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHolder> {
 
     private int selectedPosition = RecyclerView.NO_POSITION;
-
     public void setSelectedAddress(Address address) {
         int oldPosition = selectedPosition;
         for (int i = 0; i < list.size(); i++) {
@@ -72,7 +72,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
 
         holder.tvName.setText(a.getName());
         holder.tvPhone.setText(a.getPhone());
-        // Địa chỉ tổng hợp: số nhà, phường/xã, quận/huyện, tỉnh/thành
+
         StringBuilder fullAddress = new StringBuilder();
         if (a.getAddress() != null && !a.getAddress().isEmpty()) {
             fullAddress.append(a.getAddress());
@@ -90,9 +90,20 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
             fullAddress.append(a.getCity());
         }
         holder.tvAddress.setText(fullAddress.toString());
-        holder.rbDefault.setChecked(position == selectedPosition);
 
-        // Set tag visibility and text
+        boolean isSelected = position == selectedPosition;
+        CardView card = (CardView) holder.itemView;
+
+        holder.cardRoot.setCardBackgroundColor(
+                isSelected
+                        ? Color.parseColor("#2F80FF")
+                        : Color.WHITE
+        );
+
+        // ✅ Radio
+        holder.rbDefault.setChecked(isSelected);
+
+        // ✅ TAG
         if (a.isDefault()) {
             holder.tvTag.setVisibility(View.VISIBLE);
             holder.tvTag.setText("MẶC ĐỊNH");
@@ -100,12 +111,28 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
             holder.tvTag.setVisibility(View.GONE);
         }
 
-        holder.itemView.setBackgroundColor(position == selectedPosition
-                ? Color.parseColor("#2F80FF")
-                : Color.parseColor("#FFFFFF"));
-        holder.btnEdit.setColorFilter(Color.BLACK);
-        holder.btnDelete.setColorFilter(Color.BLACK);
+        // 🎨 BACKGROUND
+//        holder.itemView.setBackgroundResource(
+//                isSelected ? R.drawable.bg_address_selected : R.drawable.bg_address_normal
+//        );
 
+        // 🎨 TEXT COLOR
+        holder.tvName.setTextColor(isSelected ? Color.WHITE : Color.BLACK);
+        holder.tvPhone.setTextColor(isSelected ? Color.WHITE : Color.DKGRAY);
+        holder.tvAddress.setTextColor(isSelected ? Color.WHITE : Color.GRAY);
+
+        // 🎨 RADIO COLOR
+        holder.rbDefault.setButtonTintList(
+                android.content.res.ColorStateList.valueOf(
+                        isSelected ? Color.WHITE : Color.parseColor("#2F80FF")
+                )
+        );
+
+        // 🎨 ICON
+        holder.btnEdit.setColorFilter(isSelected ? Color.WHITE : Color.BLACK);
+        holder.btnDelete.setColorFilter(isSelected ? Color.WHITE : Color.BLACK);
+
+        // 👉 CLICK
         View.OnClickListener selectListener = v -> {
             int oldPosition = selectedPosition;
             selectedPosition = holder.getAdapterPosition();
@@ -130,6 +157,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
         RadioButton rbDefault;
         TextView tvName, tvPhone, tvAddress, tvTag;
         ImageButton btnEdit, btnDelete;
+        CardView cardRoot;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -140,7 +168,7 @@ public class AddressAdapter extends RecyclerView.Adapter<AddressAdapter.ViewHold
             tvTag = itemView.findViewById(R.id.tvTag);
             btnEdit = itemView.findViewById(R.id.btnEdit);
             btnDelete = itemView.findViewById(R.id.btnDelete);
-
+            cardRoot = itemView.findViewById(R.id.cardRoot);
             btnEdit.setImageResource(android.R.drawable.ic_menu_edit);
             btnDelete.setImageResource(android.R.drawable.ic_menu_delete);
         }

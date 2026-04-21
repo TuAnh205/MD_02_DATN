@@ -31,6 +31,9 @@
             android:name=".screens.DetailActivity"
             android:exported="false" />
         <activity
+            android:name=".screens.VoucherSelectActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.OTP_Activity"
             android:exported="false" />
         <activity

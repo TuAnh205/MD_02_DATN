@@ -1,4 +1,3 @@
-
 package com.anhnvt_ph55017.md_02_datn.utils;
 
 import android.content.Context;
@@ -19,35 +18,53 @@ public class CartApiService {
         void onSuccess(JSONObject cartJson);
         void onError(String error);
     }
-    // ✅ CLEAR CART
+
+    // ================= SAFE CALLBACK =================
+    private static void safeSuccess(CartCallback callback, JSONObject res) {
+        if (callback != null) callback.onSuccess(res);
+    }
+
+    private static void safeError(CartCallback callback, String err) {
+        if (callback != null) callback.onError(err);
+    }
+
+    // ================= CLEAR CART =================
     public static void clearCart(Context context, String token, CartCallback callback) {
         new Thread(() -> {
             try {
                 URL url = new URL(BASE_URL + "/clear");
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+
                 conn.setRequestMethod("POST");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
+
                 int code = conn.getResponseCode();
+
                 Scanner sc = new Scanner(
                         code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()
                 ).useDelimiter("\\A");
+
                 String res = sc.hasNext() ? sc.next() : "";
                 sc.close();
+
                 Log.d("CLEAR_CART", res);
+
                 if (code >= 200 && code < 300) {
-                    callback.onSuccess(new JSONObject(res));
-                } else callback.onError(res);
+                    safeSuccess(callback, new JSONObject(res));
+                } else {
+                    safeError(callback, res);
+                }
+
             } catch (Exception e) {
-                callback.onError(e.getMessage());
+                safeError(callback, e.getMessage());
             }
         }).start();
     }
-    // ✅ ADD TO CART
+
+    // ================= ADD TO CART =================
     public static void addToCart(Context context, String token, String productId, int qty, CartCallback callback) {
         new Thread(() -> {
             try {
-                Log.d("ADD_CART_DEBUG", "Token=" + token + " | productId=" + productId);
-
                 URL url = new URL(BASE_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
@@ -60,98 +77,68 @@ public class CartApiService {
                 body.put("productId", productId);
                 body.put("qty", qty);
 
-                Log.d("ADD_CART_BODY", body.toString());
-
                 OutputStream os = conn.getOutputStream();
                 os.write(body.toString().getBytes());
                 os.flush();
                 os.close();
 
-                int responseCode = conn.getResponseCode();
-                Log.d("ADD_CART_RESPONSE_CODE", String.valueOf(responseCode));
+                int code = conn.getResponseCode();
 
-                // Log all response headers for debugging
-                try {
-                    for (int i = 1;; i++) {
-                        String headerKey = conn.getHeaderFieldKey(i);
-                        String headerValue = conn.getHeaderField(i);
-                        if (headerKey == null && headerValue == null) break;
-                        Log.d("ADD_CART_HEADER", headerKey + ": " + headerValue);
-                    }
-                } catch (Exception ex) {
-                    Log.e("ADD_CART_HEADER_ERROR", ex.getMessage(), ex);
-                }
-
-                Scanner scanner = new Scanner(
-                        responseCode >= 200 && responseCode < 300
-                                ? conn.getInputStream()
-                                : conn.getErrorStream()
+                Scanner sc = new Scanner(
+                        code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()
                 ).useDelimiter("\\A");
 
-                String response = scanner.hasNext() ? scanner.next() : "";
-                scanner.close();
+                String res = sc.hasNext() ? sc.next() : "";
+                sc.close();
 
-                Log.d("ADD_CART_RESPONSE", "code=" + responseCode + " | body=" + response);
+                Log.d("ADD_CART", "code=" + code + " | body=" + res);
 
-                if (responseCode >= 200 && responseCode < 300) {
-                    try {
-                        JSONObject json = new JSONObject(response);
-                        callback.onSuccess(json);
-                    } catch (Exception parseEx) {
-                        Log.e("ADD_CART_JSON_ERROR", "Parse error: " + parseEx.getMessage() + " | body=" + response, parseEx);
-                        callback.onError("JSON parse error: " + parseEx.getMessage() + " | body=" + response);
-                    }
+                if (code >= 200 && code < 300) {
+                    safeSuccess(callback, new JSONObject(res));
                 } else {
-                    Log.e("ADD_CART_API_ERROR", "API error: code=" + responseCode + " | body=" + response);
-                    callback.onError(response);
+                    safeError(callback, res);
                 }
 
             } catch (Exception e) {
-                Log.e("ADD_CART_ERROR", e.getMessage(), e);
-                callback.onError(e.getMessage());
+                safeError(callback, e.getMessage());
             }
         }).start();
     }
 
-    // ✅ GET CART
+    // ================= GET CART =================
     public static void getCart(Context context, String token, CartCallback callback) {
         new Thread(() -> {
             try {
-                Log.d("GET_CART_DEBUG", "Token=" + token);
-
                 URL url = new URL(BASE_URL);
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
 
                 conn.setRequestMethod("GET");
                 conn.setRequestProperty("Authorization", "Bearer " + token);
 
-                int responseCode = conn.getResponseCode();
+                int code = conn.getResponseCode();
 
-                Scanner scanner = new Scanner(
-                        responseCode >= 200 && responseCode < 300
-                                ? conn.getInputStream()
-                                : conn.getErrorStream()
+                Scanner sc = new Scanner(
+                        code >= 200 && code < 300 ? conn.getInputStream() : conn.getErrorStream()
                 ).useDelimiter("\\A");
 
-                String response = scanner.hasNext() ? scanner.next() : "";
-                scanner.close();
+                String res = sc.hasNext() ? sc.next() : "";
+                sc.close();
 
-                Log.d("GET_CART_RESPONSE", "code=" + responseCode + " | body=" + response);
+                Log.d("GET_CART", "code=" + code + " | body=" + res);
 
-                if (responseCode >= 200 && responseCode < 300) {
-                    callback.onSuccess(new JSONObject(response));
+                if (code >= 200 && code < 300) {
+                    safeSuccess(callback, new JSONObject(res));
                 } else {
-                    callback.onError(response);
+                    safeError(callback, res);
                 }
 
             } catch (Exception e) {
-                Log.e("GET_CART_ERROR", e.getMessage(), e);
-                callback.onError(e.getMessage());
+                safeError(callback, e.getMessage());
             }
         }).start();
     }
 
-    // ✅ UPDATE
+    // ================= UPDATE =================
     public static void updateCartItem(Context context, String token, String productId, int qty, CartCallback callback) {
         new Thread(() -> {
             try {
@@ -179,19 +166,21 @@ public class CartApiService {
                 String res = sc.hasNext() ? sc.next() : "";
                 sc.close();
 
-                Log.d("UPDATE_CART", res);
+                Log.d("UPDATE_CART", "code=" + code + " | body=" + res);
 
                 if (code >= 200 && code < 300) {
-                    callback.onSuccess(new JSONObject(res));
-                } else callback.onError(res);
+                    safeSuccess(callback, new JSONObject(res));
+                } else {
+                    safeError(callback, res);
+                }
 
             } catch (Exception e) {
-                callback.onError(e.getMessage());
+                safeError(callback, e.getMessage());
             }
         }).start();
     }
 
-    // ✅ DELETE
+    // ================= DELETE =================
     public static void removeFromCart(Context context, String token, String productId, CartCallback callback) {
         new Thread(() -> {
             try {
@@ -209,15 +198,17 @@ public class CartApiService {
 
                 String res = sc.hasNext() ? sc.next() : "";
                 sc.close();
-                Log.d("DEBUG_ID", productId);
-                Log.d("DELETE_CART", res);
+
+                Log.d("DELETE_CART", "id=" + productId + " | code=" + code + " | body=" + res);
 
                 if (code >= 200 && code < 300) {
-                    callback.onSuccess(new JSONObject(res));
-                } else callback.onError(res);
+                    safeSuccess(callback, new JSONObject(res));
+                } else {
+                    safeError(callback, res);
+                }
 
             } catch (Exception e) {
-                callback.onError(e.getMessage());
+                safeError(callback, e.getMessage());
             }
         }).start();
     }
