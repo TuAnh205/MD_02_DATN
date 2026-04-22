@@ -18,7 +18,7 @@ const shopRoutes = require('./routes/shopRoutes');
 const addressRoutes = require('./routes/addressRoutes');
 const locationRoutes = require('./routes/locationRoutes');
 const { seedDatabase } = require('./seeds/seed');
-
+const notificationRoutes = require('./routes/notificationRoutes');
 const app = express();
 const autoSeedOnStart = String(process.env.AUTO_SEED_ON_START || 'true').toLowerCase() === 'true';
 
@@ -40,7 +40,7 @@ app.use('/api/promotions', promotionRoutes);
 app.use('/api/shop', shopRoutes);
 app.use('/api/user/addresses', addressRoutes);
 app.use('/api/locations', locationRoutes);
-
+app.use('/api/notifications', notificationRoutes);
 // Public voucher route
 app.use('/api/vouchers', voucherRoutes);
 

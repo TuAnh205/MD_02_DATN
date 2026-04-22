@@ -17,5 +17,5 @@ router.get("/me", auth, ctrl.me);
 router.put("/me", auth, ctrl.updateProfile);
 router.post("/firebase-sync", ctrl.firebaseSync);
 router.post("/set-password", auth, ctrl.setPassword);
-
+router.put("/change-password", auth, ctrl.changePassword);
 module.exports = router;

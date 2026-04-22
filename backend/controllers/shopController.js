@@ -125,6 +125,22 @@ exports.updateShopOrderStatus = async (req, res) => {
     order.status = mappedStatus;
     await order.save();
 
+    // Nếu trạng thái là "đã xác nhận" thì tạo notification cho user
+    if (mappedStatus === 'đã xác nhận') {
+      try {
+        await Notification.create({
+          user: order.user, // user nhận thông báo
+          type: 'order_status',
+          title: 'Đơn hàng đã được xác nhận',
+          message: `Đơn hàng #${order.orderNumber} của bạn đã được shop xác nhận.`,
+          data: { orderId: order._id, orderNumber: order.orderNumber },
+          isRead: false
+        });
+      } catch (notiErr) {
+        console.error('Lỗi tạo notification cho user:', notiErr);
+      }
+    }
+
     res.json({ message: 'Cập nhật trạng thái thành công', order });
   } catch (err) {
     res.status(500).json({ message: err.message });

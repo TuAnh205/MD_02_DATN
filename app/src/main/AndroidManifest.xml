@@ -16,6 +16,9 @@
         android:theme="@style/Theme.MD_02_DATN"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".screens.ChangePasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.FavoriteActivity"
             android:exported="false" />
         <activity
@@ -40,6 +43,9 @@
             android:name=".screens.ResetPass"
             android:exported="false" />
         <activity
+            android:name=".screens.NotificationActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.LoadingActivity"
             android:exported="true">
             <intent-filter>
@@ -50,7 +56,7 @@
         </activity>
         <activity
             android:name=".screens.MainActivity"
-            android:exported="true"></activity>
+            android:exported="true" />
         <activity
             android:name=".screens.CartActivity"
             android:exported="false" />

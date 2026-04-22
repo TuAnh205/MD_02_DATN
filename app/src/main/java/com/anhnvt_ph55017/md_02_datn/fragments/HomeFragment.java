@@ -32,6 +32,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.CartActivity;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
+import com.anhnvt_ph55017.md_02_datn.screens.NotificationActivity;
 import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
@@ -109,16 +110,22 @@ public class HomeFragment extends Fragment {
             updateNotificationBadge();
 
 
-
             imgNotification.setOnClickListener(v -> {
                 int count = NotificationManager.getNotificationCount(getContext());
+
                 if (count > 0) {
                     Toast.makeText(getContext(), "You have " + count + " notification(s)", Toast.LENGTH_SHORT).show();
-                    NotificationManager.clearNotifications(getContext());
-                    updateNotificationBadge();
                 } else {
                     Toast.makeText(getContext(), "No new notifications", Toast.LENGTH_SHORT).show();
                 }
+
+                // 👉 Chuyển sang màn NotificationActivity
+                Intent intent = new Intent(getContext(), NotificationActivity.class);
+                startActivity(intent);
+
+                // 👉 Nếu muốn xóa badge sau khi bấm
+                NotificationManager.clearNotifications(getContext());
+                updateNotificationBadge();
             });
 
                 listProducts = new java.util.ArrayList<>();

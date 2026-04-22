@@ -76,4 +76,45 @@ public class ProfileApiService {
             }
         }).start();
     }
+    public static void changePassword(Context context, String token,
+                                      String oldPass, String newPass,
+                                      ProfileCallback callback) {
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(NetworkConstants.API_BASE_URL + "/api/auth/change-password");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("PUT");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setDoOutput(true);
+
+                JSONObject body = new JSONObject();
+                body.put("oldPassword", oldPass);
+                body.put("newPassword", newPass);
+
+                java.io.OutputStream os = conn.getOutputStream();
+                os.write(body.toString().getBytes("UTF-8"));
+                os.close();
+
+                int code = conn.getResponseCode();
+
+                java.io.InputStream is = (code >= 200 && code < 300)
+                        ? conn.getInputStream()
+                        : conn.getErrorStream();
+
+                java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                if (code >= 200 && code < 300) {
+                    callback.onSuccess(new JSONObject(response));
+                } else {
+                    callback.onError(response);
+                }
+
+            } catch (Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
 }

@@ -631,3 +631,37 @@ exports.forgotPassword = async (req, res) => {
 exports.resetPassword = async (req, res) => {
   res.json({ message: "Reset password API (demo)" });
 };
+// ================= CHANGE PASSWORD =================
+exports.changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Thiếu dữ liệu" });
+    }
+
+    const user = await User.findById(req.user.id);
+
+    if (!user || !user.password) {
+      return res.status(400).json({
+        message: "Tài khoản này không có mật khẩu (Google login)",
+      });
+    }
+
+    // check mật khẩu cũ
+    const isMatch = await bcrypt.compare(oldPassword, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Mật khẩu hiện tại không đúng" });
+    }
+
+    // hash mật khẩu mới
+    const hashed = await bcrypt.hash(newPassword, 10);
+    user.password = hashed;
+
+    await user.save();
+
+    res.json({ message: "Đổi mật khẩu thành công" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};

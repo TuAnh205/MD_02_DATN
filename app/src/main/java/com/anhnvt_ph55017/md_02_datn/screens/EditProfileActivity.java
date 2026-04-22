@@ -18,13 +18,11 @@ import com.anhnvt_ph55017.md_02_datn.models.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
-
 public class EditProfileActivity extends AppCompatActivity {
 
     private ImageButton btnBack;
-    private ImageView imgAvatar;
-    private EditText etFullName, etEmail, etPhone, etBio;
-    private AppCompatButton btnSaveChanges, btnCancel;
+    private EditText etFullName, etEmail, etPhone;
+    private AppCompatButton btnSaveChanges;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,78 +30,66 @@ public class EditProfileActivity extends AppCompatActivity {
         setContentView(R.layout.activity_edit_profile);
 
         btnBack = findViewById(R.id.btnBack);
-        imgAvatar = findViewById(R.id.imgAvatar);
         etFullName = findViewById(R.id.etFullName);
         etEmail = findViewById(R.id.etEmail);
         etPhone = findViewById(R.id.etPhone);
-        etBio = findViewById(R.id.etBio);
         btnSaveChanges = findViewById(R.id.btnSaveChanges);
-        btnCancel = findViewById(R.id.btnCancel);
 
-        loadCurrentProfile();
+        loadProfile();
 
-        btnBack.setOnClickListener(v -> onBackPressed());
-        btnCancel.setOnClickListener(v -> onBackPressed());
-
+        btnBack.setOnClickListener(v -> finish());
         btnSaveChanges.setOnClickListener(v -> saveProfile());
     }
 
-    private void loadCurrentProfile() {
+    private void loadProfile() {
         String token = SessionManager.getToken(this);
+
         ProfileApiService.fetchProfile(this, token, new ProfileApiService.ProfileCallback() {
             @Override
             public void onSuccess(org.json.JSONObject userJson) {
                 runOnUiThread(() -> {
-                    etFullName.setText(userJson.optString("name", ""));
-                    etEmail.setText(userJson.optString("email", ""));
-                    etPhone.setText(userJson.optString("phone", ""));
-                    etEmail.setEnabled(false);
-                    etEmail.setTextIsSelectable(false);
-                    // Nếu backend có bio/avatar thì set thêm
+                    etFullName.setText(userJson.optString("name"));
+                    etEmail.setText(userJson.optString("email"));
+                    etPhone.setText(userJson.optString("phone"));
                 });
             }
+
             @Override
             public void onError(String error) {
-                runOnUiThread(() -> Toast.makeText(EditProfileActivity.this, "Lỗi tải thông tin: " + error, Toast.LENGTH_SHORT).show());
+                runOnUiThread(() ->
+                        Toast.makeText(EditProfileActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show()
+                );
             }
         });
     }
 
     private void saveProfile() {
-        String fullName = etFullName.getText().toString().trim();
+        String name = etFullName.getText().toString().trim();
         String phone = etPhone.getText().toString().trim();
-        if (fullName.isEmpty()) {
-            Toast.makeText(this, "Vui lòng điền tên", Toast.LENGTH_SHORT).show();
+
+        if (name.isEmpty()) {
+            Toast.makeText(this, "Nhập tên", Toast.LENGTH_SHORT).show();
             return;
         }
+
         String token = SessionManager.getToken(this);
-        ProfileApiService.updateProfile(this, token, fullName, phone, new ProfileApiService.ProfileCallback() {
-            @Override
-            public void onSuccess(org.json.JSONObject responseJson) {
-                runOnUiThread(() -> {
-                    org.json.JSONObject userJson = responseJson.optJSONObject("user");
-                    if (userJson == null) {
-                        userJson = responseJson;
+
+        ProfileApiService.updateProfile(this, token, name, phone,
+                new ProfileApiService.ProfileCallback() {
+                    @Override
+                    public void onSuccess(org.json.JSONObject userJson) {
+                        runOnUiThread(() -> {
+                            Toast.makeText(EditProfileActivity.this, "Thành công", Toast.LENGTH_SHORT).show();
+                            finish();
+                        });
                     }
-                    Toast.makeText(EditProfileActivity.this, "Cập nhật thành công", Toast.LENGTH_SHORT).show();
-                    // Cập nhật lại session nếu cần
-                    SessionManager.saveUserSession(EditProfileActivity.this,
-                            userJson.optString("_id", ""),
-                            userJson.optString("email", ""),
-                            userJson.optString("name", "")
-                    );
-                    Intent result = new Intent();
-                    result.putExtra("name", userJson.optString("name", ""));
-                    result.putExtra("email", userJson.optString("email", ""));
-                    result.putExtra("phone", userJson.optString("phone", ""));
-                    setResult(RESULT_OK, result);
-                    finish();
+
+                    @Override
+                    public void onError(String error) {
+                        runOnUiThread(() ->
+                                Toast.makeText(EditProfileActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show()
+                        );
+                    }
                 });
-            }
-            @Override
-            public void onError(String error) {
-                runOnUiThread(() -> Toast.makeText(EditProfileActivity.this, "Lỗi cập nhật: " + error, Toast.LENGTH_SHORT).show());
-            }
-        });
     }
 }
