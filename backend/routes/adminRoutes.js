@@ -53,5 +53,7 @@ router.delete('/vouchers/:id', adminController.deleteVoucher);
 // Revenue analytics routes
 router.get('/revenue', adminController.getRevenue);
 router.get('/revenue/shops', adminController.getRevenueByShop);
+router.get('/revenue/platform', adminController.getPlatformRevenue);
+router.get('/revenue/platform/shops', adminController.getPlatformRevenueByShop);
 
 module.exports = router;

@@ -4,15 +4,154 @@ const User = require('../models/User');
 const Order = require('../models/Order');
 const Review = require('../models/Review');
 const Notification = require('../models/Notification');
+const {
+  SHOP_BILLING_POLICY,
+  roundCurrency,
+} = require('../config/shopBillingPolicy');
+const { syncShopBilling, topUpShopWallet } = require('../services/shopBillingService');
+
+const getShopPolicyPayload = (user) => ({
+  ...SHOP_BILLING_POLICY,
+  accepted: Boolean(user?.shopBillingPolicy?.acceptedAt),
+  acceptedAt: user?.shopBillingPolicy?.acceptedAt || null,
+  acceptedVersion: user?.shopBillingPolicy?.version || null,
+  shopStatus: user?.shopStatus || 'active',
+  walletBalance: roundCurrency(user?.shopWallet?.balance || 0),
+  outstandingAmount: roundCurrency(user?.shopBillingSummary?.outstandingAmount || 0),
+});
 
 // ================= GET SHOP PRODUCTS =================
 exports.getShopProducts = async (req, res) => {
   try {
     const shopId = req.user.id;
-    const products = await Product.find({ shopId });
-    res.json(products);
+    const products = await Product.find({ shopId }).sort({ createdAt: -1 });
+    res.json(
+      products.map((product) => {
+        return {
+          ...product.toObject(),
+          chargeStatus: product.billing?.chargeStatus || 'pending',
+        };
+      })
+    );
   } catch (err) {
     res.status(500).json({ message: err.message });
+  }
+};
+
+exports.getBillingSummary = async (req, res) => {
+  try {
+    const synced = await syncShopBilling(req.user.id, { createNotifications: true });
+    if (!synced?.shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    const overdueOrders = await Order.find({
+      'payment.status': 'paid',
+      'items.shopId': req.user.id,
+      'items.platformFee.status': 'unpaid',
+    }).select('orderNumber items payment createdAt');
+
+    const overdueItems = [];
+    overdueOrders.forEach((order) => {
+      order.items.forEach((item) => {
+        if (item.shopId.toString() !== req.user.id.toString()) return;
+        if (item.platformFee?.status !== 'unpaid') return;
+        overdueItems.push({
+          _id: `${order._id}-${item._id}`,
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          name: item.name,
+          price: item.price,
+          qty: item.qty,
+          baseAmount: roundCurrency(item.platformFee?.baseAmount || ((item.price || 0) * (item.qty || 1))),
+          feeAmount: roundCurrency(item.platformFee?.feeAmount || 0),
+          paidAt: order.payment?.paidAt || order.createdAt,
+        });
+      });
+    });
+
+    res.json({
+      summary: synced.summary,
+      policy: getShopPolicyPayload(synced.shop),
+      overdueItems,
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi lấy công nợ shop', error: err.message });
+  }
+};
+
+exports.topUpWallet = async (req, res) => {
+  try {
+    const amount = Number(req.body.amount);
+    const synced = await topUpShopWallet(req.user.id, amount);
+
+    res.json({
+      message: 'Nạp ví thành công, hệ thống đã kiểm tra và tự khấu trừ phí đến hạn',
+      summary: synced.summary,
+      policy: getShopPolicyPayload(synced.shop),
+    });
+  } catch (err) {
+    res.status(400).json({ message: err.message || 'Không thể nạp ví' });
+  }
+};
+
+exports.settleBilling = async (req, res) => {
+  try {
+    const synced = await syncShopBilling(req.user.id, { createNotifications: true });
+    if (!synced?.shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json({
+      message: synced.summary.outstandingAmount > 0
+        ? 'Ví chưa đủ số dư để thanh toán hết công nợ'
+        : 'Công nợ đã được thanh toán đầy đủ',
+      summary: synced.summary,
+      policy: getShopPolicyPayload(synced.shop),
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi thanh toán công nợ', error: err.message });
+  }
+};
+
+exports.getBillingPolicy = async (req, res) => {
+  try {
+    const shop = await User.findById(req.user.id).select('shopBillingPolicy');
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json(getShopPolicyPayload(shop));
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi lấy điều khoản shop', error: err.message });
+  }
+};
+
+exports.acceptBillingPolicy = async (req, res) => {
+  try {
+    const acceptedAt = new Date();
+    const shop = await User.findByIdAndUpdate(
+      req.user.id,
+      {
+        shopBillingPolicy: {
+          acceptedAt,
+          version: SHOP_BILLING_POLICY.version,
+        },
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!shop) {
+      return res.status(404).json({ message: 'Shop not found' });
+    }
+
+    res.json({
+      message: 'Đã chấp nhận điều khoản phí đăng bán',
+      user: shop,
+      policy: getShopPolicyPayload(shop),
+    });
+  } catch (err) {
+    res.status(500).json({ message: 'Lỗi khi chấp nhận điều khoản', error: err.message });
   }
 };
 
@@ -20,14 +159,31 @@ exports.getShopProducts = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const shopId = req.user.id;
+    const shop = await User.findById(shopId).select('shopBillingPolicy shopStatus shopWallet shopBillingSummary');
+    const acceptedVersion = shop?.shopBillingPolicy?.version;
+
+    if (!shop?.shopBillingPolicy?.acceptedAt || acceptedVersion !== SHOP_BILLING_POLICY.version) {
+      return res.status(403).json({
+        message: 'Shop cần chấp nhận điều khoản phí đăng bán trước khi đăng sản phẩm',
+        code: 'SHOP_POLICY_NOT_ACCEPTED',
+        policy: getShopPolicyPayload(shop),
+      });
+    }
+
     const productData = {
       ...req.body,
       shopId,
-      createdBy: req.user.id // Phải có createdBy vì model bắt buộc
+      createdBy: req.user.id,
+      billing: buildProductBillingSnapshot(req.body.price, new Date())
     };
     const product = new Product(productData);
     await product.save();
-    res.status(201).json(product);
+    res.status(201).json({
+      ...product.toObject(),
+      billingStatus: getBillingStatus(product),
+      policy: getShopPolicyPayload(shop),
+      billingSummary: req.shopBillingSummary || null,
+    });
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res.status(400).json({ message: 'Định dạng dữ liệu không hợp lệ', details: err.message });
@@ -44,15 +200,27 @@ exports.updateProduct = async (req, res) => {
   try {
     const shopId = req.user.id;
     const productId = req.params.id;
-    const product = await Product.findOneAndUpdate(
-      { _id: productId, shopId },
-      req.body,
-      { new: true }
-    );
-    if (!product) {
+    const existingProduct = await Product.findOne({ _id: productId, shopId });
+    if (!existingProduct) {
       return res.status(404).json({ message: 'Product not found' });
     }
-    res.json(product);
+
+    const updateData = { ...req.body };
+    if (Object.prototype.hasOwnProperty.call(req.body, 'price')) {
+      updateData.billing = buildProductBillingSnapshot(req.body.price, existingProduct.createdAt);
+    }
+
+    const product = await Product.findOneAndUpdate(
+      { _id: productId, shopId },
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    res.json({
+      ...product.toObject(),
+      billingStatus: getBillingStatus(product),
+      billingSummary: req.shopBillingSummary || null,
+    });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -275,11 +443,57 @@ exports.getShopRevenue = async (req, res) => {
 
     const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
+    // Lấy tất cả orders ĐANG LÀM VIỆC - chỉ từ orders đã thanh toán thành công
+    const orders = await Order.find({
+      'payment.status': 'paid',
+      'items.shopId': shopId,
+      'payment.paidAt': { $gte: startDate }  // Filter theo thời gian thanh toán, không phải tạo đơn
+    }).select('items payment createdAt orderNumber');
+
+    // Chi tiết từng sản phẩm với phí sàn
+    const productDetails = [];
+    let totalGrossRevenue = 0;
+    let totalPlatformFees = 0;
+    let totalNetRevenue = 0;
+
+    orders.forEach((order) => {
+      order.items.forEach((item) => {
+        if (item.shopId.toString() !== shopId.toString()) return;
+
+        const grossAmount = roundCurrency(item.price * (item.qty || 1));
+        const platformFee = roundCurrency(grossAmount * 0.05); // 5% phí sàn
+        const netAmount = roundCurrency(grossAmount - platformFee);
+
+        totalGrossRevenue += grossAmount;
+        totalPlatformFees += platformFee;
+        totalNetRevenue += netAmount;
+
+        productDetails.push({
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          productId: item.product,
+          productName: item.name,
+          productImage: item.image,
+          sku: item.sku,
+          price: item.price,
+          quantity: item.qty || 1,
+          grossAmount: grossAmount,
+          platformFeeRate: 0.05, // 5%
+          platformFee: platformFee,
+          netAmount: netAmount,
+          paidAt: order.payment?.paidAt || order.createdAt,
+          feeStatus: 'charged' // Vì chỉ lấy paid orders nên phí đã được tính
+        });
+      });
+    });
+
+    // Tính toán thống kê
     const revenueData = await Order.aggregate([
       {
         $match: {
           'payment.status': 'paid',
-          createdAt: { $gte: startDate }
+          'items.shopId': shopObjectId,
+          'payment.paidAt': { $gte: startDate }  // Filter theo thời gian thanh toán
         }
       },
       {
@@ -293,21 +507,29 @@ exports.getShopRevenue = async (req, res) => {
       {
         $group: {
           _id: null,
-          totalRevenue: { $sum: { $multiply: ['$items.price', '$items.qty'] } },
           totalOrders: { $addToSet: '$_id' },
           totalProducts: { $sum: '$items.qty' }
         }
       }
     ]);
 
-    const stats = revenueData[0] || { totalRevenue: 0, totalOrders: [], totalProducts: 0 };
+    const stats = revenueData[0] || { totalOrders: [], totalProducts: 0 };
+
+    const shopUser = await User.findById(shopId).select('shopBillingPolicy shopStatus shopWallet shopBillingSummary');
 
     res.json({
       period,
       startDate,
-      totalRevenue: stats.totalRevenue,
-      totalOrders: stats.totalOrders.length,
-      totalProducts: stats.totalProducts
+      summary: {
+        totalGrossRevenue: roundCurrency(totalGrossRevenue),
+        totalPlatformFees: roundCurrency(totalPlatformFees),
+        totalNetRevenue: roundCurrency(totalNetRevenue),
+        totalOrders: stats.totalOrders.length,
+        totalProducts: stats.totalProducts,
+        platformFeeRate: 0.05 // 5%
+      },
+      productDetails: productDetails.sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt)),
+      policy: getShopPolicyPayload(shopUser),
     });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });

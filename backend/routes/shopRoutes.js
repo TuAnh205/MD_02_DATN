@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { auth, shopAuth } = require('../middleware/auth');
+const { auth, shopAuth, ensureShopCanSell } = require('../middleware/auth');
 const shopController = require('../controllers/shopController');
 
 // Apply auth and shopAuth to all routes
@@ -9,9 +9,14 @@ router.use(shopAuth);
 
 // Product management routes
 router.get('/products', shopController.getShopProducts);
-router.post('/products', shopController.createProduct);
-router.put('/products/:id', shopController.updateProduct);
-router.delete('/products/:id', shopController.deleteProduct);
+router.get('/billing-policy', shopController.getBillingPolicy);
+router.post('/billing-policy/accept', shopController.acceptBillingPolicy);
+router.get('/billing-summary', shopController.getBillingSummary);
+router.post('/wallet/top-up', shopController.topUpWallet);
+router.post('/billing/settle', shopController.settleBilling);
+router.post('/products', ensureShopCanSell, shopController.createProduct);
+router.put('/products/:id', ensureShopCanSell, shopController.updateProduct);
+router.delete('/products/:id', ensureShopCanSell, shopController.deleteProduct);
 
 // Order management routes
 router.get('/orders', shopController.getShopOrders);

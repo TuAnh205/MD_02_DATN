@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import notificationService from '../services/notificationService';
+import api from '../services/api';
 
 const coretechVisuals = [
   {
@@ -29,6 +30,8 @@ export default function ShopDashboard() {
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [billingSummary, setBillingSummary] = useState(null);
+  const [showPolicyNotice, setShowPolicyNotice] = useState(true);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -41,6 +44,17 @@ export default function ShopDashboard() {
       }
     };
     loadNotifications();
+
+    const loadBillingSummary = async () => {
+      try {
+        const response = await api.get('/shop/billing-summary');
+        setBillingSummary(response.data.summary || null);
+      } catch (err) {
+        console.error('Không thể tải trạng thái phí shop:', err);
+      }
+    };
+
+    loadBillingSummary();
   }, []);
 
   const menuItems = [
@@ -107,6 +121,11 @@ export default function ShopDashboard() {
               </h1>
             </div>
             <div className="flex items-center space-x-4 relative">
+              {billingSummary?.isFrozen && (
+                <span className="rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
+                  Shop đang bị đóng băng bán hàng
+                </span>
+              )}
               <button
                 onClick={() => {
                   setShowNotifications(!showNotifications);
@@ -248,6 +267,53 @@ export default function ShopDashboard() {
                 ))}
               </div>
             </section>
+
+            {showPolicyNotice && (
+              <section className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-2xl">📋</span>
+                      <h3 className="text-lg font-bold text-blue-900">Chính sách phí nền tảng</h3>
+                    </div>
+                    <p className="text-sm text-blue-800 mb-3">
+                      <strong>Tất cả sản phẩm thanh toán thành công sẽ bị trừ phí sàn 5%</strong>
+                    </p>
+                    <ul className="text-sm text-blue-700 space-y-2 ml-4">
+                      <li>✓ Phí <strong>5%</strong> được tính trên giá bán sản phẩm</li>
+                      <li>✓ Phí chỉ tính khi khách hàng <strong>thanh toán thành công</strong></li>
+                      <li>✓ Hệ thống tự động trừ từ ví shop của bạn</li>
+                      <li>✓ Xem chi tiết từng sản phẩm bị trừ bao nhiêu phí tại mục <strong>Doanh Thu</strong></li>
+                    </ul>
+                    <p className="text-xs text-blue-600 mt-3 italic">
+                      Ví dụ: Sản phẩm bán được 100.000đ → Phí sàn 5.000đ → Bạn thực nhận 95.000đ
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowPolicyNotice(false)}
+                    className="ml-4 text-blue-600 hover:text-blue-800 text-xl"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </section>
+            )}
+
+            {billingSummary?.isFrozen && (
+              <section className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
+                <h3 className="text-lg font-bold text-rose-900">Cảnh báo công nợ phí nền tảng</h3>
+                <p className="mt-2 text-sm text-rose-800">{billingSummary.message}</p>
+                <p className="mt-2 text-sm text-rose-700">
+                  Số dư ví: {Number(billingSummary.walletBalance || 0).toLocaleString('vi-VN')}đ. Công nợ: {Number(billingSummary.outstandingAmount || 0).toLocaleString('vi-VN')}đ.
+                </p>
+                <Link
+                  to="/shop/revenue"
+                  className="mt-4 inline-flex rounded-md bg-rose-600 px-4 py-2 text-sm font-semibold text-white hover:bg-rose-700"
+                >
+                  Đi tới thanh toán công nợ
+                </Link>
+              </section>
+            )}
 
             <Outlet />
           </main>

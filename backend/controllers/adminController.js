@@ -5,6 +5,21 @@ const Review = require('../models/Review');
 const Feedback = require('../models/Feedback');
 const Post = require('../models/Post');
 const Voucher = require('../models/Voucher');
+const {
+  SHOP_BILLING_POLICY,
+  roundCurrency,
+} = require('../config/shopBillingPolicy');
+
+const buildDateRange = (yearNum, monthNum) => {
+  const start = monthNum
+    ? new Date(yearNum, monthNum - 1, 1)
+    : new Date(yearNum, 0, 1);
+  const end = monthNum
+    ? new Date(yearNum, monthNum, 1)
+    : new Date(yearNum + 1, 0, 1);
+
+  return { start, end };
+};
 
 // User management
 exports.getUsers = async (req, res) => {
@@ -697,6 +712,173 @@ exports.getRevenueByShop = async (req, res) => {
     res.json({ shops, total, year: yearNum, ...(monthNum && { month: monthNum }) });
   } catch (error) {
     console.error('Error fetching shop revenue:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.getPlatformRevenue = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+
+    if (!year) {
+      return res.status(400).json({ message: 'Year is required' });
+    }
+
+    const yearNum = parseInt(year, 10);
+    const monthNum = month ? parseInt(month, 10) : null;
+    const { start, end } = buildDateRange(yearNum, monthNum);
+
+    const orders = await Order.find({ 'payment.status': 'paid' }).populate('items.shopId', 'name email');
+    const chargeableProducts = [];
+
+    orders.forEach((order) => {
+      const paidAt = order.payment?.paidAt || order.createdAt;
+      if (paidAt < start || paidAt >= end) {
+        return;
+      }
+
+      order.items.forEach((item) => {
+        if (!item.platformFee?.eligible) {
+          return;
+        }
+
+        chargeableProducts.push({
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          productId: item.product,
+          productName: item.name,
+          shopId: item.shopId?._id || item.shopId,
+          shopName: item.shopId?.name || 'Shop không xác định',
+          shopEmail: item.shopId?.email || '',
+          price: Number(item.price) || 0,
+          qty: item.qty || 1,
+          baseAmount: roundCurrency(item.platformFee?.baseAmount || ((item.price || 0) * (item.qty || 1))),
+          feeAmount: roundCurrency(item.platformFee?.feeAmount || 0),
+          feeStartAt: paidAt,
+          commissionRate: item.platformFee?.rate || SHOP_BILLING_POLICY.commissionRate,
+          isFeeActive: item.platformFee?.status === 'paid',
+          feeStatus: item.platformFee?.status || 'pending',
+        });
+      });
+    });
+
+    chargeableProducts.sort((a, b) => b.feeAmount - a.feeAmount);
+
+    const totalFeeRevenue = roundCurrency(
+      chargeableProducts.reduce((sum, product) => sum + product.feeAmount, 0)
+    );
+
+    const activeCount = chargeableProducts.filter((product) => product.feeStatus === 'paid').length;
+
+    res.json({
+      products: chargeableProducts,
+      totalFeeRevenue,
+      productCount: chargeableProducts.length,
+      activeCount,
+      policy: {
+        version: SHOP_BILLING_POLICY.version,
+        freeTrialDays: SHOP_BILLING_POLICY.freeTrialDays,
+        commissionRate: SHOP_BILLING_POLICY.commissionRate,
+      },
+      year: yearNum,
+      ...(monthNum && { month: monthNum }),
+    });
+  } catch (error) {
+    console.error('Error fetching platform revenue:', error);
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+exports.getPlatformRevenueByShop = async (req, res) => {
+  try {
+    const { year, month } = req.query;
+
+    if (!year) {
+      return res.status(400).json({ message: 'Year is required' });
+    }
+
+    const yearNum = parseInt(year, 10);
+    const monthNum = month ? parseInt(month, 10) : null;
+    const { start, end } = buildDateRange(yearNum, monthNum);
+
+    const orders = await Order.find({ 'payment.status': 'paid' }).populate('items.shopId', 'name email');
+    const shopMap = new Map();
+
+    orders.forEach((order) => {
+      const paidAt = order.payment?.paidAt || order.createdAt;
+      if (paidAt < start || paidAt >= end) {
+        return;
+      }
+
+      order.items.forEach((item) => {
+        if (!item.platformFee?.eligible) {
+          return;
+        }
+
+        const shopId = item.shopId?._id?.toString() || item.shopId?.toString();
+        if (!shopId) {
+          return;
+        }
+
+        if (!shopMap.has(shopId)) {
+          shopMap.set(shopId, {
+            shopId,
+            shopName: item.shopId?.name || 'Shop không xác định',
+            shopEmail: item.shopId?.email || '',
+            totalFeeRevenue: 0,
+            productCount: 0,
+            activeFeeProducts: 0,
+            products: [],
+          });
+        }
+
+        const shopEntry = shopMap.get(shopId);
+        const feeAmount = roundCurrency(item.platformFee?.feeAmount || 0);
+        shopEntry.totalFeeRevenue += feeAmount;
+        shopEntry.productCount += item.qty || 1;
+        if (item.platformFee?.status === 'paid') {
+          shopEntry.activeFeeProducts += 1;
+        }
+        shopEntry.products.push({
+          productId: item.product,
+          orderId: order._id,
+          orderNumber: order.orderNumber,
+          productName: item.name,
+          price: Number(item.price) || 0,
+          qty: item.qty || 1,
+          feeAmount,
+          feeStartAt: paidAt,
+          commissionRate: item.platformFee?.rate || SHOP_BILLING_POLICY.commissionRate,
+        });
+      });
+    });
+
+    const shops = Array.from(shopMap.values())
+      .map((shop) => ({
+        ...shop,
+        totalFeeRevenue: roundCurrency(shop.totalFeeRevenue),
+        products: shop.products.sort((a, b) => b.feeAmount - a.feeAmount),
+      }))
+      .sort((a, b) => b.totalFeeRevenue - a.totalFeeRevenue);
+
+    const totalFeeRevenue = roundCurrency(
+      shops.reduce((sum, shop) => sum + shop.totalFeeRevenue, 0)
+    );
+
+    res.json({
+      shops,
+      totalFeeRevenue,
+      totalShops: shops.length,
+      policy: {
+        version: SHOP_BILLING_POLICY.version,
+        freeTrialDays: SHOP_BILLING_POLICY.freeTrialDays,
+        commissionRate: SHOP_BILLING_POLICY.commissionRate,
+      },
+      year: yearNum,
+      ...(monthNum && { month: monthNum }),
+    });
+  } catch (error) {
+    console.error('Error fetching platform revenue by shop:', error);
     res.status(500).json({ message: 'Server error', error: error.message });
   }
 };

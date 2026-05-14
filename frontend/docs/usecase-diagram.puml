@@ -1,0 +1,89 @@
+@startuml
+left to right direction
+skinparam packageStyle rectangle
+skinparam shadowing false
+skinparam actorStyle awesome
+skinparam linetype ortho
+skinparam defaultTextAlignment center
+skinparam rectangle {
+  BorderColor #333333
+  FontStyle bold
+}
+skinparam usecase {
+  BackgroundColor white
+  BorderColor #333333
+  ArrowColor #555555
+}
+
+title So do Use Case Tong Quat - MD_02_DATN
+
+actor "Khach" as Guest
+actor "Nguoi dung" as User
+actor "Quan tri vien" as Admin
+actor "Chu cua hang" as Shop
+
+rectangle "Tong quat" {
+  usecase "Quan ly\nthong tin" as UC_Profile
+  usecase "Xac thuc\ntai khoan" as UC_Auth
+  usecase "Quan ly\nbai viet" as UC_Posts
+
+  usecase "Xem lich su\ndon hang" as UC_OrderHistory
+  usecase "Mua hang" as UC_Shopping
+  usecase "Quan ly\nsan pham" as UC_ProductManagement
+
+  usecase "Tim kiem\nsan pham" as UC_Search
+  usecase "Danh gia /\nphan hoi" as UC_Interaction
+  usecase "Xu ly\ndon hang" as UC_OrderProcessing
+
+  usecase "Xem\nsan pham" as UC_ViewProducts
+  usecase "Thong ke\ndoanh thu" as UC_Analytics
+  usecase "Quan ly\ncua hang" as UC_ShopManagement
+}
+
+User -[hidden]down- Guest
+Admin -[hidden]down- Shop
+
+UC_Profile -[hidden]right- UC_Auth
+UC_Auth -[hidden]right- UC_Posts
+
+UC_OrderHistory -[hidden]right- UC_Shopping
+UC_Shopping -[hidden]right- UC_ProductManagement
+
+UC_Search -[hidden]right- UC_Interaction
+UC_Interaction -[hidden]right- UC_OrderProcessing
+
+UC_ViewProducts -[hidden]right- UC_Analytics
+UC_Analytics -[hidden]right- UC_ShopManagement
+
+UC_Profile -[hidden]down- UC_OrderHistory
+UC_Auth -[hidden]down- UC_Shopping
+UC_Posts -[hidden]down- UC_ProductManagement
+
+UC_OrderHistory -[hidden]down- UC_Search
+UC_Shopping -[hidden]down- UC_Interaction
+UC_ProductManagement -[hidden]down- UC_OrderProcessing
+
+UC_Search -[hidden]down- UC_ViewProducts
+UC_OrderProcessing -[hidden]down- UC_ShopManagement
+
+User --> UC_Auth
+User --> UC_Profile
+User --> UC_OrderHistory
+User --> UC_Shopping
+User --> UC_Interaction
+
+Guest --> UC_Search
+Guest --> UC_ViewProducts
+
+Admin --> UC_Auth
+Admin --> UC_Posts
+Admin --> UC_ProductManagement
+Admin --> UC_OrderProcessing
+Admin --> UC_Analytics
+
+Shop --> UC_ProductManagement
+Shop --> UC_OrderProcessing
+Shop --> UC_Analytics
+Shop --> UC_ShopManagement
+
+@enduml

@@ -50,6 +50,18 @@ const productSchema = new mongoose.Schema({
     },
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+    billing: {
+        policyVersion: { type: String },
+        freeTrialDays: { type: Number, default: 3, min: 0 },
+        commissionRate: { type: Number, default: 0.05, min: 0 },
+        feeStartAt: { type: Date },
+        feeAmount: { type: Number, default: 0, min: 0 },
+        chargeStatus: { type: String, enum: ['pending', 'unpaid', 'paid'], default: 'pending' },
+        feeChargedAt: { type: Date },
+        paidAmount: { type: Number, default: 0, min: 0 },
+        unpaidNotifiedAt: { type: Date },
+        lastNotificationAt: { type: Date }
+    },
     promotions: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Promotion' }],
 }, { timestamps: true });
 

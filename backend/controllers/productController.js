@@ -1,5 +1,13 @@
 const Product = require('../models/Product');
 const Order = require('../models/Order');
+const User = require('../models/User');
+
+const appendShopVisibilityFilter = async (filter) => {
+    const frozenShops = await User.find({ role: 'shop', shopStatus: 'frozen' }).select('_id');
+    if (frozenShops.length > 0) {
+        filter.shopId = { $nin: frozenShops.map((shop) => shop._id) };
+    }
+};
 
 // GET /api/products
 exports.getProducts = async (req, res) => {
@@ -30,6 +38,7 @@ exports.getProducts = async (req, res) => {
         if (minRating) filter['ratings.average'] = { $gte: Number(minRating) };
         if (featured === 'true') filter.isFeatured = true;
         if (hot === 'true') filter.hot = true;
+        await appendShopVisibilityFilter(filter);
 
         const skip = (Math.max(1, Number(page)) - 1) * Number(limit);
         const [items, total] = await Promise.all([
@@ -70,8 +79,9 @@ exports.getCategories = async (req, res) => {
 // GET /api/products/:id
 exports.getProductById = async (req, res) => {
     try {
-        const prod = await Product.findById(req.params.id).populate('createdBy', 'name email').populate('shopId', 'name email');
+        const prod = await Product.findById(req.params.id).populate('createdBy', 'name email').populate('shopId', 'name email shopStatus');
         if (!prod) return res.status(404).json({ message: 'Product not found' });
+        if (prod.shopId?.shopStatus === 'frozen') return res.status(404).json({ message: 'Product not found' });
         res.json(prod);
     } catch (err) {
         res.status(500).json({ message: 'Server error', error: err.message });

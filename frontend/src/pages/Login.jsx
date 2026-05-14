@@ -99,25 +99,23 @@ export default function Login() {
           </button>
         </form>
 
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px bg-gray-200 flex-1" />
-          <span className="text-xs text-gray-500">hoặc</span>
-          <div className="h-px bg-gray-200 flex-1" />
-        </div>
+        {isFirebaseAuthConfigured && (
+          <>
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px bg-gray-200 flex-1" />
+              <span className="text-xs text-gray-500">hoặc</span>
+              <div className="h-px bg-gray-200 flex-1" />
+            </div>
 
-        {isFirebaseAuthConfigured ? (
-          <button
-            type="button"
-            onClick={handleGoogleLogin}
-            disabled={googleLoading}
-            className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
-          >
-            {googleLoading ? 'Đang kết nối Google...' : 'Đăng nhập với Google'}
-          </button>
-        ) : (
-          <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Chưa bật Firebase Google Auth. Vui lòng cấu hình VITE_FIREBASE_* trong file .env của frontend.
-          </div>
+            <button
+              type="button"
+              onClick={handleGoogleLogin}
+              disabled={googleLoading}
+              className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50 transition disabled:opacity-50"
+            >
+              {googleLoading ? 'Đang kết nối Google...' : 'Đăng nhập với Google'}
+            </button>
+          </>
         )}
 
         <div className="mt-6 space-y-2 text-center">

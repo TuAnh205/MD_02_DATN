@@ -105,6 +105,23 @@ export default function Register({ accountType = 'user' }) {
             : 'Tạo tài khoản mua sắm để đặt hàng và theo dõi đơn hàng dễ dàng.'}
         </p>
 
+        {isShopAccount && (
+          <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4">
+            <div className="flex gap-2">
+              <span className="text-xl mt-1">📋</span>
+              <div className="text-sm">
+                <p className="font-semibold text-blue-900 mb-2">Chú ý về Chính sách phí nền tảng:</p>
+                <ul className="text-blue-800 space-y-1 text-xs">
+                  <li>• Tất cả sản phẩm thanh toán thành công sẽ bị trừ <strong>5%</strong> phí sàn</li>
+                  <li>• Phí được tính trên giá bán của sản phẩm</li>
+                  <li>• Hệ thống tự động trừ từ ví shop của bạn</li>
+                  <li>• Xem chi tiết tại mục Doanh Thu sau khi đăng ký</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        )}
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -169,16 +186,16 @@ export default function Register({ accountType = 'user' }) {
           </button>
         </form>
 
-        <div className="my-6 flex items-center gap-3">
-          <div className="h-px bg-gray-200 flex-1" />
-          <span className="text-xs text-gray-500">hoặc</span>
-          <div className="h-px bg-gray-200 flex-1" />
-        </div>
+        {canUseGoogleRegister && (
+          <div className="space-y-3">
+            <div className="my-6 flex items-center gap-3">
+              <div className="h-px bg-gray-200 flex-1" />
+              <span className="text-xs text-gray-500">hoặc</span>
+              <div className="h-px bg-gray-200 flex-1" />
+            </div>
 
-        <div className="space-y-3">
-          <p className="text-sm font-medium text-dark">Đăng ký bằng Google</p>
+            <p className="text-sm font-medium text-dark">Đăng ký bằng Google</p>
 
-          {canUseGoogleRegister ? (
             <button
               type="button"
               onClick={handleGoogleSignUp}
@@ -187,37 +204,33 @@ export default function Register({ accountType = 'user' }) {
             >
               {googleLoading ? 'Đang kết nối Google...' : 'Đăng ký với Google'}
             </button>
-          ) : (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-              Chưa bật Firebase Google Auth. Vui lòng cấu hình VITE_FIREBASE_* trong file .env của frontend rồi khởi động lại Vite.
-            </div>
-          )}
 
-          {googleCodeSent && (
-            <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
-              <p className="text-xs text-gray-600">
-                Mã xác nhận đã gửi đến <span className="font-semibold">{googleEmail}</span>
-              </p>
-              <input
-                type="text"
-                value={googleCode}
-                onChange={(e) => setGoogleCode(e.target.value)}
-                placeholder="Nhập mã xác nhận 6 số"
-                className="input-field"
-                maxLength={6}
-                disabled={googleLoading}
-              />
-              <button
-                type="button"
-                onClick={handleGoogleVerify}
-                disabled={googleLoading}
-                className="w-full btn-secondary font-semibold disabled:opacity-50"
-              >
-                {googleLoading ? 'Đang xác nhận...' : 'Xác nhận mã Google'}
-              </button>
-            </div>
-          )}
-        </div>
+            {googleCodeSent && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-4 space-y-3">
+                <p className="text-xs text-gray-600">
+                  Mã xác nhận đã gửi đến <span className="font-semibold">{googleEmail}</span>
+                </p>
+                <input
+                  type="text"
+                  value={googleCode}
+                  onChange={(e) => setGoogleCode(e.target.value)}
+                  placeholder="Nhập mã xác nhận 6 số"
+                  className="input-field"
+                  maxLength={6}
+                  disabled={googleLoading}
+                />
+                <button
+                  type="button"
+                  onClick={handleGoogleVerify}
+                  disabled={googleLoading}
+                  className="w-full btn-secondary font-semibold disabled:opacity-50"
+                >
+                  {googleLoading ? 'Đang xác nhận...' : 'Xác nhận mã Google'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-6 space-y-2 text-center">
           <p className="text-sm text-gray-600">

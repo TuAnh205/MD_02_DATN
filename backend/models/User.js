@@ -43,6 +43,25 @@ const userSchema = new mongoose.Schema({
       newVouchers: { type: Boolean, default: true },
     },
   },
+  shopBillingPolicy: {
+    acceptedAt: { type: Date },
+    version: { type: String },
+  },
+  shopWallet: {
+    balance: { type: Number, default: 0, min: 0 },
+    lastTopUpAt: { type: Date },
+    lastAutoChargeAt: { type: Date },
+    updatedAt: { type: Date },
+  },
+  shopBillingSummary: {
+    outstandingAmount: { type: Number, default: 0 },
+    dueProductCount: { type: Number, default: 0 },
+    paidProductCount: { type: Number, default: 0 },
+    lastSyncedAt: { type: Date },
+  },
+  shopStatus: { type: String, enum: ['active', 'frozen'], default: 'active' },
+  shopStatusReason: { type: String, default: '' },
+  shopFrozenAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -10,7 +10,17 @@ const orderItemSchema = new mongoose.Schema({
     qty: { type: Number, default: 1, min: 1 },
     variant: { type: String },
     image: { type: String },
-    attributes: { type: mongoose.Schema.Types.Mixed }
+    attributes: { type: mongoose.Schema.Types.Mixed },
+    platformFee: {
+        eligible: { type: Boolean, default: false },
+        rate: { type: Number, default: 0 },
+        baseAmount: { type: Number, default: 0 },
+        feeAmount: { type: Number, default: 0 },
+        status: { type: String, enum: ['free_trial', 'pending', 'unpaid', 'paid'], default: 'free_trial' },
+        feeStartAt: { type: Date },
+        chargedAt: { type: Date },
+        notifiedAt: { type: Date }
+    }
 });
 
 const orderSchema = new mongoose.Schema({

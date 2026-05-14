@@ -87,6 +87,7 @@ export const AuthProvider = ({ children }) => {
   const fetchProfile = async () => {
     const profile = await authService.getProfile();
     setUser(profile);
+    localStorage.setItem("user", JSON.stringify(profile));
     return profile;
   };
 

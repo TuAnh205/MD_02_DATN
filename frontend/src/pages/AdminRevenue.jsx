@@ -2,14 +2,23 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 
 export default function AdminRevenue() {
-  const [activeTab, setActiveTab] = useState('total'); // 'total' | 'shops'
+  const [activeTab, setActiveTab] = useState('total');
   const [viewType, setViewType] = useState('month'); // 'month' or 'year'
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [revenueData, setRevenueData] = useState([]);
   const [totalRevenue, setTotalRevenue] = useState(0);
   const [shopRevenue, setShopRevenue] = useState([]);
   const [shopTotal, setShopTotal] = useState(0);
+  const [platformProducts, setPlatformProducts] = useState([]);
+  const [platformProductTotal, setPlatformProductTotal] = useState(0);
+  const [platformProductCount, setPlatformProductCount] = useState(0);
+  const [platformActiveCount, setPlatformActiveCount] = useState(0);
+  const [platformShops, setPlatformShops] = useState([]);
+  const [platformShopTotal, setPlatformShopTotal] = useState(0);
+  const [policyInfo, setPolicyInfo] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const formatCurrency = (value) => `₫${Number(value || 0).toLocaleString('vi-VN')}`;
 
   useEffect(() => {
     fetchRevenueData();
@@ -26,15 +35,24 @@ export default function AdminRevenue() {
         ...(viewType === 'month' && { month })
       });
 
-      const [totalRes, shopRes] = await Promise.all([
+      const [totalRes, shopRes, platformRes, platformShopsRes] = await Promise.all([
         api.get(`/admin/revenue?${params}`),
-        api.get(`/admin/revenue/shops?${params}`)
+        api.get(`/admin/revenue/shops?${params}`),
+        api.get(`/admin/revenue/platform?${params}`),
+        api.get(`/admin/revenue/platform/shops?${params}`),
       ]);
 
       setRevenueData(totalRes.data.data || []);
       setTotalRevenue(totalRes.data.total || 0);
       setShopRevenue(shopRes.data.shops || []);
       setShopTotal(shopRes.data.total || 0);
+      setPlatformProducts(platformRes.data.products || []);
+      setPlatformProductTotal(platformRes.data.totalFeeRevenue || 0);
+      setPlatformProductCount(platformRes.data.productCount || 0);
+      setPlatformActiveCount(platformRes.data.activeCount || 0);
+      setPlatformShops(platformShopsRes.data.shops || []);
+      setPlatformShopTotal(platformShopsRes.data.totalFeeRevenue || 0);
+      setPolicyInfo(platformRes.data.policy || platformShopsRes.data.policy || null);
     } catch (error) {
       console.error('Error fetching revenue data:', error);
     } finally {
@@ -96,11 +114,20 @@ export default function AdminRevenue() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Doanh Thu</h1>
-        <p className="text-gray-600 mt-1">Xem và phân tích doanh thu theo thời gian</p>
+        <p className="text-gray-600 mt-1">Xem doanh thu bán hàng và phí nền tảng 5% theo từng sản phẩm, từng shop</p>
       </div>
 
+      {policyInfo && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
+          <p className="text-sm font-semibold text-amber-900">Chính sách phí dành cho shop</p>
+          <p className="mt-1 text-sm text-amber-800">
+            Mỗi sản phẩm được miễn phí {policyInfo.freeTrialDays} ngày đầu. Từ ngày thứ {policyInfo.freeTrialDays + 1}, sàn thu {Math.round(policyInfo.commissionRate * 100)}% trên giá trị sản phẩm đã được đặt hàng.
+          </p>
+        </div>
+      )}
+
       {/* Tabs */}
-      <div className="flex gap-2 border-b border-gray-200">
+      <div className="flex flex-wrap gap-2 border-b border-gray-200">
         <button
           onClick={() => setActiveTab('total')}
           className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
@@ -119,7 +146,27 @@ export default function AdminRevenue() {
               : 'border-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Doanh thu theo shop
+          Doanh thu bán hàng theo shop
+        </button>
+        <button
+          onClick={() => setActiveTab('platform-products')}
+          className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
+            activeTab === 'platform-products'
+              ? 'border-amber-600 text-amber-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Phí nền tảng theo sản phẩm
+        </button>
+        <button
+          onClick={() => setActiveTab('platform-shops')}
+          className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
+            activeTab === 'platform-shops'
+              ? 'border-rose-600 text-rose-600'
+              : 'border-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Phí nền tảng theo shop
         </button>
       </div>
 
@@ -175,7 +222,7 @@ export default function AdminRevenue() {
           {/* Total Revenue Card */}
           <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow p-6 text-white">
             <p className="text-green-100 text-sm font-medium">Tổng Doanh Thu ({formatDate()})</p>
-            <p className="text-4xl font-bold mt-2">₫{totalRevenue.toLocaleString('vi-VN')}</p>
+            <p className="text-4xl font-bold mt-2">{formatCurrency(totalRevenue)}</p>
             <p className="text-green-100 text-sm mt-2">Từ các đơn hàng thanh toán thành công</p>
           </div>
 
@@ -267,7 +314,7 @@ export default function AdminRevenue() {
                       return (
                         <tr key={index} className="hover:bg-gray-50">
                           <td className="px-6 py-4 text-sm font-medium text-gray-900">{getChartLabel(item)}</td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">₫{item.revenue.toLocaleString('vi-VN')}</td>
+                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">{formatCurrency(item.revenue)}</td>
                           <td className="px-6 py-4 text-sm">
                             <div className="flex items-center gap-2">
                               <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
@@ -293,7 +340,7 @@ export default function AdminRevenue() {
           {/* Shop Total Card */}
           <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow p-6 text-white">
             <p className="text-purple-100 text-sm font-medium">Tổng doanh thu các shop ({formatDate()})</p>
-            <p className="text-4xl font-bold mt-2">₫{shopTotal.toLocaleString('vi-VN')}</p>
+            <p className="text-4xl font-bold mt-2">{formatCurrency(shopTotal)}</p>
             <p className="text-purple-100 text-sm mt-2">{shopRevenue.length} shop có doanh thu</p>
           </div>
 
@@ -325,7 +372,7 @@ export default function AdminRevenue() {
                           </td>
                           <td className="px-6 py-4 text-sm font-semibold text-gray-900">{shop.shopName}</td>
                           <td className="px-6 py-4 text-sm text-gray-500">{shop.shopEmail}</td>
-                          <td className="px-6 py-4 text-sm font-bold text-green-700">₫{shop.revenue.toLocaleString('vi-VN')}</td>
+                          <td className="px-6 py-4 text-sm font-bold text-green-700">{formatCurrency(shop.revenue)}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">{shop.orderCount}</td>
                           <td className="px-6 py-4 text-sm text-gray-700">{shop.itemsSold}</td>
                           <td className="px-6 py-4 text-sm">
@@ -348,6 +395,126 @@ export default function AdminRevenue() {
               <p className="text-gray-400 text-lg">📊 Chưa có dữ liệu doanh thu theo shop</p>
             </div>
           )}
+        </>
+      )}
+
+      {activeTab === 'platform-products' && (
+        <>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <div className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white shadow">
+              <p className="text-sm font-medium text-amber-50">Tổng phí nền tảng ({formatDate()})</p>
+              <p className="mt-2 text-4xl font-bold">{formatCurrency(platformProductTotal)}</p>
+            </div>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <p className="text-sm font-medium text-gray-500">Dòng bán hàng phát sinh phí</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{platformProductCount}</p>
+            </div>
+            <div className="rounded-lg bg-white p-6 shadow">
+              <p className="text-sm font-medium text-gray-500">Dòng bán hàng đã thu phí</p>
+              <p className="mt-2 text-3xl font-bold text-rose-600">{platformActiveCount}</p>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-6 border-b">
+              <h2 className="text-lg font-bold text-gray-900">Chi tiết phí theo sản phẩm</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shop</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đơn hàng</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá trị tính phí</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phí 5%</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày thanh toán đơn</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {platformProducts.map((product) => (
+                    <tr key={product.productId} className="hover:bg-gray-50">
+                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.productName}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        <div>{product.shopName}</div>
+                        <div className="text-xs text-gray-500">{product.shopEmail}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{product.orderNumber}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{formatCurrency(product.baseAmount)}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-amber-700">{formatCurrency(product.feeAmount)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{new Date(product.feeStartAt).toLocaleString('vi-VN')}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${product.feeStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
+                          {product.feeStatus === 'paid' ? 'Đã thu phí' : 'Chưa thanh toán'}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {platformProducts.length === 0 && (
+              <div className="p-10 text-center text-gray-500">Chưa có sản phẩm nào bắt đầu phát sinh phí trong kỳ đã chọn.</div>
+            )}
+          </div>
+        </>
+      )}
+
+      {activeTab === 'platform-shops' && (
+        <>
+          <div className="rounded-lg bg-gradient-to-r from-rose-500 to-pink-600 p-6 text-white shadow">
+            <p className="text-sm font-medium text-rose-50">Tổng phí nền tảng theo shop ({formatDate()})</p>
+            <p className="mt-2 text-4xl font-bold">{formatCurrency(platformShopTotal)}</p>
+            <p className="mt-2 text-sm text-rose-100">{platformShops.length} shop có sản phẩm phát sinh phí</p>
+          </div>
+
+          <div className="bg-white rounded-lg shadow overflow-hidden">
+            <div className="p-6 border-b">
+              <h2 className="text-lg font-bold text-gray-900">Phí nền tảng theo từng shop</h2>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xếp hạng</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shop</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng phí</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm trong kỳ</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đã tới hạn</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm tiêu biểu</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {platformShops.map((shop, index) => (
+                    <tr key={shop.shopId} className="hover:bg-gray-50 align-top">
+                      <td className="px-6 py-4 text-sm font-bold text-gray-500">#{index + 1}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        <div className="font-semibold text-gray-900">{shop.shopName}</div>
+                        <div className="text-xs text-gray-500">{shop.shopEmail}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-rose-700">{formatCurrency(shop.totalFeeRevenue)}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{shop.productCount}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">{shop.activeFeeProducts}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700">
+                        <div className="space-y-2">
+                          {shop.products.slice(0, 3).map((product) => (
+                            <div key={product.productId} className="rounded-lg bg-gray-50 px-3 py-2">
+                              <div className="font-medium text-gray-900">{product.productName}</div>
+                              <div className="text-xs text-gray-500">{product.orderNumber} • {formatCurrency(product.feeAmount)} • {new Date(product.feeStartAt).toLocaleDateString('vi-VN')}</div>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            {platformShops.length === 0 && (
+              <div className="p-10 text-center text-gray-500">Chưa có shop nào phát sinh phí nền tảng trong kỳ đã chọn.</div>
+            )}
+          </div>
         </>
       )}
     </div>
