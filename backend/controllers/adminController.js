@@ -777,7 +777,7 @@ exports.getPlatformRevenue = async (req, res) => {
       activeCount,
       policy: {
         version: SHOP_BILLING_POLICY.version,
-        freeTrialDays: SHOP_BILLING_POLICY.freeTrialDays,
+        feeStartDate: SHOP_BILLING_POLICY.feeStartDate,
         commissionRate: SHOP_BILLING_POLICY.commissionRate,
       },
       year: yearNum,
@@ -871,7 +871,7 @@ exports.getPlatformRevenueByShop = async (req, res) => {
       totalShops: shops.length,
       policy: {
         version: SHOP_BILLING_POLICY.version,
-        freeTrialDays: SHOP_BILLING_POLICY.freeTrialDays,
+        feeStartDate: SHOP_BILLING_POLICY.feeStartDate,
         commissionRate: SHOP_BILLING_POLICY.commissionRate,
       },
       year: yearNum,

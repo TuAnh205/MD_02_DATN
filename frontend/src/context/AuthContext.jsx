@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import authService from "../services/authService";
+import api from "../services/api";
 
 const AuthContext = createContext();
 
@@ -15,6 +16,8 @@ export const AuthProvider = ({ children }) => {
     if (savedUser && savedToken) {
       setUser(JSON.parse(savedUser));
       setToken(savedToken);
+      // Ensure axios has Authorization header for immediate requests
+      api.defaults.headers.common.Authorization = `Bearer ${savedToken}`;
     }
     setLoading(false);
   }, []);
@@ -23,6 +26,8 @@ export const AuthProvider = ({ children }) => {
     const response = await authService.login(email, password);
     setUser(response.user);
     setToken(response.token);
+    // sync axios default header immediately to avoid race on next requests
+    if (response.token) api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
     return response;
   };
 
@@ -30,6 +35,7 @@ export const AuthProvider = ({ children }) => {
     const response = await authService.googleLogin(idToken);
     setUser(response.user);
     setToken(response.token);
+    if (response.token) api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
     return response;
   };
 
@@ -37,6 +43,7 @@ export const AuthProvider = ({ children }) => {
     const response = await authService.register(name, email, password);
     setUser(response.user);
     setToken(response.token);
+    if (response.token) api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
     return response;
   };
 
@@ -44,6 +51,7 @@ export const AuthProvider = ({ children }) => {
     const response = await authService.registerShop(name, email, password);
     setUser(response.user);
     setToken(response.token);
+    if (response.token) api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
     return response;
   };
 
@@ -58,6 +66,7 @@ export const AuthProvider = ({ children }) => {
     );
     setUser(response.user);
     setToken(response.token);
+    if (response.token) api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
     return response;
   };
 
@@ -75,6 +84,7 @@ export const AuthProvider = ({ children }) => {
     const response = await authService.verifyEmailCode(email, code);
     setUser(response.user);
     setToken(response.token);
+    if (response.token) api.defaults.headers.common.Authorization = `Bearer ${response.token}`;
     return response;
   };
 
@@ -82,6 +92,8 @@ export const AuthProvider = ({ children }) => {
     authService.logout();
     setUser(null);
     setToken(null);
+    // remove axios default header
+    delete api.defaults.headers.common.Authorization;
   };
 
   const fetchProfile = async () => {

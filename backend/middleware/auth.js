@@ -6,6 +6,10 @@ const jwtSecret = process.env.JWT_SECRET || 'secret_jwt_key';
 
 const auth = async (req, res, next) => {
     const authHeader = req.headers.authorization;
+    // Debug logging (enable by setting DEBUG_AUTH=true in env)
+    if (String(process.env.DEBUG_AUTH || '').toLowerCase() === 'true') {
+        console.log('[AUTH DEBUG] incoming Authorization header:', authHeader);
+    }
     if (!authHeader) return res.status(401).json({ message: 'No token provided' });
     const parts = authHeader.split(' ');
     if (parts.length !== 2) return res.status(401).json({ message: 'Token error' });
@@ -14,10 +18,16 @@ const auth = async (req, res, next) => {
     if (!/^Bearer$/i.test(scheme)) return res.status(401).json({ message: 'Token malformatted' });
 
     try {
+        if (String(process.env.DEBUG_AUTH || '').toLowerCase() === 'true') {
+            console.log('[AUTH DEBUG] token preview:', token ? `${token.slice(0, 8)}...` : null);
+        }
         const decoded = jwt.verify(token, jwtSecret);
         req.user = { id: decoded.id, role: decoded.role };
         next();
     } catch (err) {
+        if (String(process.env.DEBUG_AUTH || '').toLowerCase() === 'true') {
+            console.error('[AUTH DEBUG] token verify error:', err && err.message);
+        }
         return res.status(401).json({ message: 'Token invalid' });
     }
 };

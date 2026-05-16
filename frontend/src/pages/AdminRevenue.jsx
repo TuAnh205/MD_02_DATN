@@ -118,10 +118,10 @@ export default function AdminRevenue() {
       </div>
 
       {policyInfo && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-4">
-          <p className="text-sm font-semibold text-amber-900">Chính sách phí dành cho shop</p>
-          <p className="mt-1 text-sm text-amber-800">
-            Mỗi sản phẩm được miễn phí {policyInfo.freeTrialDays} ngày đầu. Từ ngày thứ {policyInfo.freeTrialDays + 1}, sàn thu {Math.round(policyInfo.commissionRate * 100)}% trên giá trị sản phẩm đã được đặt hàng.
+        <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
+          <p className="text-sm font-semibold text-blue-900">Chính sách phí nền tảng</p>
+          <p className="mt-1 text-sm text-blue-800">
+            Từ {new Date(policyInfo.feeStartDate).toLocaleString('vi-VN')}, hệ thống tính phí sàn {Math.round(policyInfo.commissionRate * 100)}% trên giá bán sản phẩm khi đơn hàng thanh toán thành công.
           </p>
         </div>
       )}

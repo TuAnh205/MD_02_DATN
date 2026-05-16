@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { signInWithGooglePopup, isFirebaseAuthConfigured } from '../services/firebaseAuth';
 
@@ -9,18 +9,30 @@ export default function Login() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [redirectPath, setRedirectPath] = useState(null);
   
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, googleLogin, user, loading: authLoading } = useAuth();
 
-  // Navigate sau khi user state được cập nhật (tránh blank page)
   useEffect(() => {
     if (!authLoading && user) {
-      if (user.role === 'admin') navigate('/admin', { replace: true });
-      else if (user.role === 'shop') navigate('/shop', { replace: true });
-      else navigate('/', { replace: true });
+      if (!redirectPath && location.pathname !== '/login') {
+        return;
+      }
+
+      const target =
+        redirectPath ||
+        (user.role === 'admin'
+          ? '/admin'
+          : user.role === 'shop'
+          ? '/shop'
+          : '/');
+
+      navigate(target, { replace: true });
+      setRedirectPath(null);
     }
-  }, [user, authLoading]);
+  }, [authLoading, user, redirectPath, navigate, location.pathname]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +45,17 @@ export default function Login() {
         return;
       }
 
-      await login(email, password);
+      const response = await login(email, password);
+      const currentUser = response?.user;
+      if (currentUser) {
+        const target =
+          currentUser.role === 'admin'
+            ? '/admin'
+            : currentUser.role === 'shop'
+            ? '/shop'
+            : '/';
+        setRedirectPath(target);
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Đăng nhập thất bại');
     } finally {
@@ -46,13 +68,25 @@ export default function Login() {
       setError('');
       setGoogleLoading(true);
       const { idToken } = await signInWithGooglePopup();
-      await googleLogin(idToken);
+      const response = await googleLogin(idToken);
+      const currentUser = response?.user;
+      if (currentUser) {
+        const target =
+          currentUser.role === 'admin'
+            ? '/admin'
+            : currentUser.role === 'shop'
+            ? '/shop'
+            : '/';
+        setRedirectPath(target);
+      }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Đăng nhập Google thất bại');
     } finally {
       setGoogleLoading(false);
     }
   };
+
+  
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-secondary">

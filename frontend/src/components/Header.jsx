@@ -11,12 +11,7 @@ export default function Header() {
   const dropdownRef = React.useRef(null);
   const registerMenuRef = React.useRef(null);
 
-  // Hide header on admin and shop routes
-  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/shop')) {
-    return null;
-  }
-
-  // Close dropdown when clicking outside
+  // Close dropdown when clicking outside (always register hooks)
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -31,6 +26,11 @@ export default function Header() {
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  // Hide header on admin and shop routes
+  if (location.pathname.startsWith('/admin') || location.pathname.startsWith('/shop')) {
+    return null;
+  }
 
   const handleLogout = () => {
     logout();

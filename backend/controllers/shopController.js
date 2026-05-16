@@ -12,9 +12,6 @@ const { syncShopBilling, topUpShopWallet } = require('../services/shopBillingSer
 
 const getShopPolicyPayload = (user) => ({
   ...SHOP_BILLING_POLICY,
-  accepted: Boolean(user?.shopBillingPolicy?.acceptedAt),
-  acceptedAt: user?.shopBillingPolicy?.acceptedAt || null,
-  acceptedVersion: user?.shopBillingPolicy?.version || null,
   shopStatus: user?.shopStatus || 'active',
   walletBalance: roundCurrency(user?.shopWallet?.balance || 0),
   outstandingAmount: roundCurrency(user?.shopBillingSummary?.outstandingAmount || 0),
@@ -25,13 +22,20 @@ exports.getShopProducts = async (req, res) => {
   try {
     const shopId = req.user.id;
     const products = await Product.find({ shopId }).sort({ createdAt: -1 });
+    const now = new Date();
+    const feeActive = now >= SHOP_BILLING_POLICY.feeStartDate;
+
     res.json(
-      products.map((product) => {
-        return {
-          ...product.toObject(),
-          chargeStatus: product.billing?.chargeStatus || 'pending',
-        };
-      })
+      products.map((product) => ({
+        ...product.toObject(),
+        billingStatus: {
+          feeStartAt: SHOP_BILLING_POLICY.feeStartDate,
+          isFeeActive: feeActive,
+          commissionRate: SHOP_BILLING_POLICY.commissionRate,
+          policyVersion: SHOP_BILLING_POLICY.version,
+        },
+        chargeStatus: product.billing?.chargeStatus || 'pending',
+      }))
     );
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -123,7 +127,7 @@ exports.getBillingPolicy = async (req, res) => {
 
     res.json(getShopPolicyPayload(shop));
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi khi lấy điều khoản shop', error: err.message });
+    res.status(500).json({ message: 'Lỗi khi lấy chính sách phí nền tảng', error: err.message });
   }
 };
 
@@ -146,12 +150,12 @@ exports.acceptBillingPolicy = async (req, res) => {
     }
 
     res.json({
-      message: 'Đã chấp nhận điều khoản phí đăng bán',
+      message: 'Đã cập nhật chính sách phí nền tảng cho shop',
       user: shop,
       policy: getShopPolicyPayload(shop),
     });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi khi chấp nhận điều khoản', error: err.message });
+    res.status(500).json({ message: 'Lỗi khi cập nhật chính sách phí nền tảng', error: err.message });
   }
 };
 
@@ -159,29 +163,21 @@ exports.acceptBillingPolicy = async (req, res) => {
 exports.createProduct = async (req, res) => {
   try {
     const shopId = req.user.id;
-    const shop = await User.findById(shopId).select('shopBillingPolicy shopStatus shopWallet shopBillingSummary');
-    const acceptedVersion = shop?.shopBillingPolicy?.version;
-
-    if (!shop?.shopBillingPolicy?.acceptedAt || acceptedVersion !== SHOP_BILLING_POLICY.version) {
-      return res.status(403).json({
-        message: 'Shop cần chấp nhận điều khoản phí đăng bán trước khi đăng sản phẩm',
-        code: 'SHOP_POLICY_NOT_ACCEPTED',
-        policy: getShopPolicyPayload(shop),
-      });
-    }
-
     const productData = {
       ...req.body,
       shopId,
       createdBy: req.user.id,
-      billing: buildProductBillingSnapshot(req.body.price, new Date())
     };
     const product = new Product(productData);
     await product.save();
     res.status(201).json({
       ...product.toObject(),
-      billingStatus: getBillingStatus(product),
-      policy: getShopPolicyPayload(shop),
+      billingStatus: {
+        feeStartAt: SHOP_BILLING_POLICY.feeStartDate,
+        isFeeActive: new Date() >= SHOP_BILLING_POLICY.feeStartDate,
+        commissionRate: SHOP_BILLING_POLICY.commissionRate,
+        policyVersion: SHOP_BILLING_POLICY.version,
+      },
       billingSummary: req.shopBillingSummary || null,
     });
   } catch (err) {
@@ -206,9 +202,6 @@ exports.updateProduct = async (req, res) => {
     }
 
     const updateData = { ...req.body };
-    if (Object.prototype.hasOwnProperty.call(req.body, 'price')) {
-      updateData.billing = buildProductBillingSnapshot(req.body.price, existingProduct.createdAt);
-    }
 
     const product = await Product.findOneAndUpdate(
       { _id: productId, shopId },
@@ -218,7 +211,12 @@ exports.updateProduct = async (req, res) => {
 
     res.json({
       ...product.toObject(),
-      billingStatus: getBillingStatus(product),
+      billingStatus: {
+        feeStartAt: SHOP_BILLING_POLICY.feeStartDate,
+        isFeeActive: new Date() >= SHOP_BILLING_POLICY.feeStartDate,
+        commissionRate: SHOP_BILLING_POLICY.commissionRate,
+        policyVersion: SHOP_BILLING_POLICY.version,
+      },
       billingSummary: req.shopBillingSummary || null,
     });
   } catch (err) {

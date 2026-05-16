@@ -52,7 +52,6 @@ const productSchema = new mongoose.Schema({
     shopId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     billing: {
         policyVersion: { type: String },
-        freeTrialDays: { type: Number, default: 3, min: 0 },
         commissionRate: { type: Number, default: 0.05, min: 0 },
         feeStartAt: { type: Date },
         feeAmount: { type: Number, default: 0, min: 0 },

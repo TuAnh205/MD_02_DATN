@@ -85,7 +85,7 @@ export default function ShopRevenue() {
               <p className="mt-2 text-sm text-gray-700">
                 {billingSummary.summary.isFrozen
                   ? billingSummary.summary.message
-                  : 'Hệ thống sẽ tự trừ phí 5% từ ví shop khi có đơn hàng đã thanh toán phát sinh sau thời gian miễn phí 3 ngày của sản phẩm.'}
+                  : 'Hệ thống sẽ tự trừ phí 5% từ ví shop khi có đơn hàng thanh toán thành công từ 13/4/2026 18:02:24 trở đi.'}
               </p>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 <div className="rounded-xl bg-white/80 px-4 py-3 shadow-sm">
