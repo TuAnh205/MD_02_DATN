@@ -112,9 +112,13 @@ Log.d("ProductAPI", "Full Response: " + response.toString(2));
                             Product product = new Product(id, name, price, imageUrl, description, stock);
 
                             JSONObject ratings = item.optJSONObject("ratings");
+
                             if (ratings != null) {
                                 product.setRating((float) ratings.optDouble("average", 0));
                                 product.setReviewCount(ratings.optInt("count", 0));
+                            } else {
+                                product.setRating((float) item.optDouble("rating", 0));
+                                product.setReviewCount(item.optInt("reviewCount", 0));
                             }
 
                             product.setFavorite(favoriteIds.contains(id));

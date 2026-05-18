@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- nền trắng -->
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF"/>
+        </shape>
+    </item>
+
+    <!-- confetti 1 -->
+    <item android:left="20dp" android:top="25dp">
+        <shape android:shape="oval">
+            <size
+                android:width="10dp"
+                android:height="10dp"/>
+            <solid android:color="#FFB800"/>
+        </shape>
+    </item>
+
+    <!-- confetti 2 -->
+    <item android:left="80dp" android:top="40dp">
+        <shape android:shape="oval">
+            <size
+                android:width="8dp"
+                android:height="8dp"/>
+            <solid android:color="#35C3E6"/>
+        </shape>
+    </item>
+
+    <!-- confetti 3 -->
+    <item android:right="40dp" android:top="30dp">
+        <shape android:shape="oval">
+            <size
+                android:width="12dp"
+                android:height="12dp"/>
+            <solid android:color="#FF5E7E"/>
+        </shape>
+    </item>
+
+    <!-- confetti 4 -->
+    <item android:left="140dp" android:top="60dp">
+        <shape android:shape="rectangle">
+            <size
+                android:width="8dp"
+                android:height="14dp"/>
+            <solid android:color="#7B61FF"/>
+            <corners android:radius="3dp"/>
+        </shape>
+    </item>
+
+    <!-- confetti 5 -->
+    <item android:right="90dp" android:top="70dp">
+        <shape android:shape="rectangle">
+            <size
+                android:width="10dp"
+                android:height="10dp"/>
+            <solid android:color="#00C48C"/>
+            <corners android:radius="2dp"/>
+        </shape>
+    </item>
+
+    <!-- confetti 6 -->
+    <item android:left="50dp" android:top="100dp">
+        <shape android:shape="oval">
+            <size
+                android:width="7dp"
+                android:height="7dp"/>
+            <solid android:color="#FF8A00"/>
+        </shape>
+    </item>
+
+    <!-- confetti 7 -->
+    <item android:right="20dp" android:top="110dp">
+        <shape android:shape="oval">
+            <size
+                android:width="9dp"
+                android:height="9dp"/>
+            <solid android:color="#4D7CFE"/>
+        </shape>
+    </item>
+
+</layer-list>

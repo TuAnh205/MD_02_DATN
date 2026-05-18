@@ -228,8 +228,17 @@ public class CheckOutActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(JSONObject res) {
                     runOnUiThread(() -> {
-                        Toast.makeText(CheckOutActivity.this, "Đặt hàng thành công", Toast.LENGTH_SHORT).show();
+
+
+
+                        // Chuyển sang màn thành công
+                        Intent intent = new Intent(
+                                CheckOutActivity.this,
+                                ThanhCongScreen.class
+                        );
                         removeBoughtItemsFromCart();
+                        startActivity(intent);
+                        finish();
                     });
                 }
 

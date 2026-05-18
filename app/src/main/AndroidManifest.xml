@@ -16,6 +16,9 @@
         android:theme="@style/Theme.MD_02_DATN"
         android:usesCleartextTraffic="true">
         <activity
+            android:name=".screens.ThanhCongScreen"
+            android:exported="false" />
+        <activity
             android:name=".screens.ChangePasswordActivity"
             android:exported="false" />
         <activity

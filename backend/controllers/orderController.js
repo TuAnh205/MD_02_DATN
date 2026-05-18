@@ -60,7 +60,7 @@ exports.updatePlatformFeeOnPayment = updatePlatformFeeOnPayment;
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { items, subtotal, payment, shipping, voucherCode } = req.body;
+    const { items, subtotal, total, payment, shipping, voucherCode } = req.body;
 
         if (!Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'items required' });
@@ -86,13 +86,13 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'SĐT không hợp lệ' });
         }
 
-        if (!/^0\d{9,10}$/.test(shippingPhone)) {
-            return res.status(400).json({ message: 'Số điện thoại giao hàng không hợp lệ' });
-        }
+      if (!/^0\d{9,10}$/.test(phone)) {
+    return res.status(400).json({ message: 'Số điện thoại giao hàng không hợp lệ' });
+}
 
-        if (/\d/.test(shippingCity)) {
-            return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
-        }
+if (/\d/.test(city)) {
+    return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
+}
 
         const productIds = items.map(item => item.product);
         const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId createdAt billing name');
