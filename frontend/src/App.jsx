@@ -24,6 +24,8 @@ import AdminReviews from './pages/AdminReviews';
 import AdminFeedbacks from './pages/AdminFeedbacks';
 import AdminPosts from './pages/AdminPosts';
 import AdminVouchers from './pages/AdminVouchers';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import ShopDashboard from './pages/ShopDashboard';
 import ShopProducts from './pages/ShopProducts';
 import ShopRevenue from './pages/ShopRevenue';
@@ -69,6 +71,8 @@ function AppContent() {
         <Route path="/register" element={<Navigate to="/register/user" replace />} />
         <Route path="/register/user" element={<Register accountType="user" />} />
         <Route path="/register/shop" element={<Register accountType="shop" />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<Home />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />

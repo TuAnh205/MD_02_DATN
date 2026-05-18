@@ -159,16 +159,6 @@ export default function ShopProducts() {
 
   return (
     <div className="space-y-6">
-      {billingSummary?.isFrozen && (
-        <div className="rounded-xl border border-rose-200 bg-rose-50 px-5 py-4">
-          <p className="text-sm font-semibold text-rose-900">Tài khoản shop đang bị đóng băng bán hàng</p>
-          <p className="mt-1 text-sm text-rose-800">{billingSummary.message}</p>
-          <p className="mt-2 text-xs text-rose-700">
-            Số dư ví hiện tại: {formatCurrency(billingSummary.walletBalance)}. Công nợ: {formatCurrency(billingSummary.outstandingAmount)}.
-          </p>
-        </div>
-      )}
-
       <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>

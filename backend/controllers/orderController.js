@@ -57,10 +57,79 @@ const updatePlatformFeeOnPayment = async (orderId) => {
 
 exports.updatePlatformFeeOnPayment = updatePlatformFeeOnPayment;
 
+// ================= SETTLE PAYMENT AND CREDIT SHOPS =================
+const settlePaymentAndCreditShops = async (orderId) => {
+    try {
+        const order = await Order.findById(orderId);
+        if (!order) return null;
+
+        const now = new Date();
+        const shopMap = new Map();
+
+        // Aggregate gross and fee per shop, mark fee as paid on items
+        for (const item of order.items) {
+            const shopId = String(item.shopId);
+            const qty = item.qty || 1;
+            const gross = roundCurrency((item.price || 0) * qty);
+            const feeAmount = roundCurrency(item.platformFee?.feeAmount || ((item.price || 0) * qty * SHOP_BILLING_POLICY.commissionRate));
+
+            // ensure platformFee object exists
+            item.platformFee = item.platformFee || {};
+            item.platformFee.feeAmount = feeAmount;
+            item.platformFee.eligible = true;
+            item.platformFee.status = 'paid';
+            item.platformFee.chargedAt = now;
+
+            if (!shopMap.has(shopId)) shopMap.set(shopId, { gross: 0, fee: 0 });
+            const agg = shopMap.get(shopId);
+            agg.gross = roundCurrency(agg.gross + gross);
+            agg.fee = roundCurrency(agg.fee + feeAmount);
+        }
+
+        // save order with updated platformFee statuses
+        await order.save();
+
+        // Credit each shop's wallet with net amount (gross - fee)
+        for (const [shopId, agg] of shopMap.entries()) {
+            const shop = await User.findById(shopId);
+            if (!shop) continue;
+
+            if (!shop.shopWallet) shop.shopWallet = { balance: 0 };
+            if (typeof shop.shopWallet.balance !== 'number') shop.shopWallet.balance = Number(shop.shopWallet.balance) || 0;
+
+            const net = roundCurrency(agg.gross - agg.fee);
+            shop.shopWallet.balance = roundCurrency((shop.shopWallet.balance || 0) + net);
+            shop.shopWallet.updatedAt = now;
+            await shop.save();
+
+            // notify shop
+            await Notification.create({
+                user: shop._id,
+                type: 'system',
+                title: 'Đã cộng tiền bán hàng',
+                message: `Đơn ${order.orderNumber} đã được thanh toán. Số tiền ${net.toLocaleString('vi-VN')}đ đã được cộng vào ví sau khi trừ phí sàn ${agg.fee.toLocaleString('vi-VN')}đ.`,
+                data: { orderId: order._id, amount: net, feeAmount: agg.fee, type: 'shop_income' },
+            });
+        }
+
+        return order;
+    } catch (err) {
+        console.error('SETTLE PAYMENT ERROR:', err);
+        return null;
+    }
+};
+
+exports.settlePaymentAndCreditShops = settlePaymentAndCreditShops;
+
+
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
+<<<<<<< Updated upstream
     const { items, subtotal, total, payment, shipping, voucherCode } = req.body;
+=======
+        const { items, subtotal, total, payment, shipping, voucherCode } = req.body;
+>>>>>>> Stashed changes
 
         if (!Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'items required' });
@@ -82,10 +151,11 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'Thông tin giao hàng không hợp lệ' });
         }
 
-        if (!/^0\d{9,10}$/.test(phone)) {
+        if (!/^0\d{9}$/.test(phone)) {
             return res.status(400).json({ message: 'SĐT không hợp lệ' });
         }
 
+<<<<<<< Updated upstream
       if (!/^0\d{9,10}$/.test(phone)) {
     return res.status(400).json({ message: 'Số điện thoại giao hàng không hợp lệ' });
 }
@@ -93,6 +163,11 @@ exports.createOrder = async (req, res) => {
 if (/\d/.test(city)) {
     return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
 }
+=======
+        if (/\d/.test(city)) {
+            return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
+        }
+>>>>>>> Stashed changes
 
         const productIds = items.map(item => item.product);
         const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId createdAt billing name');
@@ -141,8 +216,8 @@ if (/\d/.test(city)) {
                     }
                 };
             }),
-            subtotal: subtotal || total || 0,
-            total: total || 0,
+            subtotal: subtotal || 0,
+            total: typeof total === 'number' ? total : subtotal || 0,
             shipping: {
                 address: { name, phone, address, city, district, ward },
                 method: shipping.method || 'standard',
@@ -255,6 +330,9 @@ exports.markPaid = async (req, res) => {
         await updatePlatformFeeOnPayment(req.params.id);
         
         // Lấy order đã được update
+        // Cộng tiền về ví shop và đánh dấu phí đã trừ
+        await settlePaymentAndCreditShops(req.params.id);
+
         const updatedOrder = await Order.findById(req.params.id);
         res.json(updatedOrder);
     } catch (err) {
@@ -282,10 +360,12 @@ exports.processPayment = async (req, res) => {
             
             // Cập nhật phí sàn khi thanh toán thành công
             await updatePlatformFeeOnPayment(req.params.id);
-            
+            // Cộng tiền vào ví shop và cập nhật trạng thái phí
+            await settlePaymentAndCreditShops(req.params.id);
+
             // Lấy order đã được update
             const updatedOrder = await Order.findById(req.params.id);
-            
+
             return res.json({ 
                 success: true, 
                 message: '✅ Thanh toán thành công!',

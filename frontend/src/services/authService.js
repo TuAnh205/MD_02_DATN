@@ -69,6 +69,16 @@ const authService = {
     return response.data;
   },
 
+  forgotPassword: async (email) => {
+    const response = await api.post("/auth/forgot-password", { email });
+    return response.data;
+  },
+
+  resetPassword: async (email, token, password) => {
+    const response = await api.post("/auth/reset-password", { email, token, password });
+    return response.data;
+  },
+
   sendVerificationCode: async (
     name,
     email,

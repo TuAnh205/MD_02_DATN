@@ -309,7 +309,7 @@ export default function Checkout() {
 
     if (!normalizedPhone) {
       shippingErrors.phone = 'Vui lòng nhập số điện thoại';
-    } else if (!/^0\d{9,10}$/.test(normalizedPhone)) {
+    } else if (!/^0\d{9}$/.test(normalizedPhone)) {
       shippingErrors.phone = 'Số điện thoại không hợp lệ (ví dụ: 0912345678)';
     }
 

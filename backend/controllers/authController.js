@@ -623,13 +623,85 @@ exports.setPassword = async (req, res) => {
 };
 
 // ================= FORGOT PASSWORD =================
+const escapeRegExp = (value) =>
+  String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 exports.forgotPassword = async (req, res) => {
-  res.json({ message: "Forgot password API (demo)" });
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Vui lòng nhập tên tài khoản / email." });
+    }
+
+    const normalized = String(email).trim();
+    let user;
+
+    if (normalized.includes("@")) {
+      user = await User.findOne({
+        email: {
+          $regex: `^${escapeRegExp(normalized)}$`,
+          $options: "i",
+        },
+      });
+    } else {
+      user = await User.findOne({
+        name: {
+          $regex: `^${escapeRegExp(normalized)}$`,
+          $options: "i",
+        },
+      });
+    }
+
+    if (!user) {
+      return res.status(404).json({ message: "Tài khoản không tồn tại." });
+    }
+
+    const token = crypto.randomBytes(20).toString("hex");
+    user.resetPasswordToken = token;
+    user.resetPasswordExpire = Date.now() + 15 * 60 * 1000; // 15 phút
+    await user.save();
+
+    res.json({
+      message: "Tài khoản hợp lệ. Vui lòng nhập mật khẩu mới.",
+      email: user.email,
+      resetPasswordToken: token,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 
 // ================= RESET PASSWORD =================
 exports.resetPassword = async (req, res) => {
-  res.json({ message: "Reset password API (demo)" });
+  try {
+    const { email, token, password } = req.body;
+
+    if (!email || !token || !password) {
+      return res.status(400).json({ message: "Thiếu dữ liệu để đổi mật khẩu." });
+    }
+
+    const user = await User.findOne({
+      email: email.trim().toLowerCase(),
+      resetPasswordToken: token,
+    });
+
+    if (!user || !user.resetPasswordExpire || user.resetPasswordExpire < Date.now()) {
+      return res.status(400).json({
+        message: "Mã đặt lại mật khẩu không hợp lệ hoặc đã hết hạn.",
+      });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    user.password = hashed;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpire = undefined;
+    await user.save();
+
+    res.json({ message: "Đổi mật khẩu thành công." });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 };
 // ================= CHANGE PASSWORD =================
 exports.changePassword = async (req, res) => {

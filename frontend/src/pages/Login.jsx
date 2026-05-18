@@ -16,6 +16,12 @@ export default function Login() {
   const { login, googleLogin, user, loading: authLoading } = useAuth();
 
   useEffect(() => {
+    if (!error) return;
+    const t = setTimeout(() => setError(''), 10000); // hide after 10s
+    return () => clearTimeout(t);
+  }, [error]);
+
+  useEffect(() => {
     if (!authLoading && user) {
       if (!redirectPath && location.pathname !== '/login') {
         return;
@@ -94,8 +100,15 @@ export default function Login() {
         <h1 className="text-3xl font-bold text-center text-dark mb-8">Đăng Nhập</h1>
 
         {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {error}
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4 flex items-start" role="alert" aria-live="assertive">
+            <div className="flex-1">{error}</div>
+            <button
+              onClick={() => setError('')}
+              aria-label="Đóng thông báo lỗi"
+              className="ml-4 text-red-700 font-bold hover:opacity-80"
+            >
+              ✕
+            </button>
           </div>
         )}
 
