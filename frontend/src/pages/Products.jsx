@@ -245,8 +245,8 @@ export default function Products() {
                   const discount = getDiscountPercent(product);
 
                   return (
-                    <Link key={product._id} to={`/products/${product._id}`}>
-                      <div className="card hover:shadow-lg cursor-pointer relative">
+                    <Link key={product._id} to={`/products/${product._id}`} className="h-full">
+                      <div className="card hover:shadow-lg cursor-pointer relative flex flex-col h-full">
                         {discount > 0 && (
                           <span className="badge badge-discount absolute right-4 top-4">
                             -{discount}%
@@ -257,10 +257,11 @@ export default function Products() {
                           alt={product.name}
                           className="w-full h-48 object-cover rounded mb-4"
                         />
-                        <h3 className="font-semibold text-dark mb-2 line-clamp-2">
-                          {product.name}
-                        </h3>
-                        <div className="flex items-center gap-2 text-sm mb-2">
+                        <div className="px-0 px-4 flex-1 flex flex-col">
+                          <h3 className="font-semibold text-dark mb-2 line-clamp-2">
+                            {product.name}
+                          </h3>
+                          <div className="flex items-center gap-2 text-sm mb-2">
                           {product.ratings?.average ? (
                             <>
                               <div className="flex items-center">
@@ -286,6 +287,10 @@ export default function Products() {
                           ) : (
                             <span className="text-gray-400">Chưa có đánh giá</span>
                           )}
+                          <div className="mt-auto px-4 pb-4">
+                            {/* bottom spacing to keep card heights consistent */}
+                          </div>
+                        </div>
                         </div>
                         <div className="flex items-baseline gap-3">
                           <p className="text-primary font-bold text-lg">

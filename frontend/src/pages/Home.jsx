@@ -342,8 +342,8 @@ export default function Home() {
                 const discount = getDiscountPercent(product);
 
                 return (
-                  <Link key={product._id} to={`/products/${product._id}`}>
-                    <div className="bg-white rounded-xl shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group">
+                  <Link key={product._id} to={`/products/${product._id}`} className="h-full">
+                    <div className="bg-white rounded-xl shadow-card hover:shadow-lg cursor-pointer relative overflow-hidden group flex flex-col h-full">
                       {discount > 0 && (
                         <span className="badge badge-discount absolute right-4 top-4 z-10">
                           -{discount}%
@@ -357,7 +357,7 @@ export default function Home() {
                         />
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </div>
-                      <div className="p-4">
+                      <div className="p-4 flex-1 flex flex-col">
                         <h3 className="font-semibold text-dark mb-2 line-clamp-2 group-hover:text-primary transition-colors">
                           {product.name}
                         </h3>
@@ -406,7 +406,10 @@ export default function Home() {
                   </Link>
                 );
               })}
-            </div>
+                        </div>
+                        <div className="mt-auto">
+                          {/* price / footer area kept at bottom */}
+                        </div>
           </div>
         </div>
       )}
