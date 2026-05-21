@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { signInWithGooglePopup, isFirebaseAuthConfigured } from '../services/firebaseAuth';
+import authService from '../services/authService';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -14,12 +15,6 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login, googleLogin, user, loading: authLoading } = useAuth();
-
-  useEffect(() => {
-    if (!error) return;
-    const t = setTimeout(() => setError(''), 10000); // hide after 10s
-    return () => clearTimeout(t);
-  }, [error]);
 
   useEffect(() => {
     if (!authLoading && user) {
@@ -73,8 +68,20 @@ export default function Login() {
     try {
       setError('');
       setGoogleLoading(true);
-      const { idToken } = await signInWithGooglePopup();
-      const response = await googleLogin(idToken);
+      const { idToken, uid, email, name } = await signInWithGooglePopup();
+      let response;
+      try {
+        response = await googleLogin(idToken);
+      } catch (err) {
+        // If account doesn't exist on server, attempt firebase-sync to create user
+        const msg = err.response?.data?.message || '';
+        if (msg && msg.toLowerCase().includes('tai khoan chua ton tai')) {
+          const syncRes = await authService.firebaseSync(uid, email, name);
+          response = syncRes;
+        } else {
+          throw err;
+        }
+      }
       const currentUser = response?.user;
       if (currentUser) {
         const target =
@@ -146,7 +153,7 @@ export default function Login() {
           </button>
         </form>
 
-        {isFirebaseAuthConfigured && (
+        {isFirebaseAuthConfigured ? (
           <>
             <div className="my-6 flex items-center gap-3">
               <div className="h-px bg-gray-200 flex-1" />
@@ -163,6 +170,19 @@ export default function Login() {
               {googleLoading ? 'Đang kết nối Google...' : 'Đăng nhập với Google'}
             </button>
           </>
+        ) : (
+          <div className="my-6 text-center">
+            <div className="mb-3 text-sm text-yellow-700 bg-yellow-100 border border-yellow-200 p-3 rounded">
+              Google Sign-in chưa được cấu hình. Copy file <strong>.env.example</strong> thành <strong>.env</strong> trong thư mục <strong>frontend</strong> và điền các biến <code>VITE_FIREBASE_API_KEY</code>, <code>VITE_FIREBASE_AUTH_DOMAIN</code>, <code>VITE_FIREBASE_PROJECT_ID</code>, <code>VITE_FIREBASE_APP_ID</code>, sau đó khởi động lại dev server.
+            </div>
+            <button
+              type="button"
+              disabled
+              className="w-full border border-gray-300 rounded-full px-4 py-2 text-sm font-semibold text-gray-400 bg-gray-50 cursor-not-allowed"
+            >
+              Đăng nhập với Google (chưa cấu hình)
+            </button>
+          </div>
         )}
 
         <div className="mt-6 space-y-2 text-center">

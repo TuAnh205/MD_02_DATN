@@ -6,13 +6,36 @@ const firebaseConfig = {
   authDomain: (import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || '').trim(),
   projectId: (import.meta.env.VITE_FIREBASE_PROJECT_ID || '').trim(),
   appId: (import.meta.env.VITE_FIREBASE_APP_ID || '').trim(),
+  storageBucket: (import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || '').trim(),
+  messagingSenderId: (import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || '').trim(),
+  measurementId: (import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || '').trim(),
 };
 
+const placeholderPattern = /your_|replace_me|your_project|your_firebase_app_id/i;
+const isValidFirebaseValue = (value) =>
+  Boolean(value) && !placeholderPattern.test(value.trim());
+
 export const isFirebaseAuthConfigured =
-  Boolean(firebaseConfig.apiKey) &&
-  Boolean(firebaseConfig.authDomain) &&
-  Boolean(firebaseConfig.projectId) &&
-  Boolean(firebaseConfig.appId);
+  isValidFirebaseValue(firebaseConfig.apiKey) &&
+  isValidFirebaseValue(firebaseConfig.authDomain) &&
+  isValidFirebaseValue(firebaseConfig.projectId) &&
+  isValidFirebaseValue(firebaseConfig.appId);
+
+if (!isFirebaseAuthConfigured) {
+  console.warn('[Firebase] Auth not configured. Current env values:', {
+    apiKey: firebaseConfig.apiKey,
+    authDomain: firebaseConfig.authDomain,
+    projectId: firebaseConfig.projectId,
+    appId: firebaseConfig.appId,
+  });
+} else {
+  console.info('[Firebase] Auth configured. Current env values:', {
+    apiKey: firebaseConfig.apiKey,
+    authDomain: firebaseConfig.authDomain,
+    projectId: firebaseConfig.projectId,
+    appId: firebaseConfig.appId,
+  });
+}
 
 let firebaseAuth = null;
 let googleProvider = null;
@@ -36,6 +59,7 @@ export async function signInWithGooglePopup() {
 
   return {
     idToken,
+    uid: result.user.uid,
     email: result.user.email || '',
     name: result.user.displayName || '',
   };

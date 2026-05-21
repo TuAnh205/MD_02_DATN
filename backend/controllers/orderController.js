@@ -125,11 +125,7 @@ exports.settlePaymentAndCreditShops = settlePaymentAndCreditShops;
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-<<<<<<< Updated upstream
-    const { items, subtotal, total, payment, shipping, voucherCode } = req.body;
-=======
         const { items, subtotal, total, payment, shipping, voucherCode } = req.body;
->>>>>>> Stashed changes
 
         if (!Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'items required' });
@@ -155,19 +151,9 @@ exports.createOrder = async (req, res) => {
             return res.status(400).json({ message: 'SĐT không hợp lệ' });
         }
 
-<<<<<<< Updated upstream
-      if (!/^0\d{9,10}$/.test(phone)) {
-    return res.status(400).json({ message: 'Số điện thoại giao hàng không hợp lệ' });
-}
-
-if (/\d/.test(city)) {
-    return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
-}
-=======
         if (/\d/.test(city)) {
             return res.status(400).json({ message: 'Tỉnh/Thành phố không được chứa số' });
         }
->>>>>>> Stashed changes
 
         const productIds = items.map(item => item.product);
         const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId createdAt billing name');

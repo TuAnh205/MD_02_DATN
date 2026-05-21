@@ -9,7 +9,6 @@ const { OAuth2Client } = require("google-auth-library");
 // ================= CONFIG =================
 const jwtSecret = process.env.JWT_SECRET || "secret_jwt_key";
 const jwtExpire = process.env.JWT_EXPIRE || "7d";
-const googleClientId = process.env.GOOGLE_CLIENT_ID || "";
 
 const mailUser = process.env.MAIL_USER || "";
 const mailPass = process.env.MAIL_PASS || "";
@@ -22,7 +21,26 @@ const mailSecure =
 const otpStore = new Map();
 const OTP_TTL_MS = 10 * 60 * 1000;
 
-const googleClient = googleClientId ? new OAuth2Client(googleClientId) : null;
+// ================= ROLE INFERENCE CONFIG =================
+const parseCsv = (s) =>
+  String(s || "")
+    .split(",")
+    .map((x) => x.trim().toLowerCase())
+    .filter(Boolean);
+
+const ADMIN_EMAILS = parseCsv(process.env.ADMIN_EMAILS);
+const SHOP_EMAILS = parseCsv(process.env.SHOP_EMAILS);
+const ADMIN_EMAIL_DOMAINS = parseCsv(process.env.ADMIN_EMAIL_DOMAINS);
+
+const inferRoleByEmail = (email, fallback = "user") => {
+  if (!email) return fallback;
+  const normalized = String(email).trim().toLowerCase();
+  const domain = normalized.split("@")[1] || "";
+  if (ADMIN_EMAILS.includes(normalized)) return "admin";
+  if (SHOP_EMAILS.includes(normalized)) return "shop";
+  if (ADMIN_EMAIL_DOMAINS.includes(domain)) return "admin";
+  return fallback;
+};
 
 const gmailRegex = /^[^\s@]+@gmail\.com$/i;
 const placeholderRegex = /(your_|replace_me)/i;
@@ -74,28 +92,46 @@ const sendOtpMail = async (email, code) => {
 };
 
 const verifyGoogleToken = async (idToken) => {
-  if (googleClient) {
-    const ticket = await googleClient.verifyIdToken({
-      idToken,
-      audience: googleClientId,
-    });
-
-    const payload = ticket.getPayload();
+  // First try Firebase Admin verification (accepts Firebase ID tokens)
+  try {
+    const decoded = await admin.auth().verifyIdToken(idToken);
     return {
-      uid: payload.sub,
-      email: payload.email,
-      name: payload.name || "User",
-      verified: Boolean(payload.email_verified),
+      uid: decoded.uid,
+      email: decoded.email,
+      name: decoded.name || "User",
+      verified: true,
     };
+  } catch (err) {
+    // If admin verification fails (aud mismatch), try Google OAuth verification.
+    try {
+      // Attempt to decode token to extract its audience if GOOGLE_CLIENT_ID isn't set
+      const decoded = jwt.decode(idToken) || {};
+      const tokenAud = decoded.aud || decoded.audience;
+      // Build acceptable audiences array: include tokenAud and configured GOOGLE_CLIENT_ID
+      const audiences = [];
+      if (tokenAud) {
+        if (Array.isArray(tokenAud)) audiences.push(...tokenAud);
+        else audiences.push(String(tokenAud));
+      }
+      if (process.env.GOOGLE_CLIENT_ID) {
+        const cid = String(process.env.GOOGLE_CLIENT_ID);
+        if (!audiences.includes(cid)) audiences.push(cid);
+      }
+      if (audiences.length === 0) throw err;
+      const client = new OAuth2Client(audiences[0]);
+      const ticket = await client.verifyIdToken({ idToken, audience: audiences });
+      const payload = ticket.getPayload();
+      return {
+        uid: payload.sub,
+        email: payload.email,
+        name: payload.name || "User",
+        verified: payload.email_verified === true,
+      };
+    } catch (err2) {
+      // If google verification also fails, throw the google error for clearer logs
+      throw err2;
+    }
   }
-
-  const decoded = await admin.auth().verifyIdToken(idToken);
-  return {
-    uid: decoded.uid,
-    email: decoded.email,
-    name: decoded.name || "User",
-    verified: true,
-  };
 };
 
 // ================= TOKEN =================
@@ -200,12 +236,13 @@ exports.verifyGoogleRegistrationCode = async (req, res) => {
       return res.status(400).json({ message: "Email already registered" });
     }
 
+    const inferredRole = inferRoleByEmail(cached.payload.email, cached.payload.role);
     const user = new User({
       name: cached.payload.name,
       email: cached.payload.email,
       firebaseUid: cached.payload.firebaseUid,
       googleId: cached.payload.firebaseUid,
-      role: cached.payload.role,
+      role: inferredRole,
       isVerified: true,
       password: null,
     });
@@ -484,16 +521,19 @@ exports.firebaseSync = async (req, res) => {
       generatedPassword = crypto.randomBytes(6).toString("hex");
       const hashed = await bcrypt.hash(generatedPassword, 10);
 
+      const inferredRole = inferRoleByEmail(normalizedEmail, 'user');
       user = new User({
         firebaseUid,
         email: normalizedEmail,
         name: name || "User",
-        role: "user",
+        role: inferredRole,
         password: hashed,
       });
     } else {
       user.firebaseUid = firebaseUid;
       user.name = name || user.name;
+      // Update role if needed based on configured lists
+      user.role = inferRoleByEmail(normalizedEmail, user.role);
 
       if (!user.password) {
         generatedPassword = crypto.randomBytes(6).toString("hex");
@@ -551,6 +591,8 @@ exports.googleLogin = async (req, res) => {
     } else {
       user.firebaseUid = firebaseUid;
       if (!user.name) user.name = name;
+      // Ensure role is inferred/updated if this email is in admin/shop lists
+      user.role = inferRoleByEmail(email, user.role);
       user.isVerified = true;
       await user.save();
     }
