@@ -82,14 +82,30 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseAuth.getInstance()
-                .createUserWithEmailAndPassword(email, pass)
+        FirebaseAuth auth = FirebaseAuth.getInstance();
+
+        btnRegister.setEnabled(false);
+
+        auth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(task -> {
 
+                    btnRegister.setEnabled(true);
+
                     if (task.isSuccessful()) {
+
+                        auth.signOut();
+
                         registerToServer(name, email, pass);
+
                     } else {
-                        Toast.makeText(this, "Firebase lỗi: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+
+                        auth.signOut();
+
+                        Toast.makeText(
+                                this,
+                                "Firebase lỗi: " + task.getException().getMessage(),
+                                Toast.LENGTH_LONG
+                        ).show();
                     }
                 });
     }
