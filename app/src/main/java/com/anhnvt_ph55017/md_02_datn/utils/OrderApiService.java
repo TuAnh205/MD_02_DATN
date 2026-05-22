@@ -131,4 +131,38 @@ public class OrderApiService {
             }
         }).start();
     }
+
+    // Lấy chi tiết 1 đơn hàng theo id
+    public interface OrderCallback {
+        void onSuccess(JSONObject orderJson);
+        void onError(String error);
+    }
+
+    public static void getOrderById(Context context, String token, String orderId, OrderCallback callback) {
+        new Thread(() -> {
+            try {               URL url = new URL(BASE_URL + "/" + orderId);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+
+               int responseCode = conn.getResponseCode();
+                InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+               Scanner scanner = new Scanner(is).useDelimiter("\\A");
+               String response = scanner.hasNext() ? scanner.next() : "";
+               scanner.close();
+
+               Log.d("GET_ORDER_RESPONSE", "code=" + responseCode + " | body=" + response);
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    JSONObject obj = new JSONObject(response);
+                    callback.onSuccess(obj);
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                Log.e("GET_ORDER_ERROR", e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
 }

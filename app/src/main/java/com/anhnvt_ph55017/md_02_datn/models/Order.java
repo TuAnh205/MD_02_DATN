@@ -28,6 +28,7 @@ public class Order {
     double rating;  // Đánh giá sao (0-5)
     String reviewComment;  // Review comment từ khách
     String reviewedAt;  // Ngày đánh giá
+    double voucherDiscount; // Số tiền giảm bởi voucher
 
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount, int imageRes) {
         this(id, date, total, status, arrivalDate, itemCount, imageRes, "", 0, "", "");
@@ -246,5 +247,13 @@ public class Order {
 
     public void setReviewedAt(String reviewedAt) {
         this.reviewedAt = reviewedAt;
+    }
+
+    public double getVoucherDiscount() {
+        return voucherDiscount;
+    }
+
+    public void setVoucherDiscount(double voucherDiscount) {
+        this.voucherDiscount = voucherDiscount;
     }
 }

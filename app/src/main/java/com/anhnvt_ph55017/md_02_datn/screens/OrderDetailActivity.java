@@ -30,6 +30,7 @@ public class OrderDetailActivity extends AppCompatActivity {
     private TextView tvOrderStatus;
     private TextView tvOrderTotal;
     private TextView tvStatusDescription;
+    private TextView tvCancellationReason;
     private TextView tvShippingAddress;
     private TextView tvItemCount;
     private TextView tvArrivalDate;
@@ -63,6 +64,7 @@ public class OrderDetailActivity extends AppCompatActivity {
         tvOrderStatus = findViewById(R.id.tvOrderStatus);
         tvOrderTotal = findViewById(R.id.tvOrderTotal);
         tvStatusDescription = findViewById(R.id.tvStatusDescription);
+        tvCancellationReason = findViewById(R.id.tvCancellationReason);
         tvShippingAddress = findViewById(R.id.tvShippingAddress);
         tvItemCount = findViewById(R.id.tvItemCount);
         tvArrivalDate = findViewById(R.id.tvArrivalDate);
@@ -152,9 +154,26 @@ public class OrderDetailActivity extends AppCompatActivity {
 
             tvArrivalDate.setText(arrivalDate);
 
-            tvStatusDescription.setText(
-                    getStatusDescription(orderStatus)
-            );
+            if (isCancelledStatus(orderStatus)) {
+                tvStatusDescription.setVisibility(android.view.View.GONE);
+
+                String cancellationReason = intent.getStringExtra("cancellationReason");
+                if (cancellationReason == null || cancellationReason.trim().isEmpty()) {
+                    cancellationReason = intent.getStringExtra("reason");
+                }
+
+                if (cancellationReason != null && !cancellationReason.trim().isEmpty()) {
+                    tvCancellationReason.setText("Lý do hủy: " + cancellationReason);
+                } else {
+                    tvCancellationReason.setText("Lý do hủy: Chưa có lý do hủy");
+                }
+                tvCancellationReason.setVisibility(android.view.View.VISIBLE);
+            } else {
+                tvStatusDescription.setVisibility(android.view.View.VISIBLE);
+                tvStatusDescription.setText(getStatusDescription(orderStatus));
+                tvCancellationReason.setText("");
+                tvCancellationReason.setVisibility(android.view.View.GONE);
+            }
 
             setModernStatusStyle(tvOrderStatus, orderStatus);
 
@@ -172,6 +191,9 @@ public class OrderDetailActivity extends AppCompatActivity {
             // ================= BUTTON =================
 
             setupButtons();
+
+            // Fetch fresh order details from API to display voucher and latest info
+            fetchOrderDetails();
 
         } catch (Exception e) {
 
@@ -272,86 +294,360 @@ public class OrderDetailActivity extends AppCompatActivity {
 
     private void showCancelDialog() {
 
-        new AlertDialog.Builder(this)
-                .setTitle("Xác nhận")
-                .setMessage("Bạn muốn hủy đơn hàng này?")
-                .setPositiveButton("Hủy đơn", (dialog, which) ->
-                        cancelOrder()
-                )
+        String[] cancelReasons = new String[]{
+                "Đổi ý không muốn mua nữa",
+                "Đặt nhầm sản phẩm",
+                "Muốn thay đổi địa chỉ nhận hàng",
+                "Muốn thay đổi sản phẩm / số lượng",
+                "Thời gian giao hàng quá lâu",
+                "Tìm được giá tốt hơn",
+                "Không đủ khả năng thanh toán",
+                "Sản phẩm không còn nhu cầu",
+                "Muốn đặt lại đơn mới",
+                "Lý do khác"
+        };
+
+        final int[] selectedPosition = {0};
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Bạn có chắc chắn hủy đơn?")
+                .setSingleChoiceItems(cancelReasons, 0, (dialog, which) -> selectedPosition[0] = which)
                 .setNegativeButton("Đóng", null)
+                .setPositiveButton("Hủy đơn", (dialog, which) -> {
+                    int sel = selectedPosition[0];
+                    String chosen = cancelReasons[sel];
+                    if (sel == cancelReasons.length - 1) {
+                        // Lý do khác -> yêu cầu nhập text
+                        showCustomReasonDialog();
+                    } else {
+                        cancelOrder(chosen);
+                    }
+                });
+
+        builder.show();
+    }
+
+    private void showCustomReasonDialog() {
+        android.widget.EditText et = new android.widget.EditText(this);
+        et.setHint("Nhập lý do...");
+        et.setSingleLine(false);
+        et.setMinLines(2);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Lý do khác")
+                .setView(et)
+                .setPositiveButton("Gửi", (d, w) -> {
+                    String text = et.getText() != null ? et.getText().toString().trim() : "";
+                    if (text.isEmpty()) {
+                        // Nếu rỗng, vẫn cho phép hủy với nhãn chung
+                        cancelOrder("Lý do khác");
+                    } else {
+                        cancelOrder(text);
+                    }
+                })
+                .setNegativeButton("Hủy", null)
                 .show();
     }
 
-    private void cancelOrder() {
+    private void cancelOrder(String reason) {
 
         String token = SessionManager.getToken(this);
 
+        final String sentReason = reason;
+
         OrderApiService.cancelOrder(
+            this,
+            token,
+            orderId,
+            reason,
+
+            new OrderApiService.CancelOrderCallback() {
+
+                @Override
+                public void onSuccess(org.json.JSONObject json) {
+
+                runOnUiThread(() -> {
+
+                    orderStatus = "cancelled";
+
+                    tvOrderStatus.setText(
+                        getStatusVietnamese(orderStatus)
+                    );
+
+                    // try extract cancellation reason from response
+                    String displayReason = "";
+                    if (json != null) {
+                    displayReason = json.optString("cancellationReason", "");
+                    if (displayReason.isEmpty()) {
+                        displayReason = json.optString("reason", "");
+                    }
+                    if (displayReason.isEmpty()) {
+                        org.json.JSONObject orderObj = json.optJSONObject("order");
+                        if (orderObj != null) {
+                        displayReason = orderObj.optString("cancellationReason", "");
+                        }
+                    }
+                    }
+
+                    if (displayReason == null || displayReason.trim().isEmpty()) {
+                    displayReason = sentReason != null ? sentReason : "";
+                    }
+
+                    tvStatusDescription.setText(
+                        "Đơn hàng đã bị hủy"
+                    );
+
+                    if (displayReason != null && !displayReason.trim().isEmpty()) {
+                    tvCancellationReason.setText("Lý do hủy: " + displayReason);
+                    tvCancellationReason.setVisibility(android.view.View.VISIBLE);
+                    }
+
+                    setModernStatusStyle(
+                        tvOrderStatus,
+                        orderStatus
+                    );
+
+                    btnCancel.setVisibility(android.view.View.GONE);
+
+                    btnBuyAgain.setVisibility(android.view.View.VISIBLE);
+
+                    Toast.makeText(
+                        OrderDetailActivity.this,
+                        "Đã hủy đơn hàng",
+                        Toast.LENGTH_SHORT
+                    ).show();
+
+                    Intent resultIntent = new Intent();
+
+                    resultIntent.putExtra(
+                        "orderCancelled",
+                        true
+                    );
+
+                    resultIntent.putExtra("cancellationReason", displayReason);
+
+                    setResult(RESULT_OK, resultIntent);
+
+                    // update local DB if needed via DAO - keep existing behavior: finish activity
+                    finish();
+                });
+                }
+
+                @Override
+                public void onError(String err) {
+
+                runOnUiThread(() ->
+
+                    Toast.makeText(
+                        OrderDetailActivity.this,
+                        "Lỗi: " + err,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                );
+                }
+            }
+        );
+    }
+
+    // ================= FETCH DETAILS =================
+
+    private void fetchOrderDetails() {
+
+        String token = SessionManager.getToken(this);
+
+        if (token == null || orderId == null) return;
+
+        OrderApiService.getOrderById(
                 this,
                 token,
                 orderId,
-                "User cancel",
 
-                new OrderApiService.CancelOrderCallback() {
+                new OrderApiService.OrderCallback() {
 
                     @Override
-                    public void onSuccess(org.json.JSONObject json) {
+                    public void onSuccess(org.json.JSONObject orderJson) {
 
-                        runOnUiThread(() -> {
+                        try {
 
-                            orderStatus = "cancelled";
+                            Log.d("ORDER_DETAIL_RESPONSE", orderJson.toString());
 
-                            tvOrderStatus.setText(
-                                    getStatusVietnamese(orderStatus)
+                            // ================= VOUCHER =================
+
+                            double voucherDiscount = 0;
+
+                            if (orderJson.has("voucher")) {
+
+                                org.json.JSONObject v =
+                                        orderJson.optJSONObject("voucher");
+
+                                if (v != null) {
+
+                                    voucherDiscount = v.optDouble(
+                                            "discount",
+                                            v.optDouble(
+                                                    "amount",
+                                                    v.optDouble("value", 0)
+                                            )
+                                    );
+                                }
+                            }
+
+                            if (voucherDiscount == 0
+                                    && orderJson.has("discount")) {
+
+                                org.json.JSONObject discountObj =
+                                        orderJson.optJSONObject("discount");
+
+                                if (discountObj != null) {
+
+                                    voucherDiscount = discountObj.optDouble(
+                                            "amount",
+                                            discountObj.optDouble(
+                                                    "discount",
+                                                    discountObj.optDouble(
+                                                            "value",
+                                                            0
+                                                    )
+                                            )
+                                    );
+
+                                } else {
+
+                                    voucherDiscount =
+                                            orderJson.optDouble(
+                                                    "discount",
+                                                    0
+                                            );
+                                }
+                            }
+
+                            if (voucherDiscount == 0) {
+
+                                voucherDiscount =
+                                        orderJson.optDouble(
+                                                "voucherDiscount",
+                                                orderJson.optDouble(
+                                                        "discount",
+                                                        0
+                                                )
+                                        );
+                            }
+
+                            // ================= CANCEL REASON =================
+
+                            String displayReason = "";
+
+                            if (orderJson.has("cancellationReason")) {
+
+                                displayReason =
+                                        orderJson.optString(
+                                                "cancellationReason",
+                                                ""
+                                        );
+                            }
+
+                            if (displayReason.isEmpty()) {
+
+                                displayReason =
+                                        orderJson.optString(
+                                                "reason",
+                                                ""
+                                        );
+                            }
+
+                            if (displayReason.isEmpty()) {
+
+                                org.json.JSONObject orderObj =
+                                        orderJson.optJSONObject("order");
+
+                                if (orderObj != null) {
+
+                                    displayReason =
+                                            orderObj.optString(
+                                                    "cancellationReason",
+                                                    ""
+                                            );
+                                }
+                            }
+
+                            final double finalVoucher =
+                                    voucherDiscount;
+
+                            final String finalReason =
+                                    displayReason;
+
+                            runOnUiThread(() -> {
+
+                                // ===== Voucher =====
+
+                                if (finalVoucher > 0) {
+
+                                    tvVoucherDiscount.setText(
+                                            String.format(
+                                                    Locale.getDefault(),
+                                                    "%,.0fđ",
+                                                    finalVoucher
+                                            )
+                                    );
+
+                                } else {
+
+                                    String cur =
+                                            tvVoucherDiscount.getText() != null
+                                                    ? tvVoucherDiscount
+                                                    .getText()
+                                                    .toString()
+                                                    : "";
+
+                                    if (cur.isEmpty()
+                                            || cur.equals("0đ")) {
+
+                                        tvVoucherDiscount.setText("0đ");
+                                    }
+                                }
+
+                                // ===== Lý do hủy =====
+
+                                if (!finalReason.isEmpty()) {
+
+                                    tvCancellationReason.setText(
+                                            "Lý do hủy: " + finalReason
+                                    );
+
+                                    tvCancellationReason.setVisibility(
+                                            android.view.View.VISIBLE
+                                    );
+
+                                } else {
+
+                                    tvCancellationReason.setVisibility(
+                                            android.view.View.GONE
+                                    );
+                                }
+                            });
+
+                        } catch (Exception e) {
+
+                            Log.e(
+                                    "FETCH_ORDER_DETAIL",
+                                    "err",
+                                    e
                             );
-
-                            tvStatusDescription.setText(
-                                    "Đơn hàng đã bị hủy"
-                            );
-
-                            setModernStatusStyle(
-                                    tvOrderStatus,
-                                    orderStatus
-                            );
-
-                            btnCancel.setVisibility(android.view.View.GONE);
-
-                            btnBuyAgain.setVisibility(android.view.View.VISIBLE);
-
-                            Toast.makeText(
-                                    OrderDetailActivity.this,
-                                    "Đã hủy đơn hàng",
-                                    Toast.LENGTH_SHORT
-                            ).show();
-
-                            Intent resultIntent = new Intent();
-
-                            resultIntent.putExtra(
-                                    "orderCancelled",
-                                    true
-                            );
-
-                            setResult(RESULT_OK, resultIntent);
-
-                            finish();
-                        });
+                        }
                     }
 
                     @Override
-                    public void onError(String err) {
+                    public void onError(String error) {
 
-                        runOnUiThread(() ->
-
-                                Toast.makeText(
-                                        OrderDetailActivity.this,
-                                        "Lỗi: " + err,
-                                        Toast.LENGTH_SHORT
-                                ).show()
+                        Log.e(
+                                "FETCH_ORDER_DETAIL",
+                                error
                         );
                     }
                 }
         );
     }
+
 
     // ================= STATUS =================
 
@@ -374,6 +670,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                 return "Đã giao";
 
             case "cancelled":
+            case "đã hủy":
                 return "Đã hủy";
 
             default:
@@ -400,11 +697,18 @@ public class OrderDetailActivity extends AppCompatActivity {
                 return "Đơn hàng đã giao thành công";
 
             case "cancelled":
+            case "đã hủy":
                 return "Đơn hàng đã bị hủy";
 
             default:
                 return "";
         }
+    }
+
+    private boolean isCancelledStatus(String status) {
+        if (status == null) return false;
+        String normalized = status.trim().toLowerCase();
+        return normalized.equals("cancelled") || normalized.equals("đã hủy") || normalized.contains("hủy");
     }
 
     // ================= STATUS STYLE =================
@@ -456,6 +760,7 @@ public class OrderDetailActivity extends AppCompatActivity {
                 break;
 
             case "cancelled":
+            case "đã hủy":
 
                 tv.setTextColor(getColor(R.color.red));
 

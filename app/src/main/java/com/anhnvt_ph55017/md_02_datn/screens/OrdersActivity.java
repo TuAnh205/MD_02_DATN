@@ -26,6 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class OrdersActivity extends AppCompatActivity {
 
@@ -68,6 +69,9 @@ public class OrdersActivity extends AppCompatActivity {
             // Navigate to order detail
             Intent intent = new Intent(this, OrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
+            double vdisc = order.getVoucherDiscount();
+            String vDiscStr = vdisc > 0 ? String.format(Locale.getDefault(), "%,.0fđ", vdisc) : "0đ";
+            intent.putExtra("voucherDiscount", vDiscStr);
             startActivity(intent);
         });
 
@@ -181,7 +185,7 @@ public class OrdersActivity extends AppCompatActivity {
     private Order parseOrder(JSONObject item) {
         String id = item.optString("_id", "");
         String date = item.optString("createdAt", "");
-        double total = item.optDouble("totalPrice", 0);
+        double total = item.optDouble("total", 0);
         String status = item.optString("status", "pending");
         String arrivalDate = item.optString("arrivalDate", "");
         int itemCount = item.optInt("itemCount", 0);
@@ -193,7 +197,23 @@ public class OrdersActivity extends AppCompatActivity {
         // Extract order number from ID
         String orderId = "#CT-" + id.substring(Math.max(0, id.length() - 5));
 
-        return new Order(orderId, formattedDate, total, status, arrivalDate, itemCount, 0, productName, 0, "", "");
+        com.anhnvt_ph55017.md_02_datn.models.Order o = new Order(orderId, formattedDate, total, status, arrivalDate, itemCount, 0, productName, 0, "", "");
+        double voucherDiscount = 0;
+        if (item.has("voucher")) {
+            org.json.JSONObject v = item.optJSONObject("voucher");
+            if (v != null) voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
+        }
+        if (voucherDiscount == 0 && item.has("discount")) {
+            org.json.JSONObject discountObj = item.optJSONObject("discount");
+            if (discountObj != null) {
+                voucherDiscount = discountObj.optDouble("amount", discountObj.optDouble("discount", 0));
+            } else {
+                voucherDiscount = item.optDouble("discount", 0);
+            }
+        }
+        if (voucherDiscount == 0) voucherDiscount = item.optDouble("voucherDiscount", 0);
+        o.setVoucherDiscount(voucherDiscount);
+        return o;
     }
 
     private String formatDate(String date) {

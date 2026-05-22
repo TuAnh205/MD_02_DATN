@@ -25,6 +25,7 @@ import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public class OrdersFragment extends Fragment {
@@ -80,6 +81,10 @@ public class OrdersFragment extends Fragment {
             intent.putExtra("productDesc", order.getProductDesc());
             intent.putExtra("shippingAddress", order.getShippingAddress());
             intent.putExtra("paymentMethod", order.getPaymentMethod());
+            // voucher discount
+            double vDisc = order.getVoucherDiscount();
+            String vDiscStr = vDisc > 0 ? String.format(Locale.getDefault(), "%,.0fđ", vDisc) : "0đ";
+            intent.putExtra("voucherDiscount", vDiscStr);
             // Truyền list<OrderItem> qua intent
             if (order.getItems() != null) {
                 java.io.Serializable itemsSerializable = (java.io.Serializable) order.getItems();
@@ -174,6 +179,26 @@ public class OrdersFragment extends Fragment {
                         }
                         Order order = new Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
                         order.setPaymentStatus(paymentStatus);
+                        // Extract voucher discount if present
+                        double voucherDiscount = 0;
+                        if (obj.has("voucher")) {
+                            org.json.JSONObject v = obj.optJSONObject("voucher");
+                            if (v != null) {
+                                voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
+                            }
+                        }
+                        if (voucherDiscount == 0 && obj.has("discount")) {
+                            org.json.JSONObject discountObj = obj.optJSONObject("discount");
+                            if (discountObj != null) {
+                                voucherDiscount = discountObj.optDouble("amount", discountObj.optDouble("discount", 0));
+                            } else {
+                                voucherDiscount = obj.optDouble("discount", 0);
+                            }
+                        }
+                        if (voucherDiscount == 0) {
+                            voucherDiscount = obj.optDouble("voucherDiscount", 0);
+                        }
+                        order.setVoucherDiscount(voucherDiscount);
                         Log.d("ORDER_PARSE_DEBUG", "Parsed order: id=" + id + ", date=" + date + ", total=" + total + ", status=" + status + ", paymentStatus=" + paymentStatus + ", itemCount=" + itemCount + ", imageUrl=" + imageUrl);
                         orderList.add(order);
                         Log.d("ORDER_PARSE_DEBUG", "Order added to orderList: id=" + id);
@@ -183,7 +208,13 @@ public class OrdersFragment extends Fragment {
                 }
                 filteredList.addAll(orderList);
                 if (getActivity() != null) getActivity().runOnUiThread(() -> {
-                    adapter.notifyDataSetChanged();
+                    if (rvOrders != null) {
+                        rvOrders.post(() -> {
+                            if (adapter != null) adapter.notifyDataSetChanged();
+                        });
+                    } else {
+                        if (adapter != null) adapter.notifyDataSetChanged();
+                    }
                 });
             }
 
@@ -367,6 +398,17 @@ public class OrdersFragment extends Fragment {
                                 }
                                 com.anhnvt_ph55017.md_02_datn.models.Order order = new com.anhnvt_ph55017.md_02_datn.models.Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
                                 order.setPaymentStatus(paymentStatus);
+                                double voucherDiscount = 0;
+                                if (obj.has("voucher")) {
+                                    org.json.JSONObject v = obj.optJSONObject("voucher");
+                                    if (v != null) {
+                                        voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
+                                    }
+                                }
+                                if (voucherDiscount == 0) {
+                                    voucherDiscount = obj.optDouble("discount", obj.optDouble("voucherDiscount", 0));
+                                }
+                                order.setVoucherDiscount(voucherDiscount);
                                 orderList.add(order);
                             } catch (Exception e) {
                                 android.util.Log.e("ORDER_PARSE", e.getMessage(), e);
@@ -374,7 +416,13 @@ public class OrdersFragment extends Fragment {
                         }
                         filteredList.addAll(orderList);
                         if (getActivity() != null) getActivity().runOnUiThread(() -> {
-                            adapter.notifyDataSetChanged();
+                            if (rvOrders != null) {
+                                rvOrders.post(() -> {
+                                    if (adapter != null) adapter.notifyDataSetChanged();
+                                });
+                            } else {
+                                if (adapter != null) adapter.notifyDataSetChanged();
+                            }
                         });
                     }
                     @Override

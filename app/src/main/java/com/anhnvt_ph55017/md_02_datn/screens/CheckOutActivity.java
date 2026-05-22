@@ -211,11 +211,14 @@ public class CheckOutActivity extends AppCompatActivity {
 
                 discountObj.put("type", type);
                 discountObj.put("value", selectedVoucher.getValue());
+                discountObj.put("amount", discount);
+                discountObj.put("code", selectedVoucher.getCode());
 
                 body.put("voucherCode", selectedVoucher.getCode());
             } else {
                 discountObj.put("type", "fixed");
                 discountObj.put("value", 0);
+                discountObj.put("amount", 0);
             }
 
             body.put("discount", discountObj);

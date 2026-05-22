@@ -1,6 +1,7 @@
 const Order = require('../models/Order');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
+const Voucher = require('../models/Voucher');
 const { SHOP_BILLING_POLICY, roundCurrency, isOrderInFeeablePeriod } = require('../config/shopBillingPolicy');
 
 /**
@@ -121,11 +122,40 @@ const settlePaymentAndCreditShops = async (orderId) => {
 
 exports.settlePaymentAndCreditShops = settlePaymentAndCreditShops;
 
+const buildOrderResponse = (order) => {
+    const orderObj = order.toObject ? order.toObject() : order;
+    const discountAmount = orderObj.discount?.amount || orderObj.discount?.value || 0;
+
+    if (!orderObj.discount) {
+        orderObj.discount = { amount: discountAmount, value: discountAmount };
+    }
+
+    // Normalize discount response so Android can read either amount or value
+    orderObj.discount.amount = discountAmount;
+    orderObj.discount.value = discountAmount;
+
+    orderObj.voucherDiscount = discountAmount;
+    orderObj.voucher = {
+        amount: discountAmount,
+        discount: discountAmount,
+        value: discountAmount,
+        code: orderObj.discount?.code || ''
+    };
+
+    const cancellationReason = orderObj.cancellationReason || orderObj.reason || '';
+    orderObj.cancellationReason = cancellationReason;
+    if (!orderObj.reason && cancellationReason) {
+        orderObj.reason = cancellationReason;
+    }
+
+    return orderObj;
+};
 
 exports.createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { items, subtotal, total, payment, shipping, voucherCode } = req.body;
+        const { items, subtotal, total, payment, shipping, voucherCode, discountCode, discount: discountBody } = req.body;
+        const voucherCodeValue = voucherCode || discountCode || (discountBody && discountBody.code) || null;
 
         if (!Array.isArray(items) || items.length === 0) {
             return res.status(400).json({ message: 'items required' });
@@ -177,6 +207,60 @@ exports.createOrder = async (req, res) => {
 
         const now = new Date();
 
+        let finalDiscountAmount = typeof discountBody === 'number'
+            ? discountBody
+            : (discountBody && typeof discountBody === 'object')
+                ? discountBody.amount || discountBody.value || 0
+                : 0;
+        let finalDiscountType = discountBody && typeof discountBody === 'object' ? discountBody.type || discountBody?.type : undefined;
+
+        if (voucherCodeValue && finalDiscountAmount === 0) {
+            const voucher = await Voucher.findOne({
+                code: voucherCodeValue.toUpperCase(),
+                isActive: true,
+                startDate: { $lte: new Date() },
+                endDate: { $gte: new Date() }
+            });
+
+            if (voucher) {
+                const subtotalAmount = subtotal || 0;
+                if (subtotalAmount < voucher.minOrderValue) {
+                    return res.status(400).json({ message: `Giá trị đơn hàng phải lớn hơn hoặc bằng ${voucher.minOrderValue}` });
+                }
+
+                let applicableSubtotal = 0;
+
+                for (const item of items) {
+                    const product = productMap[item.product];
+                    if (!product) continue;
+
+                    const itemApplicable = (
+                        !voucher.applicableProducts || voucher.applicableProducts.length === 0 ||
+                        voucher.applicableProducts.map(id => id.toString()).includes(product._id.toString())
+                    ) && (
+                        !voucher.applicableCategories || voucher.applicableCategories.length === 0 ||
+                        voucher.applicableCategories.includes(product.category)
+                    );
+
+                    if (!itemApplicable) continue;
+
+                    const lineTotal = (item.price || 0) * (item.qty || 1);
+                    applicableSubtotal += lineTotal;
+                }
+
+                if (voucher.type === 'percentage') {
+                    let computedDiscount = (applicableSubtotal * voucher.value) / 100;
+                    if (voucher.maxDiscount && computedDiscount > voucher.maxDiscount) {
+                        computedDiscount = voucher.maxDiscount;
+                    }
+                    finalDiscountAmount = roundCurrency(computedDiscount);
+                } else {
+                    finalDiscountAmount = roundCurrency(voucher.value);
+                }
+                finalDiscountType = voucher.type;
+            }
+        }
+
         const orderData = {
             orderNumber: 'ORD-' + Date.now(),
             user: userId,
@@ -203,7 +287,12 @@ exports.createOrder = async (req, res) => {
                 };
             }),
             subtotal: subtotal || 0,
-            total: typeof total === 'number' ? total : subtotal || 0,
+            total: typeof total === 'number' ? total : roundCurrency((subtotal || 0) - finalDiscountAmount + (shipping.fee || 0)),
+            discount: {
+                amount: finalDiscountAmount,
+                code: voucherCodeValue,
+                type: finalDiscountType
+            },
             shipping: {
                 address: { name, phone, address, city, district, ward },
                 method: shipping.method || 'standard',
@@ -233,7 +322,7 @@ exports.createOrder = async (req, res) => {
             });
         }
 
-        res.status(201).json(order);
+        res.status(201).json(buildOrderResponse(order));
 
     } catch (err) {
         console.error("CREATE ORDER ERROR:", err);
@@ -248,11 +337,11 @@ exports.getOrders = async (req, res) => {
 
         if (req.user.role === 'admin') {
             const orders = await Order.find().populate('items.product');
-            return res.json(orders);
+            return res.json(orders.map(buildOrderResponse));
         }
 
         const orders = await Order.find({ user: userId }).populate('items.product');
-        res.json(orders);
+        res.json(orders.map(buildOrderResponse));
 
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -270,7 +359,7 @@ exports.getOrderById = async (req, res) => {
             return res.status(403).json({ message: 'Forbidden' });
         }
 
-        res.json(order);
+        res.json(buildOrderResponse(order));
 
     } catch (err) {
         res.status(500).json({ message: err.message });
@@ -372,8 +461,15 @@ exports.cancelOrder = async (req, res) => {
         const order = await Order.findById(req.params.id);
 
         if (!order) return res.status(404).json({ message: 'Not found' });
+        if (order.user.toString() !== req.user.id && req.user.role !== 'admin') {
+            return res.status(403).json({ message: 'Forbidden' });
+        }
 
+        const { reason } = req.body;
         order.status = 'đã hủy';
+        if (reason && typeof reason === 'string') {
+            order.cancellationReason = reason.trim();
+        }
         await order.save();
 
         res.json(order);
