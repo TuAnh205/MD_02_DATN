@@ -22,6 +22,7 @@ public class Order {
     String shippingAddress;
     List<OrderItem> items;
     String paymentMethod;
+    String paymentStatus;
     String createdAt;  // Để tính ngày dự kiến nhận
     String cancellationReason;  // Lý do hủy đơn
     double rating;  // Đánh giá sao (0-5)
@@ -65,6 +66,7 @@ public class Order {
         this.shippingAddress = shippingAddress;
         this.items = items;
         this.paymentMethod = "Thanh toán khi nhận hàng";
+        this.paymentStatus = "";
         this.imageUrl = imageUrl;
     }
 
@@ -84,6 +86,7 @@ public class Order {
         this.shippingAddress = shippingAddress;
         this.items = items;
         this.paymentMethod = paymentMethod != null ? paymentMethod : "Thanh toán khi nhận hàng";
+        this.paymentStatus = "";
         this.imageUrl = imageUrl;
 
     }
@@ -195,6 +198,14 @@ public class Order {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
     }
 
     public String getCreatedAt() {

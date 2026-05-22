@@ -269,7 +269,16 @@ public class DetailActivity extends AppCompatActivity {
                         String content = obj.optString("comment");
                         float rating = (float) obj.optDouble("rating", 0);
                         String createdAt = obj.optString("createdAt");
-                        reviewList.add(new Review(id, userName, userId, content, rating, createdAt));
+                        String responseText = "";
+                        String responseByName = "";
+                        String responseDate = "";
+                        if (obj.optJSONObject("response") != null) {
+                            responseText = obj.optJSONObject("response").optString("text", "");
+                            responseByName = obj.optJSONObject("response").optJSONObject("respondedBy") != null ? obj.optJSONObject("response").optJSONObject("respondedBy").optString("name", "") : "";
+                            responseDate = obj.optJSONObject("response").optString("respondedAt", "");
+                        }
+                        reviewList.add(new Review(id, userName, userId, content, rating, createdAt,
+                                responseText, responseByName, responseDate));
                         int r = Math.round(rating);
                         if (r >= 1 && r <= 5) starCounts[r]++;
                         if (userId.equals(myUserId)) {

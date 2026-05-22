@@ -54,6 +54,8 @@ public class OrdersFragment extends Fragment {
         // Always re-init orderList to avoid static bugs
         orderList = new ArrayList<>();
 
+        // Map payment method helpers
+        
         // Initialize status tabs
         tvAll = view.findViewById(R.id.tvAll);
         tvPending = view.findViewById(R.id.tvPending);
@@ -101,14 +103,25 @@ public class OrdersFragment extends Fragment {
                         String date = obj.optString("createdAt");
                         double total = obj.optDouble("total");
                         String status = obj.optString("status");
-                        String paymentMethod = obj.optJSONObject("payment") != null ? obj.optJSONObject("payment").optString("method", "") : "";
+                        org.json.JSONObject paymentObj = obj.optJSONObject("payment");
+                        String paymentMethod = mapPaymentMethod(paymentObj != null ? paymentObj.optString("method", "") : "");
+                        String paymentStatus = paymentObj != null ? paymentObj.optString("status", "") : "";
                         String shippingAddress = "";
                         if (obj.has("shipping")) {
                             org.json.JSONObject ship = obj.optJSONObject("shipping");
                             if (ship != null && ship.has("address")) {
                                 org.json.JSONObject addr = ship.optJSONObject("address");
                                 if (addr != null) {
-                                    shippingAddress = addr.optString("address", "");
+                                    String street = addr.optString("address", "");
+                                    String district = addr.optString("district", "");
+                                    String city = addr.optString("city", "");
+                                    String ward = addr.optString("ward", "");
+                                    StringBuilder addressBuilder = new StringBuilder();
+                                    if (!street.isEmpty()) addressBuilder.append(street);
+                                    if (!ward.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(ward);
+                                    if (!district.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(district);
+                                    if (!city.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(city);
+                                    shippingAddress = addressBuilder.toString();
                                 }
                             }
                         }
@@ -160,7 +173,8 @@ public class OrdersFragment extends Fragment {
                             }
                         }
                         Order order = new Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
-                        Log.d("ORDER_PARSE_DEBUG", "Parsed order: id=" + id + ", date=" + date + ", total=" + total + ", status=" + status + ", itemCount=" + itemCount + ", imageUrl=" + imageUrl);
+                        order.setPaymentStatus(paymentStatus);
+                        Log.d("ORDER_PARSE_DEBUG", "Parsed order: id=" + id + ", date=" + date + ", total=" + total + ", status=" + status + ", paymentStatus=" + paymentStatus + ", itemCount=" + itemCount + ", imageUrl=" + imageUrl);
                         orderList.add(order);
                         Log.d("ORDER_PARSE_DEBUG", "Order added to orderList: id=" + id);
                     } catch (Exception e) {
@@ -193,6 +207,23 @@ public class OrdersFragment extends Fragment {
         return view;
     }
 
+    private String mapPaymentMethod(String rawMethod) {
+        if (rawMethod == null || rawMethod.trim().isEmpty()) {
+            return "Thanh toán khi nhận hàng";
+        }
+
+        String value = rawMethod.trim();
+        if (value.equalsIgnoreCase("COD")
+                || value.equalsIgnoreCase("cod")
+                || value.equalsIgnoreCase("cash_on_delivery")
+                || value.equalsIgnoreCase("cash on delivery")
+                || value.equalsIgnoreCase("cashondelivery")) {
+            return "Thanh toán khi nhận hàng";
+        }
+
+        return value;
+    }
+
     // Thiết lập sự kiện click cho các tab trạng thái
     private void setupTabListeners() {
         tvAll.setOnClickListener(v -> filterByStatus("ALL"));
@@ -211,7 +242,7 @@ public class OrdersFragment extends Fragment {
             filteredList.addAll(orderList);
         } else {
             filteredList.addAll(orderList.stream()
-                    .filter(order -> statusMatch(order.getStatus(), status))
+                    .filter(order -> statusMatch(order, status))
                     .collect(Collectors.toList()));
         }
         adapter.notifyDataSetChanged();
@@ -224,19 +255,20 @@ public class OrdersFragment extends Fragment {
     }
 
     // So khớp trạng thái tiếng Anh/Việt
-    private boolean statusMatch(String backendStatus, String tabStatus) {
-        backendStatus = backendStatus.trim().toLowerCase();
+    private boolean statusMatch(Order order, String tabStatus) {
+        String backendStatus = order.getStatus() != null ? order.getStatus().trim().toLowerCase() : "";
+        String paymentStatus = order.getPaymentStatus() != null ? order.getPaymentStatus().trim().toLowerCase() : "";
         if (tabStatus.equals("Chờ xác nhận")) {
             // Các trạng thái chờ xác nhận phổ biến
             return backendStatus.equals("pending") || backendStatus.equals("chờ xác nhận") || backendStatus.equals("chua xac nhan") || backendStatus.equals("cho xac nhan");
         }
         if (tabStatus.equals("Xác nhận")) {
             // Các trạng thái đã xác nhận phổ biến
-            return backendStatus.equals("processing") || backendStatus.equals("xác nhận") || backendStatus.equals("da xac nhan") || backendStatus.equals("xac nhan") || backendStatus.equals("confirmed");
+            return backendStatus.equals("processing") || backendStatus.equals("xác nhận") || backendStatus.equals("da xac nhan") || backendStatus.equals("xac nhan") || backendStatus.equals("confirmed") || backendStatus.equals("đã xác nhận");
         }
         if (tabStatus.equals("Chưa thanh toán")) {
-            // Các trạng thái chưa thanh toán phổ biến
-            return backendStatus.equals("unpaid") || backendStatus.equals("chưa thanh toán") || backendStatus.equals("chua thanh toan");
+            // Các đơn chưa thanh toán nghĩa là payment.pending hoặc trạng thái pending/chưa thanh toán
+            return paymentStatus.equals("pending") || backendStatus.equals("unpaid") || backendStatus.equals("chưa thanh toán") || backendStatus.equals("chua thanh toan") || backendStatus.equals("pending");
         }
         if (tabStatus.equals("Đã hủy")) return isCancelled(backendStatus);
         return backendStatus.equals(tabStatus);
@@ -270,14 +302,25 @@ public class OrdersFragment extends Fragment {
                                 String date = obj.optString("createdAt");
                                 double total = obj.optDouble("total");
                                 String status = obj.optString("status");
-                                String paymentMethod = obj.optJSONObject("payment") != null ? obj.optJSONObject("payment").optString("method", "") : "";
+                                org.json.JSONObject paymentObj = obj.optJSONObject("payment");
+                                String paymentMethod = paymentObj != null ? paymentObj.optString("method", "") : "";
+                                String paymentStatus = paymentObj != null ? paymentObj.optString("status", "") : "";
                                 String shippingAddress = "";
                                 if (obj.has("shipping")) {
                                     org.json.JSONObject ship = obj.optJSONObject("shipping");
                                     if (ship != null && ship.has("address")) {
                                         org.json.JSONObject addr = ship.optJSONObject("address");
                                         if (addr != null) {
-                                            shippingAddress = addr.optString("address", "");
+                                            String street = addr.optString("address", "");
+                                            String district = addr.optString("district", "");
+                                            String city = addr.optString("city", "");
+                                            String ward = addr.optString("ward", "");
+                                            StringBuilder addressBuilder = new StringBuilder();
+                                            if (!street.isEmpty()) addressBuilder.append(street);
+                                            if (!ward.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(ward);
+                                            if (!district.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(district);
+                                            if (!city.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(city);
+                                            shippingAddress = addressBuilder.toString();
                                         }
                                     }
                                 }
@@ -323,6 +366,7 @@ public class OrdersFragment extends Fragment {
                                     }
                                 }
                                 com.anhnvt_ph55017.md_02_datn.models.Order order = new com.anhnvt_ph55017.md_02_datn.models.Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
+                                order.setPaymentStatus(paymentStatus);
                                 orderList.add(order);
                             } catch (Exception e) {
                                 android.util.Log.e("ORDER_PARSE", e.getMessage(), e);

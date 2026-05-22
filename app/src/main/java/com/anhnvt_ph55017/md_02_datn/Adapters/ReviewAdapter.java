@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -38,6 +39,25 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
         holder.tvReviewContent.setText(review.getContent());
         holder.ratingBarReview.setRating(review.getRating());
         holder.tvReviewDate.setText(review.getCreatedAt());
+
+        String responseText = review.getResponseText();
+        if (responseText != null && !responseText.isEmpty()) {
+            holder.layoutReplyContainer.setVisibility(View.VISIBLE);
+            holder.tvReplyContent.setText(responseText);
+            String responseBy = review.getResponseByName();
+            String responseDate = review.getResponseDate();
+            String info = "";
+            if (responseBy != null && !responseBy.isEmpty()) {
+                info = "Trả lời bởi " + responseBy;
+            }
+            if (responseDate != null && !responseDate.isEmpty()) {
+                if (!info.isEmpty()) info += " • ";
+                info += responseDate;
+            }
+            holder.tvReplyInfo.setText(info.isEmpty() ? "Đã trả lời" : info);
+        } else {
+            holder.layoutReplyContainer.setVisibility(View.GONE);
+        }
     }
 
     @Override
@@ -52,12 +72,17 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ViewHolder
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         TextView tvReviewer, tvReviewContent, tvReviewDate;
+        TextView tvReplyContent, tvReplyInfo;
+        LinearLayout layoutReplyContainer;
         RatingBar ratingBarReview;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvReviewer = itemView.findViewById(R.id.tvReviewer);
             tvReviewContent = itemView.findViewById(R.id.tvReviewContent);
             tvReviewDate = itemView.findViewById(R.id.tvReviewDate);
+            tvReplyContent = itemView.findViewById(R.id.tvReplyContent);
+            tvReplyInfo = itemView.findViewById(R.id.tvReplyInfo);
+            layoutReplyContainer = itemView.findViewById(R.id.layoutReplyContainer);
             ratingBarReview = itemView.findViewById(R.id.ratingBarReview);
         }
     }

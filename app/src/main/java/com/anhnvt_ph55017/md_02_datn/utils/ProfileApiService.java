@@ -9,6 +9,11 @@ public class ProfileApiService {
         void onError(String error);
     }
 
+    public interface CountCallback {
+        void onSuccess(int count);
+        void onError(String error);
+    }
+
     // Fetch profile info from backend
     public static void fetchProfile(Context context, String token, ProfileCallback callback) {
         new Thread(() -> {
@@ -112,6 +117,60 @@ public class ProfileApiService {
                     callback.onError(response);
                 }
 
+            } catch (Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
+    // Fetch number of orders for the current user
+    public static void fetchOrderCount(Context context, String token, CountCallback callback) {
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(NetworkConstants.API_BASE_URL + "/api/orders");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+
+                int responseCode = conn.getResponseCode();
+                java.io.InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    org.json.JSONArray arr = new org.json.JSONArray(response);
+                    callback.onSuccess(arr.length());
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
+    // Fetch number of favorites (wishlist) for the current user
+    public static void fetchWishlistCount(Context context, String token, CountCallback callback) {
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(NetworkConstants.API_BASE_URL + "/api/favorites");
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+
+                int responseCode = conn.getResponseCode();
+                java.io.InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    org.json.JSONArray arr = new org.json.JSONArray(response);
+                    callback.onSuccess(arr.length());
+                } else {
+                    callback.onError(response);
+                }
             } catch (Exception e) {
                 callback.onError(e.getMessage());
             }

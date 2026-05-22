@@ -37,10 +37,19 @@ public class ProductReviewApiService {
                             String id = item.optString("_id");
                             String userName = item.optJSONObject("user") != null ? item.optJSONObject("user").optString("name", "Ẩn danh") : "Ẩn danh";
                             String userId = item.optJSONObject("user") != null ? item.optJSONObject("user").optString("_id", "") : "";
-                            String content = item.optString("content");
+                            String content = item.optString("content", item.optString("comment", ""));
                             float rating = (float) item.optDouble("rating", 0);
                             String createdAt = item.optString("createdAt", "");
-                            reviews.add(new Review(id, userName, userId, content, rating, createdAt));
+                            String responseText = "";
+                            String responseByName = "";
+                            String responseDate = "";
+                            if (item.optJSONObject("response") != null) {
+                                responseText = item.optJSONObject("response").optString("text", "");
+                                responseByName = item.optJSONObject("response").optJSONObject("respondedBy") != null ? item.optJSONObject("response").optJSONObject("respondedBy").optString("name", "") : "";
+                                responseDate = item.optJSONObject("response").optString("respondedAt", "");
+                            }
+                            reviews.add(new Review(id, userName, userId, content, rating, createdAt,
+                                    responseText, responseByName, responseDate));
                         }
                         callback.onSuccess(reviews);
                     } catch (Exception e) {

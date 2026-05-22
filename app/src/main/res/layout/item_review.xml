@@ -48,6 +48,44 @@
         android:layout_marginTop="2dp"
         android:text="01/04/2026"/>
 
+    <LinearLayout
+        android:id="@+id/layoutReplyContainer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="10dp"
+        android:layout_marginTop="8dp"
+        android:background="#F5F7FA">
+
+        <TextView
+            android:id="@+id/tvReplyLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Phản hồi từ shop"
+            android:textColor="#2F80FF"
+            android:textStyle="bold"
+            android:textSize="14sp" />
+
+        <TextView
+            android:id="@+id/tvReplyContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp"
+            android:text="Nội dung phản hồi" />
+
+        <TextView
+            android:id="@+id/tvReplyInfo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textColor="#828282"
+            android:textSize="12sp"
+            android:layout_marginTop="4dp"
+            android:text="Trả lời bởi admin • 01/04/2026" />
+    </LinearLayout>
+
 </LinearLayout>
 
 

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -81,6 +82,35 @@ public class ProfileFragment extends Fragment {
                         tvEmail.setText(userJson.optString("email", ""));
                         String avatar = userJson.optString("avatar", "");
                         if (!avatar.isEmpty()) loadAvatar(avatar);
+                        // fetch and display counts
+                        ProfileApiService.fetchOrderCount(getContext(), token, new ProfileApiService.CountCallback() {
+                            @Override
+                            public void onSuccess(int count) {
+                                if (getActivity() != null)
+                                    getActivity().runOnUiThread(() -> tvOrderCount.setText(String.valueOf(count)));
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                // ignore, show 0
+                                if (getActivity() != null)
+                                    getActivity().runOnUiThread(() -> tvOrderCount.setText("0"));
+                            }
+                        });
+
+                        ProfileApiService.fetchWishlistCount(getContext(), token, new ProfileApiService.CountCallback() {
+                            @Override
+                            public void onSuccess(int count) {
+                                if (getActivity() != null)
+                                    getActivity().runOnUiThread(() -> tvWishlistCount.setText(String.valueOf(count)));
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                if (getActivity() != null)
+                                    getActivity().runOnUiThread(() -> tvWishlistCount.setText("0"));
+                            }
+                        });
                     });
                 }
 
@@ -101,6 +131,8 @@ public class ProfileFragment extends Fragment {
 
             tvName.setText("Khách");
             tvEmail.setText("Vui lòng đăng nhập");
+            tvOrderCount.setText("0");
+            tvWishlistCount.setText("0");
         }
 
         // ================= BUTTON =================
@@ -139,7 +171,14 @@ public class ProfileFragment extends Fragment {
 
         view.findViewById(R.id.rowOrders).setOnClickListener(v -> {
             if (!ensureLoggedIn()) return;
-            Toast.makeText(getContext(), "Đơn hàng của tôi", Toast.LENGTH_SHORT).show();
+            if (requireActivity() instanceof AppCompatActivity) {
+                AppCompatActivity activity = (AppCompatActivity) requireActivity();
+                activity.getSupportFragmentManager()
+                        .beginTransaction()
+                        .replace(R.id.fragment_container, new OrdersFragment())
+                        .addToBackStack(null)
+                        .commit();
+            }
         });
 
         view.findViewById(R.id.rowLanguage).setOnClickListener(v ->
