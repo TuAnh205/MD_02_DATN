@@ -476,6 +476,21 @@ export default function Home() {
                         {product.shopId && (
                           <p className="text-xs text-gray-600 mt-2">Shop: {product.shopId.name}</p>
                         )}
+                        
+                        {/* Stock Status */}
+                        {product.stock <= 0 ? (
+                          <div className="mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded text-center">
+                            Hết hàng
+                          </div>
+                        ) : product.stock < 10 ? (
+                          <p className="text-xs text-orange-600 font-medium mt-2">
+                            ⚠️ Còn lại: {product.stock} sản phẩm
+                          </p>
+                        ) : (
+                          <p className="text-xs text-green-600 font-medium mt-2">
+                            ✓ Còn hàng: {product.stock}
+                          </p>
+                        )}
                       </div>
                     </div>
                   </Link>
@@ -745,11 +760,21 @@ export default function Home() {
                         {product.shopId && (
                           <p className="text-xs text-gray-600">Shop: {product.shopId.name}</p>
                         )}
-                        <p className="text-sm mt-1">
-                          <span className={`font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                            {product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
-                          </span>
-                        </p>
+                        
+                        {/* Stock Status */}
+                        {product.stock <= 0 ? (
+                          <div className="mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded text-center">
+                            Hết hàng
+                          </div>
+                        ) : product.stock < 10 ? (
+                          <p className="text-xs text-orange-600 font-medium mt-2">
+                            ⚠️ Còn lại: {product.stock} sản phẩm
+                          </p>
+                        ) : (
+                          <p className="text-xs text-green-600 font-medium mt-2">
+                            ✓ Còn hàng: {product.stock}
+                          </p>
+                        )}
                       </div>
                     </Link>
                   );

@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Promotion = require('../models/Promotion');
+const Voucher = require('../models/Voucher');
 
 const upsertIfMissing = async (model, filter, payload) => {
   const result = await model.updateOne(
@@ -633,6 +634,93 @@ const seedPromotions = async () => {
     return Promotion.find({ code: { $in: promotions.map((promotion) => promotion.code) } });
   } catch (err) {
     console.error('✗ Error seeding promotions:', err.message);
+  }
+};
+
+const seedVouchers = async () => {
+  try {
+    const adminUser = await User.findOne({ role: 'admin' });
+    if (!adminUser) {
+      console.log('⊘ Admin user not found, skipping voucher seeding');
+      return [];
+    }
+
+    const vouchers = [
+      {
+        code: 'WELCOME20',
+        name: 'Welcome - Giảm 20%',
+        description: 'Giảm 20% cho đơn hàng đầu tiên',
+        type: 'percentage',
+        value: 20,
+        minOrderValue: 100000,
+        maxDiscount: 500000,
+        usageLimit: 100,
+        userLimit: 1,
+        applicableCategories: [],
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 60 * 24 * 60 * 60 * 1000), // 60 days
+        isActive: true,
+        createdBy: adminUser._id
+      },
+      {
+        code: 'SUMMER50K',
+        name: 'Hè - Giảm 50.000₫',
+        description: 'Giảm cố định 50.000₫ cho đơn từ 200.000₫',
+        type: 'fixed',
+        value: 50000,
+        minOrderValue: 200000,
+        usageLimit: 200,
+        userLimit: 2,
+        applicableCategories: [],
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 45 * 24 * 60 * 60 * 1000), // 45 days
+        isActive: true,
+        createdBy: adminUser._id
+      },
+      {
+        code: 'SAVE100K',
+        name: 'Tiết kiệm - Giảm 100.000₫',
+        description: 'Giảm 100.000₫ cho đơn từ 500.000₫',
+        type: 'fixed',
+        value: 100000,
+        minOrderValue: 500000,
+        usageLimit: 50,
+        userLimit: 1,
+        applicableCategories: [],
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        isActive: true,
+        createdBy: adminUser._id
+      },
+      {
+        code: 'FLASH30',
+        name: 'Flash Sale - 30%',
+        description: 'Giảm 30% cho sản phẩm máy tính',
+        type: 'percentage',
+        value: 30,
+        minOrderValue: 50000,
+        maxDiscount: 3000000,
+        usageLimit: 150,
+        userLimit: 1,
+        applicableCategories: ['Máy tính'],
+        startDate: new Date(),
+        endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+        isActive: true,
+        createdBy: adminUser._id
+      }
+    ];
+
+    let insertedCount = 0;
+
+    for (const voucher of vouchers) {
+      const result = await upsertIfMissing(Voucher, { code: voucher.code }, voucher);
+      if (result === 'inserted') insertedCount++;
+    }
+
+    console.log(`✓ Vouchers ready: ${vouchers.length} total, ${insertedCount} inserted, ${vouchers.length - insertedCount} already existed`);
+    return Voucher.find({ code: { $in: vouchers.map((voucher) => voucher.code) } });
+  } catch (err) {
+    console.error('✗ Error seeding vouchers:', err.message);
   }
 };
 

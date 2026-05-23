@@ -382,6 +382,22 @@ export default function Products() {
                             )}
                           </div>
                           <p className="text-sm text-gray-500 mt-2">{product.category}</p>
+                          
+                          {/* Stock Status */}
+                          {product.stock <= 0 ? (
+                            <div className="mt-2 px-2 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded text-center">
+                              Hết hàng
+                            </div>
+                          ) : product.stock < 10 ? (
+                            <p className="text-xs text-orange-600 font-medium mt-2">
+                              ⚠️ Còn lại: {product.stock} sản phẩm
+                            </p>
+                          ) : (
+                            <p className="text-xs text-green-600 font-medium mt-2">
+                              ✓ Còn hàng: {product.stock}
+                            </p>
+                          )}
+                          
                           {product.shopId && (
                             <p className="text-xs text-gray-600 mt-1">Shop: {product.shopId.name}</p>
                           )}

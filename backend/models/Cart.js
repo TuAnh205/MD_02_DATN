@@ -7,6 +7,7 @@ const cartItemSchema = new mongoose.Schema({
     qty: { type: Number, default: 1, min: 1 },
     variant: { type: String },
     image: { type: String },
+    stock: { type: Number, default: 0 },
     attributes: { type: mongoose.Schema.Types.Mixed }
 });
 

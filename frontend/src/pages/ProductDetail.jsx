@@ -348,6 +348,24 @@ export default function ProductDetail() {
               </div>
             </div>
 
+            {/* Stock Status */}
+            <div className="mb-4 p-4 rounded-lg border-2" style={{
+              borderColor: product.stock <= 0 ? '#dc2626' : product.stock < 10 ? '#f97316' : '#16a34a',
+              backgroundColor: product.stock <= 0 ? '#fee2e2' : product.stock < 10 ? '#ffedd5' : '#dcfce7'
+            }}>
+              {product.stock <= 0 ? (
+                <p className="font-semibold text-red-700 text-lg">❌ Hết hàng</p>
+              ) : product.stock < 10 ? (
+                <p className="font-semibold text-orange-700">
+                  ⚠️ Chỉ còn <span className="text-lg">{product.stock}</span> sản phẩm
+                </p>
+              ) : (
+                <p className="font-semibold text-green-700">
+                  ✓ Còn hàng: <span className="text-lg">{product.stock}</span> sản phẩm
+                </p>
+              )}
+            </div>
+
             {/* Quantity & Add to Cart */}
             <div className="flex items-center gap-4 mb-6">
               <div className="flex items-center border rounded">

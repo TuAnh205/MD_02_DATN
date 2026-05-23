@@ -39,6 +39,7 @@ exports.addToCart = async (req, res) => {
 
         if (existingItem) {
             existingItem.qty += qty;
+            existingItem.stock = product.stock;
         } else {
             cart.items.push({
                 product: productId,
@@ -47,6 +48,7 @@ exports.addToCart = async (req, res) => {
                 qty,
                 variant,
                 image: product.images[0],
+                stock: product.stock,
                 attributes: product.attributes
             });
         }
@@ -84,6 +86,7 @@ exports.updateCartItem = async (req, res) => {
         }
 
         item.qty = qty;
+        item.stock = product.stock;
         await cart.save();
         await cart.populate('items.product');
         res.json(cart);

@@ -27,9 +27,18 @@ export default function Cart() {
 
   const handleUpdateQuantity = async (itemId, newQuantity) => {
     if (newQuantity < 1) return;
+    
+    // Get the item to check stock
+    const item = cart.items.find(i => i._id === itemId);
+    if (item && newQuantity > item.stock) {
+      setError(`Chỉ có ${item.stock} sản phẩm này còn hàng`);
+      return;
+    }
+    
     try {
       const updatedCart = await cartService.updateCartItem(itemId, newQuantity);
       setCart(updatedCart);
+      setError(null);
     } catch (err) {
       setError('Không thể cập nhật số lượng');
     }
@@ -155,14 +164,27 @@ export default function Cart() {
                               }}
                               className="w-12 text-center border rounded py-1"
                               min="1"
+                              max={item.stock || 999}
                             />
                             <button
                               onClick={() => handleUpdateQuantity(item._id, item.qty + 1)}
-                              className="px-2 py-1 border rounded hover:bg-gray-100"
+                              disabled={item.qty >= (item.stock || 0)}
+                              className="px-2 py-1 border rounded hover:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                             >
                               +
                             </button>
                           </div>
+                          {item.stock !== undefined && (
+                            <p className="text-xs text-gray-500 text-center mt-1">
+                              {item.stock <= 0 ? (
+                                <span className="text-red-600 font-semibold">Hết hàng</span>
+                              ) : item.stock < 5 ? (
+                                <span className="text-orange-600">Còn {item.stock}</span>
+                              ) : (
+                                <span className="text-green-600">Còn {item.stock}</span>
+                              )}
+                            </p>
+                          )}
                         </td>
                         <td className="px-6 py-4 text-right font-semibold">
                           ₫{(item.price * item.qty)?.toLocaleString('vi-VN')}
