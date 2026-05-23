@@ -8,6 +8,8 @@
     "dev": "nodemon app.js",
     "test": "jest",
     "seed": "node seeds/seed.js",
+     "seedOrders": "node seeds/seedOrders.js",
+  
     "seed:reviews": "node seeds/seedRandomReviews.js"
   },
   "author": "",
