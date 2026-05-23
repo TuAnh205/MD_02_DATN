@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 export default function ShopProducts() {
   const { fetchProfile } = useAuth();
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
@@ -25,6 +26,7 @@ export default function ShopProducts() {
     fetchProducts();
     fetchPolicy();
     fetchBillingSummary();
+    fetchCategories();
   }, []);
 
   const formatCurrency = (value) =>
@@ -47,6 +49,15 @@ export default function ShopProducts() {
       setBillingSummary(response.data.summary || null);
     } catch (error) {
       console.error("Error fetching billing summary:", error);
+    }
+  };
+
+  const fetchCategories = async () => {
+    try {
+      const response = await api.get("/products/categories");
+      setCategories(response.data || []);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
     }
   };
 
@@ -274,14 +285,21 @@ export default function ShopProducts() {
               <label className="block text-sm font-medium text-gray-700">
                 Danh mục
               </label>
-              <input
-                type="text"
+              <select
                 value={formData.category}
                 onChange={(e) =>
                   setFormData({ ...formData, category: e.target.value })
                 }
-                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
-              />
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2 bg-white"
+                required
+              >
+                <option value="">Chọn danh mục</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {/* Image Section */}
