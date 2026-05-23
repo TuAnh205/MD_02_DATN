@@ -8,9 +8,11 @@
     "dev": "nodemon app.js",
     "test": "jest",
     "seed": "node seeds/seed.js",
-     "seedOrders": "node seeds/seedOrders.js",
-  
-    "seed:reviews": "node seeds/seedRandomReviews.js"
+    "seed:reviews": "node seeds/seedRandomReviews.js",
+    "db:dump": "echo \"Run mongodump --archive=backup.gz --gzip --uri=\"$MONGO_URI\"\"",
+    "db:restore": "echo \"Run mongorestore --archive=backup.gz --gzip --uri=\"$MONGO_URI\"\"",
+    "db:export": "echo \"Run mongoexport --uri=\"$MONGO_URI\" --collection=COL --out=fixtures/COL.json --jsonArray\"",
+    "db:import": "echo \"Run mongoimport --uri=\"$MONGO_URI\" --collection=COL --file=fixtures/COL.json --jsonArray --mode=upsert --upsertFields=name\""
   },
   "author": "",
   "license": "MIT",

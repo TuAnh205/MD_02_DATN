@@ -238,6 +238,15 @@ export default function Profile() {
             </div>
           </form>
 
+          <div className="mt-4">
+            <button
+              onClick={() => navigate('/change-password')}
+              className="px-4 py-2 border rounded-lg bg-white hover:bg-gray-50"
+            >
+              🔒 Đổi mật khẩu
+            </button>
+          </div>
+
           {/* Quick access */}
           <div className="mt-8 border-t pt-6">
             <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Truy cập nhanh</h2>
