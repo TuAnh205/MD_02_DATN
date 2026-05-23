@@ -35,10 +35,12 @@ import ChangePassword from "./pages/ChangePassword";
 import ShopDashboard from "./pages/ShopDashboard";
 import Favorites from "./pages/Favorites";
 import ShopHome from "./pages/ShopHome";
+import ClaimVouchers from "./pages/ClaimVouchers";
 import ShopProducts from "./pages/ShopProducts";
 import ShopRevenue from "./pages/ShopRevenue";
 import ShopOrders from "./pages/ShopOrders";
 import ShopReviews from "./pages/ShopReviews";
+import ShopVouchers from "./pages/ShopVouchers";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -162,6 +164,14 @@ function AppContent() {
           }
         />
         <Route
+          path="/vouchers"
+          element={
+            <ProtectedRoute>
+              <ClaimVouchers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/change-password"
           element={
             <ProtectedRoute>
@@ -183,6 +193,7 @@ function AppContent() {
           <Route path="reviews" element={<ShopReviews />} />
           <Route path="revenue" element={<ShopRevenue />} />
           <Route path="orders" element={<ShopOrders />} />
+          <Route path="vouchers" element={<ShopVouchers />} />
         </Route>
         <Route
           path="/admin"

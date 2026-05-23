@@ -1,7 +1,7 @@
 const Voucher = require('../models/Voucher');
 const User = require('../models/User');
 
-// GET /api/vouchers - Public: Get all active vouchers for users
+// GET /api/vouchers - Public: Get all active vouchers for users from all shops
 exports.getActiveVouchers = async (req, res) => {
   try {
     const now = new Date();
@@ -9,7 +9,9 @@ exports.getActiveVouchers = async (req, res) => {
       isActive: true,
       startDate: { $lte: now },
       endDate: { $gte: now }
-    }).select('-createdBy -usageLimit -usedCount -userLimit -applicableProducts -applicableCategories -__v -updatedAt -createdAt');
+    })
+      .populate('shop', 'name _id')
+      .select('-createdBy -usageLimit -usedCount -userLimit -applicableProducts -applicableCategories -__v -updatedAt -createdAt');
     res.json({ vouchers });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
@@ -21,19 +23,31 @@ exports.getMyVouchers = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate({
       path: 'userVouchers.voucher',
-      select: 'code name description type value minOrderValue maxDiscount startDate endDate endDate isActive'
+      populate: {
+        path: 'shop',
+        select: 'name _id'
+      },
+      select: 'code name description type value minOrderValue maxDiscount startDate endDate isActive shop'
     });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const vouchers = user.userVouchers
-      .filter((entry) => entry.voucher)
-      .map((entry) => ({
-        ...entry.voucher.toObject(),
-        claimedAt: entry.claimedAt,
-        usedCount: entry.usedCount,
-      }));
+    // Deduplicate by voucher ID to prevent duplicate entries
+    const voucherMap = new Map();
+    user.userVouchers.forEach((entry) => {
+      if (entry.voucher && entry.voucher._id) {
+        const voucherId = entry.voucher._id.toString();
+        if (!voucherMap.has(voucherId)) {
+          voucherMap.set(voucherId, {
+            ...entry.voucher.toObject(),
+            claimedAt: entry.claimedAt,
+            usedCount: entry.usedCount,
+          });
+        }
+      }
+    });
+    const vouchers = Array.from(voucherMap.values());
 
     res.json({ vouchers });
   } catch (err) {
@@ -85,6 +99,124 @@ exports.claimVoucher = async (req, res) => {
     await user.save();
 
     res.json({ voucher });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// GET /api/vouchers/shop/:shopId - Get all vouchers created by a shop (with shop info)
+exports.getShopVouchers = async (req, res) => {
+  try {
+    const { shopId } = req.params;
+    const vouchers = await Voucher.find({ shop: shopId, isActive: true })
+      .populate('shop', 'name _id')
+      .select('code name description type value minOrderValue maxDiscount startDate endDate shop');
+    res.json({ vouchers });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// POST /api/vouchers/shop - Shop: Create a new voucher
+exports.createShopVoucher = async (req, res) => {
+  try {
+    const { code, name, description, type, value, minOrderValue, maxDiscount, usageLimit, userLimit, startDate, endDate } = req.body;
+
+    if (!code || !name || !type || !value || !startDate || !endDate) {
+      return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    const upperCode = String(code).trim().toUpperCase();
+    const existingVoucher = await Voucher.findOne({ code: upperCode });
+    if (existingVoucher) {
+      return res.status(400).json({ message: 'Mã voucher này đã tồn tại' });
+    }
+
+    const voucher = new Voucher({
+      code: upperCode,
+      name,
+      description,
+      type,
+      value,
+      minOrderValue: minOrderValue || 0,
+      maxDiscount,
+      usageLimit: usageLimit || null,
+      userLimit: userLimit || 1,
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      isActive: true,
+      shop: req.user.id,
+      createdBy: req.user.id
+    });
+
+    await voucher.save();
+    res.status(201).json({ message: 'Voucher created successfully', voucher });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// GET /api/vouchers/shop/my - Shop: Get my created vouchers
+exports.getMyCreatedVouchers = async (req, res) => {
+  try {
+    const vouchers = await Voucher.find({ shop: req.user.id })
+      .populate('shop', 'name _id')
+      .select('code name description type value minOrderValue maxDiscount usageLimit usedCount userLimit startDate endDate isActive shop');
+    res.json({ vouchers });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// PUT /api/vouchers/shop/:voucherId - Shop: Update a voucher
+exports.updateShopVoucher = async (req, res) => {
+  try {
+    const { voucherId } = req.params;
+    const { name, description, value, minOrderValue, maxDiscount, usageLimit, userLimit, startDate, endDate, isActive } = req.body;
+
+    const voucher = await Voucher.findById(voucherId);
+    if (!voucher) {
+      return res.status(404).json({ message: 'Voucher not found' });
+    }
+
+    if (!voucher.shop.equals(req.user.id)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    if (name) voucher.name = name;
+    if (description) voucher.description = description;
+    if (value) voucher.value = value;
+    if (minOrderValue !== undefined) voucher.minOrderValue = minOrderValue;
+    if (maxDiscount !== undefined) voucher.maxDiscount = maxDiscount;
+    if (usageLimit !== undefined) voucher.usageLimit = usageLimit;
+    if (userLimit !== undefined) voucher.userLimit = userLimit;
+    if (startDate) voucher.startDate = new Date(startDate);
+    if (endDate) voucher.endDate = new Date(endDate);
+    if (isActive !== undefined) voucher.isActive = isActive;
+
+    await voucher.save();
+    res.json({ message: 'Voucher updated successfully', voucher });
+  } catch (err) {
+    res.status(500).json({ message: 'Server error', error: err.message });
+  }
+};
+
+// DELETE /api/vouchers/shop/:voucherId - Shop: Delete a voucher
+exports.deleteShopVoucher = async (req, res) => {
+  try {
+    const { voucherId } = req.params;
+    const voucher = await Voucher.findById(voucherId);
+
+    if (!voucher) {
+      return res.status(404).json({ message: 'Voucher not found' });
+    }
+
+    if (!voucher.shop.equals(req.user.id)) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+
+    await Voucher.findByIdAndDelete(voucherId);
+    res.json({ message: 'Voucher deleted successfully' });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }

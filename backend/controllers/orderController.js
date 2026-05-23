@@ -87,6 +87,27 @@ const settlePaymentAndCreditShops = async (orderId) => {
             agg.fee = roundCurrency(agg.fee + feeAmount);
         }
 
+        // Update voucher usage if applied
+        if (order.discount?.code) {
+            const voucher = await Voucher.findOne({ code: order.discount.code });
+            if (voucher) {
+                voucher.usedCount = (voucher.usedCount || 0) + 1;
+                await voucher.save();
+            }
+
+            // Update user's voucher usage count
+            const user = await User.findById(order.user).populate('userVouchers.voucher');
+            if (user) {
+                const userVoucherEntry = user.userVouchers.find(
+                    entry => entry.voucher && entry.voucher.code === order.discount.code
+                );
+                if (userVoucherEntry) {
+                    userVoucherEntry.usedCount = (userVoucherEntry.usedCount || 0) + 1;
+                    await user.save();
+                }
+            }
+        }
+
         // save order with updated platformFee statuses
         await order.save();
 

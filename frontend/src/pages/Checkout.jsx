@@ -491,7 +491,7 @@ export default function Checkout() {
     if (!cartData?.items) return 0;
     const subtotal = cartData.items.reduce((total, item) => total + (item.price * item.qty), 0);
     const discount = selectedVoucherDiscount || 0;
-    return Math.max(0, subtotal - discount);
+    return roundCurrency(Math.max(0, subtotal - discount));
   };
 
   const handleSubmitOrder = async (e) => {
@@ -991,7 +991,7 @@ export default function Checkout() {
                   <option value="">Chọn voucher áp dụng</option>
                   {myVouchers.map((voucher) => (
                     <option key={voucher.code} value={voucher.code}>
-                      {voucher.code} - {voucher.name}
+                      {voucher.code} - {voucher.name} (🏪 {voucher.shop?.name || 'Shop'})
                     </option>
                   ))}
                 </select>
@@ -999,11 +999,11 @@ export default function Checkout() {
                   <p className="mt-2 text-sm text-gray-500">Đang tải voucher của bạn...</p>
                 )}
                 {!loadingVouchers && myVouchers.length === 0 && (
-                  <p className="mt-2 text-sm text-gray-500">Bạn hiện không có voucher nào.</p>
+                  <p className="mt-2 text-sm text-gray-500">Bạn hiện không có voucher nào. <a href="/claim-vouchers" className="text-blue-600 hover:underline">Claim ngay</a></p>
                 )}
                 {selectedVoucher && selectedVoucherDiscount > 0 && (
                   <div className="mt-2 text-green-600 text-sm">
-                    ✅ {selectedVoucher.name}: -₫{selectedVoucherDiscount.toLocaleString('vi-VN')}
+                    ✅ {selectedVoucher.name} ({selectedVoucher.shop?.name || 'Shop'}): -₫{selectedVoucherDiscount.toLocaleString('vi-VN')}
                   </div>
                 )}
                 {selectedVoucher && selectedVoucherDiscount === 0 && (
@@ -1020,7 +1020,7 @@ export default function Checkout() {
                 </div>
                 {selectedVoucher && selectedVoucherDiscount > 0 && (
                   <div className="flex justify-between text-green-600">
-                    <span>Giảm giá ({selectedVoucher.code}):</span>
+                    <span>Giảm giá ({selectedVoucher.code} - {selectedVoucher.shop?.name || 'Shop'}):</span>
                     <span>-₫{selectedVoucherDiscount.toLocaleString('vi-VN')}</span>
                   </div>
                 )}

@@ -96,6 +96,13 @@ export default function ShopDashboard() {
       icon: "📝",
       description: "Xem và trả lời đánh giá",
     },
+    {
+      id: "vouchers",
+      label: "Quản Lý Voucher",
+      path: "/shop/vouchers",
+      icon: "🎫",
+      description: "Tạo, sửa, xóa voucher",
+    },
   ];
 
   const handleLogout = () => {

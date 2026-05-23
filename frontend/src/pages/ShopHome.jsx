@@ -161,6 +161,12 @@ export default function ShopHome() {
           >
             ⭐ Xem Đánh Giá
           </a>
+          <a
+            href="/shop/vouchers"
+            className="rounded-md bg-red-600 px-4 py-2 text-center text-white font-medium hover:bg-red-700 transition"
+          >
+            🎫 Quản Lý Voucher
+          </a>
         </div>
       </div>
     </div>

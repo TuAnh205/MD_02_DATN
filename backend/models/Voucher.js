@@ -16,10 +16,12 @@ const voucherSchema = new mongoose.Schema({
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     isActive: { type: Boolean, default: true },
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+    shop: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Shop ID (for shop-specific vouchers)
 }, { timestamps: true });
 
 voucherSchema.index({ code: 1 });
 voucherSchema.index({ isActive: 1, startDate: 1, endDate: 1 });
+voucherSchema.index({ shop: 1 });
 
 module.exports = mongoose.model('Voucher', voucherSchema);
