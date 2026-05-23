@@ -109,6 +109,11 @@ public class ShopMainActivity extends AppCompatActivity {
             startActivity(new Intent(this, ShopCustomersActivity.class));
         });
 
+        findViewById(R.id.menuVoucher).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, CreateVoucherActivity.class));
+        });
+
         findViewById(R.id.menuRevenue).setOnClickListener(v -> {
             closeSidebar();
             startActivity(new Intent(this, RevenueActivity.class));
