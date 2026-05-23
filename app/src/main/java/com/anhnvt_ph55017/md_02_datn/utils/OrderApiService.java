@@ -14,7 +14,7 @@ import java.util.Scanner;
 
 public class OrderApiService {
     private static final String BASE_URL = "http://10.0.2.2:5000/api/orders";
-    private static final String BASE_SHOP_URL = "http://10.0.2.2:5000/api/shop/orders";
+    private static final String BASE_SHOP_URL = NetworkConstants.getApiBaseUrl() + "/api/shop/orders";
 
     // Tạo đơn hàng mới
     public interface CreateOrderCallback {
@@ -87,6 +87,35 @@ public class OrderApiService {
                 }
             } catch (Exception e) {
                 Log.e("GET_ORDERS_ERROR", e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
+    public static void getShopOrders(Context context, String token, OrdersCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_SHOP_URL);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+
+                int responseCode = conn.getResponseCode();
+                InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                Scanner scanner = new Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                Log.d("GET_SHOP_ORDERS_RESPONSE", "code=" + responseCode + " | body=" + response);
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    JSONArray arr = new JSONArray(response);
+                    callback.onSuccess(arr);
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                Log.e("GET_SHOP_ORDERS_ERROR", e.getMessage(), e);
                 callback.onError(e.getMessage());
             }
         }).start();

@@ -294,6 +294,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/menuCustomers"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:orientation="horizontal"
@@ -301,7 +302,9 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:background="@drawable/bg_sidebar_item"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <ImageView
                     android:layout_width="22dp"
