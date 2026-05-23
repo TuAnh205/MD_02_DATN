@@ -1,5 +1,7 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
-public class commit {
+import org.w3c.dom.Text;
 
+public class commit {
+    Text hihi;
 }
