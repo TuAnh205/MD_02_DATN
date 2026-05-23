@@ -294,6 +294,7 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/menuCustomers"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"
                 android:orientation="horizontal"
@@ -301,7 +302,9 @@
                 android:paddingStart="14dp"
                 android:paddingEnd="14dp"
                 android:background="@drawable/bg_sidebar_item"
-                android:layout_marginBottom="8dp">
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
 
                 <ImageView
                     android:layout_width="22dp"
@@ -313,6 +316,34 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:text="Khách hàng"
+                    android:textColor="#122046"
+                    android:textSize="15sp"
+                    android:layout_marginStart="14dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/menuVoucher"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:background="@drawable/bg_sidebar_item"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@drawable/ic_voucher"
+                    android:tint="#0A6ED8" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Voucher"
                     android:textColor="#122046"
                     android:textSize="15sp"
                     android:layout_marginStart="14dp" />

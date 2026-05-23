@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#F1F5F9">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#F1F5F9">
+
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Tạo Voucher"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:layout_gravity="center_horizontal"
+            android:paddingBottom="12dp" />
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="140dp"
+            android:background="@drawable/bg_input"
+            android:layout_marginBottom="16dp"
+            android:layout_gravity="center_horizontal"
+            android:foreground="?attr/selectableItemBackground">
+
+            <ImageView
+                android:id="@+id/imgVoucherBanner"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerInside"
+                android:src="@drawable/ic_camera"
+                android:padding="28dp"
+                android:contentDescription="Ảnh bìa voucher" />
+
+            <TextView
+                android:id="@+id/tvAddBanner"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Thêm ảnh bìa voucher"
+                android:textColor="#475569"
+                android:textSize="14sp"
+                android:background="@drawable/bg_input"
+                android:padding="12dp"
+                android:layout_gravity="bottom|center_horizontal"
+                android:layout_marginBottom="12dp" />
+        </FrameLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="THÔNG TIN CƠ BẢN"
+            android:textColor="#64748B"
+            android:textStyle="bold"
+            android:paddingTop="8dp" />
+
+        <EditText
+            android:id="@+id/edtVoucherCode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Mã Voucher\nVD: CORETECH2024"
+            android:textColorHint="#64748B"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:background="@drawable/edittext_bg"
+            android:padding="12dp"
+            android:layout_marginTop="8dp" />
+
+        <EditText
+            android:id="@+id/edtProgramName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Tên chương trình\nKHUYẾN MÃI MÙA HÈ"
+            android:textColorHint="#64748B"
+            android:textStyle="bold"
+            android:textColor="#1E293B"
+            android:background="@drawable/edittext_bg"
+            android:padding="12dp"
+            android:layout_marginTop="8dp" />
+
+        <include layout="@layout/item_voucher_discount_type" />
+
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="GIỚI HẠN SỬ DỤNG"
+            android:textColor="#64748B"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="@android:color/transparent"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="0dp">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_input"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:layout_marginBottom="4dp">
+                <ImageView
+                    android:src="@drawable/ic_voucher"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:tint="#94A3B8" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="TỔNG LƯỢT SỬ DỤNG TỐI ĐA"
+                    android:textColor="#1E293B"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:paddingStart="8dp" />
+                <EditText
+                    android:id="@+id/edtTotalUsage"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="0"
+                    android:inputType="number"
+                    android:textColor="#2563EB"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:gravity="end"
+                    android:background="@android:color/transparent"
+                    android:maxLength="5"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="0dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="0dp" />
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:orientation="horizontal"
+                android:background="@drawable/bg_input"
+                android:gravity="center_vertical"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp">
+                <ImageView
+                    android:src="@android:drawable/ic_menu_myplaces"
+                    android:layout_width="20dp"
+                    android:layout_height="20dp"
+                    android:tint="#94A3B8" />
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="LƯỢT DÙNG MỖI KHÁCH HÀNG"
+                    android:textColor="#1E293B"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:paddingStart="8dp" />
+                <EditText
+                    android:id="@+id/edtUsagePerCustomer"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:hint="1"
+                    android:inputType="number"
+                    android:textColor="#2563EB"
+                    android:textStyle="bold"
+                    android:textSize="15sp"
+                    android:gravity="end"
+                    android:background="@android:color/transparent"
+                    android:maxLength="3"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="0dp"
+                    android:layout_marginStart="8dp"
+                    android:layout_marginEnd="0dp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="THỜI GIAN HIỆU LỰC"
+            android:textColor="#64748B"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <include layout="@layout/item_voucher_date_picker" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SẢN PHẨM ÁP DỤNG"
+            android:textColor="#64748B"
+            android:textStyle="bold"
+            android:paddingTop="16dp" />
+
+        <include layout="@layout/item_voucher_product_apply" />
+
+        <Button
+            android:id="@+id/btnCreateVoucher"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Tạo Voucher mới"
+            android:textAllCaps="false"
+            android:textColor="#fff"
+            android:textStyle="bold"
+            android:backgroundTint="#2563EB"
+            android:layout_marginTop="24dp"
+            android:layout_marginBottom="16dp"
+            android:padding="16dp" />
+
+    </LinearLayout>
+</ScrollView>

@@ -91,6 +91,15 @@
             android:name=".screens.RevenueActivity"
             android:exported="false" />
         <activity
+            android:name=".screens.ShopCustomersActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.CreateVoucherActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.CustomerManagementActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.EditProfileActivity"
             android:exported="false" />
         <activity

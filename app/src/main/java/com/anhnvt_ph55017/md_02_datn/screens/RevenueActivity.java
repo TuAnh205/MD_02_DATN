@@ -21,6 +21,12 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.RevenueTransaction;
 import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
+import com.github.mikephil.charting.charts.LineChart;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.data.LineData;
+import com.github.mikephil.charting.data.LineDataSet;
+import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -52,8 +58,7 @@ public class RevenueActivity extends AppCompatActivity {
     private TextView tvCardNewCustomers;
     private TextView tvCardProducts;
     private RecyclerView rvRevenueTransactions;
-
-    private View[] chartBars;
+    private LineChart revenueChart;
 
     private final List<RevenueTransaction> revenueTransactions = new ArrayList<>();
     private RevenueTransactionAdapter revenueAdapter;
@@ -82,14 +87,7 @@ public class RevenueActivity extends AppCompatActivity {
         tvCardProducts = findViewById(R.id.tvCardProducts);
         layoutRevenueSummary = findViewById(R.id.layoutRevenueSummary);
         rvRevenueTransactions = findViewById(R.id.rvRevenueTransactions);
-
-        chartBars = new View[]{
-                findViewById(R.id.barRevenue1),
-                findViewById(R.id.barRevenue2),
-                findViewById(R.id.barRevenue3),
-                findViewById(R.id.barRevenue4),
-                findViewById(R.id.barRevenue5)
-        };
+        revenueChart = findViewById(R.id.revenueChart);
 
         btnBack.setOnClickListener(v -> onBackPressed());
         initTransactionList();
@@ -180,7 +178,6 @@ public class RevenueActivity extends AppCompatActivity {
         tvCardNewCustomers.setText(String.valueOf(summary.optInt("newCustomers", 0)));
         tvCardProducts.setText(String.valueOf(summary.optInt("totalProducts", 0)));
         tvRevenueChartAmount.setText(formatPrice(summary.optDouble("totalGrossRevenue", 0)));
-        tvRevenueChartNote.setText(response.optString("chartNote", ""));
         layoutRevenueSummary.setVisibility(View.VISIBLE);
 
         JSONArray chartValues = null;
@@ -188,7 +185,15 @@ public class RevenueActivity extends AppCompatActivity {
         if (chartObject != null) {
             chartValues = chartObject.optJSONArray("values");
         }
-        updateChart(chartValues);
+
+        boolean hasNegativeValues = updateChart(chartValues);
+        String chartNote = response.optString("chartNote", "").trim();
+        if (hasNegativeValues) {
+            String note = "Biểu đồ đã được làm tròn về 0 để tránh đường cong âm do điều chỉnh tháng trước.";
+            tvRevenueChartNote.setText(chartNote.isEmpty() ? note : chartNote + " " + note);
+        } else if (!chartNote.isEmpty()) {
+            tvRevenueChartNote.setText(chartNote);
+        }
 
         JSONArray productDetails = response.optJSONArray("productDetails");
         revenueTransactions.clear();
@@ -217,32 +222,81 @@ public class RevenueActivity extends AppCompatActivity {
         tvRevenueEmpty.setVisibility(revenueTransactions.isEmpty() ? View.VISIBLE : View.GONE);
     }
 
-    private void updateChart(JSONArray values) {
-        if (values == null || values.length() == 0) {
-            for (View bar : chartBars) {
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) bar.getLayoutParams();
-                params.height = dpToPx(32);
-                bar.setLayoutParams(params);
-            }
-            return;
+    private boolean updateChart(JSONArray values) {
+        if (revenueChart == null) {
+            return false;
         }
 
+        ArrayList<Entry> entries = new ArrayList<>();
+        ArrayList<String> labels = getChartLabels();
+
+        if (values == null || values.length() == 0) {
+            revenueChart.clear();
+            revenueChart.setNoDataText("Chưa có dữ liệu doanh thu");
+            revenueChart.invalidate();
+            return false;
+        }
+
+        boolean hasNegativeValues = false;
         double max = 0;
-        for (int i = 0; i < values.length() && i < chartBars.length; i++) {
-            max = Math.max(max, values.optDouble(i, 0));
+        for (int i = 0; i < values.length(); i++) {
+            double rawValue = values.optDouble(i, 0);
+            double visualValue = Math.max(0, rawValue);
+            hasNegativeValues |= rawValue < 0;
+            entries.add(new Entry(i, (float) visualValue));
+            max = Math.max(max, visualValue);
         }
         if (max <= 0) max = 1;
 
-        for (int i = 0; i < chartBars.length; i++) {
-            double value = values.optDouble(i, 0);
-            int height = dpToPx(32) + (int) ((dpToPx(80) * value) / max);
-            if (height < dpToPx(32)) {
-                height = dpToPx(32);
-            }
-            View bar = chartBars[i];
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) bar.getLayoutParams();
-            params.height = height;
-            bar.setLayoutParams(params);
+        LineDataSet dataSet = new LineDataSet(entries, "Doanh thu");
+        dataSet.setColor(Color.parseColor("#0A6ED8"));
+        dataSet.setLineWidth(2.8f);
+        dataSet.setCircleColor(Color.parseColor("#0A6ED8"));
+        dataSet.setCircleRadius(4.5f);
+        dataSet.setDrawCircleHole(false);
+        dataSet.setMode(LineDataSet.Mode.CUBIC_BEZIER);
+        dataSet.setCubicIntensity(0.2f);
+        dataSet.setDrawFilled(true);
+        dataSet.setFillColor(Color.parseColor("#DCEBFF"));
+        dataSet.setFillAlpha(120);
+        dataSet.setDrawValues(false);
+
+        LineData lineData = new LineData(dataSet);
+        revenueChart.setData(lineData);
+        revenueChart.getDescription().setEnabled(false);
+        revenueChart.getLegend().setEnabled(false);
+        revenueChart.setTouchEnabled(true);
+        revenueChart.setDragEnabled(false);
+        revenueChart.setScaleEnabled(false);
+        revenueChart.setPinchZoom(false);
+        revenueChart.setDrawGridBackground(false);
+        revenueChart.getAxisRight().setEnabled(false);
+        revenueChart.getAxisLeft().setDrawGridLines(true);
+        revenueChart.getAxisLeft().setGridColor(Color.parseColor("#E5E7EB"));
+        revenueChart.getAxisLeft().setTextColor(Color.parseColor("#6B7280"));
+        revenueChart.getAxisLeft().setTextSize(10f);
+        revenueChart.getAxisLeft().setAxisMinimum(0f);
+        revenueChart.getXAxis().setPosition(XAxis.XAxisPosition.BOTTOM);
+        revenueChart.getXAxis().setGranularity(1f);
+        revenueChart.getXAxis().setDrawGridLines(false);
+        revenueChart.getXAxis().setTextColor(Color.parseColor("#6B7280"));
+        revenueChart.getXAxis().setTextSize(10f);
+        revenueChart.getXAxis().setValueFormatter(new IndexAxisValueFormatter(labels));
+        revenueChart.getXAxis().setLabelCount(Math.min(labels.size(), 5), true);
+        revenueChart.animateX(600);
+        revenueChart.invalidate();
+        return hasNegativeValues;
+    }
+
+    private ArrayList<String> getChartLabels() {
+        switch (currentPeriod) {
+            case "week":
+                return new ArrayList<>(List.of("T2", "T3", "T4", "T5", "CN"));
+            case "year":
+                return new ArrayList<>(List.of("Q1", "Q2", "Q3", "Q4"));
+            case "month":
+            default:
+                return new ArrayList<>(List.of("Tuần 1", "Tuần 2", "Tuần 3", "Tuần 4", "Tuần 5"));
         }
     }
 

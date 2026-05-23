@@ -84,13 +84,13 @@
 
             <TextView
                 android:id="@+id/tvOrderSummary"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="3 sản phẩm • MacBook Air M2 + 2 phụ kiện"
+                android:text="3 sản phẩm • MacBook Air M2, AirPods Pro + 1 sản phẩm khác"
                 android:textColor="#64748B"
                 android:textSize="13sp"
                 android:layout_marginTop="2dp"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end" />
 
             <TextView

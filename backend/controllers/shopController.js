@@ -508,12 +508,12 @@ exports.getShopRevenue = async (req, res) => {
 
     const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-    // Lấy tất cả orders ĐANG LÀM VIỆC - chỉ từ orders đã thanh toán thành công
+    // Lấy tất cả orders đã giao cho shop, không phụ thuộc vào trạng thái thanh toán
     const orders = await Order.find({
-      "payment.status": "paid",
+      status: "đã nhận",
       "items.shopId": shopId,
-      "payment.paidAt": { $gte: startDate }, // Filter theo thời gian thanh toán, không phải tạo đơn
-    }).select("items payment createdAt orderNumber");
+      updatedAt: { $gte: startDate },
+    }).select("user items payment createdAt updatedAt orderNumber status");
 
     // Chi tiết từng sản phẩm với phí sàn
     const productDetails = [];
@@ -533,6 +533,9 @@ exports.getShopRevenue = async (req, res) => {
         totalPlatformFees += platformFee;
         totalNetRevenue += netAmount;
 
+        const revenueAt =
+          order.updatedAt || order.payment?.paidAt || order.createdAt;
+
         productDetails.push({
           orderId: order._id,
           orderNumber: order.orderNumber,
@@ -546,8 +549,8 @@ exports.getShopRevenue = async (req, res) => {
           platformFeeRate: 0.05, // 5%
           platformFee: platformFee,
           netAmount: netAmount,
-          paidAt: order.payment?.paidAt || order.createdAt,
-          feeStatus: "charged", // Vì chỉ lấy paid orders nên phí đã được tính
+          paidAt: revenueAt,
+          feeStatus: "charged",
         });
       });
     });
@@ -556,9 +559,9 @@ exports.getShopRevenue = async (req, res) => {
     const revenueData = await Order.aggregate([
       {
         $match: {
-          "payment.status": "paid",
+          status: "đã nhận",
           "items.shopId": shopObjectId,
-          "payment.paidAt": { $gte: startDate }, // Filter theo thời gian thanh toán
+          updatedAt: { $gte: startDate },
         },
       },
       {
@@ -581,7 +584,9 @@ exports.getShopRevenue = async (req, res) => {
     const stats = revenueData[0] || { totalOrders: [], totalProducts: 0 };
 
     const uniqueCustomerIds = new Set(
-      orders.map((order) => order.user.toString()),
+      orders
+        .map((order) => (order.user ? order.user.toString() : null))
+        .filter(Boolean),
     );
     const chartBuckets = [0, 0, 0, 0, 0];
     const periodMs = Math.max(1, now.getTime() - startDate.getTime());

@@ -102,11 +102,25 @@
         android:layout_height="1dp"
         android:background="@android:color/darker_gray" />
 
+    <TextView
+        android:id="@+id/tvOrdersEmpty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="24dp"
+        android:text="Chưa có đơn hàng nào để hiển thị."
+        android:textColor="#64748B"
+        android:textSize="14sp"
+        android:visibility="gone" />
+
     <!-- ORDER LIST -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvOrders"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:padding="12dp"
+        android:paddingBottom="24dp"/>
 
 </LinearLayout>
 

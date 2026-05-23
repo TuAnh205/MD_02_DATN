@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:layout_marginTop="8dp"
+    android:background="@drawable/bg_input"
+    android:padding="12dp">
+    <ImageView
+        android:src="@drawable/ic_box"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:tint="#2563EB" />
+    <TextView
+        android:id="@+id/tvProductApply"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="TẤT CẢ SẢN PHẨM"
+        android:textColor="#1E293B"
+        android:textSize="15sp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp" />
+    <ImageView
+        android:src="@drawable/ic_right_arrow"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:tint="#2563EB" />
+</LinearLayout>
