@@ -60,6 +60,16 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/tvShopName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="#7A8BB2"
+        android:textSize="12sp"
+        android:layout_marginTop="4dp"
+        android:visibility="gone"
+        android:text="Shop ABC" />
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

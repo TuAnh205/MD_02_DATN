@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bg_bottom_sheet"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <View
+            android:layout_width="40dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center"
+            android:background="#CCCCCC"
+            android:layout_marginBottom="16dp"
+            android:backgroundTint="#CCCCCC" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thanh toán bằng thẻ"
+            android:textColor="@color/black"
+            android:textStyle="bold"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nhập thông tin thẻ của bạn"
+            android:textColor="#757575"
+            android:layout_marginTop="4dp"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nhập 16 chữ số từ thẻ của bạn"
+            android:textColor="#2F80FF"
+            android:layout_marginTop="4dp"
+            android:textSize="13sp" />
+
+        <EditText
+            android:id="@+id/etCardHolderName"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="16dp"
+            android:background="@drawable/bg_input"
+            android:hint="Tên chủ thẻ"
+            android:padding="12dp"
+            android:inputType="textPersonName"
+            android:textColor="@color/black"
+            android:textColorHint="#999999" />
+
+        <EditText
+            android:id="@+id/etCardNumber"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_input"
+            android:hint="Số thẻ"
+            android:padding="12dp"
+            android:inputType="phone"
+            android:digits="0123456789 "
+            android:textColor="@color/black"
+            android:textColorHint="#999999" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Nhập 16 chữ số thẻ, ví dụ: 1234 5678 9012 3456"
+            android:textColor="#757575"
+            android:textSize="13sp"
+            android:layout_marginTop="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="12dp">
+
+            <EditText
+                android:id="@+id/etCardExpiry"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input"
+                android:hint="MM/YY"
+                android:padding="12dp"
+                android:inputType="number"
+                android:digits="0123456789"
+                android:textColor="@color/black"
+                android:textColorHint="#999999" />
+
+            <View
+                android:layout_width="12dp"
+                android:layout_height="match_parent" />
+
+            <EditText
+                android:id="@+id/etCardCVV"
+                android:layout_width="0dp"
+                android:layout_height="48dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_input"
+                android:hint="CVV"
+                android:padding="12dp"
+                android:inputType="numberPassword"
+                android:textColor="@color/black"
+                android:textColorHint="#999999" />
+        </LinearLayout>
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnConfirmCard"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="20dp"
+            android:text="Xác nhận"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:background="@drawable/bg_btn_blue" />
+
+        <androidx.appcompat.widget.AppCompatButton
+            android:id="@+id/btnCancelCard"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="10dp"
+            android:text="Huỷ"
+            android:textAllCaps="false"
+            android:textColor="#2F80FF"
+            android:background="@drawable/bg_card" />
+    </LinearLayout>
+</ScrollView>

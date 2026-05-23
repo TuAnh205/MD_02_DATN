@@ -12,6 +12,7 @@ public class Product implements Serializable {
     String description;
     float rating;
     int reviewCount;
+    String shopName;
     int stock;
     boolean isFavorite = false;
 
@@ -58,6 +59,9 @@ public class Product implements Serializable {
 
     public int getReviewCount() { return reviewCount; }
     public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
+
+    public String getShopName() { return shopName; }
+    public void setShopName(String shopName) { this.shopName = shopName; }
 
     public int getStock() { return stock; }
     public void setStock(int stock) { this.stock = stock; }

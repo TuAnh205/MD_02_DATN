@@ -452,8 +452,8 @@ exports.processPayment = async (req, res) => {
         if (!order) return res.status(404).json({ message: 'Not found' });
 
         if (method === 'card') {
-            if (cardData.cardNumber !== '4242424242424242') {
-                return res.status(400).json({ message: 'Sai thẻ test' });
+            if (!cardData || !cardData.cardNumber || !/^\d{16}$/.test(cardData.cardNumber)) {
+                return res.status(400).json({ message: 'Số thẻ không hợp lệ, cần 16 chữ số' });
             }
 
             order.payment.status = 'paid';

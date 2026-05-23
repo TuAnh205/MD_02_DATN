@@ -36,7 +36,7 @@ import java.util.List;
 public class DetailActivity extends AppCompatActivity {
     ImageView imgProduct;
     ImageButton btnBack;
-    TextView tvName, tvPrice, tvRating, tvDesc, tvDetailedDesc, tvNewBadge;
+    TextView tvName, tvPrice, tvRating, tvDesc, tvDetailedDesc, tvNewBadge, tvShopName;
     TextView tvRatingAverage, tvRatingCount, tvCount1, tvCount2, tvCount3, tvCount4, tvCount5;
     ProgressBar progress1, progress2, progress3, progress4, progress5;
     EditText edtReview;
@@ -63,6 +63,7 @@ public class DetailActivity extends AppCompatActivity {
         tvPrice = findViewById(R.id.tvPrice);
         tvRating = findViewById(R.id.tvRating);
         tvDesc = findViewById(R.id.tvDesc);
+        tvShopName = findViewById(R.id.tvShopName);
         rvRelated = findViewById(R.id.rvRelated);
         btnAddCart = findViewById(R.id.btnAddCart);
         tvDetailedDesc = findViewById(R.id.tvDetailedDesc);
@@ -194,6 +195,28 @@ public class DetailActivity extends AppCompatActivity {
                         tvName.setText(name);
                         tvPrice.setText("$" + price);
                         tvDesc.setText(description);
+                        if (item.optJSONObject("shopId") != null) {
+                            String shopName = item.optJSONObject("shopId").optString("name", "");
+                            if (shopName.isEmpty()) {
+                                shopName = item.optJSONObject("shopId").optString("shopName", "");
+                            }
+                            if (!shopName.isEmpty()) {
+                                tvShopName.setText(shopName);
+                                tvShopName.setVisibility(View.VISIBLE);
+                            } else {
+                                tvShopName.setVisibility(View.GONE);
+                            }
+                        } else if (item.optJSONObject("shop") != null) {
+                            String shopName = item.optJSONObject("shop").optString("name", "");
+                            if (!shopName.isEmpty()) {
+                                tvShopName.setText(shopName);
+                                tvShopName.setVisibility(View.VISIBLE);
+                            } else {
+                                tvShopName.setVisibility(View.GONE);
+                            }
+                        } else {
+                            tvShopName.setVisibility(View.GONE);
+                        }
                         tvDetailedDesc.setText(detailedDescription);
                         tvRating.setText("⭐ " + rating + " (" + reviewCount + ")");
 

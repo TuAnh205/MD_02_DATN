@@ -121,6 +121,18 @@ Log.d("ProductAPI", "Full Response: " + response.toString(2));
                                 product.setReviewCount(item.optInt("reviewCount", 0));
                             }
 
+                            String shopName = "";
+                            JSONObject shopObj = item.optJSONObject("shopId");
+                            if (shopObj == null) shopObj = item.optJSONObject("shop");
+                            if (shopObj == null) shopObj = item.optJSONObject("seller");
+                            if (shopObj != null) {
+                                shopName = shopObj.optString("name", shopObj.optString("shopName", ""));
+                            }
+                            if (shopName.isEmpty()) {
+                                shopName = item.optString("shopName", "");
+                            }
+                            product.setShopName(shopName);
+
                             product.setFavorite(favoriteIds.contains(id));
                             products.add(product);
                         }

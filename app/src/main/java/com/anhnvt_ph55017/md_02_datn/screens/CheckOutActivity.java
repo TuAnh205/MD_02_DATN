@@ -11,6 +11,7 @@ import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetCardPayment;
 import com.anhnvt_ph55017.md_02_datn.models.Address;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.models.Voucher;
@@ -28,8 +29,17 @@ public class CheckOutActivity extends AppCompatActivity {
     private static final int REQUEST_CODE_VOUCHER = 2002;
 
     RadioGroup paymentGroup;
+    RadioButton payCard;
     AppCompatButton btnOrder, btnChangeAddress;
     LinearLayout layoutVoucherSelect;
+
+    boolean cardInfoConfirmed = false;
+    String cardHolderName = "";
+    String cardNumber = "";
+    String cardExpiry = "";
+    String cardCVV = "";
+    int previousPaymentId = -1;
+    boolean isProgrammaticPaymentChange = false;
 
     TextView tvSubtotal, tvTax, tvTotal, tvVoucher;
     TextView tvShipName, tvShipPhone, tvShipAddress;
@@ -74,6 +84,8 @@ public class CheckOutActivity extends AppCompatActivity {
         tvVoucherTitle = findViewById(R.id.tvVoucherTitle);
         tvVoucherValue = findViewById(R.id.tvVoucherValue);
 
+        payCard = findViewById(R.id.payCard);
+
         tvSubtotal = findViewById(R.id.tvSubtotal);
         tvTax = findViewById(R.id.tvTax);
         tvTotal = findViewById(R.id.tvTotal);
@@ -102,6 +114,18 @@ public class CheckOutActivity extends AppCompatActivity {
             startActivityForResult(new Intent(this, VoucherSelectActivity.class), REQUEST_CODE_VOUCHER);
         });
 
+        paymentGroup.setOnCheckedChangeListener((group, checkedId) -> {
+            if (isProgrammaticPaymentChange) return;
+
+            if (checkedId == R.id.payCard) {
+                showCardPaymentSheet();
+            } else {
+                cardInfoConfirmed = false;
+                payCard.setText("Thanh toán bằng thẻ");
+                previousPaymentId = checkedId;
+            }
+        });
+
         btnChangeAddress.setOnClickListener(v -> {
             startActivityForResult(new Intent(this, ShippingAddressActivity.class), REQUEST_CODE_ADDRESS);
         });
@@ -121,13 +145,17 @@ public class CheckOutActivity extends AppCompatActivity {
         double tax = subtotal * 0.1;
         double total = subtotal + tax - discount;
 
-        tvSubtotal.setText("Subtotal: " + (int) subtotal + "đ");
-        tvTax.setText("Tax: " + (int) tax + "đ");
-        tvTotal.setText("Total: " + (int) total + "đ");
+        String subtotalText = String.format("Tạm tính: %,.0f đ", subtotal);
+        String taxText = String.format("Thuế: %,.0f đ", tax);
+        String totalText = String.format("Tổng thanh toán: %,.0f đ", total);
+
+        tvSubtotal.setText(subtotalText);
+        tvTax.setText(taxText);
+        tvTotal.setText(totalText);
 
         if (discount > 0) {
             tvVoucher.setVisibility(View.VISIBLE);
-            tvVoucher.setText("Voucher: -" + (int) discount + "đ");
+            tvVoucher.setText(String.format("Voucher: -%,.0f đ", discount));
         } else {
             tvVoucher.setVisibility(View.GONE);
         }
@@ -156,8 +184,16 @@ public class CheckOutActivity extends AppCompatActivity {
             return;
         }
 
-        if (paymentGroup.getCheckedRadioButtonId() == -1) {
+        int checkedPaymentId = paymentGroup.getCheckedRadioButtonId();
+        if (checkedPaymentId == -1) {
             Toast.makeText(this, "Chọn phương thức thanh toán", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        boolean isCardPayment = checkedPaymentId == R.id.payCard;
+        if (isCardPayment && !cardInfoConfirmed) {
+            Toast.makeText(this, "Vui lòng nhập thông tin thẻ qua BottomSheet", Toast.LENGTH_SHORT).show();
+            showCardPaymentSheet();
             return;
         }
 
@@ -200,6 +236,15 @@ public class CheckOutActivity extends AppCompatActivity {
             body.put("total", total);
             body.put("shipping", shippingObj);
 
+            JSONObject paymentObj = new JSONObject();
+            paymentObj.put("method", isCardPayment ? "card" : "cod");
+            paymentObj.put("status", "pending");
+            if (isCardPayment) {
+                paymentObj.put("cardholderName", cardHolderName);
+                paymentObj.put("cardLastFour", cardNumber.substring(Math.max(0, cardNumber.length() - 4)));
+            }
+            body.put("payment", paymentObj);
+
             // ===== FIX DISCOUNT (QUAN TRỌNG NHẤT) =====
             JSONObject discountObj = new JSONObject();
 
@@ -230,19 +275,60 @@ public class CheckOutActivity extends AppCompatActivity {
             OrderApiService.createOrder(this, token, body, new OrderApiService.CreateOrderCallback() {
                 @Override
                 public void onSuccess(JSONObject res) {
-                    runOnUiThread(() -> {
+                    if (isCardPayment) {
+                        String orderId = res.optString("_id", res.optString("id", ""));
+                        if (orderId.isEmpty()) {
+                            runOnUiThread(() ->
+                                    Toast.makeText(CheckOutActivity.this, "Không lấy được ID đơn hàng", Toast.LENGTH_SHORT).show()
+                            );
+                            return;
+                        }
 
+                        try {
+                            JSONObject cardData = new JSONObject();
+                            cardData.put("cardNumber", cardNumber);
+                            cardData.put("cardholderName", cardHolderName);
+                            cardData.put("expiryDate", cardExpiry);
+                            cardData.put("cvv", cardCVV);
 
+                            OrderApiService.processPayment(CheckOutActivity.this, token, orderId, "card", cardData,
+                                    new OrderApiService.ProcessPaymentCallback() {
+                                        @Override
+                                        public void onSuccess(JSONObject paymentResponse) {
+                                            runOnUiThread(() -> {
+                                                Intent intent = new Intent(
+                                                        CheckOutActivity.this,
+                                                        ThanhCongScreen.class
+                                                );
+                                                removeBoughtItemsFromCart();
+                                                startActivity(intent);
+                                                finish();
+                                            });
+                                        }
 
-                        // Chuyển sang màn thành công
-                        Intent intent = new Intent(
-                                CheckOutActivity.this,
-                                ThanhCongScreen.class
-                        );
-                        removeBoughtItemsFromCart();
-                        startActivity(intent);
-                        finish();
-                    });
+                                        @Override
+                                        public void onError(String err) {
+                                            runOnUiThread(() ->
+                                                    Toast.makeText(CheckOutActivity.this, "Lỗi thanh toán: " + err, Toast.LENGTH_LONG).show()
+                                            );
+                                        }
+                                    });
+                        } catch (Exception e) {
+                            runOnUiThread(() ->
+                                    Toast.makeText(CheckOutActivity.this, "Lỗi xử lý thông tin thẻ", Toast.LENGTH_SHORT).show()
+                            );
+                        }
+                    } else {
+                        runOnUiThread(() -> {
+                            Intent intent = new Intent(
+                                    CheckOutActivity.this,
+                                    ThanhCongScreen.class
+                            );
+                            removeBoughtItemsFromCart();
+                            startActivity(intent);
+                            finish();
+                        });
+                    }
                 }
 
                 @Override
@@ -257,6 +343,42 @@ public class CheckOutActivity extends AppCompatActivity {
             e.printStackTrace();
         }
     }
+
+    private void showCardPaymentSheet() {
+        BottomSheetCardPayment sheet = BottomSheetCardPayment.newInstance(
+                cardHolderName,
+                cardNumber,
+                cardExpiry,
+                cardCVV,
+                new BottomSheetCardPayment.CardPaymentListener() {
+                    @Override
+                    public void onCardPaymentConfirmed(String holder, String number, String expiry, String cvv) {
+                        cardInfoConfirmed = true;
+                        cardHolderName = holder;
+                        cardNumber = number;
+                        cardExpiry = expiry;
+                        cardCVV = cvv;
+                        payCard.setText("Thanh toán bằng thẻ (đã nhập)");
+                        previousPaymentId = R.id.payCard;
+                    }
+
+                    @Override
+                    public void onCardPaymentCancelled() {
+                        if (!cardInfoConfirmed) {
+                            isProgrammaticPaymentChange = true;
+                            if (previousPaymentId != -1) {
+                                paymentGroup.check(previousPaymentId);
+                            } else {
+                                paymentGroup.clearCheck();
+                            }
+                            isProgrammaticPaymentChange = false;
+                        }
+                    }
+                }
+        );
+        sheet.show(getSupportFragmentManager(), "CardPaymentBottomSheet");
+    }
+
     //load adress
     private void loadDefaultAddress() {
         String token = SessionManager.getToken(this);

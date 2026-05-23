@@ -249,23 +249,43 @@ public class ShippingAddressActivity extends AppCompatActivity {
         Spinner spinnerWard = dialogView.findViewById(R.id.spinnerWard);
 
         // Load location data
+        final String editCity = isEdit ? editing.getCity() : null;
+        final String editDistrict = isEdit ? editing.getDistrict() : null;
+        final String editWard = isEdit ? editing.getWard() : null;
+
         LocationApiService.getLocations(new LocationApiService.LocationCallback() {
             @Override
             public void onSuccess(JSONArray locations) {
                 ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item);
                 cityAdapter.setDropDownViewResource(R.layout.spinner_item);
+                cityAdapter.add("Chọn tỉnh/thành phố");
                 for (int i = 0; i < locations.length(); i++) {
                     JSONObject cityObj = locations.optJSONObject(i);
                     if (cityObj != null) cityAdapter.add(cityObj.optString("name", ""));
                 }
                 spinnerCity.setAdapter(cityAdapter);
+                spinnerCity.setSelection(0, false);
                 spinnerCity.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
                     @Override
                     public void onItemSelected(android.widget.AdapterView<?> parent, View view, int position, long id) {
-                        JSONObject cityObj = locations.optJSONObject(position);
+                        if (position == 0) {
+                            ArrayAdapter<String> emptyDistrict = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item, new java.util.ArrayList<>());
+                            emptyDistrict.setDropDownViewResource(R.layout.spinner_item);
+                            emptyDistrict.add("Chọn quận/huyện");
+                            spinnerDistrict.setAdapter(emptyDistrict);
+
+                            ArrayAdapter<String> emptyWard = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item, new java.util.ArrayList<>());
+                            emptyWard.setDropDownViewResource(R.layout.spinner_item);
+                            emptyWard.add("Chọn phường/xã");
+                            spinnerWard.setAdapter(emptyWard);
+                            return;
+                        }
+
+                        JSONObject cityObj = locations.optJSONObject(position - 1);
                         JSONArray districts = cityObj != null ? cityObj.optJSONArray("districts") : null;
                         ArrayAdapter<String> districtAdapter = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item);
                         districtAdapter.setDropDownViewResource(R.layout.spinner_item);
+                        districtAdapter.add("Chọn quận/huyện");
                         if (districts != null) {
                             for (int j = 0; j < districts.length(); j++) {
                                 JSONObject districtObj = districts.optJSONObject(j);
@@ -274,13 +294,22 @@ public class ShippingAddressActivity extends AppCompatActivity {
                             }
                         }
                         spinnerDistrict.setAdapter(districtAdapter);
+                        spinnerDistrict.setSelection(0, false);
                         spinnerDistrict.setOnItemSelectedListener(new android.widget.AdapterView.OnItemSelectedListener() {
                             @Override
                             public void onItemSelected(android.widget.AdapterView<?> parent2, View view2, int pos2, long id2) {
-                                JSONObject districtObj = districts != null ? districts.optJSONObject(pos2) : null;
+                                if (pos2 == 0) {
+                                    ArrayAdapter<String> emptyWard = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item, new java.util.ArrayList<>());
+                                    emptyWard.setDropDownViewResource(R.layout.spinner_item);
+                                    emptyWard.add("Chọn phường/xã");
+                                    spinnerWard.setAdapter(emptyWard);
+                                    return;
+                                }
+                                JSONObject districtObj = districts != null ? districts.optJSONObject(pos2 - 1) : null;
                                 JSONArray wards = districtObj != null ? districtObj.optJSONArray("wards") : null;
                                 ArrayAdapter<String> wardAdapter = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item);
                                 wardAdapter.setDropDownViewResource(R.layout.spinner_item);
+                                wardAdapter.add("Chọn phường/xã");
                                 if (wards != null && wards.length() > 0) {
                                     for (int k = 0; k < wards.length(); k++) {
                                         JSONObject wardObj = wards.optJSONObject(k);
@@ -290,18 +319,44 @@ public class ShippingAddressActivity extends AppCompatActivity {
                                     }
                                 }
                                 spinnerWard.setAdapter(wardAdapter);
+                                if (editWard != null && !editWard.isEmpty()) {
+                                    for (int k = 0; k < wardAdapter.getCount(); k++) {
+                                        if (editWard.equals(wardAdapter.getItem(k))) {
+                                            spinnerWard.setSelection(k, false);
+                                            break;
+                                        }
+                                    }
+                                }
                             }
 
                             @Override
                             public void onNothingSelected(android.widget.AdapterView<?> parent2) {
                             }
                         });
+
+                        if (editDistrict != null && !editDistrict.isEmpty()) {
+                            for (int j = 0; j < districtAdapter.getCount(); j++) {
+                                if (editDistrict.equals(districtAdapter.getItem(j))) {
+                                    spinnerDistrict.setSelection(j, false);
+                                    break;
+                                }
+                            }
+                        }
                     }
 
                     @Override
                     public void onNothingSelected(android.widget.AdapterView<?> parent) {
                     }
                 });
+
+                if (editCity != null && !editCity.isEmpty()) {
+                    for (int i = 0; i < cityAdapter.getCount(); i++) {
+                        if (editCity.equals(cityAdapter.getItem(i))) {
+                            spinnerCity.setSelection(i, false);
+                            break;
+                        }
+                    }
+                }
             }
 
             @Override
@@ -309,6 +364,25 @@ public class ShippingAddressActivity extends AppCompatActivity {
                 Toast.makeText(ShippingAddressActivity.this, "Lỗi tải địa lý: " + error, Toast.LENGTH_SHORT).show();
             }
         });
+
+        final String promptCity = "Chọn tỉnh/thành phố";
+        final String promptDistrict = "Chọn quận/huyện";
+        final String promptWard = "Chọn phường/xã";
+
+        ArrayAdapter<String> initialCityAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, new java.util.ArrayList<>());
+        initialCityAdapter.setDropDownViewResource(R.layout.spinner_item);
+        initialCityAdapter.add(promptCity);
+        spinnerCity.setAdapter(initialCityAdapter);
+
+        ArrayAdapter<String> initialDistrictAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, new java.util.ArrayList<>());
+        initialDistrictAdapter.setDropDownViewResource(R.layout.spinner_item);
+        initialDistrictAdapter.add(promptDistrict);
+        spinnerDistrict.setAdapter(initialDistrictAdapter);
+
+        ArrayAdapter<String> initialWardAdapter = new ArrayAdapter<>(this, R.layout.spinner_item, new java.util.ArrayList<>());
+        initialWardAdapter.setDropDownViewResource(R.layout.spinner_item);
+        initialWardAdapter.add(promptWard);
+        spinnerWard.setAdapter(initialWardAdapter);
 
         if (isEdit) {
             etName.setText(editing.getName());
@@ -340,8 +414,9 @@ public class ShippingAddressActivity extends AppCompatActivity {
                 String ward = spinnerWard.getSelectedItem() != null ? spinnerWard.getSelectedItem().toString() : "";
                 // Log ra thành phố, quận, phường khi chọn địa chỉ
                 android.util.Log.d("ADDRESS_DIALOG", "Chọn địa chỉ: Thành phố=" + city + ", Quận/Huyện=" + district + ", Phường/Xã=" + ward);
-                if (name.isEmpty() || phone.isEmpty() || addr.isEmpty() || city.isEmpty() || district.isEmpty() || ward.isEmpty()) {
-                    Toast.makeText(ShippingAddressActivity.this, "Vui lòng điền đủ thông tin", Toast.LENGTH_SHORT).show();
+                if (name.isEmpty() || phone.isEmpty() || addr.isEmpty() || city.isEmpty() || district.isEmpty() || ward.isEmpty()
+                        || promptCity.equals(city) || promptDistrict.equals(district) || promptWard.equals(ward)) {
+                    Toast.makeText(ShippingAddressActivity.this, "Vui lòng điền đủ thông tin và chọn đúng tỉnh/thành, quận/huyện, phường/xã", Toast.LENGTH_SHORT).show();
                     return;
                 }
                 // Không cho tên chứa số

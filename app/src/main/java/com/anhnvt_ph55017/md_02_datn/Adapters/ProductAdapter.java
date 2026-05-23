@@ -49,6 +49,12 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
         holder.tvName.setText(product.getName());
         holder.tvPrice.setText("$" + product.getPrice());
         holder.tvRating.setText(product.getRating() + " (" + product.getReviewCount() + ")");
+        if (product.getShopName() != null && !product.getShopName().isEmpty()) {
+            holder.tvShopName.setVisibility(View.VISIBLE);
+            holder.tvShopName.setText(product.getShopName());
+        } else {
+            holder.tvShopName.setVisibility(View.GONE);
+        }
 
         // ===== IMAGE (GLIDE) =====
         String imageUrl = product.getImageUrl();
@@ -177,7 +183,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgProduct, imgFavorite;
-        TextView tvName, tvPrice, tvRating;
+        TextView tvName, tvPrice, tvRating, tvShopName;
         ImageButton btnAdd;
 
         public ViewHolder(@NonNull View itemView) {
@@ -188,6 +194,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             tvName = itemView.findViewById(R.id.tvProductName);
             tvPrice = itemView.findViewById(R.id.tvProductPrice);
             tvRating = itemView.findViewById(R.id.tvRating);
+            tvShopName = itemView.findViewById(R.id.tvShopName);
             btnAdd = itemView.findViewById(R.id.btnAdd);
         }
     }

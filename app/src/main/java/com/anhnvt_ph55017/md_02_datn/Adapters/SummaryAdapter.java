@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 
+import java.text.NumberFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.ViewHolder> {
 
@@ -37,8 +39,13 @@ public class SummaryAdapter extends RecyclerView.Adapter<SummaryAdapter.ViewHold
         Product p = list.get(position);
         holder.tvName.setText(p.getName());
         holder.tvQty.setText("x" + p.getQty());
-        double line = p.getPrice() * p.getQty();
-        holder.tvLineTotal.setText(String.format("$%.2f", line));
+        long line = Math.round(p.getPrice() * p.getQty());
+        holder.tvLineTotal.setText(formatVnd(line));
+    }
+
+    private String formatVnd(long value) {
+        NumberFormat formatter = NumberFormat.getInstance(new Locale("vi", "VN"));
+        return formatter.format(value) + "đ";
     }
 
     @Override

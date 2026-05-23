@@ -194,7 +194,9 @@ public class CartFragment extends Fragment {
         CartApiService.getCart(requireContext(), token, new CartApiService.CartCallback() {
             @Override
             public void onSuccess(org.json.JSONObject cartJson) {
-                requireActivity().runOnUiThread(() -> {
+                if (!isAdded() || getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    if (!isAdded() || getActivity() == null) return;
                     cartList.clear();
 
                     org.json.JSONArray items = cartJson.optJSONArray("items");
@@ -239,9 +241,11 @@ public class CartFragment extends Fragment {
 
             @Override
             public void onError(String error) {
-                requireActivity().runOnUiThread(() ->
-                        Toast.makeText(requireContext(), "Lỗi: " + error, Toast.LENGTH_SHORT).show()
-                );
+                if (!isAdded() || getActivity() == null) return;
+                getActivity().runOnUiThread(() -> {
+                    if (!isAdded() || getActivity() == null) return;
+                    Toast.makeText(requireContext(), "Lỗi: " + error, Toast.LENGTH_SHORT).show();
+                });
             }
         });
     }

@@ -22,6 +22,48 @@ public class OrderApiService {
         void onError(String error);
     }
 
+    public interface ProcessPaymentCallback {
+        void onSuccess(JSONObject paymentResponse);
+        void onError(String error);
+    }
+
+    public static void processPayment(Context context, String token, String orderId, String method, JSONObject cardData, ProcessPaymentCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL(BASE_URL + "/" + orderId + "/process-payment");
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("POST");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+                conn.setDoOutput(true);
+
+                JSONObject body = new JSONObject();
+                body.put("method", method);
+                body.put("cardData", cardData);
+
+                conn.getOutputStream().write(body.toString().getBytes("UTF-8"));
+
+                int responseCode = conn.getResponseCode();
+                InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                Scanner scanner = new Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                Log.d("PROCESS_PAYMENT_RESPONSE", "code=" + responseCode + " | body=" + response);
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    JSONObject obj = new JSONObject(response);
+                    callback.onSuccess(obj);
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                Log.e("PROCESS_PAYMENT_ERROR", e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
     public static void createOrder(Context context, String token, JSONObject orderBody, CreateOrderCallback callback) {
         new Thread(() -> {
             try {
