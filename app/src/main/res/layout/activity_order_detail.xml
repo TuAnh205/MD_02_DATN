@@ -1,27 +1,23 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/background"
     android:padding="16dp">
-
     <!-- HEADER -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical"
-       >
-
+        android:gravity="center_vertical">
         <ImageButton
             android:id="@+id/btnBack"
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:src="@drawable/ic_back2"
             android:background="@null"
-            android:contentDescription="Back"/>
-
+            android:contentDescription="Back" />
         <TextView
             android:text="Chi tiết đơn hàng"
             android:textSize="20sp"
@@ -31,112 +27,25 @@
             android:gravity="center"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
-
         <View
             android:layout_width="40dp"
             android:layout_height="40dp" />
-
     </LinearLayout>
-
     <!-- DIVIDER -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:background="@android:color/darker_gray"
         android:layout_marginBottom="16dp" />
-
-    <!-- PRODUCT INFO CARD - HIDDEN WHEN USING LIST -->
-    <LinearLayout
-        android:id="@+id/productInfoCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/bg_card"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone">
-
-        <TextView
-            android:id="@+id/tvProductName"
-            android:textSize="18sp"
-            android:textColor="#000000"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/tvProductPrice"
-            android:textSize="16sp"
-            android:textColor="#2F80FF"
-            android:textStyle="bold"
-            android:layout_marginBottom="8dp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id="@+id/tvProductDesc"
-            android:textSize="14sp"
-            android:textColor="#000000"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-    </LinearLayout>
-
-    <!-- ITEMS LIST CARD -->
-    <LinearLayout
-        android:id="@+id/itemsCard"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="@drawable/bg_card"
-        android:padding="16dp"
-        android:layout_marginBottom="16dp">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
-
-            <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
-                android:src="@drawable/ic_box"
-                android:tint="#2F80FF"
-                android:layout_marginEnd="8dp" />
-
-            <TextView
-                android:text="Danh sách hàng hóa"
-                android:textSize="16sp"
-                android:textColor="#000000"
-                android:textStyle="bold"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content" />
-
-        </LinearLayout>
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvOrderItems"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:nestedScrollingEnabled="false" />
-
-    </LinearLayout>
-
-    <!-- SCROLL VIEW FOR CONTENT -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
-
-            <!-- ORDER INFO CARD -->
+            <!-- ORDER CODE -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -144,176 +53,53 @@
                 android:background="@drawable/bg_card"
                 android:padding="16dp"
                 android:layout_marginBottom="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_box"
-                        android:tint="#2F80FF"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:text="Thông tin đơn hàng"
-                        android:textSize="16sp"
-                        android:textColor="#000000"
-                        android:textStyle="bold"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
-
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_weight="1"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical">
-
-                        <TextView
-                            android:id="@+id/tvOrderId"
-                            android:textSize="16sp"
-                            android:textColor="#050505"
-                            android:textStyle="bold"
-                            android:layout_marginBottom="4dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:gravity="start">
-
-                            <TextView
-                                android:text="Thời gian đặt:"
-                                android:textSize="13sp"
-                                android:textColor="#666666"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-
-                            <TextView
-                                android:id="@+id/tvOrderDate"
-                                android:textSize="13sp"
-                                android:textColor="#666666"
-                                android:textStyle="bold"
-                                android:layout_marginTop="4dp"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content" />
-
-                        </LinearLayout>
-
-                    </LinearLayout>
-
-                    <View
-                        android:layout_width="1dp"
-                        android:layout_height="48dp"
-                        android:background="#DDDDDD"
-                        android:layout_marginHorizontal="12dp" />
-
-                    <LinearLayout
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:gravity="center">
-
-                        <TextView
-                            android:text="Trạng thái"
-                            android:textSize="12sp"
-                            android:textColor="#666666"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="4dp" />
-
-                        <TextView
-                            android:id="@+id/tvOrderStatus"
-                            android:textSize="16sp"
-                            android:textColor="#2F80FF"
-                            android:textStyle="bold"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content" />
-
-                        <TextView
-                            android:id="@+id/tvCancellationReason"
-                            android:textSize="13sp"
-                            android:textColor="#000000"
-                            android:visibility="gone"
-                            android:layout_marginTop="8dp"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:gravity="end" />
-
-                    </LinearLayout>
-
-                </LinearLayout>
-
+                <TextView
+                    android:id="@+id/tvOrderId"
+                    android:textSize="16sp"
+                    android:textColor="#4F46E5"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tvOrderDate"
+                    android:textSize="14sp"
+                    android:textColor="#71717A"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <!-- ORDER STATUS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Trạng thái đơn"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tvOrderStatus"
+                    android:textSize="18sp"
+                    android:textColor="#2F80FF"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="6dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
                 <TextView
                     android:id="@+id/tvStatusDescription"
-                    android:textSize="13sp"
-                    android:textColor="#000000"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <!-- RATING CARD đã bị ẩn theo yêu cầu -->
-
-            <!-- SHIPPING ADDRESS CARD -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                android:background="@drawable/bg_card"
-                android:padding="16dp"
-                android:layout_marginBottom="12dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical"
-                    android:layout_marginBottom="12dp">
-
-                    <ImageView
-                        android:layout_width="20dp"
-                        android:layout_height="20dp"
-                        android:src="@drawable/ic_location"
-                        android:tint="#2F80FF"
-                        android:layout_marginEnd="8dp" />
-
-                    <TextView
-                        android:text="Địa chỉ giao hàng"
-                        android:textSize="16sp"
-                        android:textColor="#000000"
-                        android:textStyle="bold"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tvShippingAddress"
                     android:textSize="14sp"
-                    android:textColor="#000000"
-                    android:lineSpacingExtra="2sp"
+                    android:textColor="#6B7280"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
-
             </LinearLayout>
-
-            <!-- PAYMENT INFO CARD -->
+            <!-- ORDER SUMMARY -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -321,21 +107,18 @@
                 android:background="@drawable/bg_card"
                 android:padding="16dp"
                 android:layout_marginBottom="12dp">
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:layout_marginBottom="12dp">
-
                     <ImageView
                         android:layout_width="20dp"
                         android:layout_height="20dp"
                         android:src="@drawable/ic_payment"
                         android:tint="#2F80FF"
                         android:layout_marginEnd="8dp" />
-
                     <TextView
                         android:text="Thông tin thanh toán"
                         android:textSize="16sp"
@@ -343,23 +126,19 @@
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="12dp">
-
                     <TextView
-                        android:text="Số lượng sản phẩm:"
+                        android:text="Số lượng sản phẩm"
                         android:textSize="14sp"
                         android:textColor="#000000"
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
-
                     <TextView
                         android:id="@+id/tvItemCount"
                         android:textSize="14sp"
@@ -367,23 +146,19 @@
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="12dp">
-
                     <TextView
-                        android:text="Dự kiến nhận:"
+                        android:text="Dự kiến nhận"
                         android:textSize="14sp"
                         android:textColor="#000000"
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
-
                     <TextView
                         android:id="@+id/tvArrivalDate"
                         android:textSize="14sp"
@@ -391,15 +166,12 @@
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="12dp">
-
                     <TextView
                         android:text="Phương thức thanh toán:"
                         android:textSize="14sp"
@@ -407,7 +179,6 @@
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
-
                     <TextView
                         android:id="@+id/tvPaymentMethod"
                         android:textSize="14sp"
@@ -415,15 +186,12 @@
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-
                 </LinearLayout>
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:layout_marginBottom="12dp">
-
                     <TextView
                         android:text="Giảm giá voucher:"
                         android:textSize="14sp"
@@ -431,7 +199,6 @@
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
-
                     <TextView
                         android:id="@+id/tvVoucherDiscount"
                         android:textSize="14sp"
@@ -439,45 +206,289 @@
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-
                 </LinearLayout>
-
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/black"
+                    android:background="#E5E7EB"
                     android:layout_marginBottom="12dp" />
-
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal">
-
                     <TextView
-                        android:text="Tổng tiền:"
+                        android:text="Tổng tiền"
                         android:textSize="16sp"
                         android:textColor="#000000"
                         android:textStyle="bold"
                         android:layout_weight="1"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content" />
-
                     <TextView
                         android:id="@+id/tvOrderTotal"
                         android:textSize="18sp"
-                        android:textColor="#2F80FF"
+                        android:textColor="#0F766E"
                         android:textStyle="bold"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content" />
-
                 </LinearLayout>
-
             </LinearLayout>
-
+            <!-- ORDER ITEMS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Chi tiết sản phẩm"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="12dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvOrderItems"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:nestedScrollingEnabled="false" />
+            </LinearLayout>
+            <!-- SHIPPING ADDRESS -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Địa chỉ giao hàng"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tvShippingAddress"
+                    android:textSize="14sp"
+                    android:textColor="#6B7280"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+            <!-- ORDER TIMELINE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Trạng thái đơn hàng"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="12dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+                        <TextView
+                            android:id="@+id/tvTimelineBullet1"
+                            android:text="●"
+                            android:textSize="14sp"
+                            android:textColor="#22C55E"
+                            android:layout_width="24dp"
+                            android:layout_height="wrap_content" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tvTimelineStep1"
+                                android:text="Đã lấy hàng"
+                                android:textSize="14sp"
+                                android:textColor="#000000"
+                                android:textStyle="bold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                            <TextView
+                                android:id="@+id/tvTimelineTime1"
+                                android:text="10:30 - 20/10/2023"
+                                android:textSize="12sp"
+                                android:textColor="#6B7280"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+                        <TextView
+                            android:id="@+id/tvTimelineBullet2"
+                            android:text="●"
+                            android:textSize="14sp"
+                            android:textColor="#9CA3AF"
+                            android:layout_width="24dp"
+                            android:layout_height="wrap_content" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tvTimelineStep2"
+                                android:text="Đã thanh toán (Chuyển khoản)"
+                                android:textSize="14sp"
+                                android:textColor="#000000"
+                                android:textStyle="bold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                            <TextView
+                                android:id="@+id/tvTimelineTime2"
+                                android:text="10:30 - 20/10/2023"
+                                android:textSize="12sp"
+                                android:textColor="#6B7280"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp">
+                        <TextView
+                            android:id="@+id/tvTimelineBullet3"
+                            android:text="●"
+                            android:textSize="14sp"
+                            android:textColor="#9CA3AF"
+                            android:layout_width="24dp"
+                            android:layout_height="wrap_content" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tvTimelineStep3"
+                                android:text="Đang chuẩn bị hàng"
+                                android:textSize="14sp"
+                                android:textColor="#000000"
+                                android:textStyle="bold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                            <TextView
+                                android:id="@+id/tvTimelineTime3"
+                                android:text="10:30 - 20/10/2023"
+                                android:textSize="12sp"
+                                android:textColor="#6B7280"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+                    </LinearLayout>
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal">
+                        <TextView
+                            android:id="@+id/tvTimelineBullet4"
+                            android:text="●"
+                            android:textSize="14sp"
+                            android:textColor="#9CA3AF"
+                            android:layout_width="24dp"
+                            android:layout_height="wrap_content" />
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_weight="1"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical">
+                            <TextView
+                                android:id="@+id/tvTimelineStep4"
+                                android:text="Đang giao hàng"
+                                android:textSize="14sp"
+                                android:textColor="#6B7280"
+                                android:textStyle="bold"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                            <TextView
+                                android:id="@+id/tvTimelineTime4"
+                                android:text="10:30 - 20/10/2023"
+                                android:textSize="12sp"
+                                android:textColor="#6B7280"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+            <!-- INTERNAL NOTE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Ghi chú nội bộ"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <EditText
+                    android:id="@+id/edtInternalNote"
+                    android:layout_width="match_parent"
+                    android:layout_height="120dp"
+                    android:background="@drawable/bg_input"
+                    android:padding="12dp"
+                    android:gravity="top"
+                    android:textSize="14sp"
+                    android:hint="Nhập lý do cập nhật hoặc lưu ý cho shipper..."
+                    android:textColor="#000000"
+                    android:textColorHint="#9CA3AF" />
+            </LinearLayout>
+            <!-- SHIPPING NOTE -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_card"
+                android:padding="16dp"
+                android:layout_marginBottom="12dp">
+                <TextView
+                    android:text="Thông tin vận chuyển"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="8dp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+                <TextView
+                    android:id="@+id/tvShippingNote"
+                    android:textSize="14sp"
+                    android:textColor="#6B7280"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Giao giờ hành chính, gọi trước khi đến 15 phút." />
+            </LinearLayout>
         </LinearLayout>
-
     </ScrollView>
-
     <!-- ACTION BUTTONS -->
     <LinearLayout
         android:layout_width="match_parent"
@@ -497,7 +508,6 @@
             android:layout_weight="1"
             android:layout_width="0dp"
             android:layout_height="wrap_content" />
-
         <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnBuyAgain"
             android:text="Mua sắm tiếp"
@@ -512,7 +522,4 @@
             android:layout_height="wrap_content"
             android:visibility="gone" />
     </LinearLayout>
-
 </LinearLayout>
-
-

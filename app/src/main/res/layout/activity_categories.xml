@@ -2,114 +2,125 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#FFFFFF">
+    android:background="#F2F3F7"
+    android:orientation="vertical">
 
     <!-- Header -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
         android:background="#FFFFFF"
-        android:elevation="4dp">
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp">
 
         <ImageView
-            android:id="@+id/ivBack"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
-            android:src="@drawable/ic_back"
-            android:tint="#122046"
-            android:contentDescription="Quay lại" />
+            android:id="@+id/btnMenu"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:contentDescription="Menu"
+            android:src="@drawable/ic_menu" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Danh mục"
-            android:textColor="#122046"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:layout_marginStart="16dp" />
+            android:gravity="center"
+            android:text="Quản lý sản phẩm"
+            android:textColor="#1A1A1A"
+            android:textSize="17sp"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/btnNotification"
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:contentDescription="Thông báo"
+            android:src="@drawable/ic_bell" />
     </LinearLayout>
 
-    <!-- Search -->
-    <EditText
-        android:id="@+id/edtSearchCategory"
-        android:layout_width="match_parent"
-        android:layout_height="48dp"
-        android:background="@drawable/bg_search"
-        android:hint="Tìm kiếm danh mục"
-        android:drawableStart="@drawable/ic_search"
-        android:drawablePadding="10dp"
-        android:padding="14dp"
-        android:textColor="#122046"
-        android:textColorHint="#7A8BB2"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginBottom="12dp" />
-
-    <!-- Categories List -->
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_marginTop="20dp"
-        android:visibility="gone" />
-
-    <RecyclerView
-        android:id="@+id/recyclerCategories"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp" />
-
-    <TextView
-        android:id="@+id/tvEmptyState"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:text="Chưa có danh mục nào"
-        android:textColor="#7A8BB2"
-        android:textSize="16sp"
-        android:visibility="gone" />
-
-    <!-- Bottom Info -->
+    <!-- Search Bar -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center"
+        android:background="#FFFFFF"
         android:paddingStart="16dp"
+        android:paddingTop="10dp"
         android:paddingEnd="16dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="12dp"
-        android:background="#F5F7FA">
+        android:paddingBottom="10dp">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="Hiển thị 6 trên 12 danh mục"
-            android:textColor="#7A8BB2"
-            android:textSize="13sp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_search_bar"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp">
 
-        <Button
-            android:id="@+id/btnAddCategory"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="@drawable/bg_btn_blue"
-            android:text="+"
-            android:textColor="@android:color/white"
-            android:textSize="24sp"
-            android:padding="0dp" />
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:contentDescription="Tìm kiếm"
+                android:src="@drawable/ic_search"
+                android:tint="#9E9E9E" />
+
+            <EditText
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1"
+                android:background="@null"
+                android:hint="Tìm kiếm tên , sản phẩm"
+                android:textColorHint="#9E9E9E"
+                android:textSize="14sp"
+                android:inputType="text"
+                android:maxLines="1" />
+        </LinearLayout>
     </LinearLayout>
+
+    <!-- Add Button -->
+    <Button
+        android:id="@+id/btnAddProduct"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:background="@drawable/bg_btn_primary"
+        android:drawableStart="@drawable/ic_plus"
+        android:drawablePadding="8dp"
+        android:gravity="center"
+        android:text="Thêm sản phẩm mới"
+        android:textColor="#FFFFFF"
+        android:textSize="15sp"
+        android:textStyle="bold" />
+
+    <!-- Product List -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recyclerViewProducts"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:paddingStart="16dp"
+        android:paddingTop="8dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="8dp" />
+
+    <!-- Load More Button -->
+    <Button
+        android:id="@+id/btnLoadMore"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_btn_outline"
+        android:text="Xem thêm sản phẩm"
+        android:textColor="#6B6B6B"
+        android:textSize="14sp" />
+
 </LinearLayout>

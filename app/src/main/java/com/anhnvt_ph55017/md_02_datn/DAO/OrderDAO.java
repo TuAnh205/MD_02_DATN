@@ -23,8 +23,8 @@ public class OrderDAO {
     }
 
     // Thêm đơn hàng mới
-    public long addOrder(String orderId, int userId, double total, String status, 
-                        String address, String payment, String note, int imageRes) {
+    public long addOrder(String orderId, int userId, double total, String status,
+                         String address, String payment, String note, int imageRes) {
         try {
             ContentValues values = new ContentValues();
             values.put("orderId", orderId);
@@ -56,20 +56,25 @@ public class OrderDAO {
 
             if (cursor.moveToFirst()) {
                 do {
-                    int id = cursor.getInt(0);
-                    double total = cursor.getDouble(1);
-                    String status = cursor.getString(2);
+                    int    id       = cursor.getInt(0);
+                    double total    = cursor.getDouble(1);
+                    String status   = cursor.getString(2);
                     String createdAt = cursor.getString(3);
-                    int imageRes = cursor.getInt(4);
+                    // imageRes không dùng trong constructor mới, bỏ qua
 
-                    // Parse date
-                    String[] dateParts = createdAt.split(" ");
-                    String dateStr = dateParts[0]; // "yyyy-MM-dd"
+                    String date = convertDateFormat(createdAt.split(" ")[0]);
 
-                    // Convert to "MMM dd yyyy" format
-                    String date = convertDateFormat(dateStr);
-                    
-                    Order order = new Order("OD-" + id, date, total, status, "TBD", 1, imageRes);
+                    Order order = new Order(
+                            String.valueOf(id), // id
+                            "OD-" + id,         // orderCode
+                            date,               // formattedDate
+                            total,              // total
+                            status,             // status
+                            "TBD",              // customerName
+                            "",                 // itemSummary
+                            "",                 // productImageUrl
+                            1                   // itemCount
+                    );
                     orders.add(order);
                 } while (cursor.moveToNext());
             }
@@ -80,26 +85,35 @@ public class OrderDAO {
         return orders;
     }
 
-    // Lấy tất cả đơn hàng (cho admin, hoặc dev testing)
+    // Lấy tất cả đơn hàng (cho admin)
     public List<Order> getAllOrders() {
         List<Order> orders = new ArrayList<>();
         try {
             Cursor cursor = db.rawQuery(
-                    "SELECT id, total, status, createdAt, imageRes FROM orders ORDER BY createdAt DESC",
+                    "SELECT id, total, status, createdAt FROM orders ORDER BY createdAt DESC",
                     null
             );
 
             if (cursor.moveToFirst()) {
                 do {
-                    int id = cursor.getInt(0);
-                    double total = cursor.getDouble(1);
-                    String status = cursor.getString(2);
+                    int    id        = cursor.getInt(0);
+                    double total     = cursor.getDouble(1);
+                    String status    = cursor.getString(2);
                     String createdAt = cursor.getString(3);
-                    int imageRes = cursor.getInt(4);
 
                     String date = convertDateFormat(createdAt.split(" ")[0]);
-                    
-                    Order order = new Order("OD-" + id, date, total, status, "TBD", 1, imageRes);
+
+                    Order order = new Order(
+                            String.valueOf(id), // id
+                            "OD-" + id,         // orderCode
+                            date,               // formattedDate
+                            total,              // total
+                            status,             // status
+                            "TBD",              // customerName
+                            "",                 // itemSummary
+                            "",                 // productImageUrl
+                            1                   // itemCount
+                    );
                     orders.add(order);
                 } while (cursor.moveToNext());
             }
@@ -130,34 +144,46 @@ public class OrderDAO {
         Order order = null;
         try {
             Cursor cursor = db.rawQuery(
-                    "SELECT id, userId, total, status, address, payment, createdAt, note, imageRes, cancellationReason, rating, reviewComment, reviewedAt FROM orders WHERE id=?",
+                    "SELECT id, userId, total, status, address, payment, createdAt, note, imageRes, " +
+                            "cancellationReason, rating, reviewComment, reviewedAt FROM orders WHERE id=?",
                     new String[]{String.valueOf(orderId)}
             );
 
             if (cursor.moveToFirst()) {
-                int id = cursor.getInt(0);
-                int userId = cursor.getInt(1);
-                double total = cursor.getDouble(2);
-                String status = cursor.getString(3);
-                String address = cursor.getString(4);
-                String payment = cursor.getString(5);
-                String createdAt = cursor.getString(6);
-                String note = cursor.getString(7);
-                int imageRes = cursor.getInt(8);
+                int    id                = cursor.getInt(0);
+                // userId (index 1) — không dùng hiện tại
+                double total             = cursor.getDouble(2);
+                String status            = cursor.getString(3);
+                String address           = cursor.getString(4);
+                String payment           = cursor.getString(5);
+                String createdAt         = cursor.getString(6);
+                // note (index 7) — không dùng hiện tại
+                // imageRes (index 8) — không dùng trong constructor mới
                 String cancellationReason = cursor.getString(9);
-                double rating = cursor.getDouble(10);
-                String reviewComment = cursor.getString(11);
-                String reviewedAt = cursor.getString(12);
+                double rating            = cursor.getDouble(10);
+                String reviewComment     = cursor.getString(11);
+                String reviewedAt        = cursor.getString(12);
 
                 String date = convertDateFormat(createdAt.split(" ")[0]);
-                order = new Order("OD-" + id, date, total, status, "TBD", 1, imageRes);
+
+                order = new Order(
+                        String.valueOf(id), // id
+                        "OD-" + id,         // orderCode
+                        date,               // formattedDate
+                        total,              // total
+                        status,             // status
+                        "TBD",              // customerName
+                        "",                 // itemSummary
+                        "",                 // productImageUrl
+                        1                   // itemCount
+                );
                 order.setShippingAddress(address);
                 order.setPaymentMethod(payment);
-                order.setCreatedAt(createdAt);  // Lưu createdAt để tính ngày dự kiến
-                order.setCancellationReason(cancellationReason);  // Lưu lý do hủy
-                order.setRating(rating);  // Lưu rating
-                order.setReviewComment(reviewComment);  // Lưu review comment
-                order.setReviewedAt(reviewedAt);  // Lưu thời gian đánh giá
+                order.setCreatedAt(createdAt);
+                order.setCancellationReason(cancellationReason);
+                order.setRating(rating);
+                order.setReviewComment(reviewComment);
+                order.setReviewedAt(reviewedAt);
             }
             cursor.close();
         } catch (Exception e) {
@@ -172,20 +198,19 @@ public class OrderDAO {
         try {
             Cursor cursor = db.rawQuery(
                     "SELECT oi.productId, oi.quantity, oi.price, p.name, p.image " +
-                    "FROM order_items oi " +
-                    "JOIN products p ON oi.productId = p.id " +
-                    "WHERE oi.orderId = ? " +
-                    "ORDER BY oi.id ASC",
+                            "FROM order_items oi " +
+                            "JOIN products p ON oi.productId = p.id " +
+                            "WHERE oi.orderId = ? " +
+                            "ORDER BY oi.id ASC",
                     new String[]{String.valueOf(orderId)}
             );
 
             if (cursor.moveToFirst()) {
                 do {
-                    int productId = cursor.getInt(0);
-                    int quantity = cursor.getInt(1);
-                    double price = cursor.getDouble(2);
+                    int    quantity    = cursor.getInt(1);
+                    double price       = cursor.getDouble(2);
                     String productName = cursor.getString(3);
-                    int imageRes = cursor.getInt(4);
+                    int    imageRes    = cursor.getInt(4);
 
                     OrderItem item = new OrderItem(productName, price, quantity, imageRes);
                     items.add(item);
@@ -234,24 +259,20 @@ public class OrderDAO {
     // Tính ngày dự kiến nhận hàng dựa trên status
     public String calculateExpectedDelivery(String createdAt, String status) {
         try {
-            // Nếu chưa xác nhận (Chưa thanh toán, Đang xử lý) => chưa có ngày dự kiến
             if ("Chưa thanh toán".equals(status) || "Đang xử lý".equals(status)) {
                 return "Chưa xác định";
             }
 
-            java.text.SimpleDateFormat inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            java.text.SimpleDateFormat inputFormat  = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
             java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("MMM dd yyyy");
             java.util.Date orderDate = inputFormat.parse(createdAt);
 
-            // Tính ngày dự kiến dựa trên status
             java.util.Calendar calendar = java.util.Calendar.getInstance();
             calendar.setTime(orderDate);
 
             if ("Đang giao hàng".equals(status)) {
-                // Nếu đang giao => + 3-4 ngày (chọn 3)
                 calendar.add(java.util.Calendar.DAY_OF_MONTH, 3);
             } else if ("Đã nhận".equals(status)) {
-                // Nếu đã nhận => + 3 ngày (ngày xác nhận admin + 3 ngày)
                 calendar.add(java.util.Calendar.DAY_OF_MONTH, 3);
             } else if ("Đã hủy".equals(status)) {
                 return "Đã hủy";
@@ -267,13 +288,13 @@ public class OrderDAO {
     // Helper: chuyển đổi định dạng ngày từ "yyyy-MM-dd" sang "MMM dd yyyy"
     private String convertDateFormat(String dateStr) {
         try {
-            java.text.SimpleDateFormat inputFormat = new java.text.SimpleDateFormat("yyyy-MM-dd");
+            java.text.SimpleDateFormat inputFormat  = new java.text.SimpleDateFormat("yyyy-MM-dd");
             java.text.SimpleDateFormat outputFormat = new java.text.SimpleDateFormat("MMM dd yyyy");
             java.util.Date date = inputFormat.parse(dateStr);
             return outputFormat.format(date);
         } catch (Exception e) {
             e.printStackTrace();
-            return dateStr; // return as is if parsing fails
+            return dateStr;
         }
     }
 }

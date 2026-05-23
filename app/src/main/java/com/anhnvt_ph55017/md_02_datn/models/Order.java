@@ -4,6 +4,10 @@ import java.util.List;
 
 public class Order {
     String imageUrl;
+    String orderCode;
+    String customerName;
+    String itemSummary;
+    String productImageUrl;
 
     String id;
     String date;
@@ -23,12 +27,12 @@ public class Order {
     List<OrderItem> items;
     String paymentMethod;
     String paymentStatus;
+    double voucherDiscount;
     String createdAt;  // Để tính ngày dự kiến nhận
     String cancellationReason;  // Lý do hủy đơn
     double rating;  // Đánh giá sao (0-5)
     String reviewComment;  // Review comment từ khách
     String reviewedAt;  // Ngày đánh giá
-    double voucherDiscount; // Số tiền giảm bởi voucher
 
     public Order(String id, String date, double total, String status, String arrivalDate, int itemCount, int imageRes) {
         this(id, date, total, status, arrivalDate, itemCount, imageRes, "", 0, "", "");
@@ -48,6 +52,8 @@ public class Order {
         this.productDesc = productDesc;
         this.shippingAddress = "";
         this.items = null;
+        this.paymentMethod = "Thanh toán khi nhận hàng";
+        this.voucherDiscount = 0;
         this.imageUrl = imageUrl;
     }
 
@@ -67,7 +73,7 @@ public class Order {
         this.shippingAddress = shippingAddress;
         this.items = items;
         this.paymentMethod = "Thanh toán khi nhận hàng";
-        this.paymentStatus = "";
+        this.voucherDiscount = 0;
         this.imageUrl = imageUrl;
     }
 
@@ -87,10 +93,92 @@ public class Order {
         this.shippingAddress = shippingAddress;
         this.items = items;
         this.paymentMethod = paymentMethod != null ? paymentMethod : "Thanh toán khi nhận hàng";
-        this.paymentStatus = "";
+        this.voucherDiscount = 0;
         this.imageUrl = imageUrl;
-
     }
+
+    public Order(String id, String orderCode, String formattedDate, double total, String status,
+                 String customerName, String itemSummary, String productImageUrl, int itemCount) {
+        this.id = id;
+        this.orderCode = orderCode;
+        this.date = formattedDate;
+        this.total = total;
+        this.status = status;
+        this.customerName = customerName;
+        this.itemSummary = itemSummary;
+        this.productImageUrl = productImageUrl;
+        this.itemCount = itemCount;
+        this.imageRes = 0;
+        this.productName = "";
+        this.productPrice = 0;
+        this.productDesc = "";
+        this.shippingAddress = "";
+        this.items = null;
+        this.paymentMethod = "Thanh toán khi nhận hàng";
+        this.imageUrl = productImageUrl;
+    }
+
+    public String getOrderCode() {
+        if (orderCode != null && !orderCode.isEmpty()) return orderCode;
+        return id != null ? id : "";
+    }
+
+    public void setOrderCode(String orderCode) {
+        this.orderCode = orderCode;
+    }
+
+    public String getFormattedDate() {
+        if (date == null || date.isEmpty()) return "";
+        try {
+            if (date.contains("T")) {
+                String[] parts = date.split("T");
+                String datePart = parts[0];
+                String timePart = parts.length > 1 ? parts[1].substring(0, Math.min(5, parts[1].length())) : "00:00";
+                String[] dateParts = datePart.split("-");
+                if (dateParts.length == 3) {
+                    return dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0] + " • " + timePart;
+                }
+            }
+        } catch (Exception ignored) {
+        }
+        return date;
+    }
+
+    public String getCustomerName() {
+        if (customerName != null && !customerName.isEmpty()) return customerName;
+        if (productName != null && !productName.isEmpty()) return productName;
+        return "";
+    }
+
+    public void setCustomerName(String customerName) {
+        this.customerName = customerName;
+    }
+
+    public String getItemSummary() {
+        if (itemSummary != null && !itemSummary.isEmpty()) return itemSummary;
+        if (items != null && !items.isEmpty()) {
+            String firstName = items.get(0).getProductName();
+            if (items.size() == 1) {
+                return firstName;
+            }
+            return firstName + " và " + (items.size() - 1) + " sản phẩm khác";
+        }
+        return itemCount + " sản phẩm";
+    }
+
+    public void setItemSummary(String itemSummary) {
+        this.itemSummary = itemSummary;
+    }
+
+    public String getProductImageUrl() {
+        if (productImageUrl != null && !productImageUrl.isEmpty()) return productImageUrl;
+        return imageUrl != null ? imageUrl : "";
+    }
+
+    public void setProductImageUrl(String productImageUrl) {
+        this.productImageUrl = productImageUrl;
+    }
+
     public String getImageUrl() {
         return imageUrl;
     }
@@ -209,6 +297,14 @@ public class Order {
         this.paymentStatus = paymentStatus;
     }
 
+    public double getVoucherDiscount() {
+        return voucherDiscount;
+    }
+
+    public void setVoucherDiscount(double voucherDiscount) {
+        this.voucherDiscount = voucherDiscount;
+    }
+
     public String getCreatedAt() {
         return createdAt;
     }
@@ -247,13 +343,5 @@ public class Order {
 
     public void setReviewedAt(String reviewedAt) {
         this.reviewedAt = reviewedAt;
-    }
-
-    public double getVoucherDiscount() {
-        return voucherDiscount;
-    }
-
-    public void setVoucherDiscount(double voucherDiscount) {
-        this.voucherDiscount = voucherDiscount;
     }
 }

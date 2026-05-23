@@ -79,40 +79,9 @@ public class AddCategoryActivity extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        String url;
-        int method;
-
-        if (categoryId != null) {
-            // Update
-            url = NetworkConstants.getApiBaseUrl() + "/api/shop/categories/" + categoryId;
-            method = Request.Method.PUT;
-        } else {
-            // Create
-            url = NetworkConstants.getApiBaseUrl() + "/api/shop/categories";
-            method = Request.Method.POST;
-        }
-
-        JsonObjectRequest request = new JsonObjectRequest(
-                method,
-                url,
-                body,
-                response -> {
-                    Toast.makeText(this, categoryId != null ? "Cập nhật thành công" : "Thêm danh mục thành công", Toast.LENGTH_SHORT).show();
-                    finish();
-                },
-                error -> {
-                    Toast.makeText(this, "Lỗi lưu danh mục", Toast.LENGTH_SHORT).show();
-                }
-        ) {
-            @Override
-            public Map<String, String> getHeaders() {
-                Map<String, String> headers = new HashMap<>();
-                headers.put("Authorization", "Bearer " + token);
-                headers.put("Content-Type", "application/json");
-                return headers;
-            }
-        };
-
-        Volley.newRequestQueue(this).add(request);
+        // Creating/updating categories is not supported by the current backend API
+        // Show informational message and close the activity
+        Toast.makeText(this, "Thao tác thêm/cập nhật danh mục chưa được hỗ trợ trên backend", Toast.LENGTH_LONG).show();
+        finish();
     }
 }

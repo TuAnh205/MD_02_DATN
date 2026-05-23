@@ -1,4 +1,3 @@
-
 package com.anhnvt_ph55017.md_02_datn.models;
 
 import java.io.Serializable;
@@ -8,8 +7,8 @@ public class Product implements Serializable {
     String id;
     String name;
     double price;
-    int image;          // local drawable resource id (for in-app DB items)
-    String imageUrl;    // remote URL (for API products)
+    int image;
+    String imageUrl;
     String description;
     float rating;
     int reviewCount;
@@ -18,13 +17,12 @@ public class Product implements Serializable {
 
     int qty = 1;
     boolean selected = true;
-    // Lưu _id của item trong cart (dùng cho xóa/sửa)
     String cartItemId;
 
-    public String getCartItemId() { return cartItemId; }
-    public void setCartItemId(String cartItemId) { this.cartItemId = cartItemId; }
-    String color = "Black";  // Default color
-    int storage = 64;        // Default storage in GB
+    String color = "Black";
+    int storage = 64;
+    String category = "";
+    boolean isVisible = true;
 
     public Product(int id, String name, double price, int image,
                    String description, int stock) {
@@ -45,116 +43,58 @@ public class Product implements Serializable {
         this.description = description;
         this.stock = stock;
     }
-    // Đảm bảo tương thích với CartFragment: setQuantity/getQuantity
-    public void setQuantity(int quantity) {
-        this.qty = quantity;
-    }
 
-    public int getQuantity() {
-        return this.qty;
-    }
+    public void setQuantity(int quantity) { this.qty = quantity; }
+    public int getQuantity() { return this.qty; }
 
-    public int getImage() {
-        return image;
-    }
+    public int getImage() { return image; }
+    public void setImage(int image) { this.image = image; }
 
-    public void setImage(int image) {
-        this.image = image;
-    }
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String imageUrl) { this.imageUrl = imageUrl; }
 
-    public String getImageUrl() {
-        return imageUrl;
-    }
+    public float getRating() { return rating; }
+    public void setRating(float rating) { this.rating = rating; }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl = imageUrl;
-    }
+    public int getReviewCount() { return reviewCount; }
+    public void setReviewCount(int reviewCount) { this.reviewCount = reviewCount; }
 
-    public float getRating() {
-        return rating;
-    }
+    public int getStock() { return stock; }
+    public void setStock(int stock) { this.stock = stock; }
 
-    public void setRating(float rating) {
-        this.rating = rating;
-    }
-
-    public int getReviewCount() {
-        return reviewCount;
-    }
-
-    public void setReviewCount(int reviewCount) {
-        this.reviewCount = reviewCount;
-    }
-
-    public int getStock() {
-        return stock;
-    }
-
-    public void setStock(int stock) {
-        this.stock = stock;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
     public String getId() { return id; }
-
     public int getIntId() {
-        try {
-            return Integer.parseInt(id);
-        } catch (Exception e) {
-            return -1;
-        }
+        try { return Integer.parseInt(id); }
+        catch (Exception e) { return -1; }
     }
 
     public String getName() { return name; }
-
     public double getPrice() { return price; }
 
-    public boolean isFavorite() {
-        return isFavorite;
-    }
+    public boolean isFavorite() { return isFavorite; }
+    public void setFavorite(boolean favorite) { isFavorite = favorite; }
 
-    public void setFavorite(boolean favorite) {
-        isFavorite = favorite;
-    }
+    public String getCartItemId() { return cartItemId; }
+    public void setCartItemId(String cartItemId) { this.cartItemId = cartItemId; }
 
-    // ===== thêm =====
+    public int getQty() { return qty; }
+    public void setQty(int qty) { this.qty = qty; }
 
-    public int getQty() {
-        return qty;
-    }
+    public boolean isSelected() { return selected; }
+    public void setSelected(boolean selected) { this.selected = selected; }
 
-    public void setQty(int qty) {
-        this.qty = qty;
-    }
+    public String getColor() { return color; }
+    public void setColor(String color) { this.color = color; }
 
-    public boolean isSelected() {
-        return selected;
-    }
+    public int getStorage() { return storage; }
+    public void setStorage(int storage) { this.storage = storage; }
 
-    public void setSelected(boolean selected) {
-        this.selected = selected;
-    }
+    public String getCategory() { return category; }
+    public void setCategory(String category) { this.category = category; }
 
-    public String getColor() {
-        return color;
-    }
-
-    public void setColor(String color) {
-        this.color = color;
-    }
-
-    public int getStorage() {
-        return storage;
-    }
-
-    public void setStorage(int storage) {
-        this.storage = storage;
-    }
+    public boolean isVisible() { return isVisible; }
+    public void setVisible(boolean visible) { isVisible = visible; }
 }

@@ -56,6 +56,10 @@ public class AddProductActivity extends AppCompatActivity {
     private String selectedImagePath = "";
     private String selectedImageUrl = "";
     private Bitmap selectedImageBitmap = null;
+    private String editingProductId = "";
+    private boolean editMode = false;
+    private String editingCategory = "";
+    private TextView tvHeaderTitle;
     private List<String> categories = new ArrayList<>();
     private boolean isFirstImage = true;
 
@@ -66,6 +70,7 @@ public class AddProductActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_product);
 
         // Map UI elements
+        tvHeaderTitle = findViewById(R.id.tvHeaderTitle);
         edtProductName = findViewById(R.id.edtProductName);
         edtPrice = findViewById(R.id.edtPrice);
         edtDescription = findViewById(R.id.edtDescription);
@@ -79,6 +84,18 @@ public class AddProductActivity extends AppCompatActivity {
         btnAddPhoto = findViewById(R.id.btnAddPhoto);
         btnCancel = findViewById(R.id.btnCancel);
         btnSave = findViewById(R.id.btnSave);
+
+        // Determine edit mode from intent extras
+        String productId = getIntent().getStringExtra("productId");
+        if (productId != null && !productId.isEmpty()) {
+            editMode = true;
+            editingProductId = productId;
+            tvHeaderTitle.setText("Chỉnh sửa sản phẩm");
+            btnSave.setText("Cập nhật sản phẩm");
+            loadProductDetails(productId);
+        } else {
+            tvHeaderTitle.setText("Thêm sản phẩm mới");
+        }
 
         // Back button
         findViewById(R.id.ivBack).setOnClickListener(v -> onBackPressed());
@@ -225,9 +242,14 @@ public class AddProductActivity extends AppCompatActivity {
 
         // Send request to server
         String url = NetworkConstants.getApiBaseUrl() + "/api/shop/products";
+        int method = Request.Method.POST;
+        if (editMode) {
+            url += "/" + editingProductId;
+            method = Request.Method.PUT;
+        }
 
         JsonObjectRequest request = new JsonObjectRequest(
-                Request.Method.POST,
+                method,
                 url,
                 productData,
                 response -> {
@@ -255,6 +277,61 @@ public class AddProductActivity extends AppCompatActivity {
         Volley.newRequestQueue(this).add(request);
     }
 
+    private void loadProductDetails(String productId) {
+        String token = SessionManager.getToken(this);
+        if (token == null || token.isEmpty()) {
+            Toast.makeText(this, "Không tìm được token đăng nhập", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        String url = NetworkConstants.getApiBaseUrl() + "/api/products/" + productId;
+        JsonObjectRequest request = new JsonObjectRequest(
+                Request.Method.GET,
+                url,
+                null,
+                response -> {
+                    edtProductName.setText(response.optString("name", ""));
+                    edtPrice.setText(String.valueOf(response.optDouble("price", 0)));
+                    edtDescription.setText(response.optString("description", ""));
+                    edtStock.setText(String.valueOf(response.optInt("stock", 0)));
+                    editingCategory = response.optString("category", "");
+                    applyEditingCategory();
+
+                    String imageUrl = response.optString("image", "");
+                    if ((imageUrl == null || imageUrl.isEmpty()) && response.has("images")) {
+                        try {
+                            JSONArray images = response.optJSONArray("images");
+                            if (images != null && images.length() > 0) {
+                                imageUrl = images.optString(0, "");
+                            }
+                        } catch (Exception ignored) {}
+                    }
+
+                    selectedImageUrl = imageUrl != null ? imageUrl : "";
+                    if (!selectedImageUrl.isEmpty()) {
+                        Glide.with(AddProductActivity.this)
+                                .load(selectedImageUrl)
+                                .placeholder(R.drawable.bg_search)
+                                .error(R.drawable.bg_search)
+                                .into(ivProductImage2);
+                        ivRemoveImage.setVisibility(android.view.View.VISIBLE);
+                        edtImageUrl.setText(selectedImageUrl);
+                    }
+                },
+                error -> Toast.makeText(this, "Không tải được thông tin sản phẩm", Toast.LENGTH_LONG).show()
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                Map<String, String> headers = new HashMap<>();
+                headers.put("Authorization", "Bearer " + token);
+                headers.put("Content-Type", "application/json");
+                return headers;
+            }
+        };
+
+        Volley.newRequestQueue(this).add(request);
+    }
+
     private String bitmapToBase64(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
@@ -263,7 +340,7 @@ public class AddProductActivity extends AppCompatActivity {
     }
 
     private void loadCategories() {
-        String url = NetworkConstants.getApiBaseUrl() + "/products/categories";
+        String url = NetworkConstants.getApiBaseUrl() + "/api/products/categories";
 
         JsonArrayRequest request = new JsonArrayRequest(
                 Request.Method.GET,
@@ -279,6 +356,15 @@ public class AddProductActivity extends AppCompatActivity {
                         }
                     }
 
+                    // If no categories from API, use fallback
+                    if (categories.isEmpty()) {
+                        categories.addAll(java.util.Arrays.asList(
+                            "Điện thoại", "Máy tính", "Máy tính bảng", "Tai nghe",
+                            "Đồng hồ", "Camera", "Phụ kiện", "Màn hình", "Loa",
+                            "Lưu trữ", "Mạng", "Khác"
+                        ));
+                    }
+
                     // Setup spinner adapter
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(
                             this,
@@ -287,12 +373,47 @@ public class AddProductActivity extends AppCompatActivity {
                     );
                     adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                     spinnerCategory.setAdapter(adapter);
+                    applyEditingCategory();
                 },
                 error -> {
-                    Toast.makeText(this, "Không thể tải danh mục", Toast.LENGTH_SHORT).show();
+                    // Load fallback categories on error
+                    categories.clear();
+                    categories.addAll(java.util.Arrays.asList(
+                        "Điện thoại", "Máy tính", "Máy tính bảng", "Tai nghe",
+                        "Đồng hồ", "Camera", "Phụ kiện", "Màn hình", "Loa",
+                        "Lưu trữ", "Mạng", "Khác"
+                    ));
+                    
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                            this,
+                            android.R.layout.simple_spinner_item,
+                            categories
+                    );
+                    adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                    spinnerCategory.setAdapter(adapter);
+                    applyEditingCategory();
+                    Toast.makeText(this, "Dùng danh mục mặc định", Toast.LENGTH_SHORT).show();
                 }
         );
 
         Volley.newRequestQueue(this).add(request);
+    }
+
+    private void applyEditingCategory() {
+        if (editingCategory == null || editingCategory.isEmpty() || categories.isEmpty()) return;
+        int index = categories.indexOf(editingCategory);
+        if (index >= 0) {
+            spinnerCategory.setSelection(index);
+        } else {
+            categories.add(0, editingCategory);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                    this,
+                    android.R.layout.simple_spinner_item,
+                    categories
+            );
+            adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+            spinnerCategory.setAdapter(adapter);
+            spinnerCategory.setSelection(0);
+        }
     }
 }

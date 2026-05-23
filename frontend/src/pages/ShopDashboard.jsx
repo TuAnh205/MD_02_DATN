@@ -1,25 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import notificationService from '../services/notificationService';
-import api from '../services/api';
+import React, { useState, useEffect } from "react";
+import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import notificationService from "../services/notificationService";
+import api from "../services/api";
 
 const coretechVisuals = [
   {
-    id: 'ct-1',
-    title: 'CoreTech Retail Hub',
-    image: 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80'
+    id: "ct-1",
+    title: "CoreTech Retail Hub",
+    image:
+      "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80",
   },
   {
-    id: 'ct-2',
-    title: 'CoreTech Device Lab',
-    image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80'
+    id: "ct-2",
+    title: "CoreTech Device Lab",
+    image:
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
   },
   {
-    id: 'ct-3',
-    title: 'CoreTech Service Center',
-    image: 'https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?auto=format&fit=crop&w=800&q=80'
-  }
+    id: "ct-3",
+    title: "CoreTech Service Center",
+    image:
+      "https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?auto=format&fit=crop&w=800&q=80",
+  },
 ];
 
 export default function ShopDashboard() {
@@ -40,17 +43,17 @@ export default function ShopDashboard() {
         setNotifications(items);
         setUnreadCount(items.filter((n) => !n.isRead).length);
       } catch (err) {
-        console.error('Không thể tải thông báo:', err);
+        console.error("Không thể tải thông báo:", err);
       }
     };
     loadNotifications();
 
     const loadBillingSummary = async () => {
       try {
-        const response = await api.get('/shop/billing-summary');
+        const response = await api.get("/shop/billing-summary");
         setBillingSummary(response.data.summary || null);
       } catch (err) {
-        console.error('Không thể tải trạng thái phí shop:', err);
+        console.error("Không thể tải trạng thái phí shop:", err);
       }
     };
 
@@ -59,45 +62,45 @@ export default function ShopDashboard() {
 
   const menuItems = [
     {
-      id: 'dashboard',
-      label: 'Dashboard',
-      path: '/shop',
-      icon: '📊',
-      description: 'Tổng quan shop'
+      id: "dashboard",
+      label: "Dashboard",
+      path: "/shop",
+      icon: "📊",
+      description: "Tổng quan shop",
     },
     {
-      id: 'products',
-      label: 'Quản lý Sản phẩm',
-      path: '/shop/products',
-      icon: '📦',
-      description: 'Thêm, sửa, xóa sản phẩm'
+      id: "products",
+      label: "Quản lý Sản phẩm",
+      path: "/shop/products",
+      icon: "📦",
+      description: "Thêm, sửa, xóa sản phẩm",
     },
     {
-      id: 'revenue',
-      label: 'Doanh Thu',
-      path: '/shop/revenue',
-      icon: '💰',
-      description: 'Xem thống kê doanh thu'
+      id: "revenue",
+      label: "Doanh Thu",
+      path: "/shop/revenue",
+      icon: "💰",
+      description: "Xem thống kê doanh thu",
     },
     {
-      id: 'orders',
-      label: 'Đơn hàng',
-      path: '/shop/orders',
-      icon: '📋',
-      description: 'Xem đơn hàng của shop'
+      id: "orders",
+      label: "Đơn hàng",
+      path: "/shop/orders",
+      icon: "📋",
+      description: "Xem đơn hàng của shop",
     },
     {
-      id: 'reviews',
-      label: 'Đánh giá',
-      path: '/shop/reviews',
-      icon: '📝',
-      description: 'Xem và trả lời đánh giá'
-    }
+      id: "reviews",
+      label: "Đánh giá",
+      path: "/shop/reviews",
+      icon: "📝",
+      description: "Xem và trả lời đánh giá",
+    },
   ];
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   return (
@@ -112,8 +115,18 @@ export default function ShopDashboard() {
                 className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100"
               >
                 <span className="sr-only">Open sidebar</span>
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
               <h1 className="ml-2 md:ml-0 text-xl font-semibold text-gray-900">
@@ -132,9 +145,13 @@ export default function ShopDashboard() {
                 }}
                 className="relative text-gray-600 hover:text-gray-900"
               >
-                <span role="img" aria-label="notification" className="text-2xl">🔔</span>
+                <span role="img" aria-label="notification" className="text-2xl">
+                  🔔
+                </span>
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 min-w-[18px] h-4 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">{unreadCount}</span>
+                  <span className="absolute -top-1 -right-1 min-w-[18px] h-4 bg-red-600 text-white text-xs rounded-full flex items-center justify-center">
+                    {unreadCount}
+                  </span>
                 )}
               </button>
 
@@ -147,7 +164,9 @@ export default function ShopDashboard() {
                         className="text-xs text-blue-600"
                         onClick={async () => {
                           await notificationService.markAllRead();
-                          setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })));
+                          setNotifications((prev) =>
+                            prev.map((n) => ({ ...n, isRead: true })),
+                          );
                           setUnreadCount(0);
                         }}
                       >
@@ -157,18 +176,31 @@ export default function ShopDashboard() {
                   </div>
                   <div className="max-h-72 overflow-y-auto">
                     {notifications.length === 0 ? (
-                      <p className="text-sm text-gray-500">Không có thông báo</p>
+                      <p className="text-sm text-gray-500">
+                        Không có thông báo
+                      </p>
                     ) : (
                       notifications.map((item) => (
-                        <div key={item._id} className={`p-2 rounded mb-1 ${item.isRead ? 'bg-gray-50' : 'bg-blue-50'} border ${item.isRead ? 'border-gray-200' : 'border-blue-200'}`}>
+                        <div
+                          key={item._id}
+                          className={`p-2 rounded mb-1 ${item.isRead ? "bg-gray-50" : "bg-blue-50"} border ${item.isRead ? "border-gray-200" : "border-blue-200"}`}
+                        >
                           <div className="flex justify-between items-start">
-                            <p className="text-xs text-gray-500">{new Date(item.createdAt).toLocaleString('vi-VN')}</p>
+                            <p className="text-xs text-gray-500">
+                              {new Date(item.createdAt).toLocaleString("vi-VN")}
+                            </p>
                             {!item.isRead && (
                               <button
                                 className="text-xs text-blue-600"
                                 onClick={async () => {
                                   await notificationService.markRead(item._id);
-                                  setNotifications((prev) => prev.map((n) => n._id === item._id ? { ...n, isRead: true } : n));
+                                  setNotifications((prev) =>
+                                    prev.map((n) =>
+                                      n._id === item._id
+                                        ? { ...n, isRead: true }
+                                        : n,
+                                    ),
+                                  );
                                   setUnreadCount((c) => Math.max(0, c - 1));
                                 }}
                               >
@@ -177,7 +209,9 @@ export default function ShopDashboard() {
                             )}
                           </div>
                           <p className="font-medium text-sm">{item.title}</p>
-                          <p className="text-sm text-gray-700">{item.message}</p>
+                          <p className="text-sm text-gray-700">
+                            {item.message}
+                          </p>
                         </div>
                       ))
                     )}
@@ -198,7 +232,9 @@ export default function ShopDashboard() {
 
       <div className="flex">
         {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}>
+        <div
+          className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} transition-transform duration-300 ease-in-out md:translate-x-0 md:static md:inset-0`}
+        >
           <div className="flex flex-col h-full pt-16 md:pt-0">
             <nav className="flex-1 px-4 py-6 space-y-2">
               {menuItems.map((item) => {
@@ -209,15 +245,17 @@ export default function ShopDashboard() {
                     to={item.path}
                     className={`group flex items-center px-3 py-3 text-sm font-medium rounded-md transition-colors ${
                       isActive
-                        ? 'bg-primary text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        ? "bg-primary text-white"
+                        : "text-gray-700 hover:bg-gray-100"
                     }`}
                     onClick={() => setSidebarOpen(false)}
                   >
                     <span className="mr-3 text-lg">{item.icon}</span>
                     <div>
                       <div>{item.label}</div>
-                      <div className={`text-xs ${isActive ? 'text-white/80' : 'text-gray-500'}`}>
+                      <div
+                        className={`text-xs ${isActive ? "text-white/80" : "text-gray-500"}`}
+                      >
                         {item.description}
                       </div>
                     </div>
@@ -246,23 +284,31 @@ export default function ShopDashboard() {
                 </div>
 
                 <div className="absolute left-5 bottom-5 right-5 text-white">
-                  <h2 className="text-xl md:text-2xl font-bold">{user?.name} thuộc hệ thống vận hành CORETECH</h2>
+                  <h2 className="text-xl md:text-2xl font-bold">
+                    {user?.name} thuộc hệ thống vận hành CORETECH
+                  </h2>
                   <p className="text-sm text-white/90 mt-1">
-                    Không gian quản trị dành riêng cho đối tác shop chính thức trong mạng lưới CORETECH Commerce.
+                    Không gian quản trị dành riêng cho đối tác shop chính thức
+                    trong mạng lưới CORETECH Commerce.
                   </p>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50">
                 {coretechVisuals.map((item) => (
-                  <div key={item.id} className="relative rounded-xl overflow-hidden h-24 group">
+                  <div
+                    key={item.id}
+                    className="relative rounded-xl overflow-hidden h-24 group"
+                  >
                     <img
                       src={item.image}
                       alt={item.title}
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                    <p className="absolute left-3 bottom-2 text-xs font-semibold text-white tracking-wide">{item.title}</p>
+                    <p className="absolute left-3 bottom-2 text-xs font-semibold text-white tracking-wide">
+                      {item.title}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -274,19 +320,34 @@ export default function ShopDashboard() {
                   <div className="flex-1">
                     <div className="flex items-center gap-2 mb-2">
                       <span className="text-2xl">📋</span>
-                      <h3 className="text-lg font-bold text-blue-900">Chính sách phí nền tảng</h3>
+                      <h3 className="text-lg font-bold text-blue-900">
+                        Chính sách phí nền tảng
+                      </h3>
                     </div>
                     <p className="text-sm text-blue-800 mb-3">
-                      <strong>Tất cả sản phẩm thanh toán thành công sẽ bị trừ phí sàn 5%</strong>
+                      <strong>
+                        Tất cả sản phẩm thanh toán thành công sẽ bị trừ phí sàn
+                        5%
+                      </strong>
                     </p>
                     <ul className="text-sm text-blue-700 space-y-2 ml-4">
-                      <li>✓ Phí <strong>5%</strong> được tính trên giá bán sản phẩm</li>
-                      <li>✓ Phí chỉ tính khi khách hàng <strong>thanh toán thành công</strong></li>
+                      <li>
+                        ✓ Phí <strong>5%</strong> được tính trên giá bán sản
+                        phẩm
+                      </li>
+                      <li>
+                        ✓ Phí chỉ tính khi khách hàng{" "}
+                        <strong>thanh toán thành công</strong>
+                      </li>
                       <li>✓ Hệ thống tự động trừ từ ví shop của bạn</li>
-                      <li>✓ Xem chi tiết từng sản phẩm bị trừ bao nhiêu phí tại mục <strong>Doanh Thu</strong></li>
+                      <li>
+                        ✓ Xem chi tiết từng sản phẩm bị trừ bao nhiêu phí tại
+                        mục <strong>Doanh Thu</strong>
+                      </li>
                     </ul>
                     <p className="text-xs text-blue-600 mt-3 italic">
-                      Ví dụ: Sản phẩm bán được 100.000đ → Phí sàn 5.000đ → Bạn thực nhận 95.000đ
+                      Ví dụ: Sản phẩm bán được 100.000đ → Phí sàn 5.000đ → Bạn
+                      thực nhận 95.000đ
                     </p>
                   </div>
                   <button
@@ -301,10 +362,22 @@ export default function ShopDashboard() {
 
             {billingSummary?.isFrozen && (
               <section className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
-                <h3 className="text-lg font-bold text-rose-900">Cảnh báo công nợ phí nền tảng</h3>
-                <p className="mt-2 text-sm text-rose-800">{billingSummary.message}</p>
+                <h3 className="text-lg font-bold text-rose-900">
+                  Cảnh báo công nợ phí nền tảng
+                </h3>
+                <p className="mt-2 text-sm text-rose-800">
+                  {billingSummary.message}
+                </p>
                 <p className="mt-2 text-sm text-rose-700">
-                  Số dư ví: {Number(billingSummary.walletBalance || 0).toLocaleString('vi-VN')}đ. Công nợ: {Number(billingSummary.outstandingAmount || 0).toLocaleString('vi-VN')}đ.
+                  Số dư ví:{" "}
+                  {Number(billingSummary.walletBalance || 0).toLocaleString(
+                    "vi-VN",
+                  )}
+                  đ. Công nợ:{" "}
+                  {Number(billingSummary.outstandingAmount || 0).toLocaleString(
+                    "vi-VN",
+                  )}
+                  đ.
                 </p>
                 <Link
                   to="/shop/revenue"

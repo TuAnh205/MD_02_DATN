@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import api from '../services/api';
+import React, { useState, useEffect } from "react";
+import api from "../services/api";
 
 export default function ShopOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     fetchOrders();
@@ -13,10 +13,10 @@ export default function ShopOrders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const response = await api.get('/shop/orders');
+      const response = await api.get("/shop/orders");
       setOrders(response.data);
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error("Error fetching orders:", error);
     } finally {
       setLoading(false);
     }
@@ -27,45 +27,60 @@ export default function ShopOrders() {
       await api.put(`/shop/orders/${orderId}/status`, { status: newStatus });
       fetchOrders();
     } catch (error) {
-      console.error('Error updating order status:', error);
-      alert('Có lỗi xảy ra khi cập nhật trạng thái đơn hàng');
+      console.error("Error updating order status:", error);
+      alert("Có lỗi xảy ra khi cập nhật trạng thái đơn hàng");
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
-      case 'chờ xác nhận': return 'bg-yellow-100 text-yellow-800';
-      case 'đã xác nhận': return 'bg-blue-100 text-blue-800';
-      case 'đang giao': return 'bg-purple-100 text-purple-800';
-      case 'đã nhận': return 'bg-green-100 text-green-800';
-      case 'đã hủy': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "chờ xác nhận":
+        return "bg-yellow-100 text-yellow-800";
+      case "đã xác nhận":
+        return "bg-blue-100 text-blue-800";
+      case "đang giao":
+        return "bg-purple-100 text-purple-800";
+      case "đã nhận":
+        return "bg-green-100 text-green-800";
+      case "đã hủy":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusText = (status) => {
     switch (status) {
-      case 'chờ xác nhận': return 'Chờ xác nhận';
-      case 'đã xác nhận': return 'Đã xác nhận';
-      case 'đang giao': return 'Đang giao';
-      case 'đã nhận': return 'Đã giao';
-      case 'đã hủy': return 'Đã hủy';
-      default: return status;
+      case "chờ xác nhận":
+        return "Chờ xác nhận";
+      case "đã xác nhận":
+        return "Đã xác nhận";
+      case "đang giao":
+        return "Đang giao";
+      case "đã nhận":
+        return "Đã giao";
+      case "đã hủy":
+        return "Đã hủy";
+      default:
+        return status;
     }
   };
 
   // Map filter value (English) sang status TV trong DB
   const statusFilterMap = {
-    pending: 'chờ xác nhận',
-    confirmed: 'đã xác nhận',
-    shipped: 'đang giao',
-    delivered: 'đã nhận',
-    cancelled: 'đã hủy',
+    pending: "chờ xác nhận",
+    confirmed: "đã xác nhận",
+    shipped: "đang giao",
+    delivered: "đã nhận",
+    cancelled: "đã hủy",
   };
 
-  const filteredOrders = statusFilter === 'all'
-    ? orders
-    : orders.filter((o) => o.status === (statusFilterMap[statusFilter] || statusFilter));
+  const filteredOrders =
+    statusFilter === "all"
+      ? orders
+      : orders.filter(
+          (o) => o.status === (statusFilterMap[statusFilter] || statusFilter),
+        );
 
   if (loading) {
     return (
@@ -80,8 +95,12 @@ export default function ShopOrders() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Đơn hàng của Shop</h1>
-          <p className="text-gray-600 mt-1">Xem và cập nhật trạng thái đơn hàng</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Đơn hàng của Shop
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Xem và cập nhật trạng thái đơn hàng
+          </p>
         </div>
         <div className="flex items-center space-x-3">
           <select
@@ -135,17 +154,29 @@ export default function ShopOrders() {
               {filteredOrders.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">#{order._id.slice(-8)}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      #{order._id.slice(-8)}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">{order.user?.name}</div>
-                    <div className="text-sm text-gray-500">{order.user?.email}</div>
+                    <div className="text-sm font-medium text-gray-900">
+                      {order.user?.name}
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {order.user?.email}
+                    </div>
                   </td>
                   <td className="px-6 py-4">
-                    <div className="text-sm text-gray-900">{order.items?.length} sản phẩm</div>
+                    <div className="text-sm text-gray-900">
+                      {order.items?.length} sản phẩm
+                    </div>
                     <div className="text-sm text-gray-500">
-                      {order.items?.slice(0, 2).map(item => item.product?.name || item.name).join(', ')}
-                      {order.items?.length > 2 && ` và ${order.items.length - 2} sản phẩm khác`}
+                      {order.items
+                        ?.slice(0, 2)
+                        .map((item) => item.product?.name || item.name)
+                        .join(", ")}
+                      {order.items?.length > 2 &&
+                        ` và ${order.items.length - 2} sản phẩm khác`}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
@@ -154,31 +185,39 @@ export default function ShopOrders() {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
-                      order.payment?.status === 'paid'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {order.payment?.status === 'paid' ? '✓ Đã thanh toán' : '⏳ Chưa thanh toán'}
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                        order.payment?.status === "paid"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-yellow-100 text-yellow-800"
+                      }`}
+                    >
+                      {order.payment?.status === "paid"
+                        ? "✓ Đã thanh toán"
+                        : "⏳ Chưa thanh toán"}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}>
+                    <span
+                      className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(order.status)}`}
+                    >
                       {getStatusText(order.status)}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {new Date(order.createdAt).toLocaleDateString('vi-VN')}
+                      {new Date(order.createdAt).toLocaleDateString("vi-VN")}
                     </div>
                     <div className="text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleTimeString('vi-VN')}
+                      {new Date(order.createdAt).toLocaleTimeString("vi-VN")}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <select
                       value={order.status}
-                      onChange={(e) => updateOrderStatus(order._id, e.target.value)}
+                      onChange={(e) =>
+                        updateOrderStatus(order._id, e.target.value)
+                      }
                       className="px-2 py-1 text-xs border border-gray-300 rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value="chờ xác nhận">Chờ xác nhận</option>

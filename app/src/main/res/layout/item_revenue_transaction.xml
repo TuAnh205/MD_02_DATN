@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="12dp"
+    android:background="@drawable/bg_card_round"
+    android:layout_marginBottom="12dp">
+
+    <ImageView
+        android:id="@+id/imgRevenueProduct"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/bg_image_placeholder"
+        android:background="@drawable/bg_image_placeholder" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:layout_marginStart="12dp">
+
+        <TextView
+            android:id="@+id/tvRevenueProductName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="iPhone 15 Pro Max"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#122046" />
+
+        <TextView
+            android:id="@+id/tvRevenueOrderInfo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="2 phút trước • #ORD-782"
+            android:textSize="12sp"
+            android:textColor="#64748B"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvRevenueProductMeta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SKU12345 · 1 sản phẩm"
+            android:textSize="12sp"
+            android:textColor="#64748B"
+            android:layout_marginTop="4dp" />
+
+        <TextView
+            android:id="@+id/tvRevenueTransactionStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thành công"
+            android:textSize="11sp"
+            android:textColor="#16A34A"
+            android:background="@drawable/bg_badge_new"
+            android:padding="4dp"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:gravity="end">
+
+        <TextView
+            android:id="@+id/tvRevenueProductAmount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+32.5M đ"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#0A6ED8" />
+
+        <TextView
+            android:id="@+id/tvRevenueProductSubtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Thành công"
+            android:textSize="12sp"
+            android:textColor="#64748B"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
+</LinearLayout>

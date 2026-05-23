@@ -1,20 +1,25 @@
-const mongoose = require('mongoose');
-const Product = require('../models/Product');
-const User = require('../models/User');
-const Order = require('../models/Order');
-const Review = require('../models/Review');
-const Notification = require('../models/Notification');
+const mongoose = require("mongoose");
+const Product = require("../models/Product");
+const User = require("../models/User");
+const Order = require("../models/Order");
+const Review = require("../models/Review");
+const Notification = require("../models/Notification");
 const {
   SHOP_BILLING_POLICY,
   roundCurrency,
-} = require('../config/shopBillingPolicy');
-const { syncShopBilling, topUpShopWallet } = require('../services/shopBillingService');
+} = require("../config/shopBillingPolicy");
+const {
+  syncShopBilling,
+  topUpShopWallet,
+} = require("../services/shopBillingService");
 
 const getShopPolicyPayload = (user) => ({
   ...SHOP_BILLING_POLICY,
-  shopStatus: user?.shopStatus || 'active',
+  shopStatus: user?.shopStatus || "active",
   walletBalance: roundCurrency(user?.shopWallet?.balance || 0),
-  outstandingAmount: roundCurrency(user?.shopBillingSummary?.outstandingAmount || 0),
+  outstandingAmount: roundCurrency(
+    user?.shopBillingSummary?.outstandingAmount || 0,
+  ),
 });
 
 // ================= GET SHOP PRODUCTS =================
@@ -34,8 +39,8 @@ exports.getShopProducts = async (req, res) => {
           commissionRate: SHOP_BILLING_POLICY.commissionRate,
           policyVersion: SHOP_BILLING_POLICY.version,
         },
-        chargeStatus: product.billing?.chargeStatus || 'pending',
-      }))
+        chargeStatus: product.billing?.chargeStatus || "pending",
+      })),
     );
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -44,22 +49,24 @@ exports.getShopProducts = async (req, res) => {
 
 exports.getBillingSummary = async (req, res) => {
   try {
-    const synced = await syncShopBilling(req.user.id, { createNotifications: true });
+    const synced = await syncShopBilling(req.user.id, {
+      createNotifications: true,
+    });
     if (!synced?.shop) {
-      return res.status(404).json({ message: 'Shop not found' });
+      return res.status(404).json({ message: "Shop not found" });
     }
 
     const overdueOrders = await Order.find({
-      'payment.status': 'paid',
-      'items.shopId': req.user.id,
-      'items.platformFee.status': 'unpaid',
-    }).select('orderNumber items payment createdAt');
+      "payment.status": "paid",
+      "items.shopId": req.user.id,
+      "items.platformFee.status": "unpaid",
+    }).select("orderNumber items payment createdAt");
 
     const overdueItems = [];
     overdueOrders.forEach((order) => {
       order.items.forEach((item) => {
         if (item.shopId.toString() !== req.user.id.toString()) return;
-        if (item.platformFee?.status !== 'unpaid') return;
+        if (item.platformFee?.status !== "unpaid") return;
         overdueItems.push({
           _id: `${order._id}-${item._id}`,
           orderId: order._id,
@@ -67,7 +74,9 @@ exports.getBillingSummary = async (req, res) => {
           name: item.name,
           price: item.price,
           qty: item.qty,
-          baseAmount: roundCurrency(item.platformFee?.baseAmount || ((item.price || 0) * (item.qty || 1))),
+          baseAmount: roundCurrency(
+            item.platformFee?.baseAmount || (item.price || 0) * (item.qty || 1),
+          ),
           feeAmount: roundCurrency(item.platformFee?.feeAmount || 0),
           paidAt: order.payment?.paidAt || order.createdAt,
         });
@@ -80,7 +89,9 @@ exports.getBillingSummary = async (req, res) => {
       overdueItems,
     });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi khi lấy công nợ shop', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi lấy công nợ shop", error: err.message });
   }
 };
 
@@ -90,44 +101,53 @@ exports.topUpWallet = async (req, res) => {
     const synced = await topUpShopWallet(req.user.id, amount);
 
     res.json({
-      message: 'Nạp ví thành công, hệ thống đã kiểm tra và tự khấu trừ phí đến hạn',
+      message:
+        "Nạp ví thành công, hệ thống đã kiểm tra và tự khấu trừ phí đến hạn",
       summary: synced.summary,
       policy: getShopPolicyPayload(synced.shop),
     });
   } catch (err) {
-    res.status(400).json({ message: err.message || 'Không thể nạp ví' });
+    res.status(400).json({ message: err.message || "Không thể nạp ví" });
   }
 };
 
 exports.settleBilling = async (req, res) => {
   try {
-    const synced = await syncShopBilling(req.user.id, { createNotifications: true });
+    const synced = await syncShopBilling(req.user.id, {
+      createNotifications: true,
+    });
     if (!synced?.shop) {
-      return res.status(404).json({ message: 'Shop not found' });
+      return res.status(404).json({ message: "Shop not found" });
     }
 
     res.json({
-      message: synced.summary.outstandingAmount > 0
-        ? 'Ví chưa đủ số dư để thanh toán hết công nợ'
-        : 'Công nợ đã được thanh toán đầy đủ',
+      message:
+        synced.summary.outstandingAmount > 0
+          ? "Ví chưa đủ số dư để thanh toán hết công nợ"
+          : "Công nợ đã được thanh toán đầy đủ",
       summary: synced.summary,
       policy: getShopPolicyPayload(synced.shop),
     });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi khi thanh toán công nợ', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi thanh toán công nợ", error: err.message });
   }
 };
 
 exports.getBillingPolicy = async (req, res) => {
   try {
-    const shop = await User.findById(req.user.id).select('shopBillingPolicy');
+    const shop = await User.findById(req.user.id).select("shopBillingPolicy");
     if (!shop) {
-      return res.status(404).json({ message: 'Shop not found' });
+      return res.status(404).json({ message: "Shop not found" });
     }
 
     res.json(getShopPolicyPayload(shop));
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi khi lấy chính sách phí nền tảng', error: err.message });
+    res.status(500).json({
+      message: "Lỗi khi lấy chính sách phí nền tảng",
+      error: err.message,
+    });
   }
 };
 
@@ -142,20 +162,23 @@ exports.acceptBillingPolicy = async (req, res) => {
           version: SHOP_BILLING_POLICY.version,
         },
       },
-      { new: true }
-    ).select('-password');
+      { new: true },
+    ).select("-password");
 
     if (!shop) {
-      return res.status(404).json({ message: 'Shop not found' });
+      return res.status(404).json({ message: "Shop not found" });
     }
 
     res.json({
-      message: 'Đã cập nhật chính sách phí nền tảng cho shop',
+      message: "Đã cập nhật chính sách phí nền tảng cho shop",
       user: shop,
       policy: getShopPolicyPayload(shop),
     });
   } catch (err) {
-    res.status(500).json({ message: 'Lỗi khi cập nhật chính sách phí nền tảng', error: err.message });
+    res.status(500).json({
+      message: "Lỗi khi cập nhật chính sách phí nền tảng",
+      error: err.message,
+    });
   }
 };
 
@@ -181,13 +204,20 @@ exports.createProduct = async (req, res) => {
       billingSummary: req.shopBillingSummary || null,
     });
   } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).json({ message: 'Định dạng dữ liệu không hợp lệ', details: err.message });
+    if (err.name === "ValidationError") {
+      return res.status(400).json({
+        message: "Định dạng dữ liệu không hợp lệ",
+        details: err.message,
+      });
     }
     if (err.code === 11000) {
-      return res.status(400).json({ message: 'Sản phẩm đã tồn tại', details: err.keyValue });
+      return res
+        .status(400)
+        .json({ message: "Sản phẩm đã tồn tại", details: err.keyValue });
     }
-    res.status(500).json({ message: 'Lỗi khi tạo sản phẩm', error: err.message });
+    res
+      .status(500)
+      .json({ message: "Lỗi khi tạo sản phẩm", error: err.message });
   }
 };
 
@@ -198,7 +228,7 @@ exports.updateProduct = async (req, res) => {
     const productId = req.params.id;
     const existingProduct = await Product.findOne({ _id: productId, shopId });
     if (!existingProduct) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
 
     const updateData = { ...req.body };
@@ -206,7 +236,7 @@ exports.updateProduct = async (req, res) => {
     const product = await Product.findOneAndUpdate(
       { _id: productId, shopId },
       updateData,
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     );
 
     res.json({
@@ -231,9 +261,9 @@ exports.deleteProduct = async (req, res) => {
     const productId = req.params.id;
     const product = await Product.findOneAndDelete({ _id: productId, shopId });
     if (!product) {
-      return res.status(404).json({ message: 'Product not found' });
+      return res.status(404).json({ message: "Product not found" });
     }
-    res.json({ message: 'Product deleted' });
+    res.json({ message: "Product deleted" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -245,14 +275,35 @@ exports.getShopOrders = async (req, res) => {
     const shopId = req.user.id;
 
     const orders = await Order.find({
-      'items.shopId': shopId,
-      status: { $ne: 'cancelled' }
+      "items.shopId": shopId,
+      status: { $ne: "cancelled" },
     })
-      .populate('user', 'name email')
-      .populate('items.product', 'name price')
+      .populate("user", "name email")
+      .populate("items.product", "name price image images")
       .sort({ createdAt: -1 });
 
     res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
+// ================= GET SHOP ORDER DETAILS =================
+exports.getShopOrderById = async (req, res) => {
+  try {
+    const shopId = req.user.id;
+    const order = await Order.findOne({
+      _id: req.params.id,
+      "items.shopId": shopId,
+    })
+      .populate("user", "name email")
+      .populate("items.product");
+
+    if (!order) {
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
+    }
+
+    res.json(order);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -267,47 +318,57 @@ exports.updateShopOrderStatus = async (req, res) => {
 
     // Map English values from frontend → Vietnamese enum stored in DB
     const statusMap = {
-      pending: 'chờ xác nhận',
-      confirmed: 'đã xác nhận',
-      shipped: 'đang giao',
-      delivered: 'đã nhận',
-      cancelled: 'đã hủy',
+      pending: "chờ xác nhận",
+      confirmed: "đã xác nhận",
+      shipped: "đang giao",
+      delivered: "đã nhận",
+      cancelled: "đã hủy",
     };
 
     // Accept both English (legacy) and Vietnamese directly
     const mappedStatus = statusMap[status] || status;
 
-    const validStatuses = ['chờ xác nhận', 'đã xác nhận', 'đang giao', 'đã nhận', 'đã hủy'];
+    const validStatuses = [
+      "chờ xác nhận",
+      "đã xác nhận",
+      "đang giao",
+      "đã nhận",
+      "đã hủy",
+    ];
     if (!validStatuses.includes(mappedStatus)) {
-      return res.status(400).json({ message: 'Trạng thái không hợp lệ' });
+      return res.status(400).json({ message: "Trạng thái không hợp lệ" });
     }
 
     // Chỉ cho phép shop cập nhật đơn hàng có sản phẩm của shop đó
-    const order = await Order.findOne({ _id: id, 'items.shopId': new mongoose.Types.ObjectId(shopId) });
+    const order = await Order.findOne({
+      _id: id,
+      "items.shopId": new mongoose.Types.ObjectId(shopId),
+    }).populate("items.product", "name price image images");
     if (!order) {
-      return res.status(404).json({ message: 'Không tìm thấy đơn hàng' });
+      return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
     order.status = mappedStatus;
     await order.save();
+    await order.populate("items.product", "name price image images");
 
     // Nếu trạng thái là "đã xác nhận" thì tạo notification cho user
-    if (mappedStatus === 'đã xác nhận') {
+    if (mappedStatus === "đã xác nhận") {
       try {
         await Notification.create({
           user: order.user, // user nhận thông báo
-          type: 'order_status',
-          title: 'Đơn hàng đã được xác nhận',
+          type: "order_status",
+          title: "Đơn hàng đã được xác nhận",
           message: `Đơn hàng #${order.orderNumber} của bạn đã được shop xác nhận.`,
           data: { orderId: order._id, orderNumber: order.orderNumber },
-          isRead: false
+          isRead: false,
         });
       } catch (notiErr) {
-        console.error('Lỗi tạo notification cho user:', notiErr);
+        console.error("Lỗi tạo notification cho user:", notiErr);
       }
     }
 
-    res.json({ message: 'Cập nhật trạng thái thành công', order });
+    res.json({ message: "Cập nhật trạng thái thành công", order });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -334,9 +395,10 @@ exports.markNotificationRead = async (req, res) => {
     const notification = await Notification.findOneAndUpdate(
       { _id: id, user: shopId },
       { isRead: true, readAt: new Date() },
-      { new: true }
+      { new: true },
     );
-    if (!notification) return res.status(404).json({ message: 'Notification not found' });
+    if (!notification)
+      return res.status(404).json({ message: "Notification not found" });
     res.json(notification);
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -346,8 +408,11 @@ exports.markNotificationRead = async (req, res) => {
 exports.markAllNotificationsRead = async (req, res) => {
   try {
     const shopId = req.user.id;
-    await Notification.updateMany({ user: shopId, isRead: false }, { isRead: true, readAt: new Date() });
-    res.json({ message: 'All notifications marked read' });
+    await Notification.updateMany(
+      { user: shopId, isRead: false },
+      { isRead: true, readAt: new Date() },
+    );
+    res.json({ message: "All notifications marked read" });
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -364,18 +429,18 @@ exports.getShopReviews = async (req, res) => {
       productFilter._id = productId;
     }
 
-    const shopProducts = await Product.find(productFilter).select('_id');
+    const shopProducts = await Product.find(productFilter).select("_id");
     const productIds = shopProducts.map((p) => p._id);
 
     const reviews = await Review.find({ product: { $in: productIds } })
-      .populate('user', 'name email')
-      .populate('product', 'name')
-      .populate('response.respondedBy', 'name')
+      .populate("user", "name email")
+      .populate("product", "name")
+      .populate("response.respondedBy", "name")
       .sort({ createdAt: -1 });
 
     res.json(reviews);
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -386,29 +451,31 @@ exports.replyShopReview = async (req, res) => {
     const { id } = req.params;
     const { text } = req.body;
 
-    if (!text || text.trim() === '') {
-      return res.status(400).json({ message: 'Reply text is required' });
+    if (!text || text.trim() === "") {
+      return res.status(400).json({ message: "Reply text is required" });
     }
 
-    const review = await Review.findById(id).populate('product', 'shopId');
-    if (!review) return res.status(404).json({ message: 'Review not found' });
+    const review = await Review.findById(id).populate("product", "shopId");
+    if (!review) return res.status(404).json({ message: "Review not found" });
 
     if (!review.product || review.product.shopId.toString() !== shopId) {
-      return res.status(403).json({ message: 'Forbidden: review not belong to your shop' });
+      return res
+        .status(403)
+        .json({ message: "Forbidden: review not belong to your shop" });
     }
 
     review.response = {
       text: text.trim(),
       respondedAt: new Date(),
-      respondedBy: shopId
+      respondedBy: shopId,
     };
 
     await review.save();
-    await review.populate('response.respondedBy', 'name');
+    await review.populate("response.respondedBy", "name");
 
     res.json({ review });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -416,23 +483,23 @@ exports.replyShopReview = async (req, res) => {
 exports.getShopRevenue = async (req, res) => {
   try {
     const shopId = req.user.id;
-    const { period = 'month' } = req.query;
+    const { period = "month" } = req.query;
 
     const now = new Date();
     let startDate;
 
     switch (period) {
-      case 'day':
+      case "day":
         startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
         break;
-      case 'week':
+      case "week":
         const weekStart = now.getDate() - now.getDay();
         startDate = new Date(now.getFullYear(), now.getMonth(), weekStart);
         break;
-      case 'month':
+      case "month":
         startDate = new Date(now.getFullYear(), now.getMonth(), 1);
         break;
-      case 'year':
+      case "year":
         startDate = new Date(now.getFullYear(), 0, 1);
         break;
       default:
@@ -443,10 +510,10 @@ exports.getShopRevenue = async (req, res) => {
 
     // Lấy tất cả orders ĐANG LÀM VIỆC - chỉ từ orders đã thanh toán thành công
     const orders = await Order.find({
-      'payment.status': 'paid',
-      'items.shopId': shopId,
-      'payment.paidAt': { $gte: startDate }  // Filter theo thời gian thanh toán, không phải tạo đơn
-    }).select('items payment createdAt orderNumber');
+      "payment.status": "paid",
+      "items.shopId": shopId,
+      "payment.paidAt": { $gte: startDate }, // Filter theo thời gian thanh toán, không phải tạo đơn
+    }).select("items payment createdAt orderNumber");
 
     // Chi tiết từng sản phẩm với phí sàn
     const productDetails = [];
@@ -480,7 +547,7 @@ exports.getShopRevenue = async (req, res) => {
           platformFee: platformFee,
           netAmount: netAmount,
           paidAt: order.payment?.paidAt || order.createdAt,
-          feeStatus: 'charged' // Vì chỉ lấy paid orders nên phí đã được tính
+          feeStatus: "charged", // Vì chỉ lấy paid orders nên phí đã được tính
         });
       });
     });
@@ -489,31 +556,63 @@ exports.getShopRevenue = async (req, res) => {
     const revenueData = await Order.aggregate([
       {
         $match: {
-          'payment.status': 'paid',
-          'items.shopId': shopObjectId,
-          'payment.paidAt': { $gte: startDate }  // Filter theo thời gian thanh toán
-        }
+          "payment.status": "paid",
+          "items.shopId": shopObjectId,
+          "payment.paidAt": { $gte: startDate }, // Filter theo thời gian thanh toán
+        },
       },
       {
-        $unwind: '$items'
+        $unwind: "$items",
       },
       {
         $match: {
-          'items.shopId': shopObjectId
-        }
+          "items.shopId": shopObjectId,
+        },
       },
       {
         $group: {
           _id: null,
-          totalOrders: { $addToSet: '$_id' },
-          totalProducts: { $sum: '$items.qty' }
-        }
-      }
+          totalOrders: { $addToSet: "$_id" },
+          totalProducts: { $sum: "$items.qty" },
+        },
+      },
     ]);
 
     const stats = revenueData[0] || { totalOrders: [], totalProducts: 0 };
 
-    const shopUser = await User.findById(shopId).select('shopBillingPolicy shopStatus shopWallet shopBillingSummary');
+    const uniqueCustomerIds = new Set(
+      orders.map((order) => order.user.toString()),
+    );
+    const chartBuckets = [0, 0, 0, 0, 0];
+    const periodMs = Math.max(1, now.getTime() - startDate.getTime());
+    const bucketMs = periodMs / chartBuckets.length;
+
+    productDetails.forEach((item) => {
+      const paidAt = item.paidAt ? new Date(item.paidAt) : now;
+      const bucketIndex = Math.min(
+        chartBuckets.length - 1,
+        Math.max(
+          0,
+          Math.floor((paidAt.getTime() - startDate.getTime()) / bucketMs),
+        ),
+      );
+      chartBuckets[bucketIndex] += item.grossAmount;
+    });
+
+    const firstBucket = chartBuckets[0];
+    const lastBucket = chartBuckets[chartBuckets.length - 1];
+    const percentChange =
+      firstBucket > 0
+        ? Math.round(((lastBucket - firstBucket) / firstBucket) * 100)
+        : 0;
+    const chartNote =
+      percentChange >= 0
+        ? `Tăng trưởng so với kỳ trước +${percentChange}%`
+        : `Giảm so với kỳ trước ${Math.abs(percentChange)}%`;
+
+    const shopUser = await User.findById(shopId).select(
+      "shopBillingPolicy shopStatus shopWallet shopBillingSummary",
+    );
 
     res.json({
       period,
@@ -524,12 +623,19 @@ exports.getShopRevenue = async (req, res) => {
         totalNetRevenue: roundCurrency(totalNetRevenue),
         totalOrders: stats.totalOrders.length,
         totalProducts: stats.totalProducts,
-        platformFeeRate: 0.05 // 5%
+        newCustomers: uniqueCustomerIds.size,
+        platformFeeRate: 0.05, // 5%
       },
-      productDetails: productDetails.sort((a, b) => new Date(b.paidAt) - new Date(a.paidAt)),
+      chart: {
+        values: chartBuckets,
+      },
+      chartNote,
+      productDetails: productDetails.sort(
+        (a, b) => new Date(b.paidAt) - new Date(a.paidAt),
+      ),
       policy: getShopPolicyPayload(shopUser),
     });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };

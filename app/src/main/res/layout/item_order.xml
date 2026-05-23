@@ -3,169 +3,151 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:paddingStart="16dp"
-    android:paddingEnd="16dp"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp">
+    android:background="#FFFFFF"
+    android:layout_marginBottom="12dp"
+    android:padding="16dp"
+    android:elevation="1dp">
 
+    <!-- Row 1: Mã đơn + Badge trạng thái -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:padding="16dp"
-        android:background="@drawable/bg_card"
-        android:layout_marginBottom="12dp">
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="4dp">
 
-        <!-- Order Header: ID and Status -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvOrderId"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+            android:layout_weight="1"
+            android:text="#CT-99281"
+            android:textColor="#0A6ED8"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvOrderBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="MỚI"
+            android:textColor="#FFFFFF"
+            android:textSize="11sp"
+            android:textStyle="bold"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:background="@drawable/bg_badge_new" />
+    </LinearLayout>
+
+    <!-- Row 2: Ngày tạo -->
+    <TextView
+        android:id="@+id/tvOrderDate"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="14/10/2023 • 14:30"
+        android:textColor="#64748B"
+        android:textSize="13sp"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Row 3: Ảnh + Tên khách + Sản phẩm + Giá -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginBottom="16dp">
+
+        <ImageView
+            android:id="@+id/imgOrderProduct"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_image_placeholder" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:paddingStart="12dp">
 
             <TextView
-                android:id="@+id/tvOrderId"
-                android:layout_width="0dp"
+                android:id="@+id/tvCustomerName"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="#CT-99281"
-                android:textColor="#0A6ED8"
-                android:textSize="15sp"
+                android:text="Nguyễn Văn A"
+                android:textColor="#122046"
+                android:textSize="14sp"
                 android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvStatus"
+                android:id="@+id/tvOrderSummary"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:paddingTop="4dp"
-                android:paddingBottom="4dp"
-                android:text="MỚI"
-                android:textColor="#FFFFFF"
-                android:textSize="11sp"
-                android:textStyle="bold"
-                android:background="#22C55E"
-                android:gravity="center" />
-        </LinearLayout>
-
-        <!-- Order Date/Time -->
-        <TextView
-            android:id="@+id/tvDate"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="14/10/2023 • 14:30"
-            android:textColor="#040404"
-            android:textSize="13sp"
-            android:layout_marginBottom="12dp" />
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E6EDF8"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Customer Info -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
-
-            <ImageView
-                android:id="@+id/imgProduct"
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:src="@drawable/bg_image"
-                android:scaleType="centerCrop"
-                android:contentDescription="Product image" />
-
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:orientation="vertical"
-                android:layout_marginStart="12dp">
-
-                <TextView
-                    android:id="@+id/tvItemCount"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Nguyễn Văn A"
-                    android:textColor="#122046"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:id="@+id/tvPrice"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="1 sản phẩm • MacBook Air M2 + 2 phụ"
-                    android:textColor="#424343"
-                    android:textSize="12sp"
-                    android:layout_marginTop="2dp" />
-            </LinearLayout>
-        </LinearLayout>
-
-        <!-- Order Total -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginBottom="12dp">
+                android:text="3 sản phẩm • MacBook Air M2 + 2 phụ kiện"
+                android:textColor="#64748B"
+                android:textSize="13sp"
+                android:layout_marginTop="2dp"
+                android:maxLines="1"
+                android:ellipsize="end" />
 
             <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Tổng tiền:"
-                android:textColor="#424343"
-                android:textSize="14sp" />
-
-            <TextView
-                android:id="@+id/tvArrivalDate"
+                android:id="@+id/tvOrderTotal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="25.500.000đ"
                 android:textColor="#0A6ED8"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="#E6EDF8"
-            android:layout_marginBottom="12dp" />
-
-        <!-- Order Status -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="TRẠNG THÁI ĐƠN HÀNG"
-                android:textColor="#424343"
-                android:textSize="12sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tvRatingBadge"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Đang giao"
-                android:textColor="#122046"
-                android:textSize="14sp" />
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:layout_marginTop="4dp" />
         </LinearLayout>
     </LinearLayout>
+
+    <!-- Divider -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#F0F4FA"
+        android:layout_marginBottom="12dp" />
+
+    <!-- Row 4: Dropdown trạng thái -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TRẠNG THÁI ĐƠN HÀNG"
+        android:textColor="#64748B"
+        android:textSize="11sp"
+        android:textStyle="bold"
+        android:letterSpacing="0.08"
+        android:layout_marginBottom="8dp" />
+
+    <LinearLayout
+        android:id="@+id/layoutStatusDropdown"
+        android:layout_width="match_parent"
+        android:layout_height="44dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:background="@drawable/bg_dropdown"
+        android:clickable="true"
+        android:foreground="?android:attr/selectableItemBackground">
+
+        <TextView
+            android:id="@+id/tvOrderStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Đang giao"
+            android:textColor="#122046"
+            android:textSize="14sp" />
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_arrow_down"
+            android:tint="#64748B" />
+    </LinearLayout>
 </LinearLayout>
-
-

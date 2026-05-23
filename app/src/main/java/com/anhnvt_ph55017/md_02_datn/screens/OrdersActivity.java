@@ -26,18 +26,17 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 
 public class OrdersActivity extends AppCompatActivity {
 
     private RecyclerView recyclerOrders;
     private ProgressBar progressLoadingOrders;
     private TextView tvNoOrders;
-    private TextView tabAll, tabPreparing, tabShipping, tabDelivered;
+    private TextView tabPending, tabConfirmed, tabShipping, tabDelivered, tabCancelled;
     private OrderAdapter adapter;
     private List<Order> allOrders = new ArrayList<>();
     private List<Order> displayOrders = new ArrayList<>();
-    private String currentFilter = "all"; // all, preparing, shipping, delivered
+    private String currentFilter = "pending"; // pending, confirmed, shipping, delivered, cancelled
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,28 +49,27 @@ public class OrdersActivity extends AppCompatActivity {
         tvNoOrders = findViewById(R.id.tvNoOrders);
         ImageView btnBackOrders = findViewById(R.id.btnBackOrders);
 
-        tabAll = findViewById(R.id.tabAll);
-        tabPreparing = findViewById(R.id.tabPreparing);
+        tabPending = findViewById(R.id.tabPending);
+        tabConfirmed = findViewById(R.id.tabConfirmed);
         tabShipping = findViewById(R.id.tabShipping);
         tabDelivered = findViewById(R.id.tabDelivered);
+        tabCancelled = findViewById(R.id.tabCancelled);
 
         // Back button
         btnBackOrders.setOnClickListener(v -> onBackPressed());
 
         // Tab listeners
-        tabAll.setOnClickListener(v -> setTab("all"));
-        tabPreparing.setOnClickListener(v -> setTab("preparing"));
+        tabPending.setOnClickListener(v -> setTab("pending"));
+        tabConfirmed.setOnClickListener(v -> setTab("confirmed"));
         tabShipping.setOnClickListener(v -> setTab("shipping"));
         tabDelivered.setOnClickListener(v -> setTab("delivered"));
+        tabCancelled.setOnClickListener(v -> setTab("cancelled"));
 
         // Setup adapter
         adapter = new OrderAdapter(this, displayOrders, order -> {
             // Navigate to order detail
             Intent intent = new Intent(this, OrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
-            double vdisc = order.getVoucherDiscount();
-            String vDiscStr = vdisc > 0 ? String.format(Locale.getDefault(), "%,.0fđ", vdisc) : "0đ";
-            intent.putExtra("voucherDiscount", vDiscStr);
             startActivity(intent);
         });
 
@@ -88,10 +86,11 @@ public class OrdersActivity extends AppCompatActivity {
         int selectedColor = 0xFF000000; // đen
         int normalColor = 0xFF000000;   // cũng đen luôn
 
-        tabAll.setTextColor(filter.equals("all") ? selectedColor : normalColor);
-        tabPreparing.setTextColor(filter.equals("preparing") ? selectedColor : normalColor);
+        tabPending.setTextColor(filter.equals("pending") ? selectedColor : normalColor);
+        tabConfirmed.setTextColor(filter.equals("confirmed") ? selectedColor : normalColor);
         tabShipping.setTextColor(filter.equals("shipping") ? selectedColor : normalColor);
         tabDelivered.setTextColor(filter.equals("delivered") ? selectedColor : normalColor);
+        tabCancelled.setTextColor(filter.equals("cancelled") ? selectedColor : normalColor);
 
         filterOrders();
     }
@@ -107,18 +106,28 @@ public class OrdersActivity extends AppCompatActivity {
                 if (status == null) status = "pending";
                 
                 switch (currentFilter) {
-                    case "preparing":
+                    case "pending":
                         if (status.equalsIgnoreCase("pending") || status.equalsIgnoreCase("processing")) {
                             displayOrders.add(order);
                         }
                         break;
+                    case "confirmed":
+                        if (status.equalsIgnoreCase("confirmed")) {
+                            displayOrders.add(order);
+                        }
+                        break;
                     case "shipping":
-                        if (status.equalsIgnoreCase("shipping")) {
+                        if (status.equalsIgnoreCase("shipping") || status.equalsIgnoreCase("shipped")) {
                             displayOrders.add(order);
                         }
                         break;
                     case "delivered":
                         if (status.equalsIgnoreCase("delivered")) {
+                            displayOrders.add(order);
+                        }
+                        break;
+                    case "cancelled":
+                        if (status.equalsIgnoreCase("cancelled") || status.equalsIgnoreCase("cancelled")) {
                             displayOrders.add(order);
                         }
                         break;
@@ -185,7 +194,7 @@ public class OrdersActivity extends AppCompatActivity {
     private Order parseOrder(JSONObject item) {
         String id = item.optString("_id", "");
         String date = item.optString("createdAt", "");
-        double total = item.optDouble("total", 0);
+        double total = item.optDouble("totalPrice", 0);
         String status = item.optString("status", "pending");
         String arrivalDate = item.optString("arrivalDate", "");
         int itemCount = item.optInt("itemCount", 0);
@@ -197,23 +206,7 @@ public class OrdersActivity extends AppCompatActivity {
         // Extract order number from ID
         String orderId = "#CT-" + id.substring(Math.max(0, id.length() - 5));
 
-        com.anhnvt_ph55017.md_02_datn.models.Order o = new Order(orderId, formattedDate, total, status, arrivalDate, itemCount, 0, productName, 0, "", "");
-        double voucherDiscount = 0;
-        if (item.has("voucher")) {
-            org.json.JSONObject v = item.optJSONObject("voucher");
-            if (v != null) voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
-        }
-        if (voucherDiscount == 0 && item.has("discount")) {
-            org.json.JSONObject discountObj = item.optJSONObject("discount");
-            if (discountObj != null) {
-                voucherDiscount = discountObj.optDouble("amount", discountObj.optDouble("discount", 0));
-            } else {
-                voucherDiscount = item.optDouble("discount", 0);
-            }
-        }
-        if (voucherDiscount == 0) voucherDiscount = item.optDouble("voucherDiscount", 0);
-        o.setVoucherDiscount(voucherDiscount);
-        return o;
+        return new Order(orderId, formattedDate, total, status, arrivalDate, itemCount, 0, productName, 0, "", "");
     }
 
     private String formatDate(String date) {

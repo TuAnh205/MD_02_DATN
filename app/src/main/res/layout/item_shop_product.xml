@@ -2,111 +2,125 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:layout_marginBottom="10dp"
+    android:background="@drawable/bg_card_product"
     android:orientation="horizontal"
-    android:padding="16dp"
-    android:layout_marginBottom="14dp"
-    android:background="@drawable/bg_card">
+    android:padding="14dp">
 
+    <!-- Product Image -->
     <ImageView
-        android:id="@+id/imgShopProduct"
-        android:layout_width="116dp"
-        android:layout_height="116dp"
-        android:scaleType="centerCrop"
-        android:src="@drawable/bg_image"
-        android:background="@drawable/bg_card" />
+        android:id="@+id/imgProduct"
+        android:layout_width="66dp"
+        android:layout_height="66dp"
+        android:background="@drawable/bg_product_image"
+        android:contentDescription="Ảnh sản phẩm"
+        android:scaleType="centerCrop" />
 
+    <!-- Product Info -->
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="12dp"
         android:layout_weight="1"
-        android:orientation="vertical"
-        android:paddingStart="14dp">
+        android:orientation="vertical">
 
+        <!-- Name + Badge -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
 
             <TextView
-                android:id="@+id/tvShopProductName"
+                android:id="@+id/tvProductName"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:textColor="#122046"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:maxLines="2"
-                android:ellipsize="end" />
+                android:text="MacBook Pro M3 14"
+                android:textColor="#1A1A1A"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <TextView
-                android:id="@+id/tvShopProductStatus"
+                android:id="@+id/tvBadgeStatus"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_status_blue"
-                android:text="Đang hiển thị"
-                android:textColor="@android:color/white"
+                android:background="@drawable/bg_badge_active"
+                android:paddingStart="9dp"
+                android:paddingTop="3dp"
+                android:paddingEnd="9dp"
+                android:paddingBottom="3dp"
+                android:text="Đang hiện"
+                android:textColor="#1A9650"
                 android:textSize="11sp"
-                android:paddingLeft="10dp"
-                android:paddingRight="10dp"
-                android:paddingTop="5dp"
-                android:paddingBottom="5dp"
-                android:layout_marginStart="10dp" />
+                android:textStyle="bold" />
         </LinearLayout>
 
+        <!-- Category -->
         <TextView
-            android:id="@+id/tvShopProductDescription"
-            android:layout_width="match_parent"
+            android:id="@+id/tvCategory"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#7A8BB2"
-            android:textSize="13sp"
-            android:layout_marginTop="6dp"
-            android:maxLines="1"
-            android:ellipsize="end" />
+            android:layout_marginTop="2dp"
+            android:text="Danh mục : Điện thoại"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
 
+        <!-- Price -->
         <TextView
-            android:id="@+id/tvShopProductPrice"
-            android:layout_width="match_parent"
+            android:id="@+id/tvPrice"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#2F80FF"
-            android:textSize="16sp"
-            android:textStyle="bold"
-            android:layout_marginTop="12dp" />
+            android:layout_marginTop="4dp"
+            android:text="39.990.000 đ"
+            android:textColor="#1A6EF5"
+            android:textSize="15sp"
+            android:textStyle="bold" />
 
+        <!-- Stock -->
         <TextView
-            android:id="@+id/tvShopProductStock"
-            android:layout_width="match_parent"
+            android:id="@+id/tvStock"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="#7A8BB2"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="2dp"
+            android:text="Tồn kho : 42"
+            android:textColor="#9E9E9E"
+            android:textSize="12sp" />
 
+        <!-- Action Icons -->
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
             android:gravity="center_vertical"
-            android:layout_marginTop="12dp">
+            android:orientation="horizontal">
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
+                android:id="@+id/btnEdit"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:contentDescription="Chỉnh sửa"
                 android:src="@drawable/ic_edit"
-                android:tint="#2F80FF" />
+                android:tint="#BDBDBD" />
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
-                android:src="@drawable/ic_eye"
-                android:tint="#7A8BB2" />
+                android:id="@+id/btnToggleVisibility"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="14dp"
+                android:contentDescription="Ẩn/Hiện"
+                android:src="@drawable/ic_eye_close"
+                android:tint="#BDBDBD" />
 
             <ImageView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:layout_marginStart="16dp"
+                android:id="@+id/btnDelete"
+                android:layout_width="22dp"
+                android:layout_height="22dp"
+                android:layout_marginStart="14dp"
+                android:contentDescription="Xóa"
                 android:src="@drawable/ic_delete"
-                android:tint="#FF4D4D" />
+                android:tint="#BDBDBD" />
         </LinearLayout>
+
     </LinearLayout>
 </LinearLayout>

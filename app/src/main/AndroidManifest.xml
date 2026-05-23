@@ -88,6 +88,9 @@
             android:name=".screens.OrdersActivity"
             android:exported="false" />
         <activity
+            android:name=".screens.RevenueActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.EditProfileActivity"
             android:exported="false" />
         <activity

@@ -14,6 +14,7 @@ import java.util.Scanner;
 
 public class OrderApiService {
     private static final String BASE_URL = "http://10.0.2.2:5000/api/orders";
+    private static final String BASE_SHOP_URL = "http://10.0.2.2:5000/api/shop/orders";
 
     // Tạo đơn hàng mới
     public interface CreateOrderCallback {
@@ -90,6 +91,46 @@ public class OrderApiService {
             }
         }).start();
     }
+
+    public interface OrderDetailCallback {
+        void onSuccess(JSONObject orderJson);
+        void onError(String error);
+    }
+
+    public static void getOrderDetail(Context context, String token, String orderId, OrderDetailCallback callback) {
+        getOrderDetail(context, token, orderId, false, callback);
+    }
+
+    public static void getOrderDetail(Context context, String token, String orderId, boolean isShopOrder, OrderDetailCallback callback) {
+        new Thread(() -> {
+            try {
+                URL url = new URL((isShopOrder ? BASE_SHOP_URL : BASE_URL) + "/" + orderId);
+                HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("GET");
+                conn.setRequestProperty("Authorization", "Bearer " + token);
+                conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
+
+                int responseCode = conn.getResponseCode();
+                InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                Scanner scanner = new Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                Log.d("GET_ORDER_DETAIL_RESPONSE", "code=" + responseCode + " | body=" + response);
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    JSONObject obj = new JSONObject(response);
+                    callback.onSuccess(obj);
+                } else {
+                    callback.onError(response);
+                }
+            } catch (Exception e) {
+                Log.e("GET_ORDER_DETAIL_ERROR", e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
     // Hủy đơn hàng
     public interface CancelOrderCallback {
         void onSuccess(JSONObject orderJson);
