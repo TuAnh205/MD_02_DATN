@@ -58,6 +58,20 @@ export default function Profile() {
     fetchVouchers();
   }, []);
 
+  useEffect(() => {
+    const handleFavoritesChanged = async () => {
+      try {
+        const favorites = await favoriteService.listFavorites();
+        setWishlistCount(favorites.length);
+      } catch {
+        setWishlistCount('--');
+      }
+    };
+
+    window.addEventListener('favoritesChanged', handleFavoritesChanged);
+    return () => window.removeEventListener('favoritesChanged', handleFavoritesChanged);
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({

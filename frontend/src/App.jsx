@@ -32,6 +32,7 @@ import AdminVouchers from "./pages/AdminVouchers";
 import ForgotPassword from "./pages/ForgotPassword";
 import ResetPassword from "./pages/ResetPassword";
 import ShopDashboard from "./pages/ShopDashboard";
+import Favorites from "./pages/Favorites";
 import ShopHome from "./pages/ShopHome";
 import ShopProducts from "./pages/ShopProducts";
 import ShopRevenue from "./pages/ShopRevenue";
@@ -148,6 +149,14 @@ function AppContent() {
           element={
             <ProtectedRoute>
               <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute>
+              <Favorites />
             </ProtectedRoute>
           }
         />
