@@ -1,6 +1,7 @@
 const Cart = require('../models/Cart');
 const Product = require('../models/Product');
 const Voucher = require('../models/Voucher');
+const User = require('../models/User');
 
 exports.getCart = async (req, res) => {
     try {
@@ -143,6 +144,20 @@ exports.applyVoucher = async (req, res) => {
 
         if (voucher.usageLimit && voucher.usedCount >= voucher.usageLimit) {
             return res.status(400).json({ message: 'Voucher usage limit exceeded' });
+        }
+
+        const user = await User.findById(req.user.id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const claimedVoucher = (user.userVouchers || []).find((entry) => entry.code === voucher.code);
+        if (!claimedVoucher) {
+            return res.status(400).json({ message: 'Bạn chưa nhận voucher này hoặc không có quyền sử dụng' });
+        }
+
+        if (voucher.userLimit && claimedVoucher.usedCount >= voucher.userLimit) {
+            return res.status(400).json({ message: 'Bạn đã dùng voucher này tối đa số lần' });
         }
 
         const cart = await Cart.findOne({ user: req.user.id }).populate('items.product');

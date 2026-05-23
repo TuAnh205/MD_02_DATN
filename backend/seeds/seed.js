@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/User');
 const Product = require('../models/Product');
 const Promotion = require('../models/Promotion');
+const Voucher = require('../models/Voucher');
 
 const upsertIfMissing = async (model, filter, payload) => {
   const result = await model.updateOne(
@@ -636,6 +637,73 @@ const seedPromotions = async () => {
   }
 };
 
+const seedVouchers = async () => {
+  try {
+    const adminUser = await User.findOne({ role: 'admin' });
+    if (!adminUser) {
+      console.error('✗ No admin user found, skipping voucher seeding');
+      return;
+    }
+
+    const vouchers = [
+      {
+        code: 'SUMMER2026',
+        name: 'SUMMER2026',
+        description: 'Voucher giảm giá 5% cho tất cả đơn hàng, không giới hạn thời gian dùng và mỗi tài khoản được dùng tối đa 3 lần.',
+        type: 'percentage',
+        value: 5,
+        minOrderValue: 0,
+        maxDiscount: 100000,
+        usageLimit: null,
+        userLimit: 3,
+        startDate: new Date(),
+        endDate: new Date('2099-12-31T23:59:59.999Z'),
+        isActive: true,
+        createdBy: adminUser._id,
+      },
+    ];
+
+    let insertedCount = 0;
+    let updatedCount = 0;
+
+    for (const voucher of vouchers) {
+      const result = await Voucher.updateOne(
+        { code: voucher.code },
+        {
+          $set: {
+            name: voucher.name,
+            description: voucher.description,
+            type: voucher.type,
+            value: voucher.value,
+            minOrderValue: voucher.minOrderValue,
+            maxDiscount: voucher.maxDiscount,
+            usageLimit: voucher.usageLimit,
+            userLimit: voucher.userLimit,
+            startDate: voucher.startDate,
+            endDate: voucher.endDate,
+            isActive: voucher.isActive,
+          },
+          $setOnInsert: {
+            createdBy: voucher.createdBy,
+          },
+        },
+        { upsert: true }
+      );
+
+      if (result.upsertedCount === 1) {
+        insertedCount += 1;
+      } else if (result.modifiedCount === 1) {
+        updatedCount += 1;
+      }
+    }
+
+    console.log(`✓ Vouchers ready: ${vouchers.length} total, ${insertedCount} inserted, ${updatedCount} updated, ${vouchers.length - insertedCount - updatedCount} already existed`);
+    return Voucher.find({ code: { $in: vouchers.map((voucher) => voucher.code) } });
+  } catch (err) {
+    console.error('✗ Error seeding vouchers:', err.message);
+  }
+};
+
 const seedDatabase = async (options = {}) => {
   const { connect = true, exitOnFinish = true } = options;
 
@@ -647,6 +715,7 @@ const seedDatabase = async (options = {}) => {
     await seedUsers();
     await seedProducts();
     await seedPromotions();
+    await seedVouchers();
     
     console.log('\n✓ Database seeding completed successfully!');
     console.log('\n--- Test Accounts ---');

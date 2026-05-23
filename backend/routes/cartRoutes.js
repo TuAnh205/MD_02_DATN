@@ -12,5 +12,6 @@ router.put('/:itemId', ctrl.updateCartItem);
 router.delete('/:itemId', ctrl.removeFromCart);
 router.post('/clear', ctrl.clearCart);
 router.post('/apply-voucher', ctrl.applyVoucher);
+router.post('/remove-voucher', ctrl.removeVoucher);
 
 module.exports = router;

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { cartService } from '../services/cartService';
 import { orderService } from '../services/orderService';
 import { promotionService } from '../services/promotionService';
+import { voucherService } from '../services/voucherService';
+import { useAuth } from '../context/AuthContext';
 
 export default function Checkout() {
   const vietnamProvinces = [
@@ -84,6 +86,7 @@ export default function Checkout() {
   const [error, setError] = useState(null);
   const [fieldErrors, setFieldErrors] = useState({});
   const [discountCode, setDiscountCode] = useState('');
+  const [myVouchers, setMyVouchers] = useState([]);
   const [appliedDiscount, setAppliedDiscount] = useState(null);
   const [applyingDiscount, setApplyingDiscount] = useState(false);
 
@@ -104,8 +107,20 @@ export default function Checkout() {
     accountHolder: ''
   });
 
+  const { fetchProfile, user } = useAuth();
+
   React.useEffect(() => {
-    fetchCart();
+    const init = async () => {
+      // ensure profile is fresh so vouchers attached to user are up-to-date
+      try {
+        await fetchProfile();
+      } catch (e) {
+        // ignore profile fetch errors
+      }
+      await fetchCart();
+      await fetchMyVouchers();
+    };
+    init();
   }, []);
 
   React.useEffect(() => {
@@ -209,11 +224,57 @@ export default function Checkout() {
         return;
       }
       setCartData(cart);
+      if (cart.voucher) {
+        const code = cart.voucher.code || '';
+        setAppliedDiscount({
+          discountAmount: cart.voucher.discount || 0,
+          code,
+          promotion: { name: getVoucherLabel(code) },
+          isVoucher: true
+        });
+        setDiscountCode(code);
+      } else {
+        setAppliedDiscount(null);
+        setDiscountCode('');
+      }
     } catch (err) {
       setError('Không thể tải giỏ hàng');
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchMyVouchers = async () => {
+    try {
+      const response = await voucherService.getMyVouchers();
+      const list = response.vouchers || [];
+      setMyVouchers(list);
+      // nếu chưa có mã đang chọn và có voucher hợp lệ, auto chọn voucher vừa nhận gần nhất (không tự động áp dụng)
+      try {
+        const available = list.filter(v => !v.isExpired && v.isActive);
+        if (available.length > 0 && !discountCode) {
+          // sắp xếp theo claimedAt (giả sử có), chọn phần tử mới nhất
+          available.sort((a, b) => {
+            const ta = a.claimedAt ? new Date(a.claimedAt).getTime() : 0;
+            const tb = b.claimedAt ? new Date(b.claimedAt).getTime() : 0;
+            return tb - ta;
+          });
+          setDiscountCode(available[0].code || '');
+        }
+      } catch (e) {
+        // ignore
+      }
+    } catch (err) {
+      setMyVouchers([]);
+    }
+  };
+
+  const getVoucherLabel = (code) => {
+    const voucher = myVouchers.find((v) => v.code === code);
+    if (voucher) {
+      return `${voucher.name || voucher.code} (${voucher.code})`;
+    }
+    return code || 'Voucher';
   };
 
   const handleInputChange = (e) => {
@@ -420,28 +481,32 @@ export default function Checkout() {
       setApplyingDiscount(true);
       setError(null);
 
-      const cartItems = cartData.items.map(item => ({
-        productId: item.product._id,
-        quantity: item.qty,
-        price: item.price
-      }));
-
-      const discountResult = await promotionService.applyDiscountCode(
-        discountCode.trim(),
-        cartItems,
-        null // userId if logged in
-      );
-
-      setAppliedDiscount(discountResult);
+      const cart = await cartService.applyVoucher(discountCode.trim());
+      setCartData(cart);
+      const code = cart.voucher?.code || discountCode.trim();
+      setAppliedDiscount({
+        discountAmount: cart.voucher?.discount || 0,
+        code,
+        promotion: { name: getVoucherLabel(code) },
+        isVoucher: true
+      });
     } catch (err) {
-      setError(err.response?.data?.message || 'Mã giảm giá không hợp lệ');
+      setError(err.response?.data?.message || 'Voucher không hợp lệ');
       setAppliedDiscount(null);
     } finally {
       setApplyingDiscount(false);
     }
   };
 
-  const removeDiscount = () => {
+  const removeDiscount = async () => {
+    if (appliedDiscount?.isVoucher || cartData?.voucher) {
+      try {
+        const cart = await cartService.removeVoucher();
+        setCartData(cart);
+      } catch {
+        // ignore remove errors
+      }
+    }
     setAppliedDiscount(null);
     setDiscountCode('');
   };
@@ -449,7 +514,7 @@ export default function Checkout() {
   const calculateTotal = () => {
     if (!cartData?.items) return 0;
     const subtotal = cartData.items.reduce((total, item) => total + (item.price * item.qty), 0);
-    const discount = appliedDiscount?.discountAmount || 0;
+    const discount = appliedDiscount?.discountAmount ?? cartData.voucher?.discount ?? 0;
     return Math.max(0, subtotal - discount);
   };
 
@@ -938,23 +1003,28 @@ export default function Checkout() {
             <div className="bg-white rounded-lg shadow p-6 sticky top-4">
               <h2 className="text-xl font-bold text-dark mb-6">Tóm tắt đơn hàng</h2>
 
-              {/* Discount Code */}
+              {/* Discount Code Dropdown */}
               <div className="mb-6">
-                <label className="block text-sm font-semibold mb-2">Mã giảm giá</label>
+                <label className="block text-sm font-semibold mb-2">Voucher của tôi</label>
                 <div className="flex gap-2">
-                  <input
-                    type="text"
+                  <select
                     value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
-                    placeholder="Nhập mã giảm giá"
-                    className="flex-1 border rounded px-3 py-2 focus:outline-none focus:border-primary"
-                    disabled={appliedDiscount !== null}
-                  />
+                    onChange={(e) => setDiscountCode(e.target.value)}
+                    disabled={(appliedDiscount?.isVoucher === true) || myVouchers.length === 0}
+                    className="flex-1 border rounded px-3 py-2 focus:outline-none focus:border-primary disabled:bg-gray-100"
+                  >
+                    <option value="">-- Chọn voucher --</option>
+                    {myVouchers.filter(v => !v.isExpired && v.isActive).map((voucher) => (
+                      <option key={voucher._id} value={voucher.code}>
+                        {voucher.name} ({voucher.code}) - {voucher.type === 'percentage' ? `${voucher.value}%` : `₫${voucher.value?.toLocaleString('vi-VN')}`}
+                      </option>
+                    ))}
+                  </select>
                   {!appliedDiscount ? (
                     <button
                       type="button"
                       onClick={applyDiscountCode}
-                      disabled={applyingDiscount || !discountCode.trim()}
+                      disabled={applyingDiscount || !discountCode.trim() || myVouchers.length === 0}
                       className="bg-primary text-white px-4 py-2 rounded hover:bg-primary/90 disabled:bg-gray-400"
                     >
                       {applyingDiscount ? '...' : 'Áp dụng'}
@@ -969,9 +1039,12 @@ export default function Checkout() {
                     </button>
                   )}
                 </div>
+                {myVouchers.length === 0 && !appliedDiscount && (
+                  <p className="text-xs text-gray-500 mt-2">Bạn chưa có voucher nào. Vào tài khoản để nhận voucher mới.</p>
+                )}
                 {appliedDiscount && (
                   <div className="mt-2 text-green-600 text-sm">
-                    ✅ {appliedDiscount.promotion.name}: -₫{appliedDiscount.discountAmount.toLocaleString('vi-VN')}
+                    ✅ {appliedDiscount.promotion?.name || getVoucherLabel(appliedDiscount.code)}: -₫{appliedDiscount.discountAmount.toLocaleString('vi-VN')}
                   </div>
                 )}
               </div>

@@ -53,5 +53,25 @@ export const cartService = {
       console.error('Error clearing cart:', err);
       throw err;
     }
+  },
+
+  applyVoucher: async (code) => {
+    try {
+      const response = await api.post('/cart/apply-voucher', { code });
+      return response.data;
+    } catch (err) {
+      console.error('Error applying voucher:', err);
+      throw err;
+    }
+  },
+
+  removeVoucher: async () => {
+    try {
+      const response = await api.post('/cart/remove-voucher');
+      return response.data;
+    } catch (err) {
+      console.error('Error removing voucher:', err);
+      throw err;
+    }
   }
 };

@@ -94,17 +94,34 @@ export default function Header() {
 
               {/* Dropdown Menu */}
               {isDropdownOpen && (
-                <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                  {/* If user has recent vouchers, show them first */}
+                  {user?.userVouchers && user.userVouchers.length > 0 && (
+                    <div className="p-3 border-b border-gray-100">
+                      <div className="text-xs text-gray-500 font-medium mb-2">Voucher vừa nhận</div>
+                      {user.userVouchers.slice(0, 3).map((entry, idx) => (
+                        <div key={idx} className="flex items-start justify-between mb-2">
+                          <div>
+                            <div className="text-sm font-semibold text-gray-800">{entry.name || entry.code}</div>
+                            <div className="text-xs text-gray-500">{entry.code}</div>
+                          </div>
+                          <div className="text-xs text-gray-400">{entry.claimedAt ? new Date(entry.claimedAt).toLocaleDateString('vi-VN') : ''}</div>
+                        </div>
+                      ))}
+                      <div className="text-xs text-blue-600 hover:underline cursor-pointer" onClick={() => { setIsDropdownOpen(false); window.location.href = '/profile#voucher-section'; }}>Xem tất cả</div>
+                    </div>
+                  )}
+
                   <Link
                     to="/profile"
                     onClick={() => setIsDropdownOpen(false)}
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-t-lg"
+                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                   >
                     Thông tin cá nhân
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-b-lg border-t"
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-t"
                   >
                     Đăng Xuất
                   </button>

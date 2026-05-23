@@ -214,50 +214,71 @@ exports.createOrder = async (req, res) => {
                 : 0;
         let finalDiscountType = discountBody && typeof discountBody === 'object' ? discountBody.type || discountBody?.type : undefined;
 
-        if (voucherCodeValue && finalDiscountAmount === 0) {
-            const voucher = await Voucher.findOne({
+        let voucherFromDb = null;
+        let claimedVoucher = null;
+        let voucherUser = null;
+
+        if (voucherCodeValue) {
+            voucherFromDb = await Voucher.findOne({
                 code: voucherCodeValue.toUpperCase(),
                 isActive: true,
                 startDate: { $lte: new Date() },
                 endDate: { $gte: new Date() }
             });
 
-            if (voucher) {
+            if (voucherFromDb) {
+                voucherUser = await User.findById(userId);
+                if (!voucherUser) {
+                    return res.status(404).json({ message: 'User not found' });
+                }
+
+                claimedVoucher = (voucherUser.userVouchers || []).find((entry) => entry.code === voucherFromDb.code);
+                if (!claimedVoucher) {
+                    return res.status(400).json({ message: 'Bạn chưa nhận voucher này' });
+                }
+
+                if (voucherFromDb.userLimit && claimedVoucher.usedCount >= voucherFromDb.userLimit) {
+                    return res.status(400).json({ message: 'Bạn đã dùng voucher này tối đa số lần' });
+                }
+
                 const subtotalAmount = subtotal || 0;
-                if (subtotalAmount < voucher.minOrderValue) {
-                    return res.status(400).json({ message: `Giá trị đơn hàng phải lớn hơn hoặc bằng ${voucher.minOrderValue}` });
+                if (subtotalAmount < voucherFromDb.minOrderValue) {
+                    return res.status(400).json({ message: `Giá trị đơn hàng phải lớn hơn hoặc bằng ${voucherFromDb.minOrderValue}` });
                 }
 
-                let applicableSubtotal = 0;
+                if (finalDiscountAmount === 0) {
+                    let applicableSubtotal = 0;
 
-                for (const item of items) {
-                    const product = productMap[item.product];
-                    if (!product) continue;
+                    for (const item of items) {
+                        const product = productMap[item.product];
+                        if (!product) continue;
 
-                    const itemApplicable = (
-                        !voucher.applicableProducts || voucher.applicableProducts.length === 0 ||
-                        voucher.applicableProducts.map(id => id.toString()).includes(product._id.toString())
-                    ) && (
-                        !voucher.applicableCategories || voucher.applicableCategories.length === 0 ||
-                        voucher.applicableCategories.includes(product.category)
-                    );
+                        const itemApplicable = (
+                            !voucherFromDb.applicableProducts || voucherFromDb.applicableProducts.length === 0 ||
+                            voucherFromDb.applicableProducts.map(id => id.toString()).includes(product._id.toString())
+                        ) && (
+                            !voucherFromDb.applicableCategories || voucherFromDb.applicableCategories.length === 0 ||
+                            voucherFromDb.applicableCategories.includes(product.category)
+                        );
 
-                    if (!itemApplicable) continue;
+                        if (!itemApplicable) continue;
 
-                    const lineTotal = (item.price || 0) * (item.qty || 1);
-                    applicableSubtotal += lineTotal;
-                }
-
-                if (voucher.type === 'percentage') {
-                    let computedDiscount = (applicableSubtotal * voucher.value) / 100;
-                    if (voucher.maxDiscount && computedDiscount > voucher.maxDiscount) {
-                        computedDiscount = voucher.maxDiscount;
+                        const lineTotal = (item.price || 0) * (item.qty || 1);
+                        applicableSubtotal += lineTotal;
                     }
-                    finalDiscountAmount = roundCurrency(computedDiscount);
-                } else {
-                    finalDiscountAmount = roundCurrency(voucher.value);
+
+                    if (voucherFromDb.type === 'percentage') {
+                        let computedDiscount = (applicableSubtotal * voucherFromDb.value) / 100;
+                        if (voucherFromDb.maxDiscount && computedDiscount > voucherFromDb.maxDiscount) {
+                            computedDiscount = voucherFromDb.maxDiscount;
+                        }
+                        finalDiscountAmount = roundCurrency(computedDiscount);
+                    } else {
+                        finalDiscountAmount = roundCurrency(voucherFromDb.value);
+                    }
                 }
-                finalDiscountType = voucher.type;
+
+                finalDiscountType = finalDiscountType || voucherFromDb.type;
             }
         }
 
@@ -308,6 +329,13 @@ exports.createOrder = async (req, res) => {
         const order = new Order(orderData);
         await order.save();
 
+        if (voucherFromDb && claimedVoucher && voucherUser) {
+            claimedVoucher.usedCount = (claimedVoucher.usedCount || 0) + 1;
+            await voucherUser.save();
+            voucherFromDb.usedCount = (voucherFromDb.usedCount || 0) + 1;
+            await voucherFromDb.save();
+        }
+
         // Tạo thông báo cho shop (mỗi shop một thông báo)
         for (const shopId of shopIds) {
             const relatedCount = order.items.filter((item) => item.shopId.toString() === shopId)
@@ -317,7 +345,7 @@ exports.createOrder = async (req, res) => {
                 user: shopId,
                 type: 'shop_order',
                 title: 'Đơn hàng mới',
-                message: `Bạn có đơn hàng mới`,
+                message: `Bạn có đơn hàng mới${voucherCodeValue ? ` (áp dụng voucher ${voucherCodeValue})` : ''}`,
                 data: { orderId: order._id }
             });
         }

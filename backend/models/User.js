@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   phone: { type: String },
   avatar: { type: String },
+  userVouchers: [{
+    voucher: { type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' },
+    code: { type: String, uppercase: true },
+    name: { type: String },
+    description: { type: String },
+    claimedAt: { type: Date, default: Date.now },
+    usedCount: { type: Number, default: 0 }
+  }],
   role: { type: String, enum: ["user", "shop", "admin"], default: "user" },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String },
