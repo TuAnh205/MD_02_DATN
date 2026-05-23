@@ -41,52 +41,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             tvStatusDescription = findViewById(R.id.tvStatusDescription);
             btnCancel = findViewById(R.id.btnCancel);
             btnBuyAgain = findViewById(R.id.btnBuyAgain);
-            // Ẩn các view đánh giá (ratingCard đã bị xóa khỏi layout, không cần xử lý)
-                        // Địa chỉ giao hàng
-                        tvShippingAddress = findViewById(R.id.tvShippingAddress);
-                        // Lấy địa chỉ từ 3 trường nếu có
-                        String address = getIntent().getStringExtra("address");
-                        String district = getIntent().getStringExtra("district");
-                        String city = getIntent().getStringExtra("city");
-                        String shippingAddress = getIntent().getStringExtra("shippingAddress");
-                        String fullAddress = "";
-                        if (address != null && !address.isEmpty()) fullAddress += address;
-                        if (district != null && !district.isEmpty()) fullAddress += (fullAddress.isEmpty() ? "" : ", ") + district;
-                        if (city != null && !city.isEmpty()) fullAddress += (fullAddress.isEmpty() ? "" : ", ") + city;
-                        if (fullAddress.isEmpty() && shippingAddress != null && !shippingAddress.isEmpty()) {
-                            fullAddress = shippingAddress;
-                        }
-                        if (fullAddress.isEmpty()) fullAddress = "Không có thông tin";
-                        tvShippingAddress.setText(fullAddress);
-
-                        // Số lượng sản phẩm
-                        tvItemCount = findViewById(R.id.tvItemCount);
-                        int itemCount = getIntent().getIntExtra("itemCount", 0);
-                        tvItemCount.setText(String.valueOf(itemCount));
-
-                        // Dự kiến nhận
-                        tvArrivalDate = findViewById(R.id.tvArrivalDate);
-                        String arrivalDate = getIntent().getStringExtra("arrivalDate");
-                        // Nếu chưa có thì hiển thị "Chưa có"
-                        if (arrivalDate == null || arrivalDate.isEmpty()) {
-                            tvArrivalDate.setText("Chưa có");
-                        } else {
-                            // Nếu trạng thái là đã xác nhận thì cộng thêm 4 ngày
-                            if (orderStatus.equalsIgnoreCase("processing") || orderStatus.equalsIgnoreCase("xác nhận") || orderStatus.equalsIgnoreCase("confirmed")) {
-                                try {
-                                    java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
-                                    java.util.Calendar cal = java.util.Calendar.getInstance();
-                                    cal.setTime(sdf.parse(arrivalDate));
-                                    cal.add(java.util.Calendar.DATE, 4);
-                                    String newDate = sdf.format(cal.getTime());
-                                    tvArrivalDate.setText(newDate);
-                                } catch (Exception e) {
-                                    tvArrivalDate.setText(arrivalDate);
-                                }
-                            } else {
-                                tvArrivalDate.setText(arrivalDate);
-                            }
-                        }
+            tvShippingAddress = findViewById(R.id.tvShippingAddress);
             rvOrderItems = findViewById(R.id.rvOrderItems);
 
             // ===== GET DATA =====
@@ -98,6 +53,44 @@ public class OrderDetailActivity extends AppCompatActivity {
 
             if (orderId == null) orderId = "N/A";
             if (orderStatus == null) orderStatus = "pending";
+
+            String address = intent.getStringExtra("address");
+            String district = intent.getStringExtra("district");
+            String city = intent.getStringExtra("city");
+            String shippingAddress = intent.getStringExtra("shippingAddress");
+            String fullAddress = "";
+            if (address != null && !address.isEmpty()) fullAddress += address;
+            if (district != null && !district.isEmpty()) fullAddress += (fullAddress.isEmpty() ? "" : ", ") + district;
+            if (city != null && !city.isEmpty()) fullAddress += (fullAddress.isEmpty() ? "" : ", ") + city;
+            if (fullAddress.isEmpty() && shippingAddress != null && !shippingAddress.isEmpty()) {
+                fullAddress = shippingAddress;
+            }
+            if (fullAddress.isEmpty()) fullAddress = "Không có thông tin";
+            tvShippingAddress.setText(fullAddress);
+
+            tvItemCount = findViewById(R.id.tvItemCount);
+            int itemCount = intent.getIntExtra("itemCount", 0);
+            tvItemCount.setText(String.valueOf(itemCount));
+
+            tvArrivalDate = findViewById(R.id.tvArrivalDate);
+            String arrivalDate = intent.getStringExtra("arrivalDate");
+            if (arrivalDate == null || arrivalDate.isEmpty()) {
+                tvArrivalDate.setText("Chưa có");
+            } else {
+                if (shouldAddEstimatedDelivery(orderStatus)) {
+                    try {
+                        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.getDefault());
+                        java.util.Calendar cal = java.util.Calendar.getInstance();
+                        cal.setTime(sdf.parse(arrivalDate));
+                        cal.add(java.util.Calendar.DATE, 4);
+                        tvArrivalDate.setText(sdf.format(cal.getTime()));
+                    } catch (Exception e) {
+                        tvArrivalDate.setText(arrivalDate);
+                    }
+                } else {
+                    tvArrivalDate.setText(arrivalDate);
+                }
+            }
 
             Log.d("STATUS_DEBUG", "Status backend: " + orderStatus);
 
@@ -111,7 +104,7 @@ public class OrderDetailActivity extends AppCompatActivity {
             tvStatusDescription.setText(getStatusDescription(orderStatus));
 
             // ===== LIST ITEM =====
-            List<OrderItem> list = (List<OrderItem>) getIntent().getSerializableExtra("orderItems");
+            List<OrderItem> list = (List<OrderItem>) intent.getSerializableExtra("orderItems");
             if (list == null) list = new ArrayList<>();
             OrderItemAdapter adapter = new OrderItemAdapter(list);
             rvOrderItems.setLayoutManager(new LinearLayoutManager(this));
@@ -168,6 +161,15 @@ public class OrderDetailActivity extends AppCompatActivity {
                 .setNegativeButton("Không", null)
                 .show();
     }
+
+    private boolean shouldAddEstimatedDelivery(String status) {
+        if (status == null) return false;
+        String normalized = status.trim().toLowerCase();
+        return normalized.equals("processing") || normalized.equals("xác nhận") || normalized.equals("confirmed")
+                || normalized.equals("đã xác nhận") || normalized.equals("da xac nhan")
+                || normalized.equals("chờ xác nhận") || normalized.equals("cho xac nhan");
+    }
+
     private String getStatusVietnamese(String status) {
         if (status == null) return "";
 

@@ -22,8 +22,10 @@ import com.anhnvt_ph55017.md_02_datn.models.Order;
 import com.anhnvt_ph55017.md_02_datn.models.OrderItem;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
-
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
@@ -37,7 +39,7 @@ public class OrdersFragment extends Fragment {
     List<Order> orderList;    // instance variable, avoid static
     List<Order> filteredList;
 
-    TextView tvAll, tvPending, tvProcessing, tvShipping, tvCancelled;
+    TextView tvAll, tvPending, tvProcessing, tvShipping, tvCancelled, tvOrdersEmpty;
     String selectedStatus = "ALL";
 
     public OrdersFragment() {
@@ -52,20 +54,17 @@ public class OrdersFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_orders, container, false);
 
         rvOrders = view.findViewById(R.id.rvOrders);
+        tvOrdersEmpty = view.findViewById(R.id.tvOrdersEmpty);
         // Always re-init orderList to avoid static bugs
         orderList = new ArrayList<>();
 
-        // Map payment method helpers
-        
         // Initialize status tabs
         tvAll = view.findViewById(R.id.tvAll);
         tvPending = view.findViewById(R.id.tvPending);
         tvProcessing = view.findViewById(R.id.tvProcessing);
         tvShipping = view.findViewById(R.id.tvShipping);
-        // Không còn tab Đã nhận
         tvCancelled = view.findViewById(R.id.tvCancelled);
 
-        // Lấy token từ SessionManager
         filteredList = new ArrayList<>();
         adapter = new OrderAdapter(getContext(), filteredList, order -> {
             Intent intent = new Intent(getContext(), com.anhnvt_ph55017.md_02_datn.screens.OrderDetailActivity.class);
@@ -81,11 +80,9 @@ public class OrdersFragment extends Fragment {
             intent.putExtra("productDesc", order.getProductDesc());
             intent.putExtra("shippingAddress", order.getShippingAddress());
             intent.putExtra("paymentMethod", order.getPaymentMethod());
-            // voucher discount
             double vDisc = order.getVoucherDiscount();
             String vDiscStr = vDisc > 0 ? String.format(Locale.getDefault(), "%,.0fđ", vDisc) : "0đ";
             intent.putExtra("voucherDiscount", vDiscStr);
-            // Truyền list<OrderItem> qua intent
             if (order.getItems() != null) {
                 java.io.Serializable itemsSerializable = (java.io.Serializable) order.getItems();
                 intent.putExtra("orderItems", itemsSerializable);
@@ -93,149 +90,187 @@ public class OrdersFragment extends Fragment {
             startActivityForResult(intent, REQUEST_CODE_DETAIL);
         });
 
-        // Gọi API lấy đơn hàng từ backend
+        rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
+        rvOrders.setAdapter(adapter);
+
+        setupTabListeners();
+        setTabActive(tvAll);
+        filterByStatus("ALL");
+        loadOrders();
+
+        return view;
+    }
+
+    private void loadOrders() {
         String token = SessionManager.getToken(getContext());
         com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.getOrders(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.OrdersCallback() {
             @Override
             public void onSuccess(org.json.JSONArray ordersJson) {
                 orderList.clear();
-                filteredList.clear();
                 for (int i = 0; i < ordersJson.length(); i++) {
                     try {
                         org.json.JSONObject obj = ordersJson.getJSONObject(i);
-                        Log.d("ORDER_PARSE_DEBUG", "Raw order json: " + obj.toString());
-                        String id = obj.optString("_id");
-                        String date = obj.optString("createdAt");
-                        double total = obj.optDouble("total");
-                        String status = obj.optString("status");
-                        org.json.JSONObject paymentObj = obj.optJSONObject("payment");
-                        String paymentMethod = mapPaymentMethod(paymentObj != null ? paymentObj.optString("method", "") : "");
-                        String paymentStatus = paymentObj != null ? paymentObj.optString("status", "") : "";
-                        String shippingAddress = "";
-                        if (obj.has("shipping")) {
-                            org.json.JSONObject ship = obj.optJSONObject("shipping");
-                            if (ship != null && ship.has("address")) {
-                                org.json.JSONObject addr = ship.optJSONObject("address");
-                                if (addr != null) {
-                                    String street = addr.optString("address", "");
-                                    String district = addr.optString("district", "");
-                                    String city = addr.optString("city", "");
-                                    String ward = addr.optString("ward", "");
-                                    StringBuilder addressBuilder = new StringBuilder();
-                                    if (!street.isEmpty()) addressBuilder.append(street);
-                                    if (!ward.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(ward);
-                                    if (!district.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(district);
-                                    if (!city.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(city);
-                                    shippingAddress = addressBuilder.toString();
-                                }
-                            }
+                        Order order = parseOrder(obj);
+                        if (order != null) {
+                            orderList.add(order);
                         }
-                        int itemCount = obj.has("items") ? obj.getJSONArray("items").length() : 0;
-                        // Lấy imageUrl của sản phẩm đầu tiên trong đơn hàng (nếu có)
-                        String imageUrl = null;
-                        if (obj.has("items")) {
-                            org.json.JSONArray itemsArr = obj.getJSONArray("items");
-                            if (itemsArr.length() > 0) {
-                                org.json.JSONObject firstItem = itemsArr.getJSONObject(0);
-                                // Ưu tiên lấy trường "image" trực tiếp
-                                imageUrl = firstItem.optString("image", null);
-                                // Nếu không có, thử lấy từ product.images[0]
-                                if ((imageUrl == null || imageUrl.isEmpty()) && firstItem.has("product")) {
-                                    org.json.JSONObject productObj = firstItem.optJSONObject("product");
-                                    if (productObj != null && productObj.has("images")) {
-                                        org.json.JSONArray imagesArr = productObj.optJSONArray("images");
-                                        if (imagesArr != null && imagesArr.length() > 0) {
-                                            imageUrl = imagesArr.optString(0, null);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        // Parse danh sách hàng hóa
-                        List<OrderItem> orderItems = new ArrayList<>();
-                        if (obj.has("items")) {
-                            org.json.JSONArray itemsArr = obj.getJSONArray("items");
-                            for (int j = 0; j < itemsArr.length(); j++) {
-                                org.json.JSONObject itemObj = itemsArr.getJSONObject(j);
-                                String productName = itemObj.optString("name", "");
-                                double price = itemObj.optDouble("price", 0);
-                                int quantity = itemObj.optInt("quantity", 1);
-                                int imageRes = R.drawable.bg_image;
-                                // Lấy image từ item hoặc product.images[0]
-                                String itemImageUrl = itemObj.optString("image", null);
-                                if ((itemImageUrl == null || itemImageUrl.isEmpty()) && itemObj.has("product")) {
-                                    org.json.JSONObject productObj = itemObj.optJSONObject("product");
-                                    if (productObj != null && productObj.has("images")) {
-                                        org.json.JSONArray imagesArr = productObj.optJSONArray("images");
-                                        if (imagesArr != null && imagesArr.length() > 0) {
-                                            itemImageUrl = imagesArr.optString(0, null);
-                                        }
-                                    }
-                                }
-                                // Nếu muốn truyền imageUrl, cần sửa OrderItem cho phù hợp
-                                OrderItem orderItem = new OrderItem(productName, price, quantity, imageRes, itemImageUrl);
-                                orderItems.add(orderItem);
-                            }
-                        }
-                        Order order = new Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
-                        order.setPaymentStatus(paymentStatus);
-                        // Extract voucher discount if present
-                        double voucherDiscount = 0;
-                        if (obj.has("voucher")) {
-                            org.json.JSONObject v = obj.optJSONObject("voucher");
-                            if (v != null) {
-                                voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
-                            }
-                        }
-                        if (voucherDiscount == 0 && obj.has("discount")) {
-                            org.json.JSONObject discountObj = obj.optJSONObject("discount");
-                            if (discountObj != null) {
-                                voucherDiscount = discountObj.optDouble("amount", discountObj.optDouble("discount", 0));
-                            } else {
-                                voucherDiscount = obj.optDouble("discount", 0);
-                            }
-                        }
-                        if (voucherDiscount == 0) {
-                            voucherDiscount = obj.optDouble("voucherDiscount", 0);
-                        }
-                        order.setVoucherDiscount(voucherDiscount);
-                        Log.d("ORDER_PARSE_DEBUG", "Parsed order: id=" + id + ", date=" + date + ", total=" + total + ", status=" + status + ", paymentStatus=" + paymentStatus + ", itemCount=" + itemCount + ", imageUrl=" + imageUrl);
-                        orderList.add(order);
-                        Log.d("ORDER_PARSE_DEBUG", "Order added to orderList: id=" + id);
                     } catch (Exception e) {
                         Log.e("ORDER_PARSE", e.getMessage(), e);
                     }
                 }
-                filteredList.addAll(orderList);
-                if (getActivity() != null) getActivity().runOnUiThread(() -> {
-                    if (rvOrders != null) {
-                        rvOrders.post(() -> {
-                            if (adapter != null) adapter.notifyDataSetChanged();
-                        });
-                    } else {
-                        if (adapter != null) adapter.notifyDataSetChanged();
-                    }
-                });
+                sortOrdersByDate(orderList);
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (tvOrdersEmpty != null) {
+                            tvOrdersEmpty.setVisibility(orderList.isEmpty() ? View.VISIBLE : View.GONE);
+                        }
+                        filterByStatus(selectedStatus);
+                    });
+                }
             }
 
             @Override
             public void onError(String error) {
                 Log.e("ORDER_API_ERROR", error);
-                if (getActivity() != null) getActivity().runOnUiThread(() -> {
-                    // Hiển thị thông báo lỗi nếu muốn
-                });
+                if (getActivity() != null) {
+                    getActivity().runOnUiThread(() -> {
+                        if (tvOrdersEmpty != null) {
+                            tvOrdersEmpty.setVisibility(View.VISIBLE);
+                            tvOrdersEmpty.setText("Không thể tải lịch sử đơn hàng. Vui lòng thử lại.");
+                        }
+                    });
+                }
             }
         });
+    }
 
-        rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
-        rvOrders.setAdapter(adapter);
+    private Order parseOrder(org.json.JSONObject obj) throws Exception {
+        Log.d("ORDER_PARSE_DEBUG", "Raw order json: " + obj.toString());
+        String id = obj.optString("_id");
+        String date = obj.optString("createdAt");
+        double total = obj.optDouble("total");
+        String status = obj.optString("status");
+        org.json.JSONObject paymentObj = obj.optJSONObject("payment");
+        String paymentMethod = mapPaymentMethod(paymentObj != null ? paymentObj.optString("method", "") : "");
+        String paymentStatus = paymentObj != null ? paymentObj.optString("status", "") : "";
 
-        // Set up tab click listeners
-        setupTabListeners();
-        setTabActive(tvAll);
-        filterByStatus("ALL");
+        String shippingAddress = "";
+        if (obj.has("shipping")) {
+            org.json.JSONObject ship = obj.optJSONObject("shipping");
+            if (ship != null && ship.has("address")) {
+                org.json.JSONObject addr = ship.optJSONObject("address");
+                if (addr != null) {
+                    String street = addr.optString("address", "");
+                    String district = addr.optString("district", "");
+                    String city = addr.optString("city", "");
+                    String ward = addr.optString("ward", "");
+                    StringBuilder addressBuilder = new StringBuilder();
+                    if (!street.isEmpty()) addressBuilder.append(street);
+                    if (!ward.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(ward);
+                    if (!district.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(district);
+                    if (!city.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(city);
+                    shippingAddress = addressBuilder.toString();
+                }
+            }
+        }
 
-        return view;
+        int itemCount = obj.has("items") ? obj.getJSONArray("items").length() : 0;
+        String imageUrl = null;
+        if (obj.has("items")) {
+            org.json.JSONArray itemsArr = obj.getJSONArray("items");
+            if (itemsArr.length() > 0) {
+                org.json.JSONObject firstItem = itemsArr.getJSONObject(0);
+                imageUrl = firstItem.optString("image", null);
+                if ((imageUrl == null || imageUrl.isEmpty()) && firstItem.has("product")) {
+                    org.json.JSONObject productObj = firstItem.optJSONObject("product");
+                    if (productObj != null && productObj.has("images")) {
+                        org.json.JSONArray imagesArr = productObj.optJSONArray("images");
+                        if (imagesArr != null && imagesArr.length() > 0) {
+                            imageUrl = imagesArr.optString(0, null);
+                        }
+                    }
+                }
+            }
+        }
+
+        List<OrderItem> orderItems = new ArrayList<>();
+        if (obj.has("items")) {
+            org.json.JSONArray itemsArr = obj.getJSONArray("items");
+            for (int j = 0; j < itemsArr.length(); j++) {
+                org.json.JSONObject itemObj = itemsArr.getJSONObject(j);
+                String productName = itemObj.optString("name", "");
+                double price = itemObj.optDouble("price", 0);
+                int quantity = itemObj.optInt("quantity", 1);
+                int imageRes = R.drawable.bg_image;
+                String itemImageUrl = itemObj.optString("image", null);
+                if ((itemImageUrl == null || itemImageUrl.isEmpty()) && itemObj.has("product")) {
+                    org.json.JSONObject productObj = itemObj.optJSONObject("product");
+                    if (productObj != null && productObj.has("images")) {
+                        org.json.JSONArray imagesArr = productObj.optJSONArray("images");
+                        if (imagesArr != null && imagesArr.length() > 0) {
+                            itemImageUrl = imagesArr.optString(0, null);
+                        }
+                    }
+                }
+                orderItems.add(new OrderItem(productName, price, quantity, imageRes, itemImageUrl));
+            }
+        }
+
+        Order order = new Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
+        order.setPaymentStatus(paymentStatus);
+
+        double voucherDiscount = 0;
+        if (obj.has("voucher")) {
+            org.json.JSONObject v = obj.optJSONObject("voucher");
+            if (v != null) {
+                voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
+            }
+        }
+        if (voucherDiscount == 0 && obj.has("discount")) {
+            org.json.JSONObject discountObj = obj.optJSONObject("discount");
+            if (discountObj != null) {
+                voucherDiscount = discountObj.optDouble("amount", discountObj.optDouble("discount", 0));
+            } else {
+                voucherDiscount = obj.optDouble("discount", 0);
+            }
+        }
+        if (voucherDiscount == 0) {
+            voucherDiscount = obj.optDouble("voucherDiscount", 0);
+        }
+        order.setVoucherDiscount(voucherDiscount);
+        Log.d("ORDER_PARSE_DEBUG", "Parsed order: id=" + id + ", date=" + date + ", total=" + total + ", status=" + status + ", paymentStatus=" + paymentStatus + ", itemCount=" + itemCount + ", imageUrl=" + imageUrl);
+        return order;
+    }
+
+    private void sortOrdersByDate(List<Order> orders) {
+        Collections.sort(orders, (first, second) -> Long.compare(parseOrderTimestamp(second.getDate()), parseOrderTimestamp(first.getDate())));
+    }
+
+    private long parseOrderTimestamp(String date) {
+        if (date == null || date.isEmpty()) {
+            return 0L;
+        }
+
+        String normalized = date.replace("Z", "+00:00");
+        String[] patterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd"
+        };
+
+        for (String pattern : patterns) {
+            try {
+                SimpleDateFormat format = new SimpleDateFormat(pattern, Locale.US);
+                Date parsed = format.parse(normalized);
+                if (parsed != null) {
+                    return parsed.getTime();
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        return 0L;
     }
 
     private String mapPaymentMethod(String rawMethod) {
@@ -318,121 +353,7 @@ public class OrdersFragment extends Fragment {
         if (requestCode == REQUEST_CODE_DETAIL && resultCode == getActivity().RESULT_OK && data != null) {
             boolean cancelled = data.getBooleanExtra("orderCancelled", false);
             if (cancelled) {
-                // Gọi lại API để lấy danh sách đơn hàng mới nhất từ backend
-                String token = com.anhnvt_ph55017.md_02_datn.utils.SessionManager.getToken(getContext());
-                com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.getOrders(getContext(), token, new com.anhnvt_ph55017.md_02_datn.utils.OrderApiService.OrdersCallback() {
-                    @Override
-                    public void onSuccess(org.json.JSONArray ordersJson) {
-                        orderList.clear();
-                        filteredList.clear();
-                        for (int i = 0; i < ordersJson.length(); i++) {
-                            try {
-                                org.json.JSONObject obj = ordersJson.getJSONObject(i);
-                                // ...parse order như cũ...
-                                String id = obj.optString("_id");
-                                String date = obj.optString("createdAt");
-                                double total = obj.optDouble("total");
-                                String status = obj.optString("status");
-                                org.json.JSONObject paymentObj = obj.optJSONObject("payment");
-                                String paymentMethod = paymentObj != null ? paymentObj.optString("method", "") : "";
-                                String paymentStatus = paymentObj != null ? paymentObj.optString("status", "") : "";
-                                String shippingAddress = "";
-                                if (obj.has("shipping")) {
-                                    org.json.JSONObject ship = obj.optJSONObject("shipping");
-                                    if (ship != null && ship.has("address")) {
-                                        org.json.JSONObject addr = ship.optJSONObject("address");
-                                        if (addr != null) {
-                                            String street = addr.optString("address", "");
-                                            String district = addr.optString("district", "");
-                                            String city = addr.optString("city", "");
-                                            String ward = addr.optString("ward", "");
-                                            StringBuilder addressBuilder = new StringBuilder();
-                                            if (!street.isEmpty()) addressBuilder.append(street);
-                                            if (!ward.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(ward);
-                                            if (!district.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(district);
-                                            if (!city.isEmpty()) addressBuilder.append(addressBuilder.length() > 0 ? ", " : "").append(city);
-                                            shippingAddress = addressBuilder.toString();
-                                        }
-                                    }
-                                }
-                                int itemCount = obj.has("items") ? obj.getJSONArray("items").length() : 0;
-                                String imageUrl = null;
-                                if (obj.has("items")) {
-                                    org.json.JSONArray itemsArr = obj.getJSONArray("items");
-                                    if (itemsArr.length() > 0) {
-                                        org.json.JSONObject firstItem = itemsArr.getJSONObject(0);
-                                        imageUrl = firstItem.optString("image", null);
-                                        if ((imageUrl == null || imageUrl.isEmpty()) && firstItem.has("product")) {
-                                            org.json.JSONObject productObj = firstItem.optJSONObject("product");
-                                            if (productObj != null && productObj.has("images")) {
-                                                org.json.JSONArray imagesArr = productObj.optJSONArray("images");
-                                                if (imagesArr != null && imagesArr.length() > 0) {
-                                                    imageUrl = imagesArr.optString(0, null);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                                java.util.List<com.anhnvt_ph55017.md_02_datn.models.OrderItem> orderItems = new java.util.ArrayList<>();
-                                if (obj.has("items")) {
-                                    org.json.JSONArray itemsArr = obj.getJSONArray("items");
-                                    for (int j = 0; j < itemsArr.length(); j++) {
-                                        org.json.JSONObject itemObj = itemsArr.getJSONObject(j);
-                                        String productName = itemObj.optString("name", "");
-                                        double price = itemObj.optDouble("price", 0);
-                                        int quantity = itemObj.optInt("quantity", 1);
-                                        int imageRes = com.anhnvt_ph55017.md_02_datn.R.drawable.bg_image;
-                                        String itemImageUrl = itemObj.optString("image", null);
-                                        if ((itemImageUrl == null || itemImageUrl.isEmpty()) && itemObj.has("product")) {
-                                            org.json.JSONObject productObj = itemObj.optJSONObject("product");
-                                            if (productObj != null && productObj.has("images")) {
-                                                org.json.JSONArray imagesArr = productObj.optJSONArray("images");
-                                                if (imagesArr != null && imagesArr.length() > 0) {
-                                                    itemImageUrl = imagesArr.optString(0, null);
-                                                }
-                                            }
-                                        }
-                                        com.anhnvt_ph55017.md_02_datn.models.OrderItem orderItem = new com.anhnvt_ph55017.md_02_datn.models.OrderItem(productName, price, quantity, imageRes, itemImageUrl);
-                                        orderItems.add(orderItem);
-                                    }
-                                }
-                                com.anhnvt_ph55017.md_02_datn.models.Order order = new com.anhnvt_ph55017.md_02_datn.models.Order(id, date, total, status, "", itemCount, shippingAddress, orderItems, paymentMethod, imageUrl);
-                                order.setPaymentStatus(paymentStatus);
-                                double voucherDiscount = 0;
-                                if (obj.has("voucher")) {
-                                    org.json.JSONObject v = obj.optJSONObject("voucher");
-                                    if (v != null) {
-                                        voucherDiscount = v.optDouble("discount", v.optDouble("amount", 0));
-                                    }
-                                }
-                                if (voucherDiscount == 0) {
-                                    voucherDiscount = obj.optDouble("discount", obj.optDouble("voucherDiscount", 0));
-                                }
-                                order.setVoucherDiscount(voucherDiscount);
-                                orderList.add(order);
-                            } catch (Exception e) {
-                                android.util.Log.e("ORDER_PARSE", e.getMessage(), e);
-                            }
-                        }
-                        filteredList.addAll(orderList);
-                        if (getActivity() != null) getActivity().runOnUiThread(() -> {
-                            if (rvOrders != null) {
-                                rvOrders.post(() -> {
-                                    if (adapter != null) adapter.notifyDataSetChanged();
-                                });
-                            } else {
-                                if (adapter != null) adapter.notifyDataSetChanged();
-                            }
-                        });
-                    }
-                    @Override
-                    public void onError(String error) {
-                        android.util.Log.e("ORDER_API_ERROR", error);
-                        if (getActivity() != null) getActivity().runOnUiThread(() -> {
-                            // Hiển thị thông báo lỗi nếu muốn
-                        });
-                    }
-                });
+                loadOrders();
             }
         }
     }
