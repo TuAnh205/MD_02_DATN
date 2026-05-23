@@ -58,6 +58,20 @@ export default function Profile() {
     fetchVouchers();
   }, []);
 
+  useEffect(() => {
+    const handleFavoritesChanged = async () => {
+      try {
+        const favorites = await favoriteService.listFavorites();
+        setWishlistCount(favorites.length);
+      } catch {
+        setWishlistCount('--');
+      }
+    };
+
+    window.addEventListener('favoritesChanged', handleFavoritesChanged);
+    return () => window.removeEventListener('favoritesChanged', handleFavoritesChanged);
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -88,21 +102,42 @@ export default function Profile() {
     try {
       const res = await voucherService.claimVoucher(code);
       setVoucherMessage('Nhận voucher thành công!');
-      // cập nhật danh sách voucher trong trang ngay lập tức
       await fetchVouchers();
-      // cập nhật profile toàn cục để Header và các component khác nhận thay đổi
       try {
         await fetchProfile();
       } catch (e) {
-        // nếu fetchProfile lỗi, không ảnh hưởng tới UX chính
         console.warn('fetchProfile failed after claiming voucher', e);
       }
-      // nếu backend trả về chi tiết voucher trong res, thêm tạm vào myVouchers để hiển thị ngay
       if (res && res.voucher) {
         setMyVouchers((prev) => [res.voucher, ...prev]);
+        try {
+          const raw = localStorage.getItem('user');
+          if (raw) {
+            const lu = JSON.parse(raw);
+            lu.userVouchers = lu.userVouchers || [];
+            lu.userVouchers.unshift({
+              voucher: res.voucher._id,
+              code: res.voucher.code,
+              name: res.voucher.name,
+              description: res.voucher.description,
+              claimedAt: new Date().toISOString(),
+              usedCount: 0
+            });
+            localStorage.setItem('user', JSON.stringify(lu));
+            window.dispatchEvent(new Event('userChanged'));
+          }
+        } catch (e) {
+          // ignore
+        }
       }
     } catch (error) {
-      setVoucherMessage(error.response?.data?.message || 'Không thể nhận voucher');
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        (typeof error.response?.data === 'string' ? error.response.data : null) ||
+        error.message ||
+        'Không thể nhận voucher';
+      setVoucherMessage(errorMessage);
     } finally {
       setClaimingVoucher(false);
     }

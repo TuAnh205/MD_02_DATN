@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { favoriteService } from '../services/favoriteService';
 
 const heroSlides = [
   {
@@ -107,6 +108,9 @@ export default function Home() {
   const [productCategories, setProductCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [favoriteIds, setFavoriteIds] = useState(new Set());
+  const [favoriteLoading, setFavoriteLoading] = useState(true);
+  const navigate = useNavigate();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -114,6 +118,29 @@ export default function Home() {
     fetchBrands();
     fetchHotProducts();
   }, []);
+
+  useEffect(() => {
+    const loadFavorites = async () => {
+      if (!user) {
+        setFavoriteIds(new Set());
+        setFavoriteLoading(false);
+        return;
+      }
+
+      try {
+        setFavoriteLoading(true);
+        const data = await favoriteService.listFavorites();
+        const ids = new Set(data.map((favorite) => favorite.product?._id || favorite.product));
+        setFavoriteIds(ids);
+      } catch (err) {
+        setFavoriteIds(new Set());
+      } finally {
+        setFavoriteLoading(false);
+      }
+    };
+
+    loadFavorites();
+  }, [user]);
 
   // Auto-slide carousel
   useEffect(() => {
@@ -190,6 +217,42 @@ export default function Home() {
     const original = product.originalPrice || product.price;
     if (!original || original <= product.price) return 0;
     return Math.round((1 - product.price / original) * 100);
+  };
+
+  const isFavorite = (productId) => favoriteIds.has(productId);
+
+  const toggleFavorite = async (event, product) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!user) {
+      navigate('/login');
+      return;
+    }
+
+    const productId = product._id;
+    const alreadyFavorite = favoriteIds.has(productId);
+    const nextFavorites = new Set(favoriteIds);
+
+    if (alreadyFavorite) {
+      nextFavorites.delete(productId);
+    } else {
+      nextFavorites.add(productId);
+    }
+
+    setFavoriteIds(nextFavorites);
+
+    try {
+      if (alreadyFavorite) {
+        await favoriteService.removeFavorite(productId);
+      } else {
+        await favoriteService.addFavorite(productId);
+      }
+      window.dispatchEvent(new CustomEvent('favoritesChanged'));
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+      setFavoriteIds(favoriteIds);
+    }
   };
 
   const visibleProducts = showAllProducts ? products : products.slice(0, 12);
@@ -349,6 +412,18 @@ export default function Home() {
                           -{discount}%
                         </span>
                       )}
+                      <button
+                        type="button"
+                        onClick={(event) => toggleFavorite(event, product)}
+                        className={`absolute top-4 left-4 z-20 w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center transition shadow-sm pointer-events-auto ${
+                          isFavorite(product._id) ? 'bg-red-100 text-red-600' : 'bg-white text-gray-400 hover:text-red-500'
+                        }`}
+                        title={isFavorite(product._id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                      >
+                        <span className={`text-xl ${isFavorite(product._id) ? 'text-red-600' : 'text-gray-400'}`}>
+                          ♥
+                        </span>
+                      </button>
                       <div className="relative overflow-hidden">
                         <img
                           src={product.image || product.images?.[0] || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=60'}
@@ -594,6 +669,18 @@ export default function Home() {
                             -{discount}%
                           </span>
                         )}
+                        <button
+                          type="button"
+                          onClick={(event) => toggleFavorite(event, product)}
+                          className={`absolute top-4 left-4 z-20 w-11 h-11 rounded-full border border-gray-200 flex items-center justify-center transition shadow-sm pointer-events-auto ${
+                            isFavorite(product._id) ? 'bg-red-100 text-red-600' : 'bg-white text-gray-400 hover:text-red-500'
+                          }`}
+                          title={isFavorite(product._id) ? 'Bỏ yêu thích' : 'Thêm vào yêu thích'}
+                        >
+                          <span className={`text-xl ${isFavorite(product._id) ? 'text-red-600' : 'text-gray-400'}`}>
+                            ♥
+                          </span>
+                        </button>
                         {(() => {
                           const rawImages = product.images || [];
                           const normalizedImages = Array.isArray(rawImages)

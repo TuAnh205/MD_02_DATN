@@ -70,6 +70,13 @@ const userSchema = new mongoose.Schema({
   shopStatus: { type: String, enum: ['active', 'frozen'], default: 'active' },
   shopStatusReason: { type: String, default: '' },
   shopFrozenAt: { type: Date },
+  userVouchers: [
+    {
+      voucher: { type: mongoose.Schema.Types.ObjectId, ref: 'Voucher', required: true },
+      claimedAt: { type: Date, default: Date.now },
+      usedCount: { type: Number, default: 0 },
+    }
+  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -16,28 +16,24 @@ exports.getActiveVouchers = async (req, res) => {
   }
 };
 
-exports.getUserVouchers = async (req, res) => {
+// GET /api/vouchers/my - Authenticated: Get vouchers claimed by the current user
+exports.getMyVouchers = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id).populate('userVouchers.voucher');
-    if (!user) return res.status(404).json({ message: 'User not found' });
+    const user = await User.findById(req.user.id).populate({
+      path: 'userVouchers.voucher',
+      select: 'code name description type value minOrderValue maxDiscount startDate endDate endDate isActive'
+    });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
 
-    const vouchers = (user.userVouchers || []).map((entry) => ({
-      _id: entry._id,
-      voucherId: entry.voucher?._id,
-      code: entry.code,
-      name: entry.name,
-      description: entry.description,
-      claimedAt: entry.claimedAt,
-      usedCount: entry.usedCount,
-      isExpired: !!entry.voucher && entry.voucher.endDate && entry.voucher.endDate < new Date(),
-      isActive: !!entry.voucher && entry.voucher.isActive,
-      startDate: entry.voucher?.startDate,
-      endDate: entry.voucher?.endDate,
-      type: entry.voucher?.type,
-      value: entry.voucher?.value,
-      minOrderValue: entry.voucher?.minOrderValue,
-      maxDiscount: entry.voucher?.maxDiscount
-    }));
+    const vouchers = user.userVouchers
+      .filter((entry) => entry.voucher)
+      .map((entry) => ({
+        ...entry.voucher.toObject(),
+        claimedAt: entry.claimedAt,
+        usedCount: entry.usedCount,
+      }));
 
     res.json({ vouchers });
   } catch (err) {
@@ -45,6 +41,7 @@ exports.getUserVouchers = async (req, res) => {
   }
 };
 
+// POST /api/vouchers/claim - Authenticated: Claim a voucher by code
 exports.claimVoucher = async (req, res) => {
   try {
     const { code } = req.body;
@@ -52,55 +49,42 @@ exports.claimVoucher = async (req, res) => {
       return res.status(400).json({ message: 'Voucher code is required' });
     }
 
+    const upperCode = String(code).trim().toUpperCase();
     const now = new Date();
     const voucher = await Voucher.findOne({
-      code: code.toUpperCase(),
+      code: upperCode,
       isActive: true,
       startDate: { $lte: now },
       endDate: { $gte: now }
     });
 
     if (!voucher) {
-      return res.status(404).json({ message: 'Voucher không hợp lệ hoặc đã hết hạn' });
+      return res.status(404).json({ message: 'Voucher không tồn tại hoặc đã hết hạn' });
     }
 
-    const user = await User.findById(req.user.id);
+    const user = await User.findById(req.user.id).populate('userVouchers.voucher');
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    const existing = (user.userVouchers || []).find((entry) => entry.code === voucher.code);
-    if (existing) {
+    const alreadyClaimed = user.userVouchers.some(
+      (entry) => entry.voucher && entry.voucher._id.equals(voucher._id)
+    );
+    if (alreadyClaimed) {
       return res.status(400).json({ message: 'Bạn đã nhận voucher này rồi' });
     }
 
-    user.userVouchers = user.userVouchers || [];
-    user.userVouchers.push({
-      voucher: voucher._id,
-      code: voucher.code,
-      name: voucher.name,
-      description: voucher.description,
-      claimedAt: now,
-      usedCount: 0
-    });
+    const claimedCount = user.userVouchers.filter(
+      (entry) => entry.voucher && entry.voucher._id.equals(voucher._id)
+    ).length;
+    if (voucher.userLimit && claimedCount >= voucher.userLimit) {
+      return res.status(400).json({ message: 'Bạn không thể nhận voucher này thêm lần nữa' });
+    }
 
+    user.userVouchers.push({ voucher: voucher._id, claimedAt: new Date() });
     await user.save();
 
-    res.status(201).json({
-      message: 'Đã nhận voucher thành công',
-      voucher: {
-        _id: voucher._id,
-        code: voucher.code,
-        name: voucher.name,
-        description: voucher.description,
-        type: voucher.type,
-        value: voucher.value,
-        minOrderValue: voucher.minOrderValue,
-        maxDiscount: voucher.maxDiscount,
-        startDate: voucher.startDate,
-        endDate: voucher.endDate
-      }
-    });
+    res.json({ voucher });
   } catch (err) {
     res.status(500).json({ message: 'Server error', error: err.message });
   }
