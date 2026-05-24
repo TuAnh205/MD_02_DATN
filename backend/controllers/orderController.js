@@ -1,4 +1,5 @@
 const Order = require('../models/Order');
+const Product = require('../models/Product');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
 const Voucher = require('../models/Voucher');
@@ -207,7 +208,7 @@ exports.createOrder = async (req, res) => {
         }
 
         const productIds = items.map(item => item.product);
-        const productsInDb = await require('../models/Product').find({ _id: { $in: productIds } }).select('_id shopId createdAt billing name');
+        const productsInDb = await Product.find({ _id: { $in: productIds } }).select('_id shopId createdAt billing name stock');
 
         if (productsInDb.length !== productIds.length) {
             return res.status(400).json({ message: 'Một hoặc nhiều sản phẩm không hợp lệ' });
@@ -356,6 +357,25 @@ exports.createOrder = async (req, res) => {
 
         const order = new Order(orderData);
         await order.save();
+
+        // Giảm tồn kho khi đơn được tạo thành công
+        try {
+            await Promise.all(order.items.map(async (item) => {
+                const qty = item.qty || 1;
+                const updatedProduct = await Product.findOneAndUpdate(
+                    { _id: item.product, stock: { $gte: qty } },
+                    { $inc: { stock: -qty } },
+                    { new: true }
+                );
+
+                if (!updatedProduct) {
+                    throw new Error(`Sản phẩm ${productMap[String(item.product)]?.name || 'không đủ'} không còn đủ hàng`);
+                }
+            }));
+        } catch (stockErr) {
+            await Order.findByIdAndDelete(order._id);
+            return res.status(400).json({ message: stockErr.message || 'Không đủ tồn kho để tạo đơn hàng' });
+        }
 
         if (voucherFromDb && claimedVoucher && voucherUser) {
             claimedVoucher.usedCount = (claimedVoucher.usedCount || 0) + 1;

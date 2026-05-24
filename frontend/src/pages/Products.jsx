@@ -382,6 +382,9 @@ export default function Products() {
                             )}
                           </div>
                           <p className="text-sm text-gray-500 mt-2">{product.category}</p>
+                          <p className={`text-sm font-semibold mt-1 ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {product.stock > 0 ? `Còn ${product.stock}` : 'Hết hàng'}
+                          </p>
                           {product.shopId && (
                             <p className="text-xs text-gray-600 mt-1">Shop: {product.shopId.name}</p>
                           )}

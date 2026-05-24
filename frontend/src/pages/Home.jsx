@@ -750,6 +750,7 @@ export default function Home() {
                             {product.stock > 0 ? 'Còn hàng' : 'Hết hàng'}
                           </span>
                         </p>
+                        <p className="text-sm text-gray-500">Số lượng còn: {product.stock}</p>
                       </div>
                     </Link>
                   );

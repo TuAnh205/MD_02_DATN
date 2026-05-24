@@ -224,6 +224,9 @@ export default function ProductDetail() {
                   <span className="font-semibold">Thương hiệu:</span> {product.brand}
                 </p>
               )}
+              <p className={`text-sm font-semibold ${product.stock > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                {product.stock > 0 ? `Còn ${product.stock}` : 'Hết hàng'}
+              </p>
               {product.tags && product.tags.length > 0 && (
                 <p className="text-sm">
                   <span className="font-semibold">Tags:</span> {product.tags.join(', ')}
