@@ -30,7 +30,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
-public class OrdersFragment extends Fragment {
+public class OrdersFragment extends Fragment implements OrderAdapter.OnOrderStatusChangeListener {
 
     private static final int REQUEST_CODE_DETAIL = 1001;
 
@@ -88,7 +88,7 @@ public class OrdersFragment extends Fragment {
                 intent.putExtra("orderItems", itemsSerializable);
             }
             startActivityForResult(intent, REQUEST_CODE_DETAIL);
-        });
+        }, this);
 
         rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
         rvOrders.setAdapter(adapter);
@@ -344,6 +344,11 @@ public class OrdersFragment extends Fragment {
         status = status.trim().toLowerCase();
         // Các biến thể phổ biến của trạng thái đã hủy
         return status.equals("canceled") || status.equals("cancelled") || status.equals("đã hủy") || status.equals("da huy") || status.equals("huy") || status.equals("cancel") || status.equals("đã bị hủy") || status.equals("da bi huy");
+    }
+
+    @Override
+    public void onOrderStatusChanged() {
+        loadOrders();
     }
 
     // Nhận kết quả trả về từ OrderDetailActivity (thay đổi trạng thái)

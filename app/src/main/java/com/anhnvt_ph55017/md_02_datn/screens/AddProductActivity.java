@@ -293,7 +293,7 @@ public class AddProductActivity extends AppCompatActivity {
                     edtProductName.setText(response.optString("name", ""));
                     edtPrice.setText(String.valueOf(response.optDouble("price", 0)));
                     edtDescription.setText(response.optString("description", ""));
-                    edtStock.setText(String.valueOf(response.optInt("stock", 0)));
+                    edtStock.setText(String.valueOf(resolveStock(response)));
                     editingCategory = response.optString("category", "");
                     applyEditingCategory();
 
@@ -330,6 +330,61 @@ public class AddProductActivity extends AppCompatActivity {
         };
 
         Volley.newRequestQueue(this).add(request);
+    }
+
+    private int resolveStock(JSONObject item) {
+        int stock = parseIntField(item, "stock");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        stock = parseIntField(item, "inventory");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        stock = parseIntField(item, "availableStock");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        stock = parseIntField(item, "quantity");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        JSONArray variants = item.optJSONArray("variants");
+        if (variants != null) {
+            int total = 0;
+            for (int i = 0; i < variants.length(); i++) {
+                JSONObject variant = variants.optJSONObject(i);
+                if (variant == null) continue;
+                int variantStock = parseIntField(variant, "stock");
+                if (variantStock != Integer.MIN_VALUE) {
+                    total += variantStock;
+                }
+            }
+            return total;
+        }
+
+        return 0;
+    }
+
+    private int parseIntField(JSONObject obj, String key) {
+        if (obj == null || !obj.has(key) || obj.isNull(key)) {
+            return Integer.MIN_VALUE;
+        }
+
+        Object value = obj.opt(key);
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (Exception e) {
+            return Integer.MIN_VALUE;
+        }
     }
 
     private String bitmapToBase64(Bitmap bitmap) {

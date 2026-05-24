@@ -30,7 +30,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OrdersActivity extends AppCompatActivity {
+public class OrdersActivity extends AppCompatActivity implements OrderAdapter.OnOrderStatusChangeListener {
 
     private RecyclerView recyclerOrders;
     private ProgressBar progressLoadingOrders;
@@ -83,7 +83,7 @@ public class OrdersActivity extends AppCompatActivity {
                 intent.putExtra("orderItems", new ArrayList<>(order.getItems()));
             }
             startActivity(intent);
-        });
+        }, this);
 
         recyclerOrders.setLayoutManager(new LinearLayoutManager(this));
         recyclerOrders.setAdapter(adapter);
@@ -248,6 +248,11 @@ public class OrdersActivity extends AppCompatActivity {
             return NetworkConstants.getApiBaseUrl() + "/api/shop/orders";
         }
         return NetworkConstants.getApiBaseUrl() + "/api/orders";
+    }
+
+    @Override
+    public void onOrderStatusChanged() {
+        loadOrders();
     }
 
     private Order parseOrder(JSONObject item) {

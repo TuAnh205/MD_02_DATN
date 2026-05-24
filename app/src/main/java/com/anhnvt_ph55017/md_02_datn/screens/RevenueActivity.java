@@ -1,5 +1,9 @@
 package com.anhnvt_ph55017.md_02_datn.screens;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
@@ -10,12 +14,14 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.RevenueTransactionAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.RevenueTransaction;
@@ -57,12 +63,22 @@ public class RevenueActivity extends AppCompatActivity {
     private TextView tvCardOrders;
     private TextView tvCardNewCustomers;
     private TextView tvCardProducts;
+    private TextView tvPlatformFeeAmount;
     private RecyclerView rvRevenueTransactions;
     private LineChart revenueChart;
 
     private final List<RevenueTransaction> revenueTransactions = new ArrayList<>();
     private RevenueTransactionAdapter revenueAdapter;
     private String currentPeriod = "month";
+
+    private final BroadcastReceiver orderStatusReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (OrderAdapter.ACTION_ORDER_STATUS_CHANGED.equals(intent.getAction())) {
+                loadRevenue(currentPeriod);
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +101,7 @@ public class RevenueActivity extends AppCompatActivity {
         tvCardOrders = findViewById(R.id.tvCardOrders);
         tvCardNewCustomers = findViewById(R.id.tvCardNewCustomers);
         tvCardProducts = findViewById(R.id.tvCardProducts);
+        tvPlatformFeeAmount = findViewById(R.id.tvPlatformFeeAmount);
         layoutRevenueSummary = findViewById(R.id.layoutRevenueSummary);
         rvRevenueTransactions = findViewById(R.id.rvRevenueTransactions);
         revenueChart = findViewById(R.id.revenueChart);
@@ -93,6 +110,21 @@ public class RevenueActivity extends AppCompatActivity {
         initTransactionList();
         setupPeriodButtons();
         loadRevenue(currentPeriod);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        LocalBroadcastManager.getInstance(this).registerReceiver(
+                orderStatusReceiver,
+                new IntentFilter(OrderAdapter.ACTION_ORDER_STATUS_CHANGED)
+        );
+    }
+
+    @Override
+    protected void onStop() {
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(orderStatusReceiver);
+        super.onStop();
     }
 
     private void initTransactionList() {
@@ -218,8 +250,62 @@ public class RevenueActivity extends AppCompatActivity {
             }
         }
 
+        double totalPlatformFee = calculatePlatformFee(productDetails);
+        updatePlatformFeeAmount(totalPlatformFee);
+
         revenueAdapter.notifyDataSetChanged();
         tvRevenueEmpty.setVisibility(revenueTransactions.isEmpty() ? View.VISIBLE : View.GONE);
+    }
+
+    private double calculatePlatformFee(JSONArray productDetails) {
+        double total = 0;
+
+        if (productDetails == null) {
+            return 0;
+        }
+
+        for (int i = 0; i < productDetails.length(); i++) {
+            JSONObject item = productDetails.optJSONObject(i);
+            if (item == null) {
+                continue;
+            }
+
+            String status = item.optString("feeStatus", item.optString("status", ""));
+            if (!isDeliveredStatus(status)) {
+                continue;
+            }
+
+            double platformFee = item.optDouble("platformFee", 0);
+            if (platformFee > 0) {
+                total += platformFee;
+            } else {
+                total += item.optDouble("grossAmount", 0) * 0.05;
+            }
+        }
+
+        return Math.max(0, total);
+    }
+
+    private boolean isDeliveredStatus(String status) {
+        if (status == null) {
+            return false;
+        }
+
+        String normalized = status.trim().toLowerCase(Locale.ROOT);
+        return normalized.equals("delivered")
+                || normalized.equals("đã giao")
+                || normalized.equals("da giao")
+                || normalized.equals("paid")
+                || normalized.equals("charged")
+                || normalized.equals("đã nhận")
+                || normalized.equals("da nhan");
+    }
+
+    private void updatePlatformFeeAmount(double totalPlatformFee) {
+        if (tvPlatformFeeAmount == null) {
+            return;
+        }
+        tvPlatformFeeAmount.setText(formatPrice(totalPlatformFee));
     }
 
     private boolean updateChart(JSONArray values) {
