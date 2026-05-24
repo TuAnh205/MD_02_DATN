@@ -17,7 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
-import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
+import com.anhnvt_ph55017.md_02_datn.Adapters.UserOrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 import com.anhnvt_ph55017.md_02_datn.models.OrderItem;
@@ -38,7 +38,7 @@ public class OrdersActivity extends AppCompatActivity {
     private TextView tabPending, tabConfirmed, tabShipping, tabDelivered, tabCancelled;
     private View tabIndicator;
     private TextView[] tabViews;
-    private OrderAdapter adapter;
+    private UserOrderAdapter adapter;
     private List<Order> allOrders = new ArrayList<>();
     private List<Order> displayOrders = new ArrayList<>();
     private String currentFilter = "pending";
@@ -70,8 +70,8 @@ public class OrdersActivity extends AppCompatActivity {
         tabDelivered.setOnClickListener(v -> setTab("delivered", 3));
         tabCancelled.setOnClickListener(v -> setTab("cancelled", 4));
 
-        adapter = new OrderAdapter(this, displayOrders, order -> {
-            Intent intent = new Intent(this, OrderDetailActivity.class);
+        adapter = new UserOrderAdapter(this, displayOrders, order -> {
+            Intent intent = new Intent(this, UserOrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
             intent.putExtra("orderStatus", order.getStatus());
             intent.putExtra("orderDate", order.getDate());

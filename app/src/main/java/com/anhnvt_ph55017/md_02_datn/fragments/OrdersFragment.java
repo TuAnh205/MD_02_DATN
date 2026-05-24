@@ -17,6 +17,7 @@ import android.widget.TextView;
 import android.content.Intent;
 
 import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
+import com.anhnvt_ph55017.md_02_datn.Adapters.UserOrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 import com.anhnvt_ph55017.md_02_datn.models.OrderItem;
@@ -35,7 +36,7 @@ public class OrdersFragment extends Fragment {
     private static final int REQUEST_CODE_DETAIL = 1001;
 
     RecyclerView rvOrders;
-    OrderAdapter adapter;
+    UserOrderAdapter adapter;
     List<Order> orderList;    // instance variable, avoid static
     List<Order> filteredList;
 
@@ -66,8 +67,8 @@ public class OrdersFragment extends Fragment {
         tvCancelled = view.findViewById(R.id.tvCancelled);
 
         filteredList = new ArrayList<>();
-        adapter = new OrderAdapter(getContext(), filteredList, order -> {
-            Intent intent = new Intent(getContext(), com.anhnvt_ph55017.md_02_datn.screens.OrderDetailActivity.class);
+        adapter = new UserOrderAdapter(getContext(), filteredList, order -> {
+            Intent intent = new Intent(getContext(), com.anhnvt_ph55017.md_02_datn.screens.UserOrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
             intent.putExtra("orderDate", order.getFormattedDate());
             intent.putExtra("orderTotal", order.getTotal());

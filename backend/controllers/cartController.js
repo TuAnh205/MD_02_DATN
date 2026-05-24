@@ -25,21 +25,22 @@ exports.addToCart = async (req, res) => {
             return res.status(404).json({ message: 'Product not found' });
         }
 
-        if (product.stock < qty) {
-            return res.status(400).json({ message: 'Insufficient stock' });
-        }
-
         let cart = await Cart.findOne({ user: req.user.id });
         if (!cart) {
             cart = new Cart({ user: req.user.id, items: [] });
         }
 
         const existingItem = cart.items.find(item =>
-            item.product.toString() === productId && item.variant === variant
+            item.product.toString() === productId && String(item.variant || '') === String(variant || '')
         );
 
+        const newQty = existingItem ? existingItem.qty + qty : qty;
+        if (product.stock < newQty) {
+            return res.status(400).json({ message: 'Insufficient stock' });
+        }
+
         if (existingItem) {
-            existingItem.qty += qty;
+            existingItem.qty = newQty;
         } else {
             cart.items.push({
                 product: productId,
