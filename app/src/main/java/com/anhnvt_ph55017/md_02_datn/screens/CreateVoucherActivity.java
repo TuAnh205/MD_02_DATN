@@ -63,6 +63,7 @@ public class CreateVoucherActivity extends AppCompatActivity {
         edtProgramName = findViewById(R.id.edtProgramName);
         rgDiscountType = findViewById(R.id.rgDiscountType);
         edtDiscountValue = findViewById(R.id.edtDiscountValue);
+        edtDiscountMax = findViewById(R.id.edtDiscountMax);
 
         edtTotalUsage = findViewById(R.id.edtTotalUsage);
         edtUsagePerCustomer = findViewById(R.id.edtUsagePerCustomer);
@@ -181,7 +182,7 @@ public class CreateVoucherActivity extends AppCompatActivity {
         new Thread(() -> {
             HttpURLConnection conn = null;
             try {
-                URL url = new URL(NetworkConstants.getApiBaseUrl() + "/api/admin/vouchers");
+                URL url = new URL(NetworkConstants.getApiBaseUrl() + "/api/vouchers/shop");
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setRequestMethod("POST");
                 conn.setConnectTimeout(15000);
