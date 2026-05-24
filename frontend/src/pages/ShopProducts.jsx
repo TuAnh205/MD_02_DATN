@@ -402,13 +402,7 @@ export default function ShopProducts() {
                       {product.price.toLocaleString("vi-VN")} VND • Tồn kho:{" "}
                       {product.stock}
                     </div>
-                    <div className="mt-1 text-xs">
-                      <span className="rounded-full bg-blue-50 px-2 py-1 font-medium text-blue-700">
-                        Các đơn phát sinh từ{" "}
-                        {formatDateTime(policy?.feeStartDate)} sẽ bị tính phí
-                        sàn 5%
-                      </span>
-                    </div>
+                    {/* Notice about platform fee removed as requested */}
                   </div>
                 </div>
                 <div className="flex space-x-2">
