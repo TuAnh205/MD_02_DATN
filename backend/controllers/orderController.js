@@ -389,6 +389,14 @@ exports.createOrder = async (req, res) => {
 
         if (voucherFromDb && claimedVoucher && voucherUser) {
             claimedVoucher.usedCount = (claimedVoucher.usedCount || 0) + 1;
+            
+            // Nếu đã dùng hết lần cho phép, xóa voucher khỏi danh sách người dùng
+            if (voucherFromDb.userLimit && claimedVoucher.usedCount >= voucherFromDb.userLimit) {
+                voucherUser.userVouchers = voucherUser.userVouchers.filter(
+                    entry => entry.voucher.toString() !== voucherFromDb._id.toString()
+                );
+            }
+            
             await voucherUser.save();
             voucherFromDb.usedCount = (voucherFromDb.usedCount || 0) + 1;
             await voucherFromDb.save();
@@ -558,6 +566,49 @@ exports.cancelOrder = async (req, res) => {
         const { reason } = req.body;
 
         await restoreOrderStock(order);
+
+        // Hoàn lại voucher nếu được sử dụng trong đơn hàng này
+        if (order.discount?.code) {
+            try {
+                const voucherFromDb = await Voucher.findOne({ code: order.discount.code });
+                const user = await User.findById(order.user).populate('userVouchers.voucher');
+                
+                if (voucherFromDb && user) {
+                    const userVoucherEntry = user.userVouchers.find(
+                        entry => entry.voucher && entry.voucher._id.toString() === voucherFromDb._id.toString()
+                    );
+
+                    if (userVoucherEntry && userVoucherEntry.usedCount > 0) {
+                        // Giảm usedCount
+                        userVoucherEntry.usedCount = Math.max(0, userVoucherEntry.usedCount - 1);
+                        
+                        // Nếu usedCount = 0 và chưa vượt userLimit, thêm lại voucher
+                        if (userVoucherEntry.usedCount === 0 && voucherFromDb.userLimit && voucherFromDb.userLimit > 0) {
+                            // Voucher được khôi phục, không cần làm gì thêm
+                        }
+                        
+                        await user.save();
+                    } else if (!userVoucherEntry && voucherFromDb.userLimit === 1) {
+                        // Voucher đã bị xóa vì hết lần dùng, thêm lại với usedCount = 0
+                        user.userVouchers.push({
+                            voucher: voucherFromDb._id,
+                            claimedAt: new Date(),
+                            usedCount: 0
+                        });
+                        await user.save();
+                    }
+
+                    // Giảm usedCount của voucher chính
+                    if (voucherFromDb.usedCount > 0) {
+                        voucherFromDb.usedCount = Math.max(0, voucherFromDb.usedCount - 1);
+                        await voucherFromDb.save();
+                    }
+                }
+            } catch (voucherErr) {
+                console.error('Error restoring voucher on cancel:', voucherErr);
+                // Không dừng quá trình hủy nếu có lỗi hoàn voucher
+            }
+        }
 
         order.status = 'đã hủy';
         if (reason && typeof reason === 'string') {
