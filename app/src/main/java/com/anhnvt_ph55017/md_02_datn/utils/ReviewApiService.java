@@ -38,6 +38,11 @@ public class ReviewApiService {
         void onError(String error);
     }
 
+    public interface ReviewReplyCallback {
+        void onSuccess(JSONObject review);
+        void onError(String error);
+    }
+
     // ================== GET REVIEW ==================
     public static void fetchReviewsByProduct(Context context, String productId, ReviewListCallback callback) {
 
@@ -55,6 +60,29 @@ public class ReviewApiService {
                     callback.onError(message);
                 }
         );
+
+        getQueue(context).add(request);
+    }
+
+    public static void fetchShopReviews(Context context, String token, ReviewListCallback callback) {
+        String url = NetworkConstants.API_BASE_URL + "/api/shop/reviews";
+
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
+                response -> {
+                    Log.d("GET_SHOP_REVIEWS_SUCCESS", response.toString());
+                    callback.onSuccess(response);
+                },
+                error -> {
+                    String message = parseError(error, "Lỗi tải đánh giá shop");
+                    Log.e("GET_SHOP_REVIEWS_ERROR", message);
+                    callback.onError(message);
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                return getAuthHeaders(token);
+            }
+        };
 
         getQueue(context).add(request);
     }
@@ -116,6 +144,38 @@ public class ReviewApiService {
                 error -> {
                     String message = parseError(error, "Update thất bại");
                     Log.e("UPDATE_ERROR", message);
+                    callback.onError(message);
+                }
+        ) {
+            @Override
+            public Map<String, String> getHeaders() {
+                return getAuthHeaders(token);
+            }
+        };
+
+        getQueue(context).add(request);
+    }
+
+    // ================== REPLY REVIEW ==================
+    public static void replyShopReview(Context context, String token, String reviewId, String replyText, ReviewReplyCallback callback) {
+        String url = NetworkConstants.API_BASE_URL + "/api/shop/reviews/" + reviewId + "/reply";
+
+        JSONObject body = new JSONObject();
+        try {
+            body.put("text", replyText);
+        } catch (Exception e) {
+            callback.onError("Data lỗi");
+            return;
+        }
+
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.PUT, url, body,
+                response -> {
+                    Log.d("REPLY_SUCCESS", response.toString());
+                    callback.onSuccess(response);
+                },
+                error -> {
+                    String message = parseError(error, "Phản hồi đánh giá thất bại");
+                    Log.e("REPLY_ERROR", message);
                     callback.onError(message);
                 }
         ) {

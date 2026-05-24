@@ -82,16 +82,23 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
 
     private String formatDiscount(Voucher voucher) {
         if (voucher == null) return "";
+
         String type = voucher.getType();
         if (type == null) type = "percentage";
 
-        double value = voucher.getValue();
-        String formattedValue = formatDisplayValue(value);
-
         if (type.equalsIgnoreCase("percentage") || type.equalsIgnoreCase("percent")) {
-            return formattedValue + "%";
+            String display = formatDisplayValue(voucher.getValue()) + "%";
+            if (voucher.getMaxDiscount() > 0) {
+                display += " • Tối đa " + formatCurrency(voucher.getMaxDiscount());
+            }
+            return display;
         }
-        return "-" + formattedValue + " ₫";
+
+        String display = "Giảm " + formatCurrency(voucher.getValue());
+        if (voucher.getMinOrderValue() > 0) {
+            display += " • Áp dụng từ " + formatCurrency(voucher.getMinOrderValue());
+        }
+        return display;
     }
 
     private String formatDisplayValue(double value) {
@@ -99,6 +106,10 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
             return String.format(Locale.getDefault(), "%.0f", value);
         }
         return String.format(Locale.getDefault(), "%.1f", value);
+    }
+
+    private String formatCurrency(double value) {
+        return String.format(Locale.getDefault(), "%,.0f ₫", value);
     }
 
     private String formatDateRange(Voucher voucher) {

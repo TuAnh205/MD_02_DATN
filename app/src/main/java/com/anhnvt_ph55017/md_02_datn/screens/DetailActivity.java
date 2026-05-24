@@ -93,6 +93,18 @@ public class DetailActivity extends AppCompatActivity {
 
         // Setup review list
         reviewAdapter = new ReviewAdapter(this, reviewList);
+        reviewAdapter.setOnReviewClickListener(review -> {
+            Intent reviewIntent = new Intent(DetailActivity.this, ReviewDetailActivity.class);
+            reviewIntent.putExtra("reviewId", review.getId());
+            reviewIntent.putExtra("reviewerName", review.getUserName());
+            reviewIntent.putExtra("reviewContent", review.getContent());
+            reviewIntent.putExtra("reviewDate", review.getCreatedAt());
+            reviewIntent.putExtra("reviewRating", review.getRating());
+            reviewIntent.putExtra("responseText", review.getResponseText());
+            reviewIntent.putExtra("responseByName", review.getResponseByName());
+            reviewIntent.putExtra("responseDate", review.getResponseDate());
+            startActivity(reviewIntent);
+        });
         rvReviews.setLayoutManager(new LinearLayoutManager(this));
         rvReviews.setAdapter(reviewAdapter);
 
@@ -151,6 +163,12 @@ public class DetailActivity extends AppCompatActivity {
         loadProductDetail();
         loadReviews();
         loadRelatedProducts();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        loadReviews();
     }
 
     private void redirectToLogin(String reason) {

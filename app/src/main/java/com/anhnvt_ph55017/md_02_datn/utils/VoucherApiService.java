@@ -22,6 +22,22 @@ public class VoucherApiService {
         void onError(String error);
     }
 
+    public interface DeleteCallback {
+        void onSuccess(String message);
+        void onError(String error);
+    }
+
+    private static List<Voucher> filterAvailableVouchers(List<Voucher> vouchers) {
+        List<Voucher> available = new ArrayList<>();
+        if (vouchers == null) return available;
+        for (Voucher voucher : vouchers) {
+            if (voucher != null && !voucher.isConsumed()) {
+                available.add(voucher);
+            }
+        }
+        return available;
+    }
+
     public static void getVouchers(Context context, VoucherListCallback callback) {
         new Thread(() -> {
             try {
@@ -131,7 +147,7 @@ public class VoucherApiService {
                                 }
                                 vouchers.add(voucher);
                             }
-                            callback.onSuccess(vouchers);
+                            callback.onSuccess(filterAvailableVouchers(vouchers));
                             return;
                         }
                     } catch (Exception e) {
@@ -150,7 +166,7 @@ public class VoucherApiService {
                                 }
                                 vouchers.add(voucher);
                             }
-                            callback.onSuccess(vouchers);
+                            callback.onSuccess(filterAvailableVouchers(vouchers));
                             return;
                         } catch (Exception ignored) {}
                         android.util.Log.e("VOUCHER_API", "Parse error (my vouchers): " + e.getMessage(), e);
@@ -281,6 +297,52 @@ public class VoucherApiService {
                         }
                     } catch (Exception ignored) {}
                     android.util.Log.e("VOUCHER_API", "Claim error: " + errorMessage);
+                    callback.onError(errorMessage);
+                }
+            } catch (Exception e) {
+                android.util.Log.e("VOUCHER_API", "Exception: " + e.getMessage(), e);
+                callback.onError(e.getMessage());
+            }
+        }).start();
+    }
+
+    public static void deleteShopVoucher(Context context, String voucherId, DeleteCallback callback) {
+        if (voucherId == null || voucherId.trim().isEmpty()) {
+            callback.onError("Voucher không hợp lệ");
+            return;
+        }
+
+        new Thread(() -> {
+            try {
+                java.net.URL url = new java.net.URL(NetworkConstants.API_BASE_URL + "/api/vouchers/shop/" + voucherId);
+                java.net.HttpURLConnection conn = (java.net.HttpURLConnection) url.openConnection();
+                conn.setRequestMethod("DELETE");
+                conn.setRequestProperty("Authorization", "Bearer " + SessionManager.getToken(context));
+
+                int responseCode = conn.getResponseCode();
+                java.io.InputStream is = responseCode >= 200 && responseCode < 300 ? conn.getInputStream() : conn.getErrorStream();
+                java.util.Scanner scanner = new java.util.Scanner(is).useDelimiter("\\A");
+                String response = scanner.hasNext() ? scanner.next() : "";
+                scanner.close();
+
+                if (responseCode >= 200 && responseCode < 300) {
+                    String successMessage = "Xóa voucher thành công";
+                    try {
+                        JSONObject json = new JSONObject(response);
+                        if (json.has("message")) {
+                            successMessage = json.optString("message", successMessage);
+                        }
+                    } catch (Exception ignored) {}
+                    callback.onSuccess(successMessage);
+                } else {
+                    String errorMessage = response;
+                    try {
+                        JSONObject json = new JSONObject(response);
+                        if (json.has("message")) {
+                            errorMessage = json.optString("message", errorMessage);
+                        }
+                    } catch (Exception ignored) {}
+                    android.util.Log.e("VOUCHER_API", "Delete voucher error: " + errorMessage);
                     callback.onError(errorMessage);
                 }
             } catch (Exception e) {

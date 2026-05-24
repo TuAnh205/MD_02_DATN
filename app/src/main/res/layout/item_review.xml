@@ -2,24 +2,60 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="12dp"
+    android:padding="14dp"
     android:background="@drawable/bg_card"
-    android:layout_marginBottom="8dp">
+    android:layout_marginBottom="10dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:gravity="center_vertical">
+        android:gravity="top">
 
-        <TextView
-            android:id="@+id/tvReviewer"
+        <ImageView
+            android:id="@+id/ivProductImage"
+            android:layout_width="78dp"
+            android:layout_height="78dp"
+            android:layout_marginEnd="12dp"
+            android:scaleType="centerCrop"
+            android:background="@drawable/bg_product_image"
+            android:contentDescription="Ảnh sản phẩm được đánh giá" />
+
+        <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:textColor="#2F80FF"
-            android:textStyle="bold"
-            android:text="Tên người dùng"/>
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/tvProductName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Tên sản phẩm"
+                android:textColor="#111827"
+                android:textStyle="bold"
+                android:textSize="15sp"
+                android:maxLines="2"
+                android:ellipsize="end" />
+
+            <TextView
+                android:id="@+id/tvReviewer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Đánh giá bởi Người dùng"
+                android:textColor="#2F80FF"
+                android:textSize="13sp"
+                android:layout_marginTop="4dp" />
+
+            <TextView
+                android:id="@+id/tvReviewDate"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColor="#6B7280"
+                android:textSize="12sp"
+                android:layout_marginTop="2dp"
+                android:text="01/04/2026"/>
+        </LinearLayout>
 
         <RatingBar
             android:id="@+id/ratingBarReview"
@@ -28,25 +64,21 @@
             android:numStars="5"
             android:stepSize="1.0"
             android:isIndicator="true"
-            android:rating="5"/>
+            android:rating="5"
+            android:progressTint="#FFC107"
+            android:secondaryProgressTint="#FFC107"
+            android:progressBackgroundTint="#D1D5DB"
+            style="?android:attr/ratingBarStyleSmall" />
     </LinearLayout>
 
     <TextView
         android:id="@+id/tvReviewContent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#000000"
+        android:textColor="#374151"
         android:text="Nội dung đánh giá"
-        android:layout_marginTop="4dp"/>
-
-    <TextView
-        android:id="@+id/tvReviewDate"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textColor="#000000"
-        android:textSize="12sp"
-        android:layout_marginTop="2dp"
-        android:text="01/04/2026"/>
+        android:layout_marginTop="10dp"
+        android:lineSpacingExtra="3dp"/>
 
     <LinearLayout
         android:id="@+id/layoutReplyContainer"
@@ -54,8 +86,8 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone"
-        android:padding="10dp"
-        android:layout_marginTop="8dp"
+        android:padding="12dp"
+        android:layout_marginTop="10dp"
         android:background="#F5F7FA">
 
         <TextView
@@ -71,7 +103,7 @@
             android:id="@+id/tvReplyContent"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#000000"
+            android:textColor="#111827"
             android:textSize="13sp"
             android:layout_marginTop="4dp"
             android:text="Nội dung phản hồi" />
@@ -80,7 +112,7 @@
             android:id="@+id/tvReplyInfo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="#828282"
+            android:textColor="#6B7280"
             android:textSize="12sp"
             android:layout_marginTop="4dp"
             android:text="Trả lời bởi admin • 01/04/2026" />

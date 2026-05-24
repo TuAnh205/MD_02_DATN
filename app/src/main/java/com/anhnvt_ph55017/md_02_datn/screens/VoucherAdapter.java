@@ -17,6 +17,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Voucher;
 
 import java.util.List;
+import java.util.Locale;
 
 public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHolder> {
     public interface OnVoucherClickListener {
@@ -44,8 +45,8 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
         holder.tvCode.setText(v.getCode());
         holder.tvName.setText(v.getName());
         holder.tvDesc.setText(v.getDescription());
-        holder.tvType.setText(v.getType().equals("percentage") ? "Giảm %" : "Giảm tiền");
-        holder.tvValue.setText(v.getType().equals("percentage") ? (v.getValue() + "%") : (v.getValue() + "đ"));
+        holder.tvType.setText(getDiscountTypeLabel(v));
+        holder.tvValue.setText(getDiscountValueLabel(v));
 
         // Hạn sử dụng
         try {
@@ -119,6 +120,27 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
     @Override
     public int getItemCount() {
         return list.size();
+    }
+
+    private String getDiscountTypeLabel(Voucher voucher) {
+        String type = voucher.getType();
+        if (type != null && (type.equalsIgnoreCase("percentage") || type.equalsIgnoreCase("percent"))) {
+            return "Giảm %";
+        }
+        return "Giảm tiền cố định";
+    }
+
+    private String getDiscountValueLabel(Voucher voucher) {
+        String type = voucher.getType();
+        if (type != null && (type.equalsIgnoreCase("percentage") || type.equalsIgnoreCase("percent"))) {
+            return String.format(Locale.getDefault(), "%.0f%%", voucher.getValue());
+        }
+
+        String valueText = String.format(Locale.getDefault(), "%,.0f đ", voucher.getValue());
+        if (voucher.getMinOrderValue() > 0) {
+            return valueText + " • Áp dụng từ " + String.format(Locale.getDefault(), "%,.0f đ", voucher.getMinOrderValue());
+        }
+        return valueText;
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

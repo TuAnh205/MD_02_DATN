@@ -15,6 +15,7 @@ public class Voucher implements Serializable {
     private int usedCount;
     private int userLimit;
     private boolean isActive;
+    private boolean isConsumed;
     private String startDate;
     private String endDate;
 
@@ -30,6 +31,7 @@ public class Voucher implements Serializable {
     public int getUsedCount() { return usedCount; }
     public int getUserLimit() { return userLimit; }
     public boolean isActive() { return isActive; }
+    public boolean isConsumed() { return isConsumed; }
     public String getStartDate() { return startDate; }
     public String getEndDate() { return endDate; }
 

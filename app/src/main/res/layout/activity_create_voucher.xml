@@ -193,16 +193,6 @@
 
         <include layout="@layout/item_voucher_date_picker" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SẢN PHẨM ÁP DỤNG"
-            android:textColor="#64748B"
-            android:textStyle="bold"
-            android:paddingTop="16dp" />
-
-        <include layout="@layout/item_voucher_product_apply" />
-
         <Button
             android:id="@+id/btnCreateVoucher"
             android:layout_width="match_parent"

@@ -371,6 +371,36 @@
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/menuReviews"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp"
+                android:background="@drawable/bg_sidebar_item"
+                android:layout_marginBottom="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:onClick="onMenuReviewsClick"
+                android:foreground="?android:attr/selectableItemBackground">
+
+                <ImageView
+                    android:layout_width="22dp"
+                    android:layout_height="22dp"
+                    android:src="@android:drawable/btn_star_big_off"
+                    android:tint="#0A6ED8" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Đánh giá"
+                    android:textColor="#122046"
+                    android:textSize="15sp"
+                    android:layout_marginStart="14dp" />
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/menuRevenue"
                 android:layout_width="match_parent"
                 android:layout_height="52dp"

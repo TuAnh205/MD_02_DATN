@@ -1,8 +1,8 @@
 package com.anhnvt_ph55017.md_02_datn.screens;
 
+import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -43,7 +43,7 @@ public class ShopVoucherListActivity extends AppCompatActivity {
 
             @Override
             public void onDelete(Voucher voucher) {
-                Toast.makeText(ShopVoucherListActivity.this, "Xóa voucher chưa được triển khai", Toast.LENGTH_SHORT).show();
+                confirmDeleteVoucher(voucher);
             }
         });
 
@@ -75,6 +75,46 @@ public class ShopVoucherListActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     swipeRefresh.setRefreshing(false);
                     Toast.makeText(ShopVoucherListActivity.this, "Lỗi tải voucher: " + error, Toast.LENGTH_LONG).show();
+                });
+            }
+        });
+    }
+
+    private void confirmDeleteVoucher(Voucher voucher) {
+        if (voucher == null || voucher.get_id() == null || voucher.get_id().trim().isEmpty()) {
+            Toast.makeText(this, "Voucher không hợp lệ", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        String voucherName = voucher.getName() != null && !voucher.getName().isEmpty()
+                ? voucher.getName()
+                : voucher.getCode();
+
+        new AlertDialog.Builder(this)
+                .setTitle("Xóa voucher")
+                .setMessage("Bạn có chắc muốn xóa voucher \"" + voucherName + "\"?")
+                .setPositiveButton("Xóa", (dialog, which) -> deleteVoucher(voucher))
+                .setNegativeButton("Hủy", null)
+                .show();
+    }
+
+    private void deleteVoucher(Voucher voucher) {
+        swipeRefresh.setRefreshing(true);
+        VoucherApiService.deleteShopVoucher(this, voucher.get_id(), new VoucherApiService.DeleteCallback() {
+            @Override
+            public void onSuccess(String message) {
+                runOnUiThread(() -> {
+                    swipeRefresh.setRefreshing(false);
+                    Toast.makeText(ShopVoucherListActivity.this, message, Toast.LENGTH_SHORT).show();
+                    loadVouchers();
+                });
+            }
+
+            @Override
+            public void onError(String error) {
+                runOnUiThread(() -> {
+                    swipeRefresh.setRefreshing(false);
+                    Toast.makeText(ShopVoucherListActivity.this, "Lỗi xóa voucher: " + error, Toast.LENGTH_LONG).show();
                 });
             }
         });

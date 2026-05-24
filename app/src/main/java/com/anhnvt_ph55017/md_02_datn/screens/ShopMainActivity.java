@@ -192,6 +192,11 @@ public class ShopMainActivity extends AppCompatActivity {
         loadShopProducts();
     }
 
+    public void onMenuReviewsClick(View view) {
+        closeSidebar();
+        startActivity(new Intent(this, ShopReviewsActivity.class));
+    }
+
     @Override
     protected void onResume() {
         super.onResume();

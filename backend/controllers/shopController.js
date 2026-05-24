@@ -434,7 +434,7 @@ exports.getShopReviews = async (req, res) => {
 
     const reviews = await Review.find({ product: { $in: productIds } })
       .populate("user", "name email")
-      .populate("product", "name")
+      .populate("product", "name image")
       .populate("response.respondedBy", "name")
       .sort({ createdAt: -1 });
 
@@ -513,7 +513,7 @@ exports.getShopRevenue = async (req, res) => {
     const timeFilter = {
       $or: [
         { updatedAt: { $gte: startDate } },
-        { 'payment.paidAt': { $gte: startDate } },
+        { "payment.paidAt": { $gte: startDate } },
         { createdAt: { $gte: startDate } },
       ],
     };
@@ -521,10 +521,7 @@ exports.getShopRevenue = async (req, res) => {
     const orders = await Order.find({
       $and: [
         {
-          $or: [
-            { status: "đã nhận" },
-            { "payment.status": "paid" },
-          ],
+          $or: [{ status: "đã nhận" }, { "payment.status": "paid" }],
         },
         { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
         { "items.shopId": shopId },
@@ -578,17 +575,14 @@ exports.getShopRevenue = async (req, res) => {
         $match: {
           $and: [
             {
-              $or: [
-                { status: "đã nhận" },
-                { "payment.status": "paid" },
-              ],
+              $or: [{ status: "đã nhận" }, { "payment.status": "paid" }],
             },
             { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
             { "items.shopId": shopObjectId },
             {
               $or: [
                 { updatedAt: { $gte: startDate } },
-                { 'payment.paidAt': { $gte: startDate } },
+                { "payment.paidAt": { $gte: startDate } },
                 { createdAt: { $gte: startDate } },
               ],
             },

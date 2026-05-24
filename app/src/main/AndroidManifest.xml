@@ -97,6 +97,9 @@
             android:name=".screens.ShopCustomersActivity"
             android:exported="false" />
         <activity
+            android:name=".screens.ShopReviewsActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.CreateVoucherActivity"
             android:exported="false" />
         <activity
@@ -110,6 +113,9 @@
             android:exported="false" />
         <activity
             android:name=".screens.EditProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".screens.ReviewDetailActivity"
             android:exported="false" />
         <activity
             android:name=".Welcome"

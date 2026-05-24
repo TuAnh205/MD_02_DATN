@@ -18,7 +18,6 @@ import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
-import com.anhnvt_ph55017.md_02_datn.Adapters.UserOrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 import com.anhnvt_ph55017.md_02_datn.models.OrderItem;
@@ -39,7 +38,7 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
     private TextView tabPending, tabConfirmed, tabShipping, tabDelivered, tabCancelled;
     private View tabIndicator;
     private TextView[] tabViews;
-    private UserOrderAdapter adapter;
+    private OrderAdapter adapter;
     private List<Order> allOrders = new ArrayList<>();
     private List<Order> displayOrders = new ArrayList<>();
     private String currentFilter = "pending";
@@ -71,7 +70,7 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
         tabDelivered.setOnClickListener(v -> setTab("delivered", 3));
         tabCancelled.setOnClickListener(v -> setTab("cancelled", 4));
 
-        adapter = new UserOrderAdapter(this, displayOrders, order -> {
+        adapter = new OrderAdapter(this, displayOrders, order -> {
             Intent intent = new Intent(this, UserOrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
             intent.putExtra("orderStatus", order.getStatus());
@@ -84,7 +83,7 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
                 intent.putExtra("orderItems", new ArrayList<>(order.getItems()));
             }
             startActivity(intent);
-        });
+        }, this);
 
         recyclerOrders.setLayoutManager(new LinearLayoutManager(this));
         recyclerOrders.setAdapter(adapter);
