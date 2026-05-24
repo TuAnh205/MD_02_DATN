@@ -325,6 +325,7 @@ export default function ShopDashboard() {
         {/* Main content */}
         <div className="flex-1 md:ml-0">
           <main className="p-6">
+            {location.pathname !== '/shop/profile' && (
             <section className="mb-6 rounded-2xl overflow-hidden border border-blue-100 shadow-sm bg-white">
               <div className="relative">
                 <div className="h-36 md:h-44 bg-gradient-to-r from-slate-900 via-blue-900 to-cyan-700" />
@@ -369,8 +370,9 @@ export default function ShopDashboard() {
                 ))}
               </div>
             </section>
+            )}
 
-            {showPolicyNotice && (
+            {location.pathname !== '/shop/profile' && location.pathname !== '/shop/revenue' && showPolicyNotice && (
               <section className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -416,7 +418,7 @@ export default function ShopDashboard() {
               </section>
             )}
 
-            {revenueSummary && (
+            {location.pathname !== '/shop/profile' && location.pathname !== '/shop/revenue' && revenueSummary && (
               <section className="mb-6 rounded-2xl overflow-hidden border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-green-500">
@@ -446,7 +448,7 @@ export default function ShopDashboard() {
               </section>
             )}
 
-            {billingSummary?.isFrozen && (
+            {location.pathname !== '/shop/profile' && billingSummary?.isFrozen && (
               <section className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
                 <h3 className="text-lg font-bold text-rose-900">
                   Cảnh báo công nợ phí nền tảng

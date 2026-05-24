@@ -2,45 +2,38 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+const coretechVisuals = [
+  {
+    id: "ct-1",
+    title: "CoreTech Retail Hub",
+    image:
+      "https://images.unsplash.com/photo-1550009158-9ebf69173e03?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "ct-2",
+    title: "CoreTech Device Lab",
+    image:
+      "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=800&q=80",
+  },
+  {
+    id: "ct-3",
+    title: "CoreTech Service Center",
+    image:
+      "https://images.unsplash.com/photo-1588702547923-7093a6c3ba33?auto=format&fit=crop&w=800&q=80",
+  },
+];
+
 export default function ShopProfile() {
   const { user, fetchProfile } = useAuth();
   const [shopName, setShopName] = useState(user?.name || '');
-  const [wallet, setWallet] = useState(0);
-  const [totalOrders, setTotalOrders] = useState(0);
-  const [totalProducts, setTotalProducts] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [editing, setEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
 
   useEffect(() => {
-    fetchShopData();
+    // Not needed for basic profile info
   }, []);
-
-  const fetchShopData = async () => {
-    try {
-      setLoading(true);
-      const [billingSummary, productsResponse, ordersResponse] = await Promise.all([
-        api.get('/shop/billing-summary'),
-        api.get('/shop/products'),
-        api.get('/shop/orders'),
-      ]);
-
-      // Set wallet from billing summary
-      setWallet(billingSummary.data?.summary?.balance || 0);
-
-      // Count products
-      setTotalProducts(productsResponse.data?.length || 0);
-
-      // Count orders
-      setTotalOrders(ordersResponse.data?.length || 0);
-    } catch (error) {
-      console.error('Error fetching shop data:', error);
-      setMessage('Không thể tải thông tin shop');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleSaveName = async () => {
     try {
@@ -73,7 +66,53 @@ export default function ShopProfile() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl">
+    <div className="space-y-6">
+      {/* CoreTech Demo Section */}
+      <section className="mb-6 rounded-2xl overflow-hidden border border-blue-100 shadow-sm bg-white">
+        <div className="relative">
+          <div className="h-36 md:h-44 bg-gradient-to-r from-slate-900 via-blue-900 to-cyan-700" />
+          <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.22),transparent_45%),radial-gradient(circle_at_80%_70%,rgba(255,255,255,0.15),transparent_40%)]" />
+
+          <div className="absolute left-5 top-5 flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-white/20 text-white text-xs font-semibold tracking-wide backdrop-blur">
+              CORETECH VERIFIED SHOP
+            </span>
+            <span className="px-3 py-1 rounded-full bg-emerald-400/90 text-slate-900 text-xs font-bold">
+              MANAGED BY CORETECH
+            </span>
+          </div>
+
+          <div className="absolute left-5 bottom-5 right-5 text-white">
+            <h2 className="text-xl md:text-2xl font-bold">
+              {user?.name} thuộc hệ thống vận hành CORETECH
+            </h2>
+            <p className="text-sm text-white/90 mt-1">
+              Không gian quản trị dành riêng cho đối tác shop chính thức
+              trong mạng lưới CORETECH Commerce.
+            </p>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 p-3 bg-slate-50">
+          {coretechVisuals.map((item) => (
+            <div
+              key={item.id}
+              className="relative rounded-xl overflow-hidden h-24 group"
+            >
+              <img
+                src={item.image}
+                alt={item.title}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+              <p className="absolute left-3 bottom-2 text-xs font-semibold text-white tracking-wide">
+                {item.title}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-gray-900">Thông tin chi tiết Shop</h1>
@@ -138,53 +177,6 @@ export default function ShopProfile() {
                   </button>
                 </div>
               )}
-            </div>
-          </div>
-
-          <hr className="my-6" />
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {/* Wallet Card */}
-            <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-5 border border-emerald-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-emerald-600 font-semibold">Tổng tiền trong ví</p>
-                  <p className="text-2xl font-bold text-emerald-700 mt-2">
-                    ₫{wallet.toLocaleString('vi-VN')}
-                  </p>
-                  <p className="text-xs text-emerald-600 mt-1">Tài khoản chính</p>
-                </div>
-                <div className="text-5xl">💰</div>
-              </div>
-            </div>
-
-            {/* Orders Card */}
-            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-5 border border-blue-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-blue-600 font-semibold">Tổng đơn hàng</p>
-                  <p className="text-2xl font-bold text-blue-700 mt-2">
-                    {totalOrders.toLocaleString('vi-VN')}
-                  </p>
-                  <p className="text-xs text-blue-600 mt-1">Đơn hàng đã bán</p>
-                </div>
-                <div className="text-5xl">📦</div>
-              </div>
-            </div>
-
-            {/* Products Card */}
-            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-5 border border-purple-200">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs uppercase tracking-wide text-purple-600 font-semibold">Tổng sản phẩm</p>
-                  <p className="text-2xl font-bold text-purple-700 mt-2">
-                    {totalProducts.toLocaleString('vi-VN')}
-                  </p>
-                  <p className="text-xs text-purple-600 mt-1">Sản phẩm hiện có</p>
-                </div>
-                <div className="text-5xl">🛍️</div>
-              </div>
             </div>
           </div>
 
