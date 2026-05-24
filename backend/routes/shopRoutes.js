@@ -7,6 +7,9 @@ const shopController = require("../controllers/shopController");
 router.use(auth);
 router.use(shopAuth);
 
+// Profile management routes
+router.put("/profile", shopController.updateShopProfile);
+
 // Product management routes
 router.get("/products", shopController.getShopProducts);
 router.get("/billing-policy", shopController.getBillingPolicy);

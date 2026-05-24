@@ -36,6 +36,8 @@ export default function ShopDashboard() {
   const [billingSummary, setBillingSummary] = useState(null);
   const [revenueSummary, setRevenueSummary] = useState(null);
   const [showPolicyNotice, setShowPolicyNotice] = useState(true);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const profileDropdownRef = React.useRef(null);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -70,6 +72,16 @@ export default function ShopDashboard() {
     };
 
     loadRevenueSummary();
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const menuItems = [
@@ -238,12 +250,37 @@ export default function ShopDashboard() {
                 </div>
               )}
 
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
-              >
-                Đăng xuất
-              </button>
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-2 hover:opacity-80 transition"
+                >
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium text-sm">
+                    {user?.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                </button>
+
+                {showProfileDropdown && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <Link
+                      to="/shop/profile"
+                      onClick={() => setShowProfileDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b"
+                    >
+                      👤 Thông tin chi tiết Shop
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setShowProfileDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      🚪 Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

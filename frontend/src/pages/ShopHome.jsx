@@ -30,7 +30,7 @@ export default function ShopHome() {
       setStats({
         totalRevenue: revenueRes.data.summary?.totalGrossRevenue || revenueRes.data.totalRevenue || 0,
         totalOrders: revenueRes.data.summary?.totalOrders || revenueRes.data.totalOrders || 0,
-        totalProducts: productsRes.data?.meta?.total || 0,
+        totalProducts: Array.isArray(productsRes.data) ? productsRes.data.length : 0,
       });
 
       setBillingSummary(billingsRes.data?.summary || null);

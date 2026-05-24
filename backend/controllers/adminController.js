@@ -264,8 +264,17 @@ exports.getOrders = async (req, res) => {
 
     const total = await Order.countDocuments(filter);
 
+    // Calculate total revenue from all orders matching the filter
+    const revenueData = await Order.aggregate([
+      { $match: filter },
+      { $group: { _id: null, totalRevenue: { $sum: '$total' } } }
+    ]);
+
+    const totalRevenue = revenueData.length > 0 ? revenueData[0].totalRevenue : 0;
+
     res.json({
       orders,
+      totalRevenue,
       pagination: {
         page,
         limit,
