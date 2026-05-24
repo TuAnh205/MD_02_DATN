@@ -14,6 +14,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
 import com.bumptech.glide.Glide;
 
+import androidx.fragment.app.Fragment;
 import java.text.NumberFormat;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +33,10 @@ public class UserOrderAdapter extends RecyclerView.Adapter<UserOrderAdapter.View
         this.context = context;
         this.orders = orders;
         this.listener = listener;
+    }
+
+    public UserOrderAdapter(Context context, List<Order> orders, OnOrderClickListener listener, Fragment fragment) {
+        this(context, orders, listener);
     }
 
     @NonNull

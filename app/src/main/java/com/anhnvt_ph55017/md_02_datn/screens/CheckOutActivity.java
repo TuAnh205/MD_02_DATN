@@ -339,7 +339,7 @@ public class CheckOutActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onError(String err) {
-                                            runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Lỗi thanh toán: " + err, Toast.LENGTH_LONG).show());
+                                            runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, ApiUtils.parseErrorMessage(err, "Lỗi thanh toán"), Toast.LENGTH_LONG).show());
                                         }
                                     });
                         } catch (Exception e) {
@@ -357,7 +357,7 @@ public class CheckOutActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String err) {
-                    runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Lỗi: " + err, Toast.LENGTH_SHORT).show());
+                    runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, ApiUtils.parseErrorMessage(err, "Lỗi đặt hàng"), Toast.LENGTH_LONG).show());
                 }
             });
 

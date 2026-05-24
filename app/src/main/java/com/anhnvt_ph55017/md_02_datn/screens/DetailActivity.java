@@ -23,6 +23,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
+import com.anhnvt_ph55017.md_02_datn.utils.ApiUtils;
 import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
@@ -251,7 +252,7 @@ public class DetailActivity extends AppCompatActivity {
                                             }
                                             @Override
                                             public void onError(String error) {
-                                                runOnUiThread(() -> Toast.makeText(DetailActivity.this, "Lỗi thêm vào giỏ hàng: " + error, Toast.LENGTH_SHORT).show());
+                                                runOnUiThread(() -> Toast.makeText(DetailActivity.this, ApiUtils.parseErrorMessage(error, "Lỗi thêm vào giỏ hàng"), Toast.LENGTH_SHORT).show());
                                             }
                                         });
                                     });

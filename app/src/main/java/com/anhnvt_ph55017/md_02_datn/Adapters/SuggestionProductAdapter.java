@@ -78,6 +78,18 @@ public class SuggestionProductAdapter extends RecyclerView.Adapter<SuggestionPro
             }
         });
 
+        if (product.getStock() <= 0) {
+            holder.tvStockStatus.setText("Hết hàng");
+            holder.tvStockStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+            holder.btnAddToCart.setEnabled(false);
+            holder.btnAddToCart.setAlpha(0.5f);
+        } else {
+            holder.tvStockStatus.setText("Còn " + product.getStock());
+            holder.tvStockStatus.setTextColor(android.graphics.Color.parseColor("#388E3C"));
+            holder.btnAddToCart.setEnabled(true);
+            holder.btnAddToCart.setAlpha(1f);
+        }
+
         // Nút thêm giỏ hàng
         holder.btnAddToCart.setOnClickListener(v -> {
             if (listener != null) listener.onAddToCart(product);
@@ -106,7 +118,7 @@ public class SuggestionProductAdapter extends RecyclerView.Adapter<SuggestionPro
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         ImageView imgProduct, imgFavorite;
-        TextView tvName, tvDesc, tvPrice;
+        TextView tvName, tvDesc, tvPrice, tvStockStatus;
         ImageButton btnAddToCart;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
@@ -115,6 +127,7 @@ public class SuggestionProductAdapter extends RecyclerView.Adapter<SuggestionPro
             tvName = itemView.findViewById(R.id.tvName);
             tvDesc = itemView.findViewById(R.id.tvDesc);
             tvPrice = itemView.findViewById(R.id.tvPrice);
+            tvStockStatus = itemView.findViewById(R.id.tvStockStatus);
             btnAddToCart = itemView.findViewById(R.id.btnAddToCart);
         }
     }

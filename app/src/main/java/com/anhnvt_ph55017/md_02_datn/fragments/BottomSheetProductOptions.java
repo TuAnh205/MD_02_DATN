@@ -9,6 +9,7 @@ import android.widget.ImageButton;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -71,16 +72,29 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
         if (product != null) {
             tvProductName.setText(product.getName());
             tvPrice.setText("$" + String.format("%.2f", product.getPrice()));
-            tvStock.setText("Stock: " + product.getStock());
+            if (product.getStock() <= 0) {
+                tvStock.setText("Hết hàng");
+                btnAdd.setEnabled(false);
+                btnAdd.setText("Hết hàng");
+            } else {
+                tvStock.setText("Stock: " + product.getStock());
+                btnAdd.setEnabled(true);
+                btnAdd.setText("Thêm vào giỏ hàng");
+            }
         }
 
         updateQtyDisplay();
 
         // xử lý tăng giảm số lượng
         btnPlus.setOnClickListener(v -> {
-            if (product != null && quantity < product.getStock() && quantity < 10) {
+            if (product == null) return;
+            if (quantity < product.getStock() && quantity < 10) {
                 quantity++;
                 updateQtyDisplay();
+            } else {
+                if (getContext() != null) {
+                    Toast.makeText(getContext(), "Hết hàng", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
@@ -97,10 +111,18 @@ public class BottomSheetProductOptions extends BottomSheetDialogFragment {
 
     private void updateQtyDisplay() {
         tvQty.setText(String.format("%02d", quantity));
+        btnPlus.setEnabled(product != null && quantity < 10);
+        btnMinus.setEnabled(quantity > 1);
     }
 
     private void addToCart(View view) {
         if (product == null) return;
+        if (product.getStock() <= 0) {
+            if (getContext() != null) {
+                Toast.makeText(getContext(), "Sản phẩm đã hết hàng", Toast.LENGTH_SHORT).show();
+            }
+            return;
+        }
         if (listener != null) {
             listener.onAddToCart(product, quantity);
         }

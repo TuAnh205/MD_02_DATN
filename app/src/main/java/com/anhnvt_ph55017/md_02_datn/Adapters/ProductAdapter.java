@@ -16,6 +16,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.fragments.BottomSheetProductOptions;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.DetailActivity;
+import com.anhnvt_ph55017.md_02_datn.utils.ApiUtils;
 import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.bumptech.glide.Glide;
@@ -72,6 +73,19 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         } else {
             holder.imgProduct.setImageResource(R.drawable.bg_image);
+        }
+
+        // ===== STOCK STATUS =====
+        if (product.getStock() <= 0) {
+            holder.tvStockStatus.setText("Hết hàng");
+            holder.tvStockStatus.setTextColor(android.graphics.Color.parseColor("#D32F2F"));
+            holder.btnAdd.setEnabled(false);
+            holder.btnAdd.setAlpha(0.5f);
+        } else {
+            holder.tvStockStatus.setText("Còn " + product.getStock());
+            holder.tvStockStatus.setTextColor(android.graphics.Color.parseColor("#388E3C"));
+            holder.btnAdd.setEnabled(true);
+            holder.btnAdd.setAlpha(1f);
         }
 
         // ===== FAVORITE =====
@@ -158,7 +172,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
                                 public void onError(String error) {
                                     if (context instanceof AppCompatActivity) {
                                         ((AppCompatActivity) context).runOnUiThread(() ->
-                                                Toast.makeText(context, "Lỗi thêm vào giỏ hàng: " + error, Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, ApiUtils.parseErrorMessage(error, "Lỗi thêm vào giỏ hàng"), Toast.LENGTH_SHORT).show()
                                         );
                                     }
                                 }
@@ -183,7 +197,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
     public static class ViewHolder extends RecyclerView.ViewHolder {
 
         ImageView imgProduct, imgFavorite;
-        TextView tvName, tvPrice, tvRating, tvShopName;
+        TextView tvName, tvPrice, tvRating, tvShopName, tvStockStatus;
         ImageButton btnAdd;
 
         public ViewHolder(@NonNull View itemView) {
@@ -193,6 +207,7 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
             imgFavorite = itemView.findViewById(R.id.imgFavorite);
             tvName = itemView.findViewById(R.id.tvProductName);
             tvPrice = itemView.findViewById(R.id.tvProductPrice);
+            tvStockStatus = itemView.findViewById(R.id.tvStockStatus);
             tvRating = itemView.findViewById(R.id.tvRating);
             tvShopName = itemView.findViewById(R.id.tvShopName);
             btnAdd = itemView.findViewById(R.id.btnAdd);

@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.utils.ApiUtils;
 import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.FavoriteApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
@@ -96,7 +97,7 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.ViewHo
                                 @Override
                                 public void onError(String error) {
                                     ((Activity) context).runOnUiThread(() ->
-                                            Toast.makeText(context, "Lỗi: " + error, Toast.LENGTH_SHORT).show()
+                                            Toast.makeText(context, ApiUtils.parseErrorMessage(error, "Lỗi thêm vào giỏ hàng"), Toast.LENGTH_SHORT).show()
                                     );
                                 }
                             });

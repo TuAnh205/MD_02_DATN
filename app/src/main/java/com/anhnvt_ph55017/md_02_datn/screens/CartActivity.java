@@ -16,6 +16,7 @@ import com.anhnvt_ph55017.md_02_datn.Adapters.CartAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.screens.LoginActivity;
+import com.anhnvt_ph55017.md_02_datn.utils.ApiUtils;
 import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
@@ -99,6 +100,10 @@ public class CartActivity extends AppCompatActivity {
                 Toast.makeText(this, "Chọn sản phẩm trước!", Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (hasOutOfStockSelected()) {
+                Toast.makeText(this, "Một hoặc nhiều sản phẩm đã hết hàng hoặc vượt quá tồn kho. Vui lòng kiểm tra lại giỏ hàng.", Toast.LENGTH_LONG).show();
+                return;
+            }
             Intent intent = new Intent(this, CheckOutActivity.class);
             intent.putExtra("cart", selected);
             startActivity(intent);
@@ -117,7 +122,7 @@ public class CartActivity extends AppCompatActivity {
             }
             @Override
             public void onError(String error) {
-                runOnUiThread(() -> Toast.makeText(CartActivity.this, "Lỗi cập nhật số lượng: " + error, Toast.LENGTH_SHORT).show());
+                runOnUiThread(() -> Toast.makeText(CartActivity.this, ApiUtils.parseErrorMessage(error, "Lỗi cập nhật số lượng"), Toast.LENGTH_SHORT).show());
             }
         });
     }
@@ -223,10 +228,19 @@ public class CartActivity extends AppCompatActivity {
             @Override
             public void onError(String error) {
                 runOnUiThread(() ->
-                        Toast.makeText(CartActivity.this, "Lỗi: " + error, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(CartActivity.this, ApiUtils.parseErrorMessage(error, "Lỗi tải giỏ hàng"), Toast.LENGTH_SHORT).show()
                 );
             }
         });
+    }
+
+    private boolean hasOutOfStockSelected() {
+        for (Product p : cartList) {
+            if (p.isSelected() && p.getQty() > p.getStock()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     // ================= TÍNH TIỀN =================

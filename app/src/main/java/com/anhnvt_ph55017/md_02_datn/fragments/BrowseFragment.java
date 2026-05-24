@@ -25,6 +25,7 @@ import com.anhnvt_ph55017.md_02_datn.Adapters.SearchHistoryAdapter;
 import com.anhnvt_ph55017.md_02_datn.DAO.SearchHistoryDAO;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
+import com.anhnvt_ph55017.md_02_datn.utils.ApiUtils;
 import com.anhnvt_ph55017.md_02_datn.utils.ProductApiService;
 
 import java.util.ArrayList;
@@ -83,7 +84,7 @@ public class BrowseFragment extends Fragment {
                         @Override
                         public void onError(String error) {
                             if (getActivity() != null) getActivity().runOnUiThread(() ->
-                                Toast.makeText(getContext(), "Lỗi thêm giỏ hàng!", Toast.LENGTH_SHORT).show()
+                                Toast.makeText(getContext(), ApiUtils.parseErrorMessage(error, "Lỗi thêm giỏ hàng!"), Toast.LENGTH_SHORT).show()
                             );
                         }
                     });

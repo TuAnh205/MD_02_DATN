@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.android.volley.Request;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
+import com.anhnvt_ph55017.md_02_datn.Adapters.OrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.Adapters.UserOrderAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Order;
@@ -83,7 +84,7 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
                 intent.putExtra("orderItems", new ArrayList<>(order.getItems()));
             }
             startActivity(intent);
-        }, this);
+        });
 
         recyclerOrders.setLayoutManager(new LinearLayoutManager(this));
         recyclerOrders.setAdapter(adapter);
