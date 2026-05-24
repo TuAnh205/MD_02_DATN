@@ -508,11 +508,19 @@ exports.getShopRevenue = async (req, res) => {
 
     const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-    // Lấy tất cả orders đã giao cho shop, không phụ thuộc vào trạng thái thanh toán
+    // Lấy tất cả orders đã thanh toán hoặc đã nhận, không tính đơn hủy/trả hàng/hoàn tiền
     const orders = await Order.find({
-      status: "đã nhận",
-      "items.shopId": shopId,
-      updatedAt: { $gte: startDate },
+      $and: [
+        {
+          $or: [
+            { status: "đã nhận" },
+            { "payment.status": "paid" },
+          ],
+        },
+        { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
+        { "items.shopId": shopId },
+        { updatedAt: { $gte: startDate } },
+      ],
     }).select("user items payment createdAt updatedAt orderNumber status");
 
     // Chi tiết từng sản phẩm với phí sàn
@@ -559,9 +567,17 @@ exports.getShopRevenue = async (req, res) => {
     const revenueData = await Order.aggregate([
       {
         $match: {
-          status: "đã nhận",
-          "items.shopId": shopObjectId,
-          updatedAt: { $gte: startDate },
+          $and: [
+            {
+              $or: [
+                { status: "đã nhận" },
+                { "payment.status": "paid" },
+              ],
+            },
+            { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
+            { "items.shopId": shopObjectId },
+            { updatedAt: { $gte: startDate } },
+          ],
         },
       },
       {
