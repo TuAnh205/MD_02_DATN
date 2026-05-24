@@ -28,10 +28,9 @@ router.get('/orders/count', adminController.getOrderCount);
 router.put('/orders/:id/status', adminController.updateOrderStatus);
 router.patch('/orders/:id/status', adminController.updateOrderStatus);
 
-// Review management routes
+// Review management routes (admin can view and delete, but NOT reply - only shop can reply)
 router.get('/reviews', adminController.getReviews);
 router.get('/reviews/count', adminController.getReviewCount);
-router.put('/reviews/:id/reply', adminController.replyReview);
 router.delete('/reviews/:id', adminController.deleteReview);
 
 // Feedback management routes
