@@ -34,6 +34,7 @@ export default function ShopDashboard() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [showNotifications, setShowNotifications] = useState(false);
   const [billingSummary, setBillingSummary] = useState(null);
+  const [revenueSummary, setRevenueSummary] = useState(null);
   const [showPolicyNotice, setShowPolicyNotice] = useState(true);
 
   useEffect(() => {
@@ -58,6 +59,17 @@ export default function ShopDashboard() {
     };
 
     loadBillingSummary();
+    const loadRevenueSummary = async () => {
+      try {
+        const res = await api.get("/shop/revenue?period=month");
+        // API returns an object with `summary` inside
+        setRevenueSummary(res.data.summary || null);
+      } catch (err) {
+        console.error("Không thể tải dữ liệu doanh thu:", err);
+      }
+    };
+
+    loadRevenueSummary();
   }, []);
 
   const menuItems = [
@@ -363,6 +375,36 @@ export default function ShopDashboard() {
                   >
                     ✕
                   </button>
+                </div>
+              </section>
+            )}
+
+            {revenueSummary && (
+              <section className="mb-6 rounded-2xl overflow-hidden border border-slate-200 bg-white p-4 shadow-sm">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-green-500">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Tổng Tiền Bán</p>
+                    <p className="mt-2 text-2xl font-bold text-green-700">{Number(revenueSummary.totalGrossRevenue || 0).toLocaleString('vi-VN')}đ</p>
+                    <p className="mt-1 text-xs text-gray-500">{revenueSummary.totalOrders || 0} đơn hàng</p>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-amber-500">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Phí Sàn (5%)</p>
+                    <p className="mt-2 text-2xl font-bold text-amber-600">{Number(revenueSummary.totalPlatformFees || 0).toLocaleString('vi-VN')}đ</p>
+                    <p className="mt-1 text-xs text-gray-500">{revenueSummary.totalProducts || 0} sản phẩm</p>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-emerald-500">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Tổng Tiền Thực Nhận</p>
+                    <p className="mt-2 text-2xl font-bold text-emerald-600">{Number(revenueSummary.totalNetRevenue || 0).toLocaleString('vi-VN')}đ</p>
+                    <p className="mt-1 text-xs text-gray-500">Sau khi trừ phí</p>
+                  </div>
+
+                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-blue-500">
+                    <p className="text-xs uppercase tracking-wide text-gray-500">Đơn hàng</p>
+                    <p className="mt-2 text-2xl font-bold text-gray-900">{revenueSummary.totalOrders || 0}</p>
+                    <p className="mt-1 text-xs text-gray-500">Số đơn trong kỳ</p>
+                  </div>
                 </div>
               </section>
             )}

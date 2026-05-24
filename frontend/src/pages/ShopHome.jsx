@@ -28,8 +28,8 @@ export default function ShopHome() {
         ]);
 
       setStats({
-        totalRevenue: revenueRes.data.totalRevenue || 0,
-        totalOrders: revenueRes.data.totalOrders || 0,
+        totalRevenue: revenueRes.data.summary?.totalGrossRevenue || revenueRes.data.totalRevenue || 0,
+        totalOrders: revenueRes.data.summary?.totalOrders || revenueRes.data.totalOrders || 0,
         totalProducts: productsRes.data?.meta?.total || 0,
       });
 
