@@ -42,6 +42,7 @@ import ShopRevenue from "./pages/ShopRevenue";
 import ShopOrders from "./pages/ShopOrders";
 import ShopReviews from "./pages/ShopReviews";
 import ShopVouchers from "./pages/ShopVouchers";
+import FeaturedProducts from "./pages/FeaturedProducts";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -114,6 +115,7 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<Home />} />
+        <Route path="/featured" element={<FeaturedProducts />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route

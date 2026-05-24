@@ -79,7 +79,7 @@ const sideBanners = {
     title: 'Siêu Sale Laptop',
     subtitle: 'Đồng giá ưu đãi mỗi ngày',
     cta: 'Xem deal ngay',
-    link: '/products?category=Máy tính',
+    link: '/featured',
     image: 'https://images.unsplash.com/photo-1603302576837-37561b2e2302?auto=format&fit=crop&w=1000&q=80',
     accent: 'from-rose-700/80 via-orange-600/75 to-amber-500/70'
   },
@@ -87,7 +87,7 @@ const sideBanners = {
     title: 'Phụ Kiện Chính Hãng',
     subtitle: 'Giảm sâu tai nghe, loa, gear',
     cta: 'Mua ngay',
-    link: '/products?category=Phụ kiện',
+    link: '/featured',
     image: 'https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?auto=format&fit=crop&w=1000&q=80',
     accent: 'from-indigo-800/80 via-blue-700/75 to-cyan-600/70'
   }
