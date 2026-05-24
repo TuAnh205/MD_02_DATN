@@ -36,6 +36,8 @@ export default function ShopDashboard() {
   const [billingSummary, setBillingSummary] = useState(null);
   const [revenueSummary, setRevenueSummary] = useState(null);
   const [showPolicyNotice, setShowPolicyNotice] = useState(true);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const profileDropdownRef = React.useRef(null);
 
   useEffect(() => {
     const loadNotifications = async () => {
@@ -70,6 +72,16 @@ export default function ShopDashboard() {
     };
 
     loadRevenueSummary();
+
+    // Close dropdown when clicking outside
+    const handleClickOutside = (event) => {
+      if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
+        setShowProfileDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   const menuItems = [
@@ -238,12 +250,37 @@ export default function ShopDashboard() {
                 </div>
               )}
 
-              <button
-                onClick={handleLogout}
-                className="bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-red-700"
-              >
-                Đăng xuất
-              </button>
+              <div className="relative" ref={profileDropdownRef}>
+                <button
+                  onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+                  className="flex items-center gap-2 hover:opacity-80 transition"
+                >
+                  <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white font-medium text-sm">
+                    {user?.name?.charAt(0)?.toUpperCase()}
+                  </div>
+                </button>
+
+                {showProfileDropdown && (
+                  <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                    <Link
+                      to="/shop/profile"
+                      onClick={() => setShowProfileDropdown(false)}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 border-b"
+                    >
+                      👤 Thông tin chi tiết Shop
+                    </Link>
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setShowProfileDropdown(false);
+                      }}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      🚪 Đăng xuất
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -288,6 +325,7 @@ export default function ShopDashboard() {
         {/* Main content */}
         <div className="flex-1 md:ml-0">
           <main className="p-6">
+            {location.pathname !== '/shop/profile' && (
             <section className="mb-6 rounded-2xl overflow-hidden border border-blue-100 shadow-sm bg-white">
               <div className="relative">
                 <div className="h-36 md:h-44 bg-gradient-to-r from-slate-900 via-blue-900 to-cyan-700" />
@@ -332,8 +370,9 @@ export default function ShopDashboard() {
                 ))}
               </div>
             </section>
+            )}
 
-            {showPolicyNotice && (
+            {location.pathname !== '/shop/profile' && location.pathname !== '/shop/revenue' && showPolicyNotice && (
               <section className="mb-6 rounded-2xl border border-blue-200 bg-blue-50 p-5 shadow-sm">
                 <div className="flex justify-between items-start">
                   <div className="flex-1">
@@ -379,7 +418,7 @@ export default function ShopDashboard() {
               </section>
             )}
 
-            {revenueSummary && (
+            {location.pathname !== '/shop/profile' && location.pathname !== '/shop/revenue' && revenueSummary && (
               <section className="mb-6 rounded-2xl overflow-hidden border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                   <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-green-500">
@@ -409,7 +448,7 @@ export default function ShopDashboard() {
               </section>
             )}
 
-            {billingSummary?.isFrozen && (
+            {location.pathname !== '/shop/profile' && billingSummary?.isFrozen && (
               <section className="mb-6 rounded-2xl border border-rose-200 bg-rose-50 p-5 shadow-sm">
                 <h3 className="text-lg font-bold text-rose-900">
                   Cảnh báo công nợ phí nền tảng

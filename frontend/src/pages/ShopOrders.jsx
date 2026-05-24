@@ -66,6 +66,12 @@ export default function ShopOrders() {
     }
   };
 
+  const getShopOrderTotal = (order) => {
+    return order.items?.reduce((total, item) => {
+      return total + (item.price * (item.qty || 1));
+    }, 0) || 0;
+  };
+
   // Map filter value (English) sang status TV trong DB
   const statusFilterMap = {
     pending: "chờ xác nhận",
@@ -181,7 +187,7 @@ export default function ShopOrders() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm font-medium text-gray-900">
-                      {order.total?.toLocaleString()}₫
+                      {getShopOrderTotal(order).toLocaleString()}₫
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

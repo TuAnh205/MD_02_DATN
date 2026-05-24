@@ -302,14 +302,14 @@ export default function Products() {
                 <p className="text-gray-400 text-sm mt-2">Hãy thử điều chỉnh bộ lọc</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 auto-rows-fr">
                 {products.map((product) => {
                   const discount = getDiscountPercent(product);
                   const favorite = isFavorite(product._id);
 
                   return (
                     <div key={product._id} className="h-full">
-                      <div className="card hover:shadow-lg relative flex flex-col h-full">
+                      <div className="card hover:shadow-lg relative flex flex-col h-full min-h-96">
                         <button
                           type="button"
                           onClick={(event) => toggleFavorite(event, product)}
@@ -333,10 +333,10 @@ export default function Products() {
                           <img
                             src={product.image || product.images?.[0] || 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?auto=format&fit=crop&w=400&q=60'}
                             alt={product.name}
-                            className="w-full h-48 object-cover rounded-t mb-4"
+                            className="w-full aspect-square object-cover rounded-t mb-4"
                           />
                           <div className="px-4 flex-1 flex flex-col">
-                            <h3 className="font-semibold text-dark mb-2 line-clamp-2">
+                            <h3 className="font-semibold text-dark mb-2 line-clamp-2 h-14 flex items-start">
                               {product.name}
                             </h3>
                             <div className="flex items-center gap-2 text-sm mb-2">

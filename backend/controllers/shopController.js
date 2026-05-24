@@ -22,6 +22,35 @@ const getShopPolicyPayload = (user) => ({
   ),
 });
 
+// ================= UPDATE SHOP PROFILE =================
+exports.updateShopProfile = async (req, res) => {
+  try {
+    const shopId = req.user.id;
+    const { name } = req.body;
+
+    if (!name || name.trim() === "") {
+      return res.status(400).json({ message: "Tên shop không được để trống" });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      shopId,
+      { name: name.trim() },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: "Shop không tìm thấy" });
+    }
+
+    res.json({
+      message: "Cập nhật tên shop thành công",
+      user
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
+
 // ================= GET SHOP PRODUCTS =================
 exports.getShopProducts = async (req, res) => {
   try {
@@ -273,14 +302,97 @@ exports.deleteProduct = async (req, res) => {
 exports.getShopOrders = async (req, res) => {
   try {
     const shopId = req.user.id;
+    const mongoose = require("mongoose");
+    const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-    const orders = await Order.find({
-      "items.shopId": shopId,
-      status: { $ne: "cancelled" },
-    })
-      .populate("user", "name email")
-      .populate("items.product", "name price image images")
-      .sort({ createdAt: -1 });
+    // Use aggregation to filter items by shopId and match ShopRevenue filter
+    // Only show orders that are paid or delivered
+    const orders = await Order.aggregate([
+      {
+        $match: {
+          $and: [
+            {
+              $or: [
+                { status: "đã nhận" },
+                { "payment.status": "paid" },
+              ],
+            },
+            { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
+            { "items.shopId": shopObjectId },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          items: {
+            $filter: {
+              input: "$items",
+              as: "item",
+              cond: { $eq: ["$$item.shopId", shopObjectId] },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $addFields: {
+          items: {
+            $map: {
+              input: "$items",
+              as: "item",
+              in: {
+                $mergeObjects: [
+                  "$$item",
+                  {
+                    product: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: "$productDetails",
+                            as: "prod",
+                            cond: { $eq: ["$$prod._id", "$$item.product"] },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          productDetails: 0,
+        },
+      },
+      {
+        $sort: { createdAt: -1 },
+      },
+    ]);
 
     res.json(orders);
   } catch (err) {
@@ -292,18 +404,100 @@ exports.getShopOrders = async (req, res) => {
 exports.getShopOrderById = async (req, res) => {
   try {
     const shopId = req.user.id;
-    const order = await Order.findOne({
-      _id: req.params.id,
-      "items.shopId": shopId,
-    })
-      .populate("user", "name email")
-      .populate("items.product");
+    const mongoose = require("mongoose");
+    const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-    if (!order) {
+    // Use aggregation to filter items by shopId
+    const orders = await Order.aggregate([
+      {
+        $match: {
+          _id: new mongoose.Types.ObjectId(req.params.id),
+          $and: [
+            {
+              $or: [
+                { status: "đã nhận" },
+                { "payment.status": "paid" },
+              ],
+            },
+            { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
+            { "items.shopId": shopObjectId },
+          ],
+        },
+      },
+      {
+        $addFields: {
+          items: {
+            $filter: {
+              input: "$items",
+              as: "item",
+              cond: { $eq: ["$$item.shopId", shopObjectId] },
+            },
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "users",
+          localField: "user",
+          foreignField: "_id",
+          as: "user",
+        },
+      },
+      {
+        $unwind: {
+          path: "$user",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "items.product",
+          foreignField: "_id",
+          as: "productDetails",
+        },
+      },
+      {
+        $addFields: {
+          items: {
+            $map: {
+              input: "$items",
+              as: "item",
+              in: {
+                $mergeObjects: [
+                  "$$item",
+                  {
+                    product: {
+                      $arrayElemAt: [
+                        {
+                          $filter: {
+                            input: "$productDetails",
+                            as: "prod",
+                            cond: { $eq: ["$$prod._id", "$$item.product"] },
+                          },
+                        },
+                        0,
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
+      {
+        $project: {
+          productDetails: 0,
+        },
+      },
+    ]);
+
+    if (orders.length === 0) {
       return res.status(404).json({ message: "Không tìm thấy đơn hàng" });
     }
 
-    res.json(order);
+    res.json(orders[0]);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

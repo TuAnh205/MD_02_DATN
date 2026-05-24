@@ -35,12 +35,14 @@ import ChangePassword from "./pages/ChangePassword";
 import ShopDashboard from "./pages/ShopDashboard";
 import Favorites from "./pages/Favorites";
 import ShopHome from "./pages/ShopHome";
+import ShopProfile from "./pages/ShopProfile";
 import ClaimVouchers from "./pages/ClaimVouchers";
 import ShopProducts from "./pages/ShopProducts";
 import ShopRevenue from "./pages/ShopRevenue";
 import ShopOrders from "./pages/ShopOrders";
 import ShopReviews from "./pages/ShopReviews";
 import ShopVouchers from "./pages/ShopVouchers";
+import FeaturedProducts from "./pages/FeaturedProducts";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -113,6 +115,7 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/" element={<Home />} />
+        <Route path="/featured" element={<FeaturedProducts />} />
         <Route path="/products" element={<Products />} />
         <Route path="/products/:id" element={<ProductDetail />} />
         <Route
@@ -189,6 +192,7 @@ function AppContent() {
         >
           <Route index element={<ShopHome />} />
           <Route path="home" element={<ShopHome />} />
+          <Route path="profile" element={<ShopProfile />} />
           <Route path="products" element={<ShopProducts />} />
           <Route path="reviews" element={<ShopReviews />} />
           <Route path="revenue" element={<ShopRevenue />} />

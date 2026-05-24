@@ -7,6 +7,7 @@ export default function AdminOrders() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [totalRevenue, setTotalRevenue] = useState(0);
 
   useEffect(() => {
     fetchOrders();
@@ -25,6 +26,7 @@ export default function AdminOrders() {
       console.log('Orders response:', response.data);
       setOrders(response.data.orders);
       setTotalPages(response.data.pagination.pages);
+      setTotalRevenue(response.data.totalRevenue || 0);
     } catch (error) {
       console.error('Error fetching orders:', error);
       console.error('Error response:', error.response);
@@ -65,6 +67,25 @@ export default function AdminOrders() {
 
   return (
     <div className="space-y-6">
+      {/* Summary Card */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 text-white">
+          <div className="text-sm font-medium opacity-90">Tổng doanh thu</div>
+          <div className="text-3xl font-bold mt-2">₫{totalRevenue.toLocaleString('vi-VN')}</div>
+          <div className="text-xs opacity-75 mt-2">Từ tất cả đơn hàng</div>
+        </div>
+        <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md p-6 text-white">
+          <div className="text-sm font-medium opacity-90">Tổng đơn hàng</div>
+          <div className="text-3xl font-bold mt-2">{orders.length}</div>
+          <div className="text-xs opacity-75 mt-2">Trên trang hiện tại</div>
+        </div>
+        <div className="bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl shadow-md p-6 text-white">
+          <div className="text-sm font-medium opacity-90">Trung bình / Đơn</div>
+          <div className="text-3xl font-bold mt-2">₫{orders.length > 0 ? Math.round(orders.reduce((sum, o) => sum + (o.total || 0), 0) / orders.length).toLocaleString('vi-VN') : '0'}</div>
+          <div className="text-xs opacity-75 mt-2">Giá trị trung bình</div>
+        </div>
+      </div>
+
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
