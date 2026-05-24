@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -30,6 +32,9 @@ import java.util.Locale;
 import java.util.Map;
 
 public class ShopCustomersActivity extends AppCompatActivity {
+    private View sidebarContainer;
+    private View dimOverlay;
+    private View layoutShopUserCard;
     private RecyclerView rvCustomers;
     private CustomerAdapter adapter;
     private List<Customer> allCustomers = new ArrayList<>();
@@ -43,6 +48,9 @@ public class ShopCustomersActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shop_customers);
 
+        sidebarContainer = findViewById(R.id.sidebarContainer);
+        dimOverlay = findViewById(R.id.dimOverlay);
+        layoutShopUserCard = findViewById(R.id.layoutShopUserCard);
         rvCustomers = findViewById(R.id.rvCustomers);
         edtSearch = findViewById(R.id.edtSearch);
         btnAll = findViewById(R.id.btnAll);
@@ -56,6 +64,49 @@ public class ShopCustomersActivity extends AppCompatActivity {
         });
         rvCustomers.setLayoutManager(new LinearLayoutManager(this));
         rvCustomers.setAdapter(adapter);
+
+        btnMenu.setOnClickListener(v -> openSidebar());
+        dimOverlay.setOnClickListener(v -> closeSidebar());
+        findViewById(R.id.ivCloseSidebar).setOnClickListener(v -> closeSidebar());
+
+        layoutShopUserCard.setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopProfileActivity.class));
+        });
+
+        findViewById(R.id.menuDashboard).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopMainActivity.class));
+        });
+
+        findViewById(R.id.menuCategories).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopMainActivity.class));
+        });
+
+        findViewById(R.id.menuOrders).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, OrdersActivity.class));
+        });
+
+        findViewById(R.id.menuCustomers).setOnClickListener(v -> closeSidebar());
+
+        findViewById(R.id.menuVoucher).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopVoucherListActivity.class));
+        });
+
+        findViewById(R.id.menuReviews).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopReviewsActivity.class));
+        });
+
+        findViewById(R.id.menuRevenue).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, RevenueActivity.class));
+        });
+
+        imgProfile.setOnClickListener(v -> startActivity(new Intent(this, ShopProfileActivity.class)));
 
         edtSearch.addTextChangedListener(new TextWatcher() {
             @Override
@@ -76,6 +127,28 @@ public class ShopCustomersActivity extends AppCompatActivity {
         });
 
         loadCustomersFromApi();
+    }
+
+    private void openSidebar() {
+        sidebarContainer.setVisibility(View.VISIBLE);
+        dimOverlay.setVisibility(View.VISIBLE);
+        TranslateAnimation anim = new TranslateAnimation(-sidebarContainer.getWidth(), 0, 0, 0);
+        anim.setDuration(250);
+        sidebarContainer.startAnimation(anim);
+    }
+
+    private void closeSidebar() {
+        TranslateAnimation anim = new TranslateAnimation(0, -sidebarContainer.getWidth(), 0, 0);
+        anim.setDuration(200);
+        anim.setAnimationListener(new android.view.animation.Animation.AnimationListener() {
+            @Override public void onAnimationStart(android.view.animation.Animation animation) {}
+            @Override public void onAnimationRepeat(android.view.animation.Animation animation) {}
+            @Override public void onAnimationEnd(android.view.animation.Animation animation) {
+                sidebarContainer.setVisibility(View.GONE);
+                dimOverlay.setVisibility(View.GONE);
+            }
+        });
+        sidebarContainer.startAnimation(anim);
     }
 
     private void loadCustomersFromApi() {

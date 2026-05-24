@@ -7,8 +7,8 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -66,6 +66,9 @@ public class RevenueActivity extends AppCompatActivity {
     private TextView tvPlatformFeeAmount;
     private RecyclerView rvRevenueTransactions;
     private LineChart revenueChart;
+    private View sidebarContainer;
+    private View dimOverlay;
+    private View layoutShopUserCard;
 
     private final List<RevenueTransaction> revenueTransactions = new ArrayList<>();
     private RevenueTransactionAdapter revenueAdapter;
@@ -86,7 +89,7 @@ public class RevenueActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_revenue);
 
-        ImageView btnBack = findViewById(R.id.btnBackRevenue);
+        ImageView btnBackRevenue = findViewById(R.id.btnBackRevenue);
         progressRevenue = findViewById(R.id.progressRevenue);
         tvRevenuePeriod = findViewById(R.id.tvRevenuePeriod);
         tvRevenueUpdatedAt = findViewById(R.id.tvRevenueUpdatedAt);
@@ -105,8 +108,51 @@ public class RevenueActivity extends AppCompatActivity {
         layoutRevenueSummary = findViewById(R.id.layoutRevenueSummary);
         rvRevenueTransactions = findViewById(R.id.rvRevenueTransactions);
         revenueChart = findViewById(R.id.revenueChart);
+        sidebarContainer = findViewById(R.id.sidebarContainer);
+        dimOverlay = findViewById(R.id.dimOverlay);
+        layoutShopUserCard = findViewById(R.id.layoutShopUserCard);
 
-        btnBack.setOnClickListener(v -> onBackPressed());
+        btnBackRevenue.setOnClickListener(v -> openSidebar());
+        findViewById(R.id.ivCloseSidebar).setOnClickListener(v -> closeSidebar());
+        dimOverlay.setOnClickListener(v -> closeSidebar());
+
+        layoutShopUserCard.setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopProfileActivity.class));
+        });
+
+        findViewById(R.id.menuDashboard).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopMainActivity.class));
+        });
+
+        findViewById(R.id.menuCategories).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopMainActivity.class));
+        });
+
+        findViewById(R.id.menuOrders).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, OrdersActivity.class));
+        });
+
+        findViewById(R.id.menuCustomers).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopCustomersActivity.class));
+        });
+
+        findViewById(R.id.menuVoucher).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopVoucherListActivity.class));
+        });
+
+        findViewById(R.id.menuReviews).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopReviewsActivity.class));
+        });
+
+        findViewById(R.id.menuRevenue).setOnClickListener(v -> closeSidebar());
+
         initTransactionList();
         setupPeriodButtons();
         loadRevenue(currentPeriod);
@@ -125,6 +171,50 @@ public class RevenueActivity extends AppCompatActivity {
     protected void onStop() {
         LocalBroadcastManager.getInstance(this).unregisterReceiver(orderStatusReceiver);
         super.onStop();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (sidebarContainer != null && sidebarContainer.getVisibility() == View.VISIBLE) {
+            closeSidebar();
+            return;
+        }
+        super.onBackPressed();
+    }
+
+    private void openSidebar() {
+        if (sidebarContainer == null || dimOverlay == null) {
+            return;
+        }
+        sidebarContainer.setVisibility(View.VISIBLE);
+        dimOverlay.setVisibility(View.VISIBLE);
+        TranslateAnimation anim = new TranslateAnimation(-sidebarContainer.getWidth(), 0, 0, 0);
+        anim.setDuration(250);
+        sidebarContainer.startAnimation(anim);
+    }
+
+    private void closeSidebar() {
+        if (sidebarContainer == null || dimOverlay == null) {
+            return;
+        }
+        TranslateAnimation anim = new TranslateAnimation(0, -sidebarContainer.getWidth(), 0, 0);
+        anim.setDuration(200);
+        anim.setAnimationListener(new android.view.animation.Animation.AnimationListener() {
+            @Override
+            public void onAnimationStart(android.view.animation.Animation animation) {
+            }
+
+            @Override
+            public void onAnimationRepeat(android.view.animation.Animation animation) {
+            }
+
+            @Override
+            public void onAnimationEnd(android.view.animation.Animation animation) {
+                sidebarContainer.setVisibility(View.GONE);
+                dimOverlay.setVisibility(View.GONE);
+            }
+        });
+        sidebarContainer.startAnimation(anim);
     }
 
     private void initTransactionList() {

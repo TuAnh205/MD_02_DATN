@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -32,6 +33,12 @@ import java.util.List;
 
 public class OrdersActivity extends AppCompatActivity implements OrderAdapter.OnOrderStatusChangeListener {
 
+    private View sidebarContainer;
+    private View dimOverlay;
+    private View mainContentArea;
+    private View layoutShopUserCard;
+    private ImageView ivToggleSidebar;
+    private ImageView ivCloseSidebar;
     private RecyclerView recyclerOrders;
     private ProgressBar progressLoadingOrders;
     private TextView tvNoOrders;
@@ -49,10 +56,16 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_orders);
 
+        sidebarContainer = findViewById(R.id.sidebarContainer);
+        dimOverlay = findViewById(R.id.dimOverlay);
+        mainContentArea = findViewById(R.id.mainContentArea);
+        layoutShopUserCard = findViewById(R.id.layoutShopUserCard);
+        ivToggleSidebar = findViewById(R.id.ivToggleSidebar);
+        ivCloseSidebar = findViewById(R.id.ivCloseSidebar);
+
         recyclerOrders = findViewById(R.id.recyclerOrders);
         progressLoadingOrders = findViewById(R.id.progressLoadingOrders);
         tvNoOrders = findViewById(R.id.tvNoOrders);
-        ImageView btnBackOrders = findViewById(R.id.btnBackOrders);
 
         tabPending = findViewById(R.id.tabPending);
         tabConfirmed = findViewById(R.id.tabConfirmed);
@@ -62,7 +75,46 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
         tabIndicator = findViewById(R.id.tabIndicator);
         tabViews = new TextView[]{tabPending, tabConfirmed, tabShipping, tabDelivered, tabCancelled};
 
-        btnBackOrders.setOnClickListener(v -> onBackPressed());
+        ivToggleSidebar.setOnClickListener(v -> openSidebar());
+        ivCloseSidebar.setOnClickListener(v -> closeSidebar());
+        dimOverlay.setOnClickListener(v -> closeSidebar());
+
+        layoutShopUserCard.setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopProfileActivity.class));
+        });
+
+        findViewById(R.id.menuDashboard).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopMainActivity.class));
+        });
+
+        findViewById(R.id.menuCategories).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopMainActivity.class));
+        });
+
+        findViewById(R.id.menuOrders).setOnClickListener(v -> closeSidebar());
+
+        findViewById(R.id.menuCustomers).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopCustomersActivity.class));
+        });
+
+        findViewById(R.id.menuVoucher).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopVoucherListActivity.class));
+        });
+
+        findViewById(R.id.menuReviews).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, ShopReviewsActivity.class));
+        });
+
+        findViewById(R.id.menuRevenue).setOnClickListener(v -> {
+            closeSidebar();
+            startActivity(new Intent(this, RevenueActivity.class));
+        });
 
         tabPending.setOnClickListener(v -> setTab("pending", 0));
         tabConfirmed.setOnClickListener(v -> setTab("confirmed", 1));
@@ -90,6 +142,28 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
 
         setTab("pending", 0);
         loadOrders();
+    }
+
+    private void openSidebar() {
+        sidebarContainer.setVisibility(View.VISIBLE);
+        dimOverlay.setVisibility(View.VISIBLE);
+        TranslateAnimation anim = new TranslateAnimation(-sidebarContainer.getWidth(), 0, 0, 0);
+        anim.setDuration(250);
+        sidebarContainer.startAnimation(anim);
+    }
+
+    private void closeSidebar() {
+        TranslateAnimation anim = new TranslateAnimation(0, -sidebarContainer.getWidth(), 0, 0);
+        anim.setDuration(200);
+        anim.setAnimationListener(new android.view.animation.Animation.AnimationListener() {
+            @Override public void onAnimationStart(android.view.animation.Animation animation) {}
+            @Override public void onAnimationRepeat(android.view.animation.Animation animation) {}
+            @Override public void onAnimationEnd(android.view.animation.Animation animation) {
+                sidebarContainer.setVisibility(View.GONE);
+                dimOverlay.setVisibility(View.GONE);
+            }
+        });
+        sidebarContainer.startAnimation(anim);
     }
 
     private void setTab(String filter, int tabIndex) {
