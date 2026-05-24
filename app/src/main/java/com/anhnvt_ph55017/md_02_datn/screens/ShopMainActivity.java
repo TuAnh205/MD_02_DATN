@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
@@ -23,8 +24,11 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.anhnvt_ph55017.md_02_datn.Adapters.ShopProductAdapter;
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.models.Notification;
 import com.anhnvt_ph55017.md_02_datn.models.Product;
 import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
+import com.anhnvt_ph55017.md_02_datn.utils.NotificationApiService;
+import com.anhnvt_ph55017.md_02_datn.utils.NotificationManager;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 import org.json.JSONArray;
@@ -34,6 +38,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.gson.GsonConverterFactory;
 
 public class ShopMainActivity extends AppCompatActivity {
 
@@ -47,6 +57,8 @@ public class ShopMainActivity extends AppCompatActivity {
     private View layoutShopUserCard;
     private ImageView ivToggleSidebar;
     private ImageView ivCloseSidebar;
+    private ImageView ivNotification;
+    private TextView tvNotificationBadge;
     private Button btnAddProduct;
     private Button btnLoadMoreProducts;
     private EditText edtSearchProduct;
@@ -72,6 +84,8 @@ public class ShopMainActivity extends AppCompatActivity {
         layoutShopUserCard   = findViewById(R.id.layoutShopUserCard);
         ivToggleSidebar      = findViewById(R.id.ivToggleSidebar);
         ivCloseSidebar       = findViewById(R.id.ivCloseSidebar);
+        ivNotification       = findViewById(R.id.ivNotification);
+        tvNotificationBadge  = findViewById(R.id.tvNotificationBadge);
         btnAddProduct        = findViewById(R.id.btnAddProduct);
         btnLoadMoreProducts  = findViewById(R.id.btnLoadMoreProducts);
         edtSearchProduct     = findViewById(R.id.edtSearchProduct);
@@ -79,6 +93,10 @@ public class ShopMainActivity extends AppCompatActivity {
         // ── Sidebar logic ─────────────────────────────────────────────────────
         // Mở sidebar khi bấm nút hamburger
         ivToggleSidebar.setOnClickListener(v -> openSidebar());
+
+        ivNotification.setOnClickListener(v -> {
+            startActivity(new Intent(this, NotificationActivity.class));
+        });
 
         // Đóng sidebar khi bấm nút X
         ivCloseSidebar.setOnClickListener(v -> closeSidebar());
@@ -169,13 +187,59 @@ public class ShopMainActivity extends AppCompatActivity {
             return;
         }
 
+        loadNotificationCount();
+        resetNotificationBadge();
         loadShopProducts();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        loadNotificationCount();
+        resetNotificationBadge();
         loadShopProducts();
+    }
+
+    private void updateNotificationBadge(int count) {
+        if (tvNotificationBadge == null) return;
+
+        tvNotificationBadge.setText(String.valueOf(count));
+        tvNotificationBadge.setVisibility(count > 0 ? View.VISIBLE : View.GONE);
+    }
+
+    private void resetNotificationBadge() {
+        NotificationManager.markAllNotificationsAsRead(this);
+        updateNotificationBadge(0);
+    }
+
+    private void loadNotificationCount() {
+        String rawToken = SessionManager.getToken(this);
+
+        if (rawToken == null || rawToken.isEmpty()) {
+            return;
+        }
+
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(NetworkConstants.API_BASE_URL + "/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .build();
+
+        NotificationApiService api = retrofit.create(NotificationApiService.class);
+
+        api.getNotifications("Bearer " + rawToken).enqueue(new Callback<List<Notification>>() {
+            @Override
+            public void onResponse(Call<List<Notification>> call, Response<List<Notification>> response) {
+                if (response.isSuccessful() && response.body() != null) {
+                    NotificationManager.saveNotificationCount(ShopMainActivity.this, response.body().size());
+                    updateNotificationBadge(NotificationManager.getNotificationCount(ShopMainActivity.this));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Notification>> call, Throwable t) {
+                Log.e("ShopMainActivity", "Failed to load notifications", t);
+            }
+        });
     }
 
     // ── Mở / Đóng sidebar với animation ──────────────────────────────────────
@@ -355,7 +419,7 @@ public class ShopMainActivity extends AppCompatActivity {
         double price       = item.optDouble("price", 0);
         String imageUrl    = item.optString("image", "");
         String description = item.optString("description", "");
-        int    stock       = item.optInt("stock", 0);
+        int stock          = resolveStock(item);
         boolean visible = item.optBoolean("isActive", item.optBoolean("isVisible", true));
 
         if ((imageUrl == null || imageUrl.isEmpty()) && item.has("images")) {
@@ -366,6 +430,61 @@ public class ShopMainActivity extends AppCompatActivity {
         Product product = new Product(id, name, price, imageUrl, description, stock);
         product.setVisible(visible);
         return product;
+    }
+
+    private int resolveStock(JSONObject item) {
+        int stock = parseIntField(item, "stock");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        stock = parseIntField(item, "inventory");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        stock = parseIntField(item, "availableStock");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        stock = parseIntField(item, "quantity");
+        if (stock != Integer.MIN_VALUE) {
+            return stock;
+        }
+
+        JSONArray variants = item.optJSONArray("variants");
+        if (variants != null) {
+            int total = 0;
+            for (int i = 0; i < variants.length(); i++) {
+                JSONObject variant = variants.optJSONObject(i);
+                if (variant == null) continue;
+                int variantStock = parseIntField(variant, "stock");
+                if (variantStock != Integer.MIN_VALUE) {
+                    total += variantStock;
+                }
+            }
+            return total;
+        }
+
+        return 0;
+    }
+
+    private int parseIntField(JSONObject obj, String key) {
+        if (obj == null || !obj.has(key) || obj.isNull(key)) {
+            return Integer.MIN_VALUE;
+        }
+
+        Object value = obj.opt(key);
+        if (value instanceof Number) {
+            return ((Number) value).intValue();
+        }
+
+        try {
+            return Integer.parseInt(String.valueOf(value));
+        } catch (Exception e) {
+            return Integer.MIN_VALUE;
+        }
     }
 
     private void searchProducts(String query) {

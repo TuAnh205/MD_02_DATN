@@ -509,6 +509,15 @@ exports.getShopRevenue = async (req, res) => {
     const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
     // Lấy tất cả orders đã thanh toán hoặc đã nhận, không tính đơn hủy/trả hàng/hoàn tiền
+    // Include orders where any relevant timestamp falls into the period
+    const timeFilter = {
+      $or: [
+        { updatedAt: { $gte: startDate } },
+        { 'payment.paidAt': { $gte: startDate } },
+        { createdAt: { $gte: startDate } },
+      ],
+    };
+
     const orders = await Order.find({
       $and: [
         {
@@ -519,7 +528,7 @@ exports.getShopRevenue = async (req, res) => {
         },
         { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
         { "items.shopId": shopId },
-        { updatedAt: { $gte: startDate } },
+        timeFilter,
       ],
     }).select("user items payment createdAt updatedAt orderNumber status");
 
@@ -576,7 +585,13 @@ exports.getShopRevenue = async (req, res) => {
             },
             { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
             { "items.shopId": shopObjectId },
-            { updatedAt: { $gte: startDate } },
+            {
+              $or: [
+                { updatedAt: { $gte: startDate } },
+                { 'payment.paidAt': { $gte: startDate } },
+                { createdAt: { $gte: startDate } },
+              ],
+            },
           ],
         },
       },
@@ -638,6 +653,9 @@ exports.getShopRevenue = async (req, res) => {
     res.json({
       period,
       startDate,
+      totalRevenue: roundCurrency(totalGrossRevenue),
+      totalOrders: stats.totalOrders.length,
+      totalProducts: stats.totalProducts,
       summary: {
         totalGrossRevenue: roundCurrency(totalGrossRevenue),
         totalPlatformFees: roundCurrency(totalPlatformFees),

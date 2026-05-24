@@ -1,6 +1,7 @@
 package com.anhnvt_ph55017.md_02_datn.Adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,6 +12,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.android.volley.Request;
@@ -30,13 +32,20 @@ import java.util.Map;
 
 public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> {
 
+    public static final String ACTION_ORDER_STATUS_CHANGED = "com.anhnvt_ph55017.md_02_datn.ACTION_ORDER_STATUS_CHANGED";
+
     public interface OnOrderClickListener {
         void onOrderClick(Order order);
+    }
+
+    public interface OnOrderStatusChangeListener {
+        void onOrderStatusChanged();
     }
 
     private final Context context;
     private final List<Order> orders;
     private final OnOrderClickListener listener;
+    private final OnOrderStatusChangeListener statusChangeListener;
 
     // Danh sách trạng thái hiển thị
     private static final String[] STATUS_LABELS = {
@@ -47,9 +56,14 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
     };
 
     public OrderAdapter(Context context, List<Order> orders, OnOrderClickListener listener) {
-        this.context  = context;
-        this.orders   = orders;
+        this(context, orders, listener, null);
+    }
+
+    public OrderAdapter(Context context, List<Order> orders, OnOrderClickListener listener, OnOrderStatusChangeListener statusChangeListener) {
+        this.context = context;
+        this.orders = orders;
         this.listener = listener;
+        this.statusChangeListener = statusChangeListener;
     }
 
     @NonNull
@@ -135,6 +149,7 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
                     holder.tvOrderBadge.setText(getBadgeLabel(updatedStatus));
                     holder.tvOrderBadge.setBackgroundResource(getBadgeBackground(updatedStatus));
                     notifyItemChanged(position);
+                    notifyStatusChanged();
                     Toast.makeText(context, "Đã cập nhật trạng thái", Toast.LENGTH_SHORT).show();
                 },
                 error -> Toast.makeText(context, "Lỗi cập nhật trạng thái", Toast.LENGTH_SHORT).show()
@@ -171,6 +186,15 @@ public class OrderAdapter extends RecyclerView.Adapter<OrderAdapter.ViewHolder> 
 
         String itemImage = firstItem.optString("image", null);
         return itemImage != null && !itemImage.isEmpty() ? itemImage : null;
+    }
+
+    private void notifyStatusChanged() {
+        if (statusChangeListener != null) {
+            statusChangeListener.onOrderStatusChanged();
+        }
+
+        Intent intent = new Intent(ACTION_ORDER_STATUS_CHANGED);
+        LocalBroadcastManager.getInstance(context).sendBroadcast(intent);
     }
 
     private void bindProductImage(ViewHolder holder, String imageUrl) {
