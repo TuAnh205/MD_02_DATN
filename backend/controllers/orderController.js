@@ -5,6 +5,16 @@ const User = require('../models/User');
 const Voucher = require('../models/Voucher');
 const { SHOP_BILLING_POLICY, roundCurrency, isOrderInFeeablePeriod } = require('../config/shopBillingPolicy');
 
+const restoreOrderStock = async (order) => {
+    if (!order || !Array.isArray(order.items)) return;
+
+    await Promise.all(order.items.map(async (item) => {
+        const qty = item.qty || 1;
+        if (!item.product || qty <= 0) return;
+        await Product.findByIdAndUpdate(item.product, { $inc: { stock: qty } }, { new: true });
+    }));
+};
+
 /**
  * Cập nhật platformFee khi order được thanh toán thành công
  * Gọi function này khi payment.status = 'paid'
@@ -541,11 +551,26 @@ exports.cancelOrder = async (req, res) => {
             return res.status(403).json({ message: 'Forbidden' });
         }
 
+        if (order.status === 'đã hủy') {
+            return res.status(400).json({ message: 'Đơn hàng đã bị hủy trước đó' });
+        }
+
         const { reason } = req.body;
+
+        await restoreOrderStock(order);
+
         order.status = 'đã hủy';
         if (reason && typeof reason === 'string') {
             order.cancellationReason = reason.trim();
         }
+
+        order.statusHistory = order.statusHistory || [];
+        order.statusHistory.push({
+            status: 'đã hủy',
+            timestamp: new Date(),
+            note: reason ? reason.trim() : 'Khách hàng hủy đơn'
+        });
+
         await order.save();
 
         res.json(order);
