@@ -96,7 +96,7 @@ public class OrderDetailActivity extends AppCompatActivity {
 
             // ===== SET UI =====
             tvOrderId.setText("Đơn #" + orderId);
-            tvOrderDate.setText(orderDate);
+            tvOrderDate.setText(formatOrderDate(orderDate));
             tvOrderStatus.setText(getStatusVietnamese(orderStatus));
             tvOrderTotal.setText("$" + total);
 
@@ -168,6 +168,26 @@ public class OrderDetailActivity extends AppCompatActivity {
         return normalized.equals("processing") || normalized.equals("xác nhận") || normalized.equals("confirmed")
                 || normalized.equals("đã xác nhận") || normalized.equals("da xac nhan")
                 || normalized.equals("chờ xác nhận") || normalized.equals("cho xac nhan");
+    }
+
+    private String formatOrderDate(String date) {
+        if (date == null || date.isEmpty()) {
+            return "";
+        }
+        if (date.contains("/") && date.contains("•")) {
+            return date;
+        }
+        try {
+            String[] parts = date.split("T");
+            String datePart = parts[0];
+            String timePart = parts.length > 1 ? parts[1].substring(0, Math.min(5, parts[1].length())) : "00:00";
+            String[] dateParts = datePart.split("-");
+            if (dateParts.length == 3) {
+                return dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0] + " • " + timePart;
+            }
+        } catch (Exception ignored) {
+        }
+        return date;
     }
 
     private String getStatusVietnamese(String status) {

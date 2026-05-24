@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.Voucher;
 import com.anhnvt_ph55017.md_02_datn.utils.VoucherApiService;
+import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,21 +46,36 @@ public class VoucherSelectActivity extends AppCompatActivity {
 
     private void loadVouchers() {
         progressBar.setVisibility(View.VISIBLE);
-        VoucherApiService.getVouchers(this, new VoucherApiService.VoucherListCallback() {
+        if (!SessionManager.isLoggedIn(this)) {
+            progressBar.setVisibility(View.GONE);
+            Toast.makeText(this, "Vui lòng đăng nhập để chọn voucher", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // Load only vouchers the user has already claimed
+        VoucherApiService.getMyVouchers(this, new VoucherApiService.VoucherListCallback() {
             @Override
             public void onSuccess(List<Voucher> vouchers) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
                     voucherList.clear();
-                    voucherList.addAll(vouchers);
+                    // Filter out vouchers that the user has already used up
+                    for (Voucher v : vouchers) {
+                        boolean userLimitOk = v.getUserLimit() <= 0 || v.getUsedCount() < v.getUserLimit();
+                        boolean usageLimitOk = v.getUsageLimit() <= 0 || v.getUsedCount() < v.getUsageLimit();
+                        if (userLimitOk && usageLimitOk) {
+                            voucherList.add(v);
+                        }
+                    }
                     adapter.notifyDataSetChanged();
                 });
             }
+
             @Override
             public void onError(String error) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
-                    Toast.makeText(VoucherSelectActivity.this, "Lỗi tải voucher: " + error, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(VoucherSelectActivity.this, "Lỗi tải voucher của bạn: " + error, Toast.LENGTH_SHORT).show();
                 });
             }
         });

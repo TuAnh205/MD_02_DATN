@@ -253,12 +253,19 @@ exports.createOrder = async (req, res) => {
                     return res.status(404).json({ message: 'User not found' });
                 }
 
-                claimedVoucher = (voucherUser.userVouchers || []).find((entry) => entry.code === voucherFromDb.code);
+                claimedVoucher = (voucherUser.userVouchers || []).find((entry) => {
+                    if (!entry || !entry.voucher) return false;
+                    try {
+                        return String(entry.voucher) === String(voucherFromDb._id);
+                    } catch (e) {
+                        return false;
+                    }
+                });
                 if (!claimedVoucher) {
                     return res.status(400).json({ message: 'Bạn chưa nhận voucher này' });
                 }
 
-                if (voucherFromDb.userLimit && claimedVoucher.usedCount >= voucherFromDb.userLimit) {
+                if (voucherFromDb.userLimit && (claimedVoucher.usedCount || 0) >= voucherFromDb.userLimit) {
                     return res.status(400).json({ message: 'Bạn đã dùng voucher này tối đa số lần' });
                 }
 

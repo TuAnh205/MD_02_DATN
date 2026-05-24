@@ -83,15 +83,30 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
             }
         } catch (Exception ignored) {}
 
-        // Nếu muốn kiểm tra hết lượt, thêm logic ở đây (dựa vào usageLimit, usedCount)
-        // Ví dụ:
-        // if (v.getUsageLimit() > 0 && v.getUsedCount() >= v.getUsageLimit()) {
-        //     holder.tvStatus.setText("Hết lượt");
-        //     holder.tvStatus.setVisibility(View.VISIBLE);
-        //     holder.btnUse.setEnabled(false);
-        //     holder.btnUse.setAlpha(0.5f);
-        //     holder.btnUse.setText("Hết lượt");
-        // }
+        // Kiểm tra số lượt còn lại dựa trên userLimit (ưu tiên) hoặc usageLimit
+        int remaining = -1;
+        if (v.getUserLimit() > 0) {
+            remaining = v.getUserLimit() - v.getUsedCount();
+            holder.tvUses.setVisibility(View.VISIBLE);
+            holder.tvUses.setText("Sử dụng: " + v.getUsedCount() + " / " + v.getUserLimit());
+        } else if (v.getUsageLimit() > 0) {
+            remaining = v.getUsageLimit() - v.getUsedCount();
+            holder.tvUses.setVisibility(View.VISIBLE);
+            holder.tvUses.setText("Sử dụng: " + v.getUsedCount() + " / " + v.getUsageLimit());
+        }
+        if (v.getUserLimit() <= 0 && v.getUsageLimit() <= 0) {
+            holder.tvUses.setVisibility(View.GONE);
+        }
+        if (remaining == 0) {
+            holder.tvStatus.setText("Hết lượt");
+            holder.tvStatus.setVisibility(View.VISIBLE);
+            holder.btnUse.setEnabled(false);
+            holder.btnUse.setAlpha(0.5f);
+            holder.btnUse.setText("Hết lượt");
+        } else if (remaining > 0) {
+            holder.tvStatus.setText("Còn " + remaining + " lượt");
+            holder.tvStatus.setVisibility(View.VISIBLE);
+        }
 
         // Icon động nếu muốn (hoặc để mặc định)
         // holder.imgIcon.setImageResource(R.drawable.ic_voucher);
@@ -110,6 +125,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
         TextView tvCode, tvName, tvDesc, tvType, tvValue, tvExpire, tvStatus;
         ImageView imgIcon;
         AppCompatButton btnUse;
+        TextView tvUses;
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             tvCode = itemView.findViewById(R.id.tvCode);
@@ -119,6 +135,7 @@ public class VoucherAdapter extends RecyclerView.Adapter<VoucherAdapter.ViewHold
             tvValue = itemView.findViewById(R.id.tvValue);
             tvExpire = itemView.findViewById(R.id.tvExpire);
             tvStatus = itemView.findViewById(R.id.tvStatus);
+            tvUses = itemView.findViewById(R.id.tvUses);
             imgIcon = itemView.findViewById(R.id.imgIcon);
             btnUse = itemView.findViewById(R.id.btnUse);
         }

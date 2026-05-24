@@ -197,6 +197,52 @@ public class CheckOutActivity extends AppCompatActivity {
             return;
         }
 
+        // Prepare and send order after ensuring voucher is claimed on server (if any)
+        if (selectedVoucher != null) {
+            // Verify the voucher exists in user's claimed list
+            VoucherApiService.getMyVouchers(this, new VoucherApiService.VoucherListCallback() {
+                @Override
+                public void onSuccess(java.util.List<Voucher> myVouchers) {
+                    android.util.Log.d("CHECKOUT_DEBUG", "getMyVouchers returned: " + myVouchers);
+                    boolean found = false;
+                    for (Voucher mv : myVouchers) {
+                        android.util.Log.d("CHECKOUT_DEBUG", "myVoucher: code=" + mv.getCode() + " usedCount=" + mv.getUsedCount());
+                        if (mv.getCode() != null && mv.getCode().equalsIgnoreCase(selectedVoucher.getCode())) {
+                            found = true; break;
+                        }
+                    }
+                    if (found) {
+                        runOnUiThread(() -> createOrderAfterValidation());
+                    } else {
+                        // Try to claim automatically then create order
+                        VoucherApiService.claimVoucher(CheckOutActivity.this, selectedVoucher.getCode(), new VoucherApiService.ClaimCallback() {
+                            @Override
+                            public void onSuccess(String message) {
+                                android.util.Log.d("CHECKOUT_DEBUG", "Auto-claim success: " + message);
+                                runOnUiThread(() -> createOrderAfterValidation());
+                            }
+
+                            @Override
+                            public void onError(String error) {
+                                android.util.Log.d("CHECKOUT_DEBUG", "Auto-claim error: " + error);
+                                runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Không thể nhận voucher trước khi đặt hàng: " + error, Toast.LENGTH_LONG).show());
+                            }
+                        });
+                    }
+                }
+
+                @Override
+                public void onError(String error) {
+                    runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Lỗi kiểm tra voucher: " + error, Toast.LENGTH_LONG).show());
+                }
+            });
+        } else {
+            createOrderAfterValidation();
+        }
+    }
+
+    // Extracted order creation flow into helper so it can be called after voucher verification/claim
+    private void createOrderAfterValidation() {
         try {
             JSONArray itemsArr = new JSONArray();
             double subtotal = 0;
@@ -206,8 +252,8 @@ public class CheckOutActivity extends AppCompatActivity {
 
                 JSONObject item = new JSONObject();
                 item.put("product", p.getId());
-                item.put("name", p.getName());   // 👈 THÊM DÒNG NÀY
-                item.put("price", p.getPrice()); // 👈 nên thêm luôn (tránh lỗi sau)
+                item.put("name", p.getName());
+                item.put("price", p.getPrice());
                 item.put("qty", p.getQty());
                 itemsArr.put(item);
             }
@@ -215,7 +261,6 @@ public class CheckOutActivity extends AppCompatActivity {
             double discount = calculateDiscount(subtotal);
             double total = subtotal - discount;
 
-            // ===== SHIPPING =====
             JSONObject addressObj = new JSONObject();
             addressObj.put("name", selectedAddress.getName());
             addressObj.put("phone", selectedAddress.getPhone());
@@ -229,7 +274,6 @@ public class CheckOutActivity extends AppCompatActivity {
             shippingObj.put("method", "standard");
             shippingObj.put("fee", 0);
 
-            // ===== BODY =====
             JSONObject body = new JSONObject();
             body.put("items", itemsArr);
             body.put("subtotal", subtotal);
@@ -237,53 +281,43 @@ public class CheckOutActivity extends AppCompatActivity {
             body.put("shipping", shippingObj);
 
             JSONObject paymentObj = new JSONObject();
-            paymentObj.put("method", isCardPayment ? "card" : "cod");
+            paymentObj.put("method", paymentGroup.getCheckedRadioButtonId() == R.id.payCard ? "card" : "cod");
             paymentObj.put("status", "pending");
-            if (isCardPayment) {
+            if (paymentGroup.getCheckedRadioButtonId() == R.id.payCard) {
                 paymentObj.put("cardholderName", cardHolderName);
                 paymentObj.put("cardLastFour", cardNumber.substring(Math.max(0, cardNumber.length() - 4)));
             }
             body.put("payment", paymentObj);
 
-            // ===== FIX DISCOUNT (QUAN TRỌNG NHẤT) =====
             JSONObject discountObj = new JSONObject();
-
             if (selectedVoucher != null) {
                 String type = selectedVoucher.getType();
-
-                // fallback tránh null hoặc ""
                 if (type == null || type.isEmpty()) type = "fixed";
-
                 discountObj.put("type", type);
                 discountObj.put("value", selectedVoucher.getValue());
                 discountObj.put("amount", discount);
                 discountObj.put("code", selectedVoucher.getCode());
-
                 body.put("voucherCode", selectedVoucher.getCode());
             } else {
                 discountObj.put("type", "fixed");
                 discountObj.put("value", 0);
                 discountObj.put("amount", 0);
             }
-
             body.put("discount", discountObj);
 
             Log.d("ORDER_BODY", body.toString());
-
             String token = SessionManager.getToken(this);
+            android.util.Log.d("CHECKOUT_DEBUG", "Creating order with token=" + token + " voucher=" + (selectedVoucher != null ? selectedVoucher.getCode() : "none"));
 
             OrderApiService.createOrder(this, token, body, new OrderApiService.CreateOrderCallback() {
                 @Override
                 public void onSuccess(JSONObject res) {
-                    if (isCardPayment) {
+                    if (paymentGroup.getCheckedRadioButtonId() == R.id.payCard) {
                         String orderId = res.optString("_id", res.optString("id", ""));
                         if (orderId.isEmpty()) {
-                            runOnUiThread(() ->
-                                    Toast.makeText(CheckOutActivity.this, "Không lấy được ID đơn hàng", Toast.LENGTH_SHORT).show()
-                            );
+                            runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Không lấy được ID đơn hàng", Toast.LENGTH_SHORT).show());
                             return;
                         }
-
                         try {
                             JSONObject cardData = new JSONObject();
                             cardData.put("cardNumber", cardNumber);
@@ -296,10 +330,7 @@ public class CheckOutActivity extends AppCompatActivity {
                                         @Override
                                         public void onSuccess(JSONObject paymentResponse) {
                                             runOnUiThread(() -> {
-                                                Intent intent = new Intent(
-                                                        CheckOutActivity.this,
-                                                        ThanhCongScreen.class
-                                                );
+                                                Intent intent = new Intent(CheckOutActivity.this, ThanhCongScreen.class);
                                                 removeBoughtItemsFromCart();
                                                 startActivity(intent);
                                                 finish();
@@ -308,22 +339,15 @@ public class CheckOutActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onError(String err) {
-                                            runOnUiThread(() ->
-                                                    Toast.makeText(CheckOutActivity.this, "Lỗi thanh toán: " + err, Toast.LENGTH_LONG).show()
-                                            );
+                                            runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Lỗi thanh toán: " + err, Toast.LENGTH_LONG).show());
                                         }
                                     });
                         } catch (Exception e) {
-                            runOnUiThread(() ->
-                                    Toast.makeText(CheckOutActivity.this, "Lỗi xử lý thông tin thẻ", Toast.LENGTH_SHORT).show()
-                            );
+                            runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Lỗi xử lý thông tin thẻ", Toast.LENGTH_SHORT).show());
                         }
                     } else {
                         runOnUiThread(() -> {
-                            Intent intent = new Intent(
-                                    CheckOutActivity.this,
-                                    ThanhCongScreen.class
-                            );
+                            Intent intent = new Intent(CheckOutActivity.this, ThanhCongScreen.class);
                             removeBoughtItemsFromCart();
                             startActivity(intent);
                             finish();
@@ -333,9 +357,7 @@ public class CheckOutActivity extends AppCompatActivity {
 
                 @Override
                 public void onError(String err) {
-                    runOnUiThread(() ->
-                            Toast.makeText(CheckOutActivity.this, "Lỗi: " + err, Toast.LENGTH_SHORT).show()
-                    );
+                    runOnUiThread(() -> Toast.makeText(CheckOutActivity.this, "Lỗi: " + err, Toast.LENGTH_SHORT).show());
                 }
             });
 

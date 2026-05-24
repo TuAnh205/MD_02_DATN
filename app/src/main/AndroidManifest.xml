@@ -97,6 +97,9 @@
             android:name=".screens.CreateVoucherActivity"
             android:exported="false" />
         <activity
+            android:name=".screens.ClaimVoucherActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.CustomerManagementActivity"
             android:exported="false" />
         <activity

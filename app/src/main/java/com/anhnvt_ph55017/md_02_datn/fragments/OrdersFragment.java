@@ -69,7 +69,7 @@ public class OrdersFragment extends Fragment {
         adapter = new OrderAdapter(getContext(), filteredList, order -> {
             Intent intent = new Intent(getContext(), com.anhnvt_ph55017.md_02_datn.screens.OrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
-            intent.putExtra("orderDate", order.getDate());
+            intent.putExtra("orderDate", order.getFormattedDate());
             intent.putExtra("orderTotal", order.getTotal());
             intent.putExtra("orderStatus", order.getStatus());
             intent.putExtra("arrivalDate", order.getArrivalDate());

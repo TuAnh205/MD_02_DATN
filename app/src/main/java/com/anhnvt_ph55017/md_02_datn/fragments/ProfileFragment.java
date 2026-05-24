@@ -28,6 +28,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 public class ProfileFragment extends Fragment {
 
     Button btnLogin, btnRegister, btnLogout;
+    View rowClaimVoucher;
     ImageView imgAvatar;
     TextView tvName, tvEmail, tvOrderCount, tvWishlistCount, tvLanguage, tvDMK;
     Switch switchDark;
@@ -50,8 +51,7 @@ public class ProfileFragment extends Fragment {
         switchDark      = view.findViewById(R.id.switchDark);
         btnLogin        = view.findViewById(R.id.btnLogin);
         btnRegister     = view.findViewById(R.id.btnRegister);
-        btnLogout       = view.findViewById(R.id.btnLogout);
-        tvDMK           = view.findViewById(R.id.tvDMK);
+        btnLogout       = view.findViewById(R.id.btnLogout);        rowClaimVoucher = view.findViewById(R.id.rowClaimVoucher);        tvDMK           = view.findViewById(R.id.tvDMK);
 
         switchDark.setChecked(SessionManager.isDarkModeEnabled(getContext()));
 
@@ -179,6 +179,11 @@ public class ProfileFragment extends Fragment {
                         .addToBackStack(null)
                         .commit();
             }
+        });
+
+        rowClaimVoucher.setOnClickListener(v -> {
+            if (!ensureLoggedIn()) return;
+            startActivity(new Intent(requireActivity(), ClaimVoucherActivity.class));
         });
 
         view.findViewById(R.id.rowLanguage).setOnClickListener(v ->

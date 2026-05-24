@@ -185,6 +185,34 @@
 
             <!-- other rows similar -->
             <LinearLayout
+                android:id="@+id/rowClaimVoucher"
+                android:orientation="horizontal"
+                android:padding="12dp"
+                android:gravity="center_vertical"
+                android:background="@drawable/bg_card"
+                android:layout_marginBottom="8dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <ImageView
+                    android:src="@drawable/ic_voucher"
+                    android:tint="@color/onSurface"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"/>
+                <TextView
+                    android:text="Nhận voucher"
+                    android:textColor="@color/onSurface"
+                    android:layout_marginStart="12dp"
+                    android:layout_weight="1"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"/>
+                <ImageView
+                    android:src="@drawable/ic_right_arrow"
+                    android:tint="@color/onSurface"
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"/>
+            </LinearLayout>
+
+            <LinearLayout
                 android:id="@+id/rowAddress"
                 android:orientation="horizontal"
                 android:padding="12dp"

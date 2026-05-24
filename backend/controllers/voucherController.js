@@ -95,7 +95,14 @@ exports.claimVoucher = async (req, res) => {
       return res.status(400).json({ message: 'Bạn không thể nhận voucher này thêm lần nữa' });
     }
 
-    user.userVouchers.push({ voucher: voucher._id, claimedAt: new Date() });
+    user.userVouchers.push({
+      voucher: voucher._id,
+      code: voucher.code,
+      name: voucher.name,
+      description: voucher.description,
+      claimedAt: new Date(),
+      usedCount: 0
+    });
     await user.save();
 
     res.json({ voucher });

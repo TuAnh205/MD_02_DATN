@@ -151,12 +151,19 @@ exports.applyVoucher = async (req, res) => {
             return res.status(404).json({ message: 'User not found' });
         }
 
-        const claimedVoucher = (user.userVouchers || []).find((entry) => entry.code === voucher.code);
+        const claimedVoucher = (user.userVouchers || []).find((entry) => {
+            if (!entry || !entry.voucher) return false;
+            try {
+                return String(entry.voucher) === String(voucher._id);
+            } catch (e) {
+                return false;
+            }
+        });
         if (!claimedVoucher) {
             return res.status(400).json({ message: 'Bạn chưa nhận voucher này hoặc không có quyền sử dụng' });
         }
 
-        if (voucher.userLimit && claimedVoucher.usedCount >= voucher.userLimit) {
+        if (voucher.userLimit && (claimedVoucher.usedCount || 0) >= voucher.userLimit) {
             return res.status(400).json({ message: 'Bạn đã dùng voucher này tối đa số lần' });
         }
 

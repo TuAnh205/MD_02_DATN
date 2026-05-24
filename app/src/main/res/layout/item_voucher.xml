@@ -100,6 +100,15 @@
                 android:layout_height="wrap_content"/>
 
             <TextView
+                android:id="@+id/tvUses"
+                android:text="Sử dụng: 0/0"
+                android:textSize="12sp"
+                android:textColor="#666"
+                android:layout_marginTop="4dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
                 android:id="@+id/tvStatus"
                 android:text="Sắp hết hạn"
                 android:textSize="12sp"
