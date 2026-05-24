@@ -19,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.anhnvt_ph55017.md_02_datn.R;
+import com.anhnvt_ph55017.md_02_datn.models.Voucher;
 import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 
@@ -35,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Locale;
 
 public class CreateVoucherActivity extends AppCompatActivity {
@@ -43,10 +45,12 @@ public class CreateVoucherActivity extends AppCompatActivity {
 
     private ImageView imgVoucherBanner;
     private TextView tvAddBanner;
+    private TextView tvTitle;
     private EditText edtVoucherCode, edtProgramName, edtDiscountValue, edtDiscountMax, edtTotalUsage, edtUsagePerCustomer, edtStartDate, edtEndDate;
     private RadioGroup rgDiscountType;
     private Button btnCreateVoucher;
     private Uri bannerUri;
+    private Voucher editingVoucher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,11 +58,13 @@ public class CreateVoucherActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_voucher);
         initViews();
         setupListeners();
+        handleEditIntent();
     }
 
     private void initViews() {
         imgVoucherBanner = findViewById(R.id.imgVoucherBanner);
         tvAddBanner = findViewById(R.id.tvAddBanner);
+        tvTitle = findViewById(R.id.tvTitle);
         edtVoucherCode = findViewById(R.id.edtVoucherCode);
         edtProgramName = findViewById(R.id.edtProgramName);
         rgDiscountType = findViewById(R.id.rgDiscountType);
@@ -78,6 +84,42 @@ public class CreateVoucherActivity extends AppCompatActivity {
         edtStartDate.setOnClickListener(v -> showDatePicker(edtStartDate));
         edtEndDate.setOnClickListener(v -> showDatePicker(edtEndDate));
         btnCreateVoucher.setOnClickListener(v -> submitVoucher());
+    }
+
+    private void handleEditIntent() {
+        Object extra = getIntent().getSerializableExtra("editVoucher");
+        if (!(extra instanceof Voucher)) {
+            return;
+        }
+
+        editingVoucher = (Voucher) extra;
+        populateForEdit(editingVoucher);
+    }
+
+    private void populateForEdit(Voucher voucher) {
+        if (voucher == null) {
+            return;
+        }
+
+        tvTitle.setText("Chỉnh sửa voucher");
+        btnCreateVoucher.setText("Lưu thay đổi");
+
+        edtVoucherCode.setText(voucher.getCode() != null ? voucher.getCode() : "");
+        edtVoucherCode.setEnabled(false);
+        edtProgramName.setText(voucher.getName() != null ? voucher.getName() : "");
+        edtDiscountValue.setText(String.valueOf(voucher.getValue()));
+        edtDiscountMax.setText(voucher.getMaxDiscount() > 0 ? String.valueOf(voucher.getMaxDiscount()) : "");
+        edtTotalUsage.setText(String.valueOf(voucher.getUsageLimit()));
+        edtUsagePerCustomer.setText(String.valueOf(voucher.getUserLimit()));
+        edtStartDate.setText(formatInputDate(voucher.getStartDate()));
+        edtEndDate.setText(formatInputDate(voucher.getEndDate()));
+
+        String type = voucher.getType();
+        if (type != null && type.equalsIgnoreCase("fixed")) {
+            rgDiscountType.check(R.id.rbFixed);
+        } else {
+            rgDiscountType.check(R.id.rbPercent);
+        }
     }
 
     private void openImagePicker() {
@@ -179,12 +221,19 @@ public class CreateVoucherActivity extends AppCompatActivity {
         isSubmitting = true;
         btnCreateVoucher.setEnabled(false);
 
+        String action = editingVoucher != null ? "Cập nhật" : "Tạo";
+        String successMessage = editingVoucher != null ? "Cập nhật voucher thành công" : "Tạo voucher thành công";
+        String failureMessage = editingVoucher != null ? "Cập nhật voucher thất bại" : "Tạo voucher thất bại";
+
         new Thread(() -> {
             HttpURLConnection conn = null;
             try {
-                URL url = new URL(NetworkConstants.getApiBaseUrl() + "/api/vouchers/shop");
+                String urlString = editingVoucher != null
+                        ? NetworkConstants.getApiBaseUrl() + "/api/vouchers/shop/" + editingVoucher.get_id()
+                        : NetworkConstants.getApiBaseUrl() + "/api/vouchers/shop";
+                URL url = new URL(urlString);
                 conn = (HttpURLConnection) url.openConnection();
-                conn.setRequestMethod("POST");
+                conn.setRequestMethod(editingVoucher != null ? "PUT" : "POST");
                 conn.setConnectTimeout(15000);
                 conn.setReadTimeout(20000);
                 conn.setRequestProperty("Content-Type", "application/json");
@@ -192,17 +241,25 @@ public class CreateVoucherActivity extends AppCompatActivity {
                 conn.setDoOutput(true);
 
                 JSONObject payload = new JSONObject();
-                payload.put("code", code.toUpperCase(Locale.ROOT));
+                if (editingVoucher == null) {
+                    payload.put("code", code.toUpperCase(Locale.ROOT));
+                }
                 payload.put("name", program);
-                payload.put("description", "Tạo từ ứng dụng");
+                if (editingVoucher != null) {
+                    payload.put("description", editingVoucher.getDescription() != null ? editingVoucher.getDescription() : "Tạo từ ứng dụng");
+                } else {
+                    payload.put("description", "Tạo từ ứng dụng");
+                }
                 payload.put("type", isPercentage ? "percentage" : "fixed");
                 payload.put("value", value);
-                payload.put("minOrderValue", 0);
+                payload.put("minOrderValue", editingVoucher != null ? (editingVoucher.getMinOrderValue() > 0 ? editingVoucher.getMinOrderValue() : 0) : 0);
                 payload.put("usageLimit", usageLimit);
                 payload.put("userLimit", userLimit);
                 payload.put("startDate", isoStartDate);
                 payload.put("endDate", isoEndDate);
-                payload.put("isActive", true);
+                if (editingVoucher == null) {
+                    payload.put("isActive", true);
+                }
                 if (finalMaxDiscount != null) {
                     payload.put("maxDiscount", finalMaxDiscount);
                 }
@@ -221,11 +278,11 @@ public class CreateVoucherActivity extends AppCompatActivity {
                     isSubmitting = false;
                     btnCreateVoucher.setEnabled(true);
                     if (responseCode >= 200 && responseCode < 300) {
-                        Log.d("CreateVoucherActivity", "Tạo voucher thành công: " + code.toUpperCase(Locale.ROOT));
-                        Toast.makeText(this, "Tạo voucher thành công", Toast.LENGTH_SHORT).show();
+                        Log.d("CreateVoucherActivity", action + " voucher thành công: " + code.toUpperCase(Locale.ROOT));
+                        Toast.makeText(this, successMessage, Toast.LENGTH_SHORT).show();
                         finish();
                     } else {
-                        Toast.makeText(this, "Tạo voucher thất bại: " + response, Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, failureMessage + ": " + response, Toast.LENGTH_LONG).show();
                     }
                 });
             } catch (Exception e) {
@@ -245,13 +302,40 @@ public class CreateVoucherActivity extends AppCompatActivity {
     private String toIsoDate(String input) throws ParseException {
         SimpleDateFormat inputFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         inputFormat.setLenient(false);
-        java.util.Date parsed = inputFormat.parse(input);
+        Date parsed = inputFormat.parse(input);
         if (parsed == null) {
             throw new ParseException("Invalid date", 0);
         }
         SimpleDateFormat outputFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US);
         outputFormat.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
         return outputFormat.format(parsed);
+    }
+
+    private String formatInputDate(String raw) {
+        if (raw == null || raw.isEmpty()) {
+            return "";
+        }
+
+        String[] patterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd",
+                "dd/MM/yyyy"
+        };
+
+        for (String pattern : patterns) {
+            try {
+                SimpleDateFormat parser = new SimpleDateFormat(pattern, Locale.US);
+                parser.setLenient(false);
+                Date parsed = parser.parse(raw);
+                if (parsed != null) {
+                    return new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(parsed);
+                }
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return raw;
     }
 
     private String readStream(InputStream inputStream) throws IOException {

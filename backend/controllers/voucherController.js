@@ -1,5 +1,5 @@
-const Voucher = require('../models/Voucher');
-const User = require('../models/User');
+const Voucher = require("../models/Voucher");
+const User = require("../models/User");
 
 // GET /api/vouchers - Public: Get all active vouchers for users from all shops
 exports.getActiveVouchers = async (req, res) => {
@@ -8,13 +8,15 @@ exports.getActiveVouchers = async (req, res) => {
     const vouchers = await Voucher.find({
       isActive: true,
       startDate: { $lte: now },
-      endDate: { $gte: now }
+      endDate: { $gte: now },
     })
-      .populate('shop', 'name _id')
-      .select('-createdBy -usageLimit -usedCount -userLimit -applicableProducts -applicableCategories -__v -updatedAt -createdAt');
+      .populate("shop", "name _id")
+      .select(
+        "-createdBy -usageLimit -usedCount -userLimit -applicableProducts -applicableCategories -__v -updatedAt -createdAt",
+      );
     res.json({ vouchers });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -22,15 +24,16 @@ exports.getActiveVouchers = async (req, res) => {
 exports.getMyVouchers = async (req, res) => {
   try {
     const user = await User.findById(req.user.id).populate({
-      path: 'userVouchers.voucher',
+      path: "userVouchers.voucher",
       populate: {
-        path: 'shop',
-        select: 'name _id'
+        path: "shop",
+        select: "name _id",
       },
-      select: 'code name description type value minOrderValue maxDiscount startDate endDate isActive shop'
+      select:
+        "code name description type value minOrderValue maxDiscount startDate endDate isActive shop",
     });
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     // Deduplicate by voucher ID to prevent duplicate entries
@@ -51,7 +54,7 @@ exports.getMyVouchers = async (req, res) => {
 
     res.json({ vouchers });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -60,7 +63,7 @@ exports.claimVoucher = async (req, res) => {
   try {
     const { code } = req.body;
     if (!code) {
-      return res.status(400).json({ message: 'Voucher code is required' });
+      return res.status(400).json({ message: "Voucher code is required" });
     }
 
     const upperCode = String(code).trim().toUpperCase();
@@ -69,30 +72,36 @@ exports.claimVoucher = async (req, res) => {
       code: upperCode,
       isActive: true,
       startDate: { $lte: now },
-      endDate: { $gte: now }
+      endDate: { $gte: now },
     });
 
     if (!voucher) {
-      return res.status(404).json({ message: 'Voucher không tồn tại hoặc đã hết hạn' });
+      return res
+        .status(404)
+        .json({ message: "Voucher không tồn tại hoặc đã hết hạn" });
     }
 
-    const user = await User.findById(req.user.id).populate('userVouchers.voucher');
+    const user = await User.findById(req.user.id).populate(
+      "userVouchers.voucher",
+    );
     if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+      return res.status(404).json({ message: "User not found" });
     }
 
     const alreadyClaimed = user.userVouchers.some(
-      (entry) => entry.voucher && entry.voucher._id.equals(voucher._id)
+      (entry) => entry.voucher && entry.voucher._id.equals(voucher._id),
     );
     if (alreadyClaimed) {
-      return res.status(400).json({ message: 'Bạn đã nhận voucher này rồi' });
+      return res.status(400).json({ message: "Bạn đã nhận voucher này rồi" });
     }
 
     const claimedCount = user.userVouchers.filter(
-      (entry) => entry.voucher && entry.voucher._id.equals(voucher._id)
+      (entry) => entry.voucher && entry.voucher._id.equals(voucher._id),
     ).length;
     if (voucher.userLimit && claimedCount >= voucher.userLimit) {
-      return res.status(400).json({ message: 'Bạn không thể nhận voucher này thêm lần nữa' });
+      return res
+        .status(400)
+        .json({ message: "Bạn không thể nhận voucher này thêm lần nữa" });
     }
 
     user.userVouchers.push({
@@ -101,13 +110,13 @@ exports.claimVoucher = async (req, res) => {
       name: voucher.name,
       description: voucher.description,
       claimedAt: new Date(),
-      usedCount: 0
+      usedCount: 0,
     });
     await user.save();
 
     res.json({ voucher });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -116,27 +125,41 @@ exports.getShopVouchers = async (req, res) => {
   try {
     const { shopId } = req.params;
     const vouchers = await Voucher.find({ shop: shopId, isActive: true })
-      .populate('shop', 'name _id')
-      .select('code name description type value minOrderValue maxDiscount startDate endDate shop');
+      .populate("shop", "name _id")
+      .select(
+        "code name description type value minOrderValue maxDiscount startDate endDate shop",
+      );
     res.json({ vouchers });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
 // POST /api/vouchers/shop - Shop: Create a new voucher
 exports.createShopVoucher = async (req, res) => {
   try {
-    const { code, name, description, type, value, minOrderValue, maxDiscount, usageLimit, userLimit, startDate, endDate } = req.body;
+    const {
+      code,
+      name,
+      description,
+      type,
+      value,
+      minOrderValue,
+      maxDiscount,
+      usageLimit,
+      userLimit,
+      startDate,
+      endDate,
+    } = req.body;
 
     if (!code || !name || !type || !value || !startDate || !endDate) {
-      return res.status(400).json({ message: 'Missing required fields' });
+      return res.status(400).json({ message: "Missing required fields" });
     }
 
     const upperCode = String(code).trim().toUpperCase();
     const existingVoucher = await Voucher.findOne({ code: upperCode });
     if (existingVoucher) {
-      return res.status(400).json({ message: 'Mã voucher này đã tồn tại' });
+      return res.status(400).json({ message: "Mã voucher này đã tồn tại" });
     }
 
     const voucher = new Voucher({
@@ -153,13 +176,13 @@ exports.createShopVoucher = async (req, res) => {
       endDate: new Date(endDate),
       isActive: true,
       shop: req.user.id,
-      createdBy: req.user.id
+      createdBy: req.user.id,
     });
 
     await voucher.save();
-    res.status(201).json({ message: 'Voucher created successfully', voucher });
+    res.status(201).json({ message: "Voucher created successfully", voucher });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -167,11 +190,13 @@ exports.createShopVoucher = async (req, res) => {
 exports.getMyCreatedVouchers = async (req, res) => {
   try {
     const vouchers = await Voucher.find({ shop: req.user.id })
-      .populate('shop', 'name _id')
-      .select('code name description type value minOrderValue maxDiscount usageLimit usedCount userLimit startDate endDate isActive shop');
+      .populate("shop", "name _id")
+      .select(
+        "code name description type value minOrderValue maxDiscount usageLimit usedCount userLimit startDate endDate isActive shop",
+      );
     res.json({ vouchers });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -179,20 +204,33 @@ exports.getMyCreatedVouchers = async (req, res) => {
 exports.updateShopVoucher = async (req, res) => {
   try {
     const { voucherId } = req.params;
-    const { name, description, value, minOrderValue, maxDiscount, usageLimit, userLimit, startDate, endDate, isActive } = req.body;
+    const {
+      name,
+      description,
+      type,
+      value,
+      minOrderValue,
+      maxDiscount,
+      usageLimit,
+      userLimit,
+      startDate,
+      endDate,
+      isActive,
+    } = req.body;
 
     const voucher = await Voucher.findById(voucherId);
     if (!voucher) {
-      return res.status(404).json({ message: 'Voucher not found' });
+      return res.status(404).json({ message: "Voucher not found" });
     }
 
     if (!voucher.shop.equals(req.user.id)) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
     if (name) voucher.name = name;
     if (description) voucher.description = description;
-    if (value) voucher.value = value;
+    if (type) voucher.type = type;
+    if (value !== undefined) voucher.value = value;
     if (minOrderValue !== undefined) voucher.minOrderValue = minOrderValue;
     if (maxDiscount !== undefined) voucher.maxDiscount = maxDiscount;
     if (usageLimit !== undefined) voucher.usageLimit = usageLimit;
@@ -202,9 +240,9 @@ exports.updateShopVoucher = async (req, res) => {
     if (isActive !== undefined) voucher.isActive = isActive;
 
     await voucher.save();
-    res.json({ message: 'Voucher updated successfully', voucher });
+    res.json({ message: "Voucher updated successfully", voucher });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
@@ -215,16 +253,16 @@ exports.deleteShopVoucher = async (req, res) => {
     const voucher = await Voucher.findById(voucherId);
 
     if (!voucher) {
-      return res.status(404).json({ message: 'Voucher not found' });
+      return res.status(404).json({ message: "Voucher not found" });
     }
 
     if (!voucher.shop.equals(req.user.id)) {
-      return res.status(403).json({ message: 'Unauthorized' });
+      return res.status(403).json({ message: "Unauthorized" });
     }
 
     await Voucher.findByIdAndDelete(voucherId);
-    res.json({ message: 'Voucher deleted successfully' });
+    res.json({ message: "Voucher deleted successfully" });
   } catch (err) {
-    res.status(500).json({ message: 'Server error', error: err.message });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
