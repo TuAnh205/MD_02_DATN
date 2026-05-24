@@ -111,7 +111,7 @@ public class ShopMainActivity extends AppCompatActivity {
 
         findViewById(R.id.menuVoucher).setOnClickListener(v -> {
             closeSidebar();
-            startActivity(new Intent(this, CreateVoucherActivity.class));
+            startActivity(new Intent(this, ShopVoucherListActivity.class));
         });
 
         findViewById(R.id.menuRevenue).setOnClickListener(v -> {
@@ -231,6 +231,10 @@ public class ShopMainActivity extends AppCompatActivity {
                 error -> {
                     progressLoading.setVisibility(View.GONE);
                     tvNoProducts.setVisibility(View.VISIBLE);
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        handleUnauthorizedSession();
+                        return;
+                    }
                     String msg = (error.networkResponse != null)
                             ? "Lỗi tải dữ liệu: " + error.networkResponse.statusCode
                             : "Không thể kết nối server";
@@ -247,6 +251,15 @@ public class ShopMainActivity extends AppCompatActivity {
         };
 
         Volley.newRequestQueue(this).add(request);
+    }
+
+    private void handleUnauthorizedSession() {
+        SessionManager.clearSession(this);
+        Toast.makeText(this, "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.", Toast.LENGTH_LONG).show();
+        Intent intent = new Intent(this, LoginActivity.class);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
     }
 
     // ── Ẩn / Hiện sản phẩm ───────────────────────────────────────────────────
@@ -269,7 +282,13 @@ public class ShopMainActivity extends AppCompatActivity {
                             product.isVisible() ? "Đã hiện sản phẩm" : "Đã ẩn sản phẩm",
                             Toast.LENGTH_SHORT).show();
                 },
-                error -> Toast.makeText(this, "Lỗi cập nhật trạng thái", Toast.LENGTH_SHORT).show()
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        handleUnauthorizedSession();
+                        return;
+                    }
+                    Toast.makeText(this, "Lỗi cập nhật trạng thái", Toast.LENGTH_SHORT).show();
+                }
         ) {
             @Override public Map<String, String> getHeaders() {
                 Map<String, String> h = new HashMap<>();
@@ -295,7 +314,13 @@ public class ShopMainActivity extends AppCompatActivity {
                     tvNoProducts.setVisibility(shopProducts.isEmpty() ? View.VISIBLE : View.GONE);
                     Toast.makeText(this, "Đã xoá sản phẩm", Toast.LENGTH_SHORT).show();
                 },
-                error -> Toast.makeText(this, "Lỗi xoá sản phẩm", Toast.LENGTH_SHORT).show()
+                error -> {
+                    if (error.networkResponse != null && error.networkResponse.statusCode == 401) {
+                        handleUnauthorizedSession();
+                        return;
+                    }
+                    Toast.makeText(this, "Lỗi xoá sản phẩm", Toast.LENGTH_SHORT).show();
+                }
         ) {
             @Override public Map<String, String> getHeaders() {
                 Map<String, String> h = new HashMap<>();
