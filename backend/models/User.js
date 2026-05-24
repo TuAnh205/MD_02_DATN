@@ -27,14 +27,17 @@ const userSchema = new mongoose.Schema({
   password: { type: String },
   phone: { type: String },
   avatar: { type: String },
-  userVouchers: [{
-    voucher: { type: mongoose.Schema.Types.ObjectId, ref: 'Voucher' },
-    code: { type: String, uppercase: true },
-    name: { type: String },
-    description: { type: String },
-    claimedAt: { type: Date, default: Date.now },
-    usedCount: { type: Number, default: 0 }
-  }],
+  userVouchers: [
+    {
+      voucher: { type: mongoose.Schema.Types.ObjectId, ref: 'Voucher', required: true },
+      code: { type: String, uppercase: true },
+      name: { type: String },
+      description: { type: String },
+      claimedAt: { type: Date, default: Date.now },
+      usedCount: { type: Number, default: 0 },
+      isConsumed: { type: Boolean, default: false },
+    }
+  ],
   role: { type: String, enum: ["user", "shop", "admin"], default: "user" },
   isVerified: { type: Boolean, default: false },
   verificationToken: { type: String },
@@ -70,13 +73,6 @@ const userSchema = new mongoose.Schema({
   shopStatus: { type: String, enum: ['active', 'frozen'], default: 'active' },
   shopStatusReason: { type: String, default: '' },
   shopFrozenAt: { type: Date },
-  userVouchers: [
-    {
-      voucher: { type: mongoose.Schema.Types.ObjectId, ref: 'Voucher', required: true },
-      claimedAt: { type: Date, default: Date.now },
-      usedCount: { type: Number, default: 0 },
-    }
-  ],
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

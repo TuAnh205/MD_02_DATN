@@ -46,6 +46,7 @@ exports.getMyVouchers = async (req, res) => {
             ...entry.voucher.toObject(),
             claimedAt: entry.claimedAt,
             usedCount: entry.usedCount,
+            isConsumed: entry.isConsumed || false,
           });
         }
       }

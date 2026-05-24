@@ -303,9 +303,9 @@ export default function Profile() {
               </div>
             )}
 
-            {myVouchers.length > 0 ? (
+            {myVouchers.filter((voucher) => !voucher.isConsumed).length > 0 ? (
               <div className="grid gap-4 mb-6">
-                {myVouchers.map((voucher) => (
+                {myVouchers.filter((voucher) => !voucher.isConsumed).map((voucher) => (
                   <div key={voucher._id} className="border rounded-lg p-4 bg-gray-50">
                     <div className="flex items-center justify-between gap-3">
                       <div>

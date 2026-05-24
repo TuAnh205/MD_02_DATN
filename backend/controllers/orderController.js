@@ -114,6 +114,9 @@ const settlePaymentAndCreditShops = async (orderId) => {
                 );
                 if (userVoucherEntry) {
                     userVoucherEntry.usedCount = (userVoucherEntry.usedCount || 0) + 1;
+                    if (voucher.userLimit && userVoucherEntry.usedCount >= voucher.userLimit) {
+                        userVoucherEntry.isConsumed = true;
+                    }
                     await user.save();
                 }
             }
@@ -389,14 +392,9 @@ exports.createOrder = async (req, res) => {
 
         if (voucherFromDb && claimedVoucher && voucherUser) {
             claimedVoucher.usedCount = (claimedVoucher.usedCount || 0) + 1;
-            
-            // Nếu đã dùng hết lần cho phép, xóa voucher khỏi danh sách người dùng
             if (voucherFromDb.userLimit && claimedVoucher.usedCount >= voucherFromDb.userLimit) {
-                voucherUser.userVouchers = voucherUser.userVouchers.filter(
-                    entry => entry.voucher.toString() !== voucherFromDb._id.toString()
-                );
+                claimedVoucher.isConsumed = true;
             }
-            
             await voucherUser.save();
             voucherFromDb.usedCount = (voucherFromDb.usedCount || 0) + 1;
             await voucherFromDb.save();
@@ -579,22 +577,11 @@ exports.cancelOrder = async (req, res) => {
                     );
 
                     if (userVoucherEntry && userVoucherEntry.usedCount > 0) {
-                        // Giảm usedCount
+                        // Giảm usedCount và nếu chưa dùng hết thì mở lại voucher
                         userVoucherEntry.usedCount = Math.max(0, userVoucherEntry.usedCount - 1);
-                        
-                        // Nếu usedCount = 0 và chưa vượt userLimit, thêm lại voucher
-                        if (userVoucherEntry.usedCount === 0 && voucherFromDb.userLimit && voucherFromDb.userLimit > 0) {
-                            // Voucher được khôi phục, không cần làm gì thêm
+                        if (voucherFromDb.userLimit && userVoucherEntry.usedCount < voucherFromDb.userLimit) {
+                            userVoucherEntry.isConsumed = false;
                         }
-                        
-                        await user.save();
-                    } else if (!userVoucherEntry && voucherFromDb.userLimit === 1) {
-                        // Voucher đã bị xóa vì hết lần dùng, thêm lại với usedCount = 0
-                        user.userVouchers.push({
-                            voucher: voucherFromDb._id,
-                            claimedAt: new Date(),
-                            usedCount: 0
-                        });
                         await user.save();
                     }
 
