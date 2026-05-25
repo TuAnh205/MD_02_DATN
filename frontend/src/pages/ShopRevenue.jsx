@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import orderStatusEmitter from "../utils/orderStatusEmitter";
 
 export default function ShopRevenue() {
   const { fetchProfile } = useAuth();
@@ -56,6 +57,18 @@ export default function ShopRevenue() {
   useEffect(() => {
     fetchRevenue();
     fetchBillingSummary();
+  }, [period]);
+
+  useEffect(() => {
+    // Listen for order status changes and refresh revenue data
+    const unsubscribe = orderStatusEmitter.on(() => {
+      fetchRevenue();
+      fetchBillingSummary();
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [period]);
 
   const fetchRevenue = async () => {

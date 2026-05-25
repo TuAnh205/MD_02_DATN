@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import notificationService from "../services/notificationService";
 import api from "../services/api";
+import orderStatusEmitter from "../utils/orderStatusEmitter";
 
 const coretechVisuals = [
   {
@@ -73,6 +74,11 @@ export default function ShopDashboard() {
 
     loadRevenueSummary();
 
+    // Listen for order status changes and refresh revenue summary
+    const unsubscribe = orderStatusEmitter.on(() => {
+      loadRevenueSummary();
+    });
+
     // Close dropdown when clicking outside
     const handleClickOutside = (event) => {
       if (profileDropdownRef.current && !profileDropdownRef.current.contains(event.target)) {
@@ -81,7 +87,10 @@ export default function ShopDashboard() {
     };
 
     document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      unsubscribe();
+    };
   }, []);
 
   const menuItems = [
@@ -414,36 +423,6 @@ export default function ShopDashboard() {
                   >
                     ✕
                   </button>
-                </div>
-              </section>
-            )}
-
-            {location.pathname !== '/shop/profile' && location.pathname !== '/shop/revenue' && revenueSummary && (
-              <section className="mb-6 rounded-2xl overflow-hidden border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-green-500">
-                    <p className="text-xs uppercase tracking-wide text-gray-500">Tổng Tiền Bán</p>
-                    <p className="mt-2 text-2xl font-bold text-green-700">{Number(revenueSummary.totalGrossRevenue || 0).toLocaleString('vi-VN')}đ</p>
-                    <p className="mt-1 text-xs text-gray-500">{revenueSummary.totalOrders || 0} đơn hàng</p>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-amber-500">
-                    <p className="text-xs uppercase tracking-wide text-gray-500">Phí Sàn (5%)</p>
-                    <p className="mt-2 text-2xl font-bold text-amber-600">{Number(revenueSummary.totalPlatformFees || 0).toLocaleString('vi-VN')}đ</p>
-                    <p className="mt-1 text-xs text-gray-500">{revenueSummary.totalProducts || 0} sản phẩm</p>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-emerald-500">
-                    <p className="text-xs uppercase tracking-wide text-gray-500">Tổng Tiền Thực Nhận</p>
-                    <p className="mt-2 text-2xl font-bold text-emerald-600">{Number(revenueSummary.totalNetRevenue || 0).toLocaleString('vi-VN')}đ</p>
-                    <p className="mt-1 text-xs text-gray-500">Sau khi trừ phí</p>
-                  </div>
-
-                  <div className="rounded-xl bg-white p-4 shadow-sm border-l-4 border-blue-500">
-                    <p className="text-xs uppercase tracking-wide text-gray-500">Đơn hàng</p>
-                    <p className="mt-2 text-2xl font-bold text-gray-900">{revenueSummary.totalOrders || 0}</p>
-                    <p className="mt-1 text-xs text-gray-500">Số đơn trong kỳ</p>
-                  </div>
                 </div>
               </section>
             )}

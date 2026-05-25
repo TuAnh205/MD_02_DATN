@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
+import orderStatusEmitter from "../utils/orderStatusEmitter";
 
 export default function ShopOrders() {
   const [orders, setOrders] = useState([]);
@@ -26,6 +27,8 @@ export default function ShopOrders() {
     try {
       await api.put(`/shop/orders/${orderId}/status`, { status: newStatus });
       fetchOrders();
+      // Emit event to notify other components to refresh their data
+      orderStatusEmitter.emit({ orderId, newStatus, timestamp: new Date() });
     } catch (error) {
       console.error("Error updating order status:", error);
       alert("Có lỗi xảy ra khi cập nhật trạng thái đơn hàng");

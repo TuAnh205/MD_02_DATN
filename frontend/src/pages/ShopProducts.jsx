@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import orderStatusEmitter from "../utils/orderStatusEmitter";
 
 export default function ShopProducts() {
   const { fetchProfile } = useAuth();
@@ -27,6 +28,15 @@ export default function ShopProducts() {
     fetchPolicy();
     fetchBillingSummary();
     fetchCategories();
+
+    // Listen for order status changes and refresh billing summary
+    const unsubscribe = orderStatusEmitter.on(() => {
+      fetchBillingSummary();
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const formatCurrency = (value) =>
