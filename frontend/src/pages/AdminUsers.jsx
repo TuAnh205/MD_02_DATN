@@ -52,16 +52,6 @@ export default function AdminUsers() {
     }
   };
 
-  const updateUserRole = async (userId, newRole) => {
-    try {
-      await api.put(`/admin/users/${userId}/role`, { role: newRole });
-      fetchUsers();
-    } catch (error) {
-      console.error('Error updating user role:', error);
-      alert('Có lỗi xảy ra khi cập nhật vai trò');
-    }
-  };
-
   const deleteUser = async (userId) => {
     if (!window.confirm('Bạn có chắc muốn xóa người dùng này?')) return;
     try {
@@ -144,19 +134,10 @@ export default function AdminUsers() {
                           </div>
                         </div>
                       </div>
-                      <div className="mt-2 flex items-center justify-between gap-2">
-                        <select
-                          value={user.role}
-                          onChange={(e) => updateUserRole(user._id, e.target.value)}
-                          className={`text-xs px-2 py-1 rounded-full font-medium border ${col.badgeBg} border-current flex-1`}
-                        >
-                          <option value="user">👤 Người dùng</option>
-                          <option value="shop">🏪 Shop</option>
-                          <option value="admin">🛡️ Admin</option>
-                        </select>
+                      <div className="mt-2 flex items-center justify-end gap-2">
                         <button
                           onClick={() => deleteUser(user._id)}
-                          className="text-xs text-red-500 hover:text-red-700 font-medium flex-shrink-0"
+                          className="text-xs text-red-500 hover:text-red-700 font-medium"
                         >
                           Xóa
                         </button>
