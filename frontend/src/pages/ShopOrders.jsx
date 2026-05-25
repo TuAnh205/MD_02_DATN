@@ -67,9 +67,8 @@ export default function ShopOrders() {
   };
 
   const getShopOrderTotal = (order) => {
-    return order.items?.reduce((total, item) => {
-      return total + (item.price * (item.qty || 1));
-    }, 0) || 0;
+    // Sử dụng total từ backend thay vì tính lại từ items
+    return order.total || 0;
   };
 
   // Map filter value (English) sang status TV trong DB

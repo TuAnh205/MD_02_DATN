@@ -35,8 +35,8 @@ exports.updateShopProfile = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       shopId,
       { name: name.trim() },
-      { new: true }
-    ).select('-password');
+      { new: true },
+    ).select("-password");
 
     if (!user) {
       return res.status(404).json({ message: "Shop không tìm thấy" });
@@ -44,7 +44,7 @@ exports.updateShopProfile = async (req, res) => {
 
     res.json({
       message: "Cập nhật tên shop thành công",
-      user
+      user,
     });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -305,21 +305,13 @@ exports.getShopOrders = async (req, res) => {
     const mongoose = require("mongoose");
     const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-    // Use aggregation to filter items by shopId and match ShopRevenue filter
-    // Only show orders that are paid or delivered
+    // Use aggregation to filter items by shopId and show all active orders
+    // Pending orders must still be visible in the shop order list.
     const orders = await Order.aggregate([
       {
         $match: {
-          $and: [
-            {
-              $or: [
-                { status: "đã nhận" },
-                { "payment.status": "paid" },
-              ],
-            },
-            { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
-            { "items.shopId": shopObjectId },
-          ],
+          status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] },
+          "items.shopId": shopObjectId,
         },
       },
       {
@@ -407,21 +399,13 @@ exports.getShopOrderById = async (req, res) => {
     const mongoose = require("mongoose");
     const shopObjectId = new mongoose.Types.ObjectId(shopId);
 
-    // Use aggregation to filter items by shopId
+    // Use aggregation to filter items by shopId and keep pending orders visible
     const orders = await Order.aggregate([
       {
         $match: {
           _id: new mongoose.Types.ObjectId(req.params.id),
-          $and: [
-            {
-              $or: [
-                { status: "đã nhận" },
-                { "payment.status": "paid" },
-              ],
-            },
-            { status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] } },
-            { "items.shopId": shopObjectId },
-          ],
+          status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] },
+          "items.shopId": shopObjectId,
         },
       },
       {

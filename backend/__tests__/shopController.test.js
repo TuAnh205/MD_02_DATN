@@ -124,4 +124,49 @@ describe("shopController.getShopRevenue", () => {
       }),
     );
   });
+
+  test("includes pending shop orders in getShopOrders even when payment is not paid", async () => {
+    const shopId = "507f1f77bcf86cd799439011";
+    const pendingOrder = {
+      _id: "444444444444444444444444",
+      orderNumber: "ORD-2",
+      status: "chờ xác nhận",
+      payment: { status: "pending" },
+      items: [{ shopId }],
+    };
+
+    mockAggregate.mockResolvedValue([pendingOrder]);
+
+    const req = {
+      user: { id: shopId },
+    };
+
+    const res = {
+      status: jest.fn().mockReturnThis(),
+      json: jest.fn(),
+    };
+
+    await shopController.getShopOrders(req, res);
+
+    expect(mockAggregate).toHaveBeenCalledTimes(1);
+    const pipeline = mockAggregate.mock.calls[0][0];
+    const firstStage = pipeline[0];
+
+    expect(firstStage.$match).toEqual(
+      expect.objectContaining({
+        status: { $nin: ["đã hủy", "trả hàng", "hoàn tiền"] },
+        "items.shopId": expect.any(Object),
+      }),
+    );
+    expect(firstStage.$match).not.toEqual(
+      expect.objectContaining({
+        $and: expect.arrayContaining([
+          expect.objectContaining({
+            $or: [{ status: "đã nhận" }, { "payment.status": "paid" }],
+          }),
+        ]),
+      }),
+    );
+    expect(res.json).toHaveBeenCalledWith([pendingOrder]);
+  });
 });
