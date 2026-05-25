@@ -63,79 +63,78 @@ export default function AdminReviews() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Đánh giá</h1>
-          <p className="text-gray-600 mt-1">Xem và quản lý đánh giá sản phẩm từ khách hàng</p>
+          <h1 className="text-3xl font-bold text-slate-900">Quản lý Đánh giá</h1>
+          <p className="text-slate-600 mt-2">Xem và quản lý đánh giá sản phẩm từ khách hàng ({reviews.length})</p>
         </div>
       </div>
 
       {/* Reviews List */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         {reviews.map((review) => (
-          <div key={review._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-start justify-between">
+          <div key={review._id} className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6 hover:shadow-md transition-all duration-200">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center space-x-4 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-medium">
-                      {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
+                    {review.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
                   <div>
-                    <div className="font-medium text-gray-900">{review.user?.name}</div>
-                    <div className="text-sm text-gray-500">
-                      {new Date(review.createdAt).toLocaleDateString('vi-VN')} lúc{' '}
-                      {new Date(review.createdAt).toLocaleTimeString('vi-VN')}
+                    <div className="font-bold text-slate-900">{review.user?.name}</div>
+                    <div className="text-sm text-slate-500 flex items-center gap-2">
+                      📅 {new Date(review.createdAt).toLocaleDateString('vi-VN')}
+                      <span className="text-slate-400">•</span>
+                      🕐 {new Date(review.createdAt).toLocaleTimeString('vi-VN')}
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <div className="font-medium text-gray-900 mb-1">
-                    {review.product?.name}
+                <div className="mb-4 p-4 bg-gradient-to-r from-blue-50 to-slate-50 rounded-xl border-2 border-blue-200">
+                  <div className="font-bold text-slate-900 mb-2">
+                    📦 {review.product?.name}
                   </div>
                   {renderStars(review.rating)}
                 </div>
 
-                <div className="text-gray-700 leading-relaxed">
+                <div className="text-slate-800 leading-relaxed mb-4 p-3 bg-slate-50 rounded-lg border-l-4 border-blue-600">
                   {review.comment}
                 </div>
 
                 {review.images && review.images.length > 0 && (
-                  <div className="mt-4 flex space-x-2">
+                  <div className="mt-4 flex space-x-3 flex-wrap">
                     {review.images.map((image, index) => (
                       <img
                         key={index}
                         src={image}
                         alt={`Review image ${index + 1}`}
-                        className="w-20 h-20 object-cover rounded-lg border border-gray-200"
+                        className="w-24 h-24 object-cover rounded-lg border-2 border-slate-200 hover:scale-105 transition-transform duration-200"
                       />
                     ))}
                   </div>
                 )}
 
                 {review.response && (
-                  <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                  <div className="mt-4 p-4 bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg border-l-4 border-green-600">
                     <div className="flex items-center space-x-2 mb-2">
-                      <span className="text-sm font-medium text-blue-800">
-                        Phản hồi từ {review.response.respondedBy?.name || 'Shop'}
+                      <span className="text-sm font-bold text-green-800">
+                        ✓ Phản hồi từ {review.response.respondedBy?.name || 'Shop'}
                       </span>
-                      <span className="text-xs text-blue-600">
+                      <span className="text-xs text-green-700">
                         {new Date(review.response.respondedAt).toLocaleDateString('vi-VN')}
                       </span>
                     </div>
-                    <p className="text-blue-700">{review.response.text}</p>
+                    <p className="text-green-800">{review.response.text}</p>
                   </div>
                 )}
               </div>
 
-              <div className="ml-4 flex flex-col space-y-2">
+              <div className="ml-4 flex-shrink-0">
                 <button
                   onClick={() => deleteReview(review._id)}
-                  className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                  className="px-4 py-2 text-sm text-white font-bold bg-red-500 hover:bg-red-600 rounded-lg transition-all duration-200 hover:shadow-md"
                 >
                   Xóa
                 </button>
@@ -146,30 +145,30 @@ export default function AdminReviews() {
       </div>
 
       {reviews.length === 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <div className="text-gray-400 text-6xl mb-4">⭐</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có đánh giá nào</h3>
-          <p className="text-gray-500">Đánh giá sẽ xuất hiện ở đây khi khách hàng đánh giá sản phẩm</p>
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-12 text-center">
+          <div className="text-slate-300 text-7xl mb-4">⭐</div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Chưa có đánh giá nào</h3>
+          <p className="text-slate-600">Đánh giá sẽ xuất hiện ở đây khi khách hàng đánh giá sản phẩm</p>
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6">
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1}
-            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             ← Trước
           </button>
-          <span className="text-sm text-gray-700">
-            Trang {page} / {totalPages}
+          <span className="text-sm font-bold text-slate-800">
+            Trang <span className="text-blue-600">{page}</span> / <span className="text-slate-600">{totalPages}</span>
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page === totalPages}
-            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             Sau →
           </button>

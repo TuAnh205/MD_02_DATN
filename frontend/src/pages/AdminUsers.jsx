@@ -79,19 +79,19 @@ export default function AdminUsers() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Người dùng</h1>
-          <p className="text-gray-600 mt-1">Tổng: {users.length} tài khoản</p>
+          <h1 className="text-3xl font-bold text-slate-900">Quản lý Tài khoản</h1>
+          <p className="text-slate-600 mt-2">Tổng cộng: <span className="font-bold text-blue-600">{users.length}</span> tài khoản</p>
         </div>
         <input
           type="text"
-          placeholder="Tìm theo tên hoặc email..."
+          placeholder="🔍 Tìm theo tên hoặc email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full sm:w-72 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+          className="w-full sm:w-80 px-4 py-3 border-2 border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium text-slate-700 hover:border-blue-400 transition-all duration-200"
         />
       </div>
 
@@ -100,44 +100,44 @@ export default function AdminUsers() {
         {COLUMNS.map((col) => {
           const colUsers = filtered.filter((u) => u.role === col.role);
           return (
-            <div key={col.role} className={`rounded-xl border-2 ${col.border} overflow-hidden`}>
+            <div key={col.role} className={`rounded-2xl border-2 ${col.border} overflow-hidden shadow-sm hover:shadow-lg transition-all duration-200 bg-white`}>
               {/* Column Header */}
-              <div className={`${col.headerBg} text-white px-4 py-3 flex items-center justify-between`}>
-                <div className="flex items-center gap-2 font-semibold text-base">
-                  <span>{col.icon}</span>
+              <div className={`${col.headerBg} text-white px-6 py-5 flex items-center justify-between bg-gradient-to-r`}>
+                <div className="flex items-center gap-3 font-bold text-lg">
+                  <span className="text-3xl">{col.icon}</span>
                   <span>{col.label}</span>
                 </div>
-                <span className="bg-white bg-opacity-25 text-white text-xs font-bold px-2 py-1 rounded-full">
+                <span className="bg-white bg-opacity-30 text-white text-sm font-bold px-3 py-1 rounded-full border-2 border-white border-opacity-40">
                   {colUsers.length}
                 </span>
               </div>
 
               {/* User Cards */}
-              <div className="bg-gray-50 divide-y divide-gray-200 max-h-[60vh] overflow-y-auto">
+              <div className="divide-y divide-slate-200 max-h-[60vh] overflow-y-auto">
                 {colUsers.length === 0 ? (
-                  <div className="text-center py-10 text-gray-400">
-                    <div className="text-4xl mb-2">{col.icon}</div>
-                    <p className="text-sm">Không có tài khoản nào</p>
+                  <div className="text-center py-12 bg-gradient-to-b from-slate-50 to-white">
+                    <div className="text-5xl mb-3 opacity-30">{col.icon}</div>
+                    <p className="text-slate-500 font-semibold">Không có tài khoản nào</p>
                   </div>
                 ) : (
                   colUsers.map((user) => (
-                    <div key={user._id} className="bg-white px-4 py-3 hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center gap-3">
-                        <div className={`w-9 h-9 rounded-full flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${col.avatarBg}`}>
-                          {col.role === 'shop' ? '🏪' : user.name?.charAt(0)?.toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-semibold text-gray-900 truncate">{user.name}</div>
-                          <div className="text-xs text-gray-500 truncate">{user.email}</div>
-                          <div className="text-xs text-gray-400">
-                            {new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                    <div key={user._id} className="bg-white px-5 py-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-slate-50 transition-all duration-200 border-b border-slate-200 last:border-b-0">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${col.avatarBg} shadow-md border-2 ${col.border}`}>
+                            {col.role === 'shop' ? '🏪' : user.name?.charAt(0)?.toUpperCase()}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-bold text-slate-900 truncate">{user.name}</div>
+                            <div className="text-xs text-slate-500 truncate">{user.email}</div>
+                            <div className="text-xs text-slate-400 mt-1 font-medium">
+                              📅 {new Date(user.createdAt).toLocaleDateString('vi-VN')}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                      <div className="mt-2 flex items-center justify-end gap-2">
                         <button
                           onClick={() => deleteUser(user._id)}
-                          className="text-xs text-red-500 hover:text-red-700 font-medium"
+                          className="text-xs text-white font-bold bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition-all duration-200 flex-shrink-0 hover:shadow-md"
                         >
                           Xóa
                         </button>
