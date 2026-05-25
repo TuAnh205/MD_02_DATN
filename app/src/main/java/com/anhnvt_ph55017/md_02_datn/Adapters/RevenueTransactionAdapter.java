@@ -13,10 +13,12 @@ import com.bumptech.glide.Glide;
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.models.RevenueTransaction;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+import java.util.TimeZone;
 
 public class RevenueTransactionAdapter extends RecyclerView.Adapter<RevenueTransactionAdapter.ViewHolder> {
 
@@ -114,13 +116,58 @@ public class RevenueTransactionAdapter extends RecyclerView.Adapter<RevenueTrans
         if (isoDate == null || isoDate.isEmpty()) {
             return "-";
         }
+
         try {
-            SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
-            Date date = iso.parse(isoDate);
-            SimpleDateFormat out = new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault());
-            return date != null ? out.format(date) : "-";
+            Date parsedDate = parseDisplayDate(isoDate.trim());
+            if (parsedDate == null) {
+                return isoDate;
+            }
+            SimpleDateFormat out = new SimpleDateFormat("dd/MM HH:mm", new Locale("vi", "VN"));
+            out.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+            return out.format(parsedDate);
         } catch (Exception e) {
             return isoDate;
         }
+    }
+
+    private Date parseDisplayDate(String rawDate) throws ParseException {
+        String[] offsetPatterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+                "yyyy-MM-dd'T'HH:mm:ssX",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd'T'HH:mm:ssXXX",
+                "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'"
+        };
+        String[] localPatterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                "yyyy-MM-dd'T'HH:mm:ss",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd HH:mm"
+        };
+
+        boolean hasExplicitOffset = rawDate.matches(".*[Zz]|.*[+-]\\d{2}:?\\d{2}$");
+        SimpleDateFormat formatter = new SimpleDateFormat();
+
+        if (hasExplicitOffset) {
+            for (String pattern : offsetPatterns) {
+                try {
+                    formatter = new SimpleDateFormat(pattern, Locale.US);
+                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    return formatter.parse(rawDate);
+                } catch (ParseException ignored) {
+                }
+            }
+        }
+
+        for (String pattern : localPatterns) {
+            try {
+                formatter = new SimpleDateFormat(pattern, Locale.US);
+                formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+                return formatter.parse(rawDate);
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return null;
     }
 }

@@ -81,9 +81,7 @@ public class OrdersFragment extends Fragment implements OrderAdapter.OnOrderStat
             intent.putExtra("productDesc", order.getProductDesc());
             intent.putExtra("shippingAddress", order.getShippingAddress());
             intent.putExtra("paymentMethod", order.getPaymentMethod());
-            double vDisc = order.getVoucherDiscount();
-            String vDiscStr = vDisc > 0 ? String.format(Locale.getDefault(), "%,.0fđ", vDisc) : "0đ";
-            intent.putExtra("voucherDiscount", vDiscStr);
+            intent.putExtra("voucherDiscount", order.getVoucherDiscount());
             if (order.getItems() != null) {
                 java.io.Serializable itemsSerializable = (java.io.Serializable) order.getItems();
                 intent.putExtra("orderItems", itemsSerializable);

@@ -20,6 +20,7 @@ import java.util.List;
 public class OrderDetailActivity extends AppCompatActivity {
 
     TextView tvOrderId, tvOrderDate, tvOrderStatus, tvOrderTotal, tvStatusDescription, tvShippingAddress, tvItemCount, tvArrivalDate;
+    TextView tvPaymentMethod, tvVoucherDiscount;
     Button btnCancel, btnBuyAgain, btnSubmitRating;
     RatingBar ratingBar;
     EditText edtRatingComment;
@@ -42,6 +43,8 @@ public class OrderDetailActivity extends AppCompatActivity {
             btnCancel = findViewById(R.id.btnCancel);
             btnBuyAgain = findViewById(R.id.btnBuyAgain);
             tvShippingAddress = findViewById(R.id.tvShippingAddress);
+            tvPaymentMethod = findViewById(R.id.tvPaymentMethod);
+            tvVoucherDiscount = findViewById(R.id.tvVoucherDiscount);
             rvOrderItems = findViewById(R.id.rvOrderItems);
 
             // ===== GET DATA =====
@@ -50,6 +53,8 @@ public class OrderDetailActivity extends AppCompatActivity {
             orderStatus = intent.getStringExtra("orderStatus");
             String orderDate = intent.getStringExtra("orderDate");
             double total = intent.getDoubleExtra("orderTotal", 0);
+            String paymentMethod = intent.getStringExtra("paymentMethod");
+            double voucherDiscount = intent.getDoubleExtra("voucherDiscount", 0);
 
             if (orderId == null) orderId = "N/A";
             if (orderStatus == null) orderStatus = "pending";
@@ -99,6 +104,8 @@ public class OrderDetailActivity extends AppCompatActivity {
             tvOrderDate.setText(formatOrderDate(orderDate));
             tvOrderStatus.setText(getStatusVietnamese(orderStatus));
             tvOrderTotal.setText("$" + total);
+            tvPaymentMethod.setText(paymentMethod != null && !paymentMethod.trim().isEmpty() ? paymentMethod : "Thanh toán khi nhận hàng");
+            tvVoucherDiscount.setText(voucherDiscount > 0 ? formatPrice(voucherDiscount) : "-");
 
             setStatusColor(tvOrderStatus, orderStatus);
             tvStatusDescription.setText(getStatusDescription(orderStatus));
@@ -188,6 +195,11 @@ public class OrderDetailActivity extends AppCompatActivity {
         } catch (Exception ignored) {
         }
         return date;
+    }
+
+    private String formatPrice(double price) {
+        java.text.NumberFormat fmt = java.text.NumberFormat.getInstance(new java.util.Locale("vi", "VN"));
+        return fmt.format((long) price) + "đ";
     }
 
     private String getStatusVietnamese(String status) {

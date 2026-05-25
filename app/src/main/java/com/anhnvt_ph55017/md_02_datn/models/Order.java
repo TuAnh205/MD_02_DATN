@@ -1,6 +1,11 @@
 package com.anhnvt_ph55017.md_02_datn.models;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class Order {
     String imageUrl;
@@ -129,19 +134,63 @@ public class Order {
 
     public String getFormattedDate() {
         if (date == null || date.isEmpty()) return "";
+
+        String rawDate = date.trim();
+        if (!rawDate.contains("T") && !rawDate.contains(" ")) {
+            return rawDate;
+        }
+
         try {
-            if (date.contains("T")) {
-                String[] parts = date.split("T");
-                String datePart = parts[0];
-                String timePart = parts.length > 1 ? parts[1].substring(0, Math.min(5, parts[1].length())) : "00:00";
-                String[] dateParts = datePart.split("-");
-                if (dateParts.length == 3) {
-                    return dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0] + " • " + timePart;
-                }
+            Date parsedDate = parseDisplayDate(rawDate);
+            if (parsedDate != null) {
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy • HH:mm", new Locale("vi", "VN"));
+                outputFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+                return outputFormat.format(parsedDate);
             }
         } catch (Exception ignored) {
         }
-        return date;
+
+        return rawDate;
+    }
+
+    private Date parseDisplayDate(String rawDate) throws ParseException {
+        String[] offsetPatterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+                "yyyy-MM-dd'T'HH:mm:ssX",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd'T'HH:mm:ssXXX"
+        };
+        String[] localPatterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                "yyyy-MM-dd'T'HH:mm:ss",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd HH:mm"
+        };
+
+        boolean hasExplicitOffset = rawDate.matches(".*[Zz]|.*[+-]\\d{2}:?\\d{2}$");
+        SimpleDateFormat formatter = new SimpleDateFormat();
+
+        if (hasExplicitOffset) {
+            for (String pattern : offsetPatterns) {
+                try {
+                    formatter = new SimpleDateFormat(pattern, Locale.US);
+                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    return formatter.parse(rawDate);
+                } catch (ParseException ignored) {
+                }
+            }
+        }
+
+        for (String pattern : localPatterns) {
+            try {
+                formatter = new SimpleDateFormat(pattern, Locale.US);
+                formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+                return formatter.parse(rawDate);
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return null;
     }
 
     public String getCustomerName() {

@@ -28,8 +28,13 @@ import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class OrdersActivity extends AppCompatActivity implements OrderAdapter.OnOrderStatusChangeListener {
 
@@ -126,11 +131,13 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
             Intent intent = new Intent(this, UserOrderDetailActivity.class);
             intent.putExtra("orderId", order.getId());
             intent.putExtra("orderStatus", order.getStatus());
-            intent.putExtra("orderDate", order.getDate());
+            intent.putExtra("orderDate", order.getFormattedDate());
             intent.putExtra("orderTotal", order.getTotal());
             intent.putExtra("itemCount", order.getItemCount());
             intent.putExtra("arrivalDate", order.getArrivalDate());
             intent.putExtra("shippingAddress", order.getShippingAddress());
+            intent.putExtra("paymentMethod", order.getPaymentMethod() != null ? order.getPaymentMethod() : "Thanh toán khi nhận hàng");
+            intent.putExtra("voucherDiscount", order.getVoucherDiscount());
             if (order.getItems() != null && !order.getItems().isEmpty()) {
                 intent.putExtra("orderItems", new ArrayList<>(order.getItems()));
             }
@@ -345,6 +352,8 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
         String firstImage = extractFirstImage(parsedItems, item);
         String summary = buildSummary(parsedItems, itemCount);
         String shippingAddress = buildShippingAddress(item.optJSONObject("shipping"), item.optString("shippingAddress", ""));
+        String paymentMethod = resolvePaymentMethod(item);
+        double voucherDiscount = resolveVoucherDiscount(item);
 
         String formattedDate = formatDate(createdAt);
         String orderCode = buildOrderCode(orderNumber, id);
@@ -355,7 +364,61 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
         order.setShippingAddress(shippingAddress);
         order.setCreatedAt(createdAt);
         order.setProductImageUrl(firstImage);
+        order.setPaymentMethod(paymentMethod);
+        order.setVoucherDiscount(voucherDiscount);
         return order;
+    }
+
+    private String resolvePaymentMethod(JSONObject item) {
+        if (item == null) {
+            return "Thanh toán khi nhận hàng";
+        }
+
+        JSONObject paymentObj = item.optJSONObject("payment");
+        String rawMethod = paymentObj != null ? paymentObj.optString("method", "") : item.optString("paymentMethod", "");
+        if (rawMethod == null || rawMethod.trim().isEmpty()) {
+            return "Thanh toán khi nhận hàng";
+        }
+
+        String value = rawMethod.trim();
+        if (value.equalsIgnoreCase("COD")
+                || value.equalsIgnoreCase("cod")
+                || value.equalsIgnoreCase("cash_on_delivery")
+                || value.equalsIgnoreCase("cash on delivery")
+                || value.equalsIgnoreCase("cashondelivery")) {
+            return "Thanh toán khi nhận hàng";
+        }
+
+        return value;
+    }
+
+    private double resolveVoucherDiscount(JSONObject item) {
+        if (item == null) {
+            return 0;
+        }
+
+        double voucherDiscount = 0;
+        if (item.has("voucher")) {
+            JSONObject voucherObj = item.optJSONObject("voucher");
+            if (voucherObj != null) {
+                voucherDiscount = voucherObj.optDouble("discount", voucherObj.optDouble("amount", 0));
+            }
+        }
+
+        if (voucherDiscount == 0 && item.has("discount")) {
+            JSONObject discountObj = item.optJSONObject("discount");
+            if (discountObj != null) {
+                voucherDiscount = discountObj.optDouble("amount", discountObj.optDouble("discount", 0));
+            } else {
+                voucherDiscount = item.optDouble("discount", 0);
+            }
+        }
+
+        if (voucherDiscount == 0) {
+            voucherDiscount = item.optDouble("voucherDiscount", 0);
+        }
+
+        return voucherDiscount;
     }
 
     private List<OrderItem> parseItems(JSONArray itemsArray) {
@@ -489,22 +552,66 @@ public class OrdersActivity extends AppCompatActivity implements OrderAdapter.On
     }
 
     private String formatDate(String date) {
+        if (date == null || date.isEmpty()) {
+            return "";
+        }
+
+        String rawDate = date.trim();
+        if (!rawDate.contains("T") && !rawDate.contains(" ")) {
+            return rawDate;
+        }
+
         try {
-            if (date == null || date.isEmpty()) {
-                return "";
-            }
-
-            String[] parts = date.split("T");
-            String datePart = parts[0];
-            String timePart = parts.length > 1 ? parts[1].substring(0, 5) : "00:00";
-
-            String[] dateParts = datePart.split("-");
-            if (dateParts.length == 3) {
-                return dateParts[2] + "/" + dateParts[1] + "/" + dateParts[0] + " • " + timePart;
+            Date parsedDate = parseDisplayDate(rawDate);
+            if (parsedDate != null) {
+                SimpleDateFormat outputFormat = new SimpleDateFormat("dd/MM/yyyy • HH:mm", new Locale("vi", "VN"));
+                outputFormat.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+                return outputFormat.format(parsedDate);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return date;
+
+        return rawDate;
+    }
+
+    private Date parseDisplayDate(String rawDate) throws ParseException {
+        String[] offsetPatterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSSX",
+                "yyyy-MM-dd'T'HH:mm:ssX",
+                "yyyy-MM-dd'T'HH:mm:ss.SSSXXX",
+                "yyyy-MM-dd'T'HH:mm:ssXXX"
+        };
+        String[] localPatterns = {
+                "yyyy-MM-dd'T'HH:mm:ss.SSS",
+                "yyyy-MM-dd'T'HH:mm:ss",
+                "yyyy-MM-dd HH:mm:ss",
+                "yyyy-MM-dd HH:mm"
+        };
+
+        boolean hasExplicitOffset = rawDate.matches(".*[Zz]|.*[+-]\\d{2}:?\\d{2}$");
+        SimpleDateFormat formatter = new SimpleDateFormat();
+
+        if (hasExplicitOffset) {
+            for (String pattern : offsetPatterns) {
+                try {
+                    formatter = new SimpleDateFormat(pattern, Locale.US);
+                    formatter.setTimeZone(TimeZone.getTimeZone("UTC"));
+                    return formatter.parse(rawDate);
+                } catch (ParseException ignored) {
+                }
+            }
+        }
+
+        for (String pattern : localPatterns) {
+            try {
+                formatter = new SimpleDateFormat(pattern, Locale.US);
+                formatter.setTimeZone(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
+                return formatter.parse(rawDate);
+            } catch (ParseException ignored) {
+            }
+        }
+
+        return null;
     }
 }

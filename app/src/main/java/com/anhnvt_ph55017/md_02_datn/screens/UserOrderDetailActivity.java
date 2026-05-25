@@ -60,7 +60,7 @@ public class UserOrderDetailActivity extends AppCompatActivity {
         String status = intent.getStringExtra("orderStatus");
         String arrival = intent.getStringExtra("arrivalDate");
         String payment = intent.getStringExtra("paymentMethod");
-        double voucherDiscount = intent.getDoubleExtra("voucherDiscount", 0);
+        double voucherDiscount = readVoucherDiscount(intent);
         double total = intent.getDoubleExtra("orderTotal", 0);
         int itemCount = intent.getIntExtra("itemCount", 0);
 
@@ -74,8 +74,8 @@ public class UserOrderDetailActivity extends AppCompatActivity {
 
         tvItemCount.setText(String.valueOf(itemCount));
         tvArrivalDate.setText(arrival != null ? arrival : "");
-        tvPaymentMethod.setText(payment != null ? payment : "");
-        tvVoucherDiscount.setText(voucherDiscount > 0 ? formatPrice(voucherDiscount) : "-" );
+        tvPaymentMethod.setText(payment != null && !payment.trim().isEmpty() ? payment : "Thanh toán khi nhận hàng");
+        tvVoucherDiscount.setText(voucherDiscount > 0 ? formatPrice(voucherDiscount) : "-");
         tvOrderTotal.setText(formatPrice(total));
         tvShippingAddress.setText(intent.getStringExtra("shippingAddress") != null ? intent.getStringExtra("shippingAddress") : "");
 
@@ -125,6 +125,31 @@ public class UserOrderDetailActivity extends AppCompatActivity {
                 });
             }
         });
+    }
+
+    private double readVoucherDiscount(Intent intent) {
+        if (intent == null || !intent.hasExtra("voucherDiscount")) {
+            return 0;
+        }
+
+        Object extra = intent.getExtras() != null ? intent.getExtras().get("voucherDiscount") : null;
+        if (extra instanceof Number) {
+            return ((Number) extra).doubleValue();
+        }
+
+        if (extra instanceof String) {
+            String rawValue = ((String) extra).replaceAll("[^\\d.]", "");
+            if (rawValue.isEmpty()) {
+                return 0;
+            }
+            try {
+                return Double.parseDouble(rawValue);
+            } catch (NumberFormatException ignored) {
+                return 0;
+            }
+        }
+
+        return 0;
     }
 
     private String formatPrice(double price) {
