@@ -61,25 +61,31 @@
             android:gravity="center"
             android:layout_marginTop="16dp">
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnLogin"
-                android:text="Đăng nhập"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginEnd="8dp"
                 android:background="@drawable/bg_btn_blue"
-                android:textColor="@android:color/white" />
+                android:text="Đăng nhập"
+                android:textAllCaps="false"
+                android:textColor="@android:color/white"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
-            <Button
+            <androidx.appcompat.widget.AppCompatButton
                 android:id="@+id/btnRegister"
-                android:text="Đăng ký"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="48dp"
                 android:layout_weight="1"
                 android:layout_marginStart="8dp"
-                android:background="@drawable/bg_button"
-                android:textColor="@android:color/white" />
+                android:background="@drawable/bg_btn_blue"
+                android:text="Đăng ký"
+                android:textAllCaps="false"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
         </LinearLayout>
 
@@ -405,13 +411,17 @@
             </LinearLayout>
         </LinearLayout>
 
-        <Button
+        <androidx.appcompat.widget.AppCompatButton
             android:id="@+id/btnLogout"
-            android:text="Đăng xuất"
-            android:textColor="#FF4444"
-            android:layout_marginTop="24dp"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="52dp"
+            android:layout_marginTop="24dp"
+            android:text="Đăng xuất"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:background="@drawable/bg_btn_logout"/>
 
     </LinearLayout>
 

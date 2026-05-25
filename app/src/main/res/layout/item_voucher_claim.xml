@@ -40,7 +40,7 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnClaim"
         android:text="Nhận"
         android:layout_width="wrap_content"

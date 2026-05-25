@@ -19,8 +19,7 @@ import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.anhnvt_ph55017.md_02_datn.utils.VoucherApiService;
 
 public class ClaimVoucherActivity extends AppCompatActivity {
-    private EditText edtVoucherCode;
-    private Button btnClaimVoucher;
+
     private ProgressBar pbLoading;
     private RecyclerView rvAvailableVouchers, rvMyVouchers;
     private VoucherClaimAdapter adapter;
@@ -33,8 +32,7 @@ public class ClaimVoucherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_claim_voucher);
 
-        edtVoucherCode = findViewById(R.id.edtVoucherCode);
-        btnClaimVoucher = findViewById(R.id.btnClaimVoucher);
+
         pbLoading = findViewById(R.id.pbLoading);
         rvMyVouchers = findViewById(R.id.rvMyVouchers);
         rvAvailableVouchers = findViewById(R.id.rvAvailableVouchers);
@@ -48,7 +46,7 @@ public class ClaimVoucherActivity extends AppCompatActivity {
         rvAvailableVouchers.setLayoutManager(new LinearLayoutManager(this));
         rvAvailableVouchers.setAdapter(adapter);
 
-        btnClaimVoucher.setOnClickListener(v -> claimVoucher());
+
 
         loadAvailableVouchers();
     }
@@ -61,7 +59,12 @@ public class ClaimVoucherActivity extends AppCompatActivity {
             public void onSuccess(java.util.List<Voucher> myVouchers) {
                 runOnUiThread(() -> {
                     myList.clear();
-                    myList.addAll(myVouchers);
+                    // Filter out consumed vouchers
+                    for (Voucher v : myVouchers) {
+                        if (v != null && !v.isConsumed()) {
+                            myList.add(v);
+                        }
+                    }
                     myAdapter.notifyDataSetChanged();
                 });
 
@@ -125,7 +128,7 @@ public class ClaimVoucherActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     setLoading(false);
                     Toast.makeText(ClaimVoucherActivity.this, message, Toast.LENGTH_LONG).show();
-                    // remove claimed voucher from list if present
+                    // Remove claimed voucher from available list
                     for (int i = availableList.size() - 1; i >= 0; i--) {
                         Voucher v = availableList.get(i);
                         if (v.getCode() != null && v.getCode().equalsIgnoreCase(code)) {
@@ -133,23 +136,15 @@ public class ClaimVoucherActivity extends AppCompatActivity {
                         }
                     }
                     adapter.notifyDataSetChanged();
-
-                    // Refresh user's claimed vouchers from server so UI and other flows are up-to-date
-                    VoucherApiService.getMyVouchers(ClaimVoucherActivity.this, new VoucherApiService.VoucherListCallback() {
-                        @Override
-                        public void onSuccess(java.util.List<Voucher> myVouchers) {
-                            runOnUiThread(() -> {
-                                myList.clear();
-                                myList.addAll(myVouchers);
-                                myAdapter.notifyDataSetChanged();
-                            });
+                    
+                    // Also remove from my vouchers list if it was there temporarily
+                    for (int i = myList.size() - 1; i >= 0; i--) {
+                        Voucher v = myList.get(i);
+                        if (v.getCode() != null && v.getCode().equalsIgnoreCase(code)) {
+                            myList.remove(i);
                         }
-
-                        @Override
-                        public void onError(String error) {
-                            // ignore silently; we've already shown success
-                        }
-                    });
+                    }
+                    myAdapter.notifyDataSetChanged();
                 });
             }
 
@@ -163,12 +158,17 @@ public class ClaimVoucherActivity extends AppCompatActivity {
         });
     }
 
-    private void claimVoucher() {
-        claimVoucher(edtVoucherCode.getText().toString().trim());
-    }
+
 
     private void setLoading(boolean loading) {
-        btnClaimVoucher.setEnabled(!loading);
+
         pbLoading.setVisibility(loading ? View.VISIBLE : View.GONE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // Auto-refresh to detect consumed vouchers when returning from checkout
+        loadAvailableVouchers();
     }
 }

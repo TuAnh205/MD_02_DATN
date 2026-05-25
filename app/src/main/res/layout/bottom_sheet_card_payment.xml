@@ -71,7 +71,7 @@
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Nhập 16 chữ số thẻ, ví dụ: 1234 5678 9012 3456"
+            android:text="Nhập số thẻ test: 4242 4242 4242 4242"
             android:textColor="#757575"
             android:textSize="13sp"
             android:layout_marginTop="4dp" />

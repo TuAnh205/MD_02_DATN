@@ -28,10 +28,16 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
 
     private final List<Voucher> list;
     private final VoucherActionListener listener;
+    private final boolean showActions;
 
     public VoucherListAdapter(List<Voucher> list, VoucherActionListener listener) {
+        this(list, listener, true);
+    }
+
+    public VoucherListAdapter(List<Voucher> list, VoucherActionListener listener, boolean showActions) {
         this.list = list;
         this.listener = listener;
+        this.showActions = showActions;
     }
 
     public VoucherListAdapter(List<Voucher> list) {
@@ -43,7 +49,7 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
             @Override
             public void onDelete(Voucher voucher) {
             }
-        });
+        }, false);  // User mode: no edit/delete buttons
     }
 
     @NonNull
@@ -71,8 +77,16 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
         holder.tvStatus.setText(status);
         holder.tvStatus.setTextColor(getStatusColor(status));
 
-        holder.btnEdit.setOnClickListener(v -> listener.onEdit(voucher));
-        holder.btnDelete.setOnClickListener(v -> listener.onDelete(voucher));
+        // Only show edit/delete buttons if showActions is true (for shop/admin use)
+        if (showActions && listener != null) {
+            holder.btnEdit.setVisibility(View.VISIBLE);
+            holder.btnDelete.setVisibility(View.VISIBLE);
+            holder.btnEdit.setOnClickListener(v -> listener.onEdit(voucher));
+            holder.btnDelete.setOnClickListener(v -> listener.onDelete(voucher));
+        } else {
+            holder.btnEdit.setVisibility(View.GONE);
+            holder.btnDelete.setVisibility(View.GONE);
+        }
     }
 
     @Override

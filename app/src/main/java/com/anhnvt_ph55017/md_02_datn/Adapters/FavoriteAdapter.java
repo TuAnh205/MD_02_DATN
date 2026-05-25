@@ -22,6 +22,7 @@ import com.bumptech.glide.Glide;
 
 import org.json.JSONObject;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.ViewHolder> {
@@ -54,7 +55,8 @@ public class FavoriteAdapter extends RecyclerView.Adapter<FavoriteAdapter.ViewHo
         Product p = list.get(position);
 
         holder.tvName.setText(p.getName());
-        holder.tvPrice.setText("$" + p.getPrice());
+        DecimalFormat format = new DecimalFormat("#,###");
+        holder.tvPrice.setText(format.format(p.getPrice()) + "đ");
 
         Glide.with(context)
                 .load(p.getImageUrl())

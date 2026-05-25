@@ -7,6 +7,7 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.anhnvt_ph55017.md_02_datn.R;
@@ -53,7 +54,7 @@ public class VoucherClaimAdapter extends RecyclerView.Adapter<VoucherClaimAdapte
 
     public static class Holder extends RecyclerView.ViewHolder {
         TextView tvName, tvDesc, tvCode;
-        Button btnClaim;
+        AppCompatButton btnClaim;
 
         public Holder(@NonNull View itemView) {
             super(itemView);

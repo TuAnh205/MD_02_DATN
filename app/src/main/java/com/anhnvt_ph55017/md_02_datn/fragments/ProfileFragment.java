@@ -8,6 +8,7 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.Fragment;
 
 import android.view.LayoutInflater;
@@ -27,7 +28,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 
 public class ProfileFragment extends Fragment {
 
-    Button btnLogin, btnRegister, btnLogout;
+    AppCompatButton btnLogin, btnRegister, btnLogout;
     View rowClaimVoucher;
     ImageView imgAvatar;
     TextView tvName, tvEmail, tvOrderCount, tvWishlistCount, tvLanguage, tvDMK;

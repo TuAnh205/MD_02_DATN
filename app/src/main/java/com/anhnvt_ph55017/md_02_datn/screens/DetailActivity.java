@@ -31,6 +31,8 @@ import com.bumptech.glide.Glide;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+
+import java.text.DecimalFormat;
 import java.util.List;
 
 
@@ -212,7 +214,8 @@ public class DetailActivity extends AppCompatActivity {
                                 .into(imgProduct);
 
                         tvName.setText(name);
-                        tvPrice.setText("$" + price);
+                        DecimalFormat format = new DecimalFormat("#,###");
+                        tvPrice.setText(format.format(price) + "đ");
                         tvDesc.setText(description);
                         if (item.optJSONObject("shopId") != null) {
                             String shopName = item.optJSONObject("shopId").optString("name", "");

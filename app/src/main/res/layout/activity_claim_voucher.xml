@@ -55,25 +55,7 @@
             android:layout_marginTop="12dp"
             android:background="#22000000" />
 
-        <EditText
-            android:id="@+id/edtVoucherCode"
-            android:hint="Nhập mã voucher (nếu có)"
-            android:textColor="@color/onBackground"
-            android:textColorHint="#888888"
-            android:background="@drawable/bg_card"
-            android:padding="14dp"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/btnClaimVoucher"
-            android:text="Nhận bằng mã"
-            android:layout_marginTop="12dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@drawable/bg_btn_blue"
-            android:textColor="@android:color/white" />
 
         <ProgressBar
             android:id="@+id/pbLoading"

@@ -21,6 +21,7 @@ import com.anhnvt_ph55017.md_02_datn.utils.CartApiService;
 import com.anhnvt_ph55017.md_02_datn.utils.SessionManager;
 import com.bumptech.glide.Glide;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHolder> {
@@ -48,7 +49,8 @@ public class ProductAdapter extends RecyclerView.Adapter<ProductAdapter.ViewHold
 
         // ===== TEXT =====
         holder.tvName.setText(product.getName());
-        holder.tvPrice.setText("$" + product.getPrice());
+        DecimalFormat format = new DecimalFormat("#,###");
+        holder.tvPrice.setText(format.format(product.getPrice()) + "đ");
         holder.tvRating.setText(product.getRating() + " (" + product.getReviewCount() + ")");
         if (product.getShopName() != null && !product.getShopName().isEmpty()) {
             holder.tvShopName.setVisibility(View.VISIBLE);

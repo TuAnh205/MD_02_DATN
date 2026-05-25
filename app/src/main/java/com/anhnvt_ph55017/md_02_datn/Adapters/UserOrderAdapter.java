@@ -131,7 +131,7 @@ public class UserOrderAdapter extends RecyclerView.Adapter<UserOrderAdapter.View
             case "confirmed":
             case "đã xác nhận":
             case "da xac nhan":
-                return R.drawable.bg_badge_active;
+                return R.drawable.bg_badge_pending;
             case "shipping":
             case "shipped":
             case "đang giao":
