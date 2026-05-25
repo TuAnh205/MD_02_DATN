@@ -110,109 +110,115 @@ export default function AdminRevenue() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Doanh Thu</h1>
-        <p className="text-gray-600 mt-1">Xem doanh thu bán hàng và phí nền tảng 5% theo từng sản phẩm, từng shop</p>
+        <h1 className="text-3xl font-bold text-slate-900">Báo cáo Doanh Thu</h1>
+        <p className="text-slate-600 mt-2">Xem doanh thu bán hàng và phí nền tảng chi tiết theo shop, sản phẩm và thời gian</p>
       </div>
 
       {policyInfo && (
-        <div className="rounded-xl border border-blue-200 bg-blue-50 px-5 py-4">
-          <p className="text-sm font-semibold text-blue-900">Chính sách phí nền tảng</p>
-          <p className="mt-1 text-sm text-blue-800">
-            Từ {new Date(policyInfo.feeStartDate).toLocaleString('vi-VN')}, hệ thống tính phí sàn {Math.round(policyInfo.commissionRate * 100)}% trên giá bán sản phẩm khi đơn hàng thanh toán thành công.
+        <div className="rounded-2xl border-2 border-blue-200 bg-gradient-to-r from-blue-50 to-blue-100 px-6 py-4 shadow-sm">
+          <p className="text-sm font-bold text-blue-900 flex items-center gap-2">
+            <span>ℹ️</span> Chính sách phí nền tảng
+          </p>
+          <p className="mt-2 text-sm text-blue-800">
+            Từ <span className="font-semibold">{new Date(policyInfo.feeStartDate).toLocaleString('vi-VN')}</span>, hệ thống tính phí <span className="font-bold text-blue-700">{Math.round(policyInfo.commissionRate * 100)}%</span> trên giá bán sản phẩm khi đơn hàng thanh toán thành công.
           </p>
         </div>
       )}
 
-      {/* Tabs */}
-      <div className="flex flex-wrap gap-2 border-b border-gray-200">
-        <button
-          onClick={() => setActiveTab('total')}
-          className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
-            activeTab === 'total'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Tổng doanh thu
-        </button>
-        <button
-          onClick={() => setActiveTab('shops')}
-          className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
-            activeTab === 'shops'
-              ? 'border-blue-600 text-blue-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Doanh thu bán hàng theo shop
-        </button>
-        <button
-          onClick={() => setActiveTab('platform-products')}
-          className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
-            activeTab === 'platform-products'
-              ? 'border-amber-600 text-amber-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Phí nền tảng theo sản phẩm
-        </button>
-        <button
-          onClick={() => setActiveTab('platform-shops')}
-          className={`px-5 py-2 font-medium text-sm border-b-2 transition -mb-px ${
-            activeTab === 'platform-shops'
-              ? 'border-rose-600 text-rose-600'
-              : 'border-transparent text-gray-500 hover:text-gray-700'
-          }`}
-        >
-          Phí nền tảng theo shop
-        </button>
-      </div>
-
-      {/* Controls */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex gap-2">
+      {/* Controls & Tabs */}
+      <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+          {/* View Type Buttons */}
+          <div className="flex gap-3">
             <button
               onClick={() => setViewType('month')}
-              className={`px-4 py-2 rounded font-medium transition ${
+              className={`px-5 py-2 rounded-lg font-bold text-sm transition-all duration-200 ${
                 viewType === 'month'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Xem theo tháng
+              📅 Xem theo Tháng
             </button>
             <button
               onClick={() => setViewType('year')}
-              className={`px-4 py-2 rounded font-medium transition ${
+              className={`px-5 py-2 rounded-lg font-bold text-sm transition-all duration-200 ${
                 viewType === 'year'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                  ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-md'
+                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Xem theo năm
+              📊 Xem theo Năm
             </button>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Date Navigation */}
+          <div className="flex items-center gap-4 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl px-6 py-3 border border-slate-200">
             <button
               onClick={handlePrevious}
-              className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+              className="p-2 rounded-lg hover:bg-white transition-colors text-slate-600 hover:text-blue-600 font-bold"
             >
-              ← Trước
+              ◀
             </button>
-            <span className="font-semibold text-lg min-w-[150px] text-center">
+            <span className="font-bold text-lg min-w-[180px] text-center text-slate-900">
               {formatDate()}
             </span>
             <button
               onClick={handleNext}
-              className="px-3 py-2 bg-gray-200 rounded hover:bg-gray-300 transition"
+              className="p-2 rounded-lg hover:bg-white transition-colors text-slate-600 hover:text-blue-600 font-bold"
             >
-              Sau →
+              ▶
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden">
+        <div className="flex flex-wrap border-b-2 border-slate-200">
+          <button
+            onClick={() => setActiveTab('total')}
+            className={`flex-1 px-6 py-4 font-bold text-sm transition-all duration-200 ${
+              activeTab === 'total'
+                ? 'border-b-4 border-blue-600 text-blue-600 bg-blue-50'
+                : 'text-slate-600 hover:text-slate-900 border-b-4 border-transparent'
+            }`}
+          >
+            💰 Tổng Doanh Thu
+          </button>
+          <button
+            onClick={() => setActiveTab('shops')}
+            className={`flex-1 px-6 py-4 font-bold text-sm transition-all duration-200 ${
+              activeTab === 'shops'
+                ? 'border-b-4 border-purple-600 text-purple-600 bg-purple-50'
+                : 'text-slate-600 hover:text-slate-900 border-b-4 border-transparent'
+            }`}
+          >
+            🏪 Doanh Thu Shop
+          </button>
+          <button
+            onClick={() => setActiveTab('platform-products')}
+            className={`flex-1 px-6 py-4 font-bold text-sm transition-all duration-200 ${
+              activeTab === 'platform-products'
+                ? 'border-b-4 border-amber-600 text-amber-600 bg-amber-50'
+                : 'text-slate-600 hover:text-slate-900 border-b-4 border-transparent'
+            }`}
+          >
+            📦 Phí Theo Sản Phẩm
+          </button>
+          <button
+            onClick={() => setActiveTab('platform-shops')}
+            className={`flex-1 px-6 py-4 font-bold text-sm transition-all duration-200 ${
+              activeTab === 'platform-shops'
+                ? 'border-b-4 border-rose-600 text-rose-600 bg-rose-50'
+                : 'text-slate-600 hover:text-slate-900 border-b-4 border-transparent'
+            }`}
+          >
+            🛍️ Phí Theo Shop
+          </button>
         </div>
       </div>
 
@@ -220,115 +226,135 @@ export default function AdminRevenue() {
       {activeTab === 'total' && (
         <>
           {/* Total Revenue Card */}
-          <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-lg shadow p-6 text-white">
-            <p className="text-green-100 text-sm font-medium">Tổng Doanh Thu ({formatDate()})</p>
-            <p className="text-4xl font-bold mt-2">{formatCurrency(totalRevenue)}</p>
-            <p className="text-green-100 text-sm mt-2">Từ các đơn hàng thanh toán thành công</p>
+          <div className="bg-gradient-to-br from-green-600 to-emerald-700 rounded-3xl shadow-lg p-8 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+            <div className="relative z-10">
+              <p className="text-green-100 text-sm font-bold uppercase tracking-widest">Tổng Doanh Thu ({formatDate()})</p>
+              <p className="text-5xl font-bold mt-4">{formatCurrency(totalRevenue)}</p>
+              <p className="text-green-100 text-sm mt-3">📊 Từ các đơn hàng thanh toán thành công</p>
+            </div>
           </div>
 
-          {/* Chart */}
+          {/* Chart & Stats */}
           {revenueData.length > 0 ? (
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Biểu đồ doanh thu</h2>
-              <div className="overflow-x-auto">
-                <div className="min-w-max" style={{ minHeight: '400px' }}>
-                  <div className="flex items-end gap-2 h-80 border-l-2 border-b-2 border-gray-300 pl-4 pb-4">
-                    {revenueData.map((item, index) => {
-                      const maxRevenue = getMaxRevenue();
-                      const percentage = maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
-                      return (
-                        <div key={index} className="flex-1 flex flex-col items-center group">
-                          <div
-                            className="w-full bg-gradient-to-t from-blue-500 to-blue-400 rounded-t transition-all hover:from-blue-600 hover:to-blue-500 cursor-pointer"
-                            style={{ height: `${percentage || 5}%` }}
-                            title={`${getChartLabel(item)}: ₫${item.revenue.toLocaleString('vi-VN')}`}
-                          >
-                            <div className="h-full flex items-start justify-center pt-1 opacity-0 group-hover:opacity-100 transition">
-                              <span className="text-white text-xs font-bold bg-blue-600 px-1 rounded">
-                                {Math.round((item.revenue / 1000000) * 10) / 10}M
-                              </span>
-                            </div>
-                          </div>
-                          <p className="text-xs text-gray-600 mt-2 font-medium">{getChartLabel(item)}</p>
-                          <p className="text-xs text-gray-500 mt-1">₫{Math.round(item.revenue / 1000)}K</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              </div>
-              <div className="mt-8 p-4 bg-gray-50 rounded border border-gray-200">
-                <p className="text-sm font-semibold text-gray-700 mb-3">Thống kê chi tiết:</p>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                  <div>
-                    <p className="text-xs text-gray-500">Tổng doanh thu</p>
-                    <p className="text-lg font-bold text-gray-900">₫{totalRevenue.toLocaleString('vi-VN')}</p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Trung bình/ngày</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      ₫{Math.round(totalRevenue / revenueData.length).toLocaleString('vi-VN')}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Cao nhất</p>
-                    <p className="text-lg font-bold text-green-600">
-                      ₫{Math.max(...revenueData.map(d => d.revenue)).toLocaleString('vi-VN')}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-500">Thấp nhất</p>
-                    <p className="text-lg font-bold text-orange-600">
-                      ₫{Math.min(...revenueData.map(d => d.revenue)).toLocaleString('vi-VN')}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <p className="text-gray-400 text-lg">📊 Chưa có dữ liệu doanh thu</p>
-            </div>
-          )}
-
-          {/* Table View */}
-          {revenueData.length > 0 && (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-bold text-gray-900">Chi tiết doanh thu</h2>
-              </div>
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
-                        {viewType === 'month' ? 'Ngày' : 'Tháng'}
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tỷ lệ</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y">
-                    {revenueData.map((item, index) => {
-                      const percentage = totalRevenue > 0 ? ((item.revenue / totalRevenue) * 100).toFixed(1) : 0;
-                      return (
-                        <tr key={index} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 text-sm font-medium text-gray-900">{getChartLabel(item)}</td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">{formatCurrency(item.revenue)}</td>
-                          <td className="px-6 py-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-blue-500 rounded-full" style={{ width: `${percentage}%` }}></div>
+            <>
+              {/* Chart */}
+              <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-8">
+                <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+                  <span>📈</span> Biểu đồ doanh thu
+                </h2>
+                <div className="overflow-x-auto">
+                  <div className="min-w-max" style={{ minHeight: '450px' }}>
+                    <div className="flex items-end gap-2 h-96 border-l-4 border-b-4 border-slate-300 pl-6 pb-6">
+                      {revenueData.map((item, index) => {
+                        const maxRevenue = getMaxRevenue();
+                        const percentage = maxRevenue > 0 ? (item.revenue / maxRevenue) * 100 : 0;
+                        return (
+                          <div key={index} className="flex-1 flex flex-col items-center group">
+                            <div className="relative h-full w-full flex items-end justify-center">
+                              <div
+                                className="w-3/4 bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-lg transition-all duration-200 hover:from-blue-700 hover:to-blue-500 cursor-pointer shadow-md"
+                                style={{ height: `${Math.max(percentage, 8)}%` }}
+                                title={`${getChartLabel(item)}: ₫${item.revenue.toLocaleString('vi-VN')}`}
+                              >
+                                <div className="h-full flex items-start justify-center pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                  <span className="text-white text-xs font-bold bg-blue-700 px-2 py-1 rounded-full">
+                                    {Math.round((item.revenue / 1000000) * 10) / 10}M
+                                  </span>
+                                </div>
                               </div>
-                              <span className="text-gray-600">{percentage}%</span>
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
+                            <p className="text-xs text-slate-700 font-bold mt-3">{getChartLabel(item)}</p>
+                            <p className="text-xs text-slate-500 mt-1">₫{Math.round(item.revenue / 1000)}K</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
               </div>
+
+              {/* Statistics */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Tổng doanh thu</p>
+                  <p className="text-3xl font-bold text-slate-900 mt-3">₫{totalRevenue.toLocaleString('vi-VN')}</p>
+                  <p className="text-xs text-slate-500 mt-2">Toàn kỳ</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Trung bình/ngày</p>
+                  <p className="text-3xl font-bold text-blue-600 mt-3">₫{Math.round(totalRevenue / revenueData.length).toLocaleString('vi-VN')}</p>
+                  <p className="text-xs text-slate-500 mt-2">{revenueData.length} ngày</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Cao nhất</p>
+                  <p className="text-3xl font-bold text-green-600 mt-3">
+                    ₫{Math.max(...revenueData.map(d => d.revenue)).toLocaleString('vi-VN')}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">Ngày đỉnh điểm</p>
+                </div>
+                <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6 hover:shadow-md transition-shadow">
+                  <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Thấp nhất</p>
+                  <p className="text-3xl font-bold text-amber-600 mt-3">
+                    ₫{Math.min(...revenueData.map(d => d.revenue)).toLocaleString('vi-VN')}
+                  </p>
+                  <p className="text-xs text-slate-500 mt-2">Ngày thấp nhất</p>
+                </div>
+              </div>
+
+              {/* Detailed Table */}
+              {revenueData.length > 0 && (
+                <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden">
+                  <div className="p-6 border-b-2 border-slate-200">
+                    <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                      <span>📋</span> Chi tiết doanh thu
+                    </h2>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-blue-600">
+                        <tr>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">
+                            {viewType === 'month' ? 'Ngày' : 'Tháng'}
+                          </th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Doanh Thu</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Tỷ Lệ</th>
+                          <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Thứ Hạng</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-200">
+                        {revenueData.map((item, index) => {
+                          const percentage = totalRevenue > 0 ? ((item.revenue / totalRevenue) * 100).toFixed(1) : 0;
+                          const isMax = item.revenue === Math.max(...revenueData.map(d => d.revenue));
+                          const isMin = item.revenue === Math.min(...revenueData.map(d => d.revenue));
+                          return (
+                            <tr key={index} className={`hover:bg-blue-50 transition-colors ${isMax ? 'bg-green-50' : isMin ? 'bg-amber-50' : ''}`}>
+                              <td className="px-6 py-4 text-sm font-bold text-slate-900">{getChartLabel(item)}</td>
+                              <td className="px-6 py-4 text-sm font-bold text-blue-600">{formatCurrency(item.revenue)}</td>
+                              <td className="px-6 py-4 text-sm">
+                                <div className="flex items-center gap-3">
+                                  <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                    <div className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full" style={{ width: `${percentage}%` }}></div>
+                                  </div>
+                                  <span className="text-slate-700 font-semibold min-w-[45px]">{percentage}%</span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-4 text-sm">
+                                {isMax && <span className="inline-flex items-center gap-1 px-3 py-1 bg-green-200 text-green-900 rounded-lg font-bold text-xs">🏆 Cao nhất</span>}
+                                {isMin && <span className="inline-flex items-center gap-1 px-3 py-1 bg-amber-200 text-amber-900 rounded-lg font-bold text-xs">📉 Thấp nhất</span>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-12 text-center">
+              <p className="text-slate-400 text-lg">📊 Chưa có dữ liệu doanh thu</p>
             </div>
           )}
         </>
@@ -338,49 +364,55 @@ export default function AdminRevenue() {
       {activeTab === 'shops' && (
         <>
           {/* Shop Total Card */}
-          <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg shadow p-6 text-white">
-            <p className="text-purple-100 text-sm font-medium">Tổng doanh thu các shop ({formatDate()})</p>
-            <p className="text-4xl font-bold mt-2">{formatCurrency(shopTotal)}</p>
-            <p className="text-purple-100 text-sm mt-2">{shopRevenue.length} shop có doanh thu</p>
+          <div className="bg-gradient-to-br from-purple-600 to-indigo-700 rounded-3xl shadow-lg p-8 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+            <div className="relative z-10">
+              <p className="text-purple-100 text-sm font-bold uppercase tracking-widest">Tổng Doanh Thu - Shop ({formatDate()})</p>
+              <p className="text-5xl font-bold mt-4">{formatCurrency(shopTotal)}</p>
+              <p className="text-purple-100 text-sm mt-3">📊 Từ {shopRevenue.length} shop có doanh thu</p>
+            </div>
           </div>
 
           {shopRevenue.length > 0 ? (
-            <div className="bg-white rounded-lg shadow overflow-hidden">
-              <div className="p-6 border-b">
-                <h2 className="text-lg font-bold text-gray-900">Doanh thu từng shop</h2>
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden">
+              <div className="p-6 border-b-2 border-slate-200">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                  <span>🏪</span> Doanh thu từng shop
+                </h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
-                  <thead className="bg-gray-50">
+                  <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-purple-600">
                     <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xếp hạng</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tên shop</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Doanh thu</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đơn hàng</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm bán</th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tỷ lệ</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Xếp Hạng</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Tên Shop</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Doanh Thu</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Đơn Hàng</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Sản Phẩm</th>
+                      <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Tỷ Lệ</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y">
+                  <tbody className="divide-y divide-slate-200">
                     {shopRevenue.map((shop, index) => {
                       const percentage = shopTotal > 0 ? ((shop.revenue / shopTotal) * 100).toFixed(1) : 0;
                       return (
-                        <tr key={shop.shopId} className="hover:bg-gray-50">
-                          <td className="px-6 py-4 text-sm font-bold text-gray-500">
-                            {index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`}
+                        <tr key={shop.shopId} className="hover:bg-purple-50 transition-colors">
+                          <td className="px-6 py-4 text-sm font-bold">
+                            {index === 0 ? <span className="text-2xl">🥇</span> : index === 1 ? <span className="text-2xl">🥈</span> : index === 2 ? <span className="text-2xl">🥉</span> : <span className="text-slate-600 font-bold">#{index + 1}</span>}
                           </td>
-                          <td className="px-6 py-4 text-sm font-semibold text-gray-900">{shop.shopName}</td>
-                          <td className="px-6 py-4 text-sm text-gray-500">{shop.shopEmail}</td>
-                          <td className="px-6 py-4 text-sm font-bold text-green-700">{formatCurrency(shop.revenue)}</td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{shop.orderCount}</td>
-                          <td className="px-6 py-4 text-sm text-gray-700">{shop.itemsSold}</td>
                           <td className="px-6 py-4 text-sm">
-                            <div className="flex items-center gap-2">
-                              <div className="w-24 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                <div className="h-full bg-purple-500 rounded-full" style={{ width: `${percentage}%` }}></div>
+                            <div className="font-bold text-slate-900">{shop.shopName}</div>
+                            <div className="text-xs text-slate-500">{shop.shopEmail}</div>
+                          </td>
+                          <td className="px-6 py-4 text-sm font-bold text-green-600">{formatCurrency(shop.revenue)}</td>
+                          <td className="px-6 py-4 text-sm font-semibold text-slate-900">{shop.orderCount}</td>
+                          <td className="px-6 py-4 text-sm font-semibold text-slate-900">{shop.itemsSold}</td>
+                          <td className="px-6 py-4 text-sm">
+                            <div className="flex items-center gap-3">
+                              <div className="w-32 h-2 bg-slate-200 rounded-full overflow-hidden">
+                                <div className="h-full bg-gradient-to-r from-purple-500 to-purple-600 rounded-full" style={{ width: `${percentage}%` }}></div>
                               </div>
-                              <span className="text-gray-600">{percentage}%</span>
+                              <span className="text-slate-700 font-semibold min-w-[45px]">{percentage}%</span>
                             </div>
                           </td>
                         </tr>
@@ -391,8 +423,8 @@ export default function AdminRevenue() {
               </div>
             </div>
           ) : (
-            <div className="bg-white rounded-lg shadow p-12 text-center">
-              <p className="text-gray-400 text-lg">📊 Chưa có dữ liệu doanh thu theo shop</p>
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-12 text-center">
+              <p className="text-slate-400 text-lg">📊 Chưa có dữ liệu doanh thu theo shop</p>
             </div>
           )}
         </>
@@ -400,53 +432,61 @@ export default function AdminRevenue() {
 
       {activeTab === 'platform-products' && (
         <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <div className="rounded-lg bg-gradient-to-r from-amber-500 to-orange-500 p-6 text-white shadow">
-              <p className="text-sm font-medium text-amber-50">Tổng phí nền tảng ({formatDate()})</p>
-              <p className="mt-2 text-4xl font-bold">{formatCurrency(platformProductTotal)}</p>
+          {/* Summary Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="bg-gradient-to-br from-amber-600 to-orange-700 rounded-3xl shadow-lg p-8 text-white overflow-hidden relative">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+              <div className="relative z-10">
+                <p className="text-amber-100 text-sm font-bold uppercase tracking-widest">Tổng Phí Nền Tảng</p>
+                <p className="text-4xl font-bold mt-3">{formatCurrency(platformProductTotal)}</p>
+                <p className="text-amber-100 text-sm mt-2">({formatDate()})</p>
+              </div>
             </div>
-            <div className="rounded-lg bg-white p-6 shadow">
-              <p className="text-sm font-medium text-gray-500">Dòng bán hàng phát sinh phí</p>
-              <p className="mt-2 text-3xl font-bold text-gray-900">{platformProductCount}</p>
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-8">
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Dòng Bán Hàng Phát Sinh</p>
+              <p className="text-4xl font-bold text-slate-900 mt-3">{platformProductCount}</p>
+              <p className="text-sm text-slate-500 mt-2">Sản phẩm</p>
             </div>
-            <div className="rounded-lg bg-white p-6 shadow">
-              <p className="text-sm font-medium text-gray-500">Dòng bán hàng đã thu phí</p>
-              <p className="mt-2 text-3xl font-bold text-rose-600">{platformActiveCount}</p>
+            <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-8">
+              <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Đã Thu Phí</p>
+              <p className="text-4xl font-bold text-rose-600 mt-3">{platformActiveCount}</p>
+              <p className="text-sm text-slate-500 mt-2">Dòng đã thanh toán</p>
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-bold text-gray-900">Chi tiết phí theo sản phẩm</h2>
+          {/* Products Table */}
+          <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden">
+            <div className="p-6 border-b-2 border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span>📦</span> Chi tiết phí theo sản phẩm
+              </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-amber-600">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shop</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đơn hàng</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Giá trị tính phí</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phí 5%</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ngày thanh toán đơn</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Trạng thái</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Sản Phẩm</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Shop</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Đơn Hàng</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Giá Trị Tính Phí</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Phí 5%</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Trạng Thái</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-slate-200">
                   {platformProducts.map((product) => (
-                    <tr key={product.productId} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">{product.productName}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        <div>{product.shopName}</div>
-                        <div className="text-xs text-gray-500">{product.shopEmail}</div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{product.orderNumber}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{formatCurrency(product.baseAmount)}</td>
-                      <td className="px-6 py-4 text-sm font-bold text-amber-700">{formatCurrency(product.feeAmount)}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{new Date(product.feeStartAt).toLocaleString('vi-VN')}</td>
+                    <tr key={product.productId} className="hover:bg-amber-50 transition-colors">
+                      <td className="px-6 py-4 text-sm font-bold text-slate-900">{product.productName}</td>
                       <td className="px-6 py-4 text-sm">
-                        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${product.feeStatus === 'paid' ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700'}`}>
-                          {product.feeStatus === 'paid' ? 'Đã thu phí' : 'Chưa thanh toán'}
+                        <div className="font-semibold text-slate-900">{product.shopName}</div>
+                        <div className="text-xs text-slate-500">{product.shopEmail}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">{product.orderNumber}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">{formatCurrency(product.baseAmount)}</td>
+                      <td className="px-6 py-4 text-sm font-bold text-amber-700">{formatCurrency(product.feeAmount)}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg ${product.feeStatus === 'paid' ? 'bg-green-200 text-green-900' : 'bg-rose-200 text-rose-900'}`}>
+                          {product.feeStatus === 'paid' ? '✓ Đã thu phí' : '⏳ Chưa TT'}
                         </span>
                       </td>
                     </tr>
@@ -455,7 +495,9 @@ export default function AdminRevenue() {
               </table>
             </div>
             {platformProducts.length === 0 && (
-              <div className="p-10 text-center text-gray-500">Chưa có sản phẩm nào bắt đầu phát sinh phí trong kỳ đã chọn.</div>
+              <div className="p-10 text-center text-slate-500">
+                <p className="text-lg">📊 Chưa có sản phẩm nào phát sinh phí</p>
+              </div>
             )}
           </div>
         </>
@@ -463,47 +505,61 @@ export default function AdminRevenue() {
 
       {activeTab === 'platform-shops' && (
         <>
-          <div className="rounded-lg bg-gradient-to-r from-rose-500 to-pink-600 p-6 text-white shadow">
-            <p className="text-sm font-medium text-rose-50">Tổng phí nền tảng theo shop ({formatDate()})</p>
-            <p className="mt-2 text-4xl font-bold">{formatCurrency(platformShopTotal)}</p>
-            <p className="mt-2 text-sm text-rose-100">{platformShops.length} shop có sản phẩm phát sinh phí</p>
+          <div className="bg-gradient-to-br from-rose-600 to-pink-700 rounded-3xl shadow-lg p-8 text-white overflow-hidden relative">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-10 rounded-full -mr-16 -mt-16"></div>
+            <div className="relative z-10">
+              <p className="text-rose-100 text-sm font-bold uppercase tracking-widest">Tổng Phí Nền Tảng - Shop ({formatDate()})</p>
+              <p className="text-5xl font-bold mt-4">{formatCurrency(platformShopTotal)}</p>
+              <p className="text-rose-100 text-sm mt-3">📊 Từ {platformShops.length} shop phát sinh phí</p>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow overflow-hidden">
-            <div className="p-6 border-b">
-              <h2 className="text-lg font-bold text-gray-900">Phí nền tảng theo từng shop</h2>
+          <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden">
+            <div className="p-6 border-b-2 border-slate-200">
+              <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+                <span>🛍️</span> Phí nền tảng theo từng shop
+              </h2>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gray-50">
+                <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-rose-600">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Xếp hạng</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Shop</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tổng phí</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm trong kỳ</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Đã tới hạn</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sản phẩm tiêu biểu</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Xếp Hạng</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Shop</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Tổng Phí</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Sản Phẩm</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Đã Thu Phí</th>
+                    <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">Sản Phẩm Tiêu Biểu</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y">
+                <tbody className="divide-y divide-slate-200">
                   {platformShops.map((shop, index) => (
-                    <tr key={shop.shopId} className="hover:bg-gray-50 align-top">
-                      <td className="px-6 py-4 text-sm font-bold text-gray-500">#{index + 1}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
-                        <div className="font-semibold text-gray-900">{shop.shopName}</div>
-                        <div className="text-xs text-gray-500">{shop.shopEmail}</div>
+                    <tr key={shop.shopId} className="hover:bg-rose-50 transition-colors align-top">
+                      <td className="px-6 py-4 text-sm font-bold">
+                        {index === 0 ? <span className="text-2xl">🥇</span> : index === 1 ? <span className="text-2xl">🥈</span> : index === 2 ? <span className="text-2xl">🥉</span> : <span className="text-slate-600 font-bold">#{index + 1}</span>}
                       </td>
-                      <td className="px-6 py-4 text-sm font-bold text-rose-700">{formatCurrency(shop.totalFeeRevenue)}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{shop.productCount}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{shop.activeFeeProducts}</td>
-                      <td className="px-6 py-4 text-sm text-gray-700">
+                      <td className="px-6 py-4 text-sm">
+                        <div className="font-bold text-slate-900">{shop.shopName}</div>
+                        <div className="text-xs text-slate-500">{shop.shopEmail}</div>
+                      </td>
+                      <td className="px-6 py-4 text-sm font-bold text-rose-600">{formatCurrency(shop.totalFeeRevenue)}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">{shop.productCount}</td>
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">{shop.activeFeeProducts}</td>
+                      <td className="px-6 py-4 text-sm">
                         <div className="space-y-2">
-                          {shop.products.slice(0, 3).map((product) => (
-                            <div key={product.productId} className="rounded-lg bg-gray-50 px-3 py-2">
-                              <div className="font-medium text-gray-900">{product.productName}</div>
-                              <div className="text-xs text-gray-500">{product.orderNumber} • {formatCurrency(product.feeAmount)} • {new Date(product.feeStartAt).toLocaleDateString('vi-VN')}</div>
+                          {shop.products.slice(0, 2).map((product) => (
+                            <div key={product.productId} className="rounded-lg bg-slate-50 px-3 py-2 border border-slate-200">
+                              <div className="font-semibold text-slate-900 text-xs truncate">{product.productName}</div>
+                              <div className="text-xs text-slate-500 mt-1">
+                                <span className="font-bold text-rose-600">{formatCurrency(product.feeAmount)}</span> • {new Date(product.feeStartAt).toLocaleDateString('vi-VN')}
+                              </div>
                             </div>
                           ))}
+                          {shop.products.length > 2 && (
+                            <div className="text-xs text-slate-600 font-semibold px-3 py-1">
+                              +{shop.products.length - 2} sản phẩm khác
+                            </div>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -512,7 +568,9 @@ export default function AdminRevenue() {
               </table>
             </div>
             {platformShops.length === 0 && (
-              <div className="p-10 text-center text-gray-500">Chưa có shop nào phát sinh phí nền tảng trong kỳ đã chọn.</div>
+              <div className="p-10 text-center text-slate-500">
+                <p className="text-lg">📊 Chưa có shop nào phát sinh phí nền tảng</p>
+              </div>
             )}
           </div>
         </>

@@ -38,20 +38,20 @@ export default function AdminFeedbacks() {
 
   const getTypeColor = (type) => {
     switch (type) {
-      case 'complaint': return 'bg-red-100 text-red-800';
-      case 'suggestion': return 'bg-blue-100 text-blue-800';
-      case 'question': return 'bg-yellow-100 text-yellow-800';
-      case 'praise': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'complaint': return 'bg-red-200 text-red-900';
+      case 'suggestion': return 'bg-blue-200 text-blue-900';
+      case 'question': return 'bg-amber-200 text-amber-900';
+      case 'praise': return 'bg-green-200 text-green-900';
+      default: return 'bg-slate-200 text-slate-900';
     }
   };
 
   const getTypeText = (type) => {
     switch (type) {
-      case 'complaint': return 'Khiếu nại';
-      case 'suggestion': return 'Góp ý';
-      case 'question': return 'Câu hỏi';
-      case 'praise': return 'Khen ngợi';
+      case 'complaint': return '⚠️ Khiếu nại';
+      case 'suggestion': return '💡 Góp ý';
+      case 'question': return '❓ Câu hỏi';
+      case 'praise': return '👍 Khen ngợi';
       default: return type;
     }
   };
@@ -65,64 +65,63 @@ export default function AdminFeedbacks() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Quản lý Phản hồi</h1>
-          <p className="text-gray-600 mt-1">Xem và xử lý phản hồi từ khách hàng</p>
+          <h1 className="text-3xl font-bold text-slate-900">Quản lý Phản hồi</h1>
+          <p className="text-slate-600 mt-2">Xem và xử lý phản hồi từ khách hàng ({feedbacks.length})</p>
         </div>
       </div>
 
       {/* Feedbacks List */}
-      <div className="space-y-4">
+      <div className="space-y-5">
         {feedbacks.map((feedback) => (
-          <div key={feedback._id} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-            <div className="flex items-start justify-between">
+          <div key={feedback._id} className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6 hover:shadow-md transition-all duration-200">
+            <div className="flex items-start justify-between gap-4">
               <div className="flex-1">
-                <div className="flex items-center space-x-4 mb-3">
-                  <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-medium">
-                      {feedback.user?.name?.charAt(0)?.toUpperCase() || 'U'}
-                    </span>
+                <div className="flex items-center space-x-4 mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl flex items-center justify-center text-white font-bold shadow-md">
+                    {feedback.user?.name?.charAt(0)?.toUpperCase() || 'U'}
                   </div>
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
                       <div>
-                        <div className="font-medium text-gray-900">{feedback.user?.name}</div>
-                        <div className="text-sm text-gray-500">{feedback.user?.email}</div>
+                        <div className="font-bold text-slate-900 truncate">{feedback.user?.name}</div>
+                        <div className="text-sm text-slate-500 truncate">{feedback.user?.email}</div>
                       </div>
-                      <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${getTypeColor(feedback.type)}`}>
+                      <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg flex-shrink-0 ${getTypeColor(feedback.type)}`}>
                         {getTypeText(feedback.type)}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500 mt-1">
-                      {new Date(feedback.createdAt).toLocaleDateString('vi-VN')} lúc{' '}
-                      {new Date(feedback.createdAt).toLocaleTimeString('vi-VN')}
+                    <div className="text-sm text-slate-500 mt-2 flex items-center gap-2">
+                      📅 {new Date(feedback.createdAt).toLocaleDateString('vi-VN')}
+                      <span className="text-slate-400">•</span>
+                      🕐 {new Date(feedback.createdAt).toLocaleTimeString('vi-VN')}
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-3">
-                  <h4 className="font-medium text-gray-900 mb-2">{feedback.subject}</h4>
-                  <div className="text-gray-700 leading-relaxed">
+                <div className="mb-4 p-4 bg-gradient-to-r from-slate-50 to-blue-50 rounded-xl border-2 border-blue-200">
+                  <h4 className="font-bold text-slate-900 mb-2">{feedback.subject}</h4>
+                  <div className="text-slate-800 leading-relaxed">
                     {feedback.message}
                   </div>
                 </div>
 
                 {feedback.order && (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="text-sm text-gray-600">
-                      <span className="font-medium">Liên quan đến đơn hàng:</span> #{feedback.order.slice(-8)}
+                  <div className="mt-4 p-3 bg-gradient-to-r from-orange-50 to-yellow-50 rounded-lg border-l-4 border-orange-600">
+                    <div className="text-sm font-semibold text-orange-800">
+                      📦 Liên quan đến đơn hàng: #{feedback.order.slice(-8)}
                     </div>
                   </div>
                 )}
               </div>
 
-              <div className="ml-4">
+              <div className="ml-4 flex-shrink-0">
                 <button
                   onClick={() => deleteFeedback(feedback._id)}
-                  className="px-3 py-1 text-sm text-red-600 border border-red-300 rounded-lg hover:bg-red-50 transition-colors"
+                  className="px-4 py-2 text-sm text-white font-bold bg-red-500 hover:bg-red-600 rounded-lg transition-all duration-200 hover:shadow-md"
                 >
                   Xóa
                 </button>
@@ -133,30 +132,30 @@ export default function AdminFeedbacks() {
       </div>
 
       {feedbacks.length === 0 && (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <div className="text-gray-400 text-6xl mb-4">💬</div>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có phản hồi nào</h3>
-          <p className="text-gray-500">Phản hồi từ khách hàng sẽ xuất hiện ở đây</p>
+        <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-12 text-center">
+          <div className="text-slate-300 text-7xl mb-4">💬</div>
+          <h3 className="text-lg font-bold text-slate-900 mb-2">Chưa có phản hồi nào</h3>
+          <p className="text-slate-600">Phản hồi từ khách hàng sẽ xuất hiện ở đây</p>
         </div>
       )}
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6">
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1}
-            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             ← Trước
           </button>
-          <span className="text-sm text-gray-700">
-            Trang {page} / {totalPages}
+          <span className="text-sm font-bold text-slate-800">
+            Trang <span className="text-blue-600">{page}</span> / <span className="text-slate-600">{totalPages}</span>
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page === totalPages}
-            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             Sau →
           </button>

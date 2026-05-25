@@ -35,93 +35,91 @@ export default function AdminProducts() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Danh sách Sản phẩm</h1>
-          <p className="text-gray-600 mt-1">Xem tất cả sản phẩm từ các shop đã đăng ký</p>
+          <h1 className="text-3xl font-bold text-slate-900">Danh sách Sản phẩm</h1>
+          <p className="text-slate-600 mt-2">Xem tất cả sản phẩm từ các shop đã đăng ký ({products.length})</p>
         </div>
       </div>
 
       {/* Products Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border-2 border-slate-200 overflow-hidden hover:shadow-md transition-shadow">
         <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
+          <table className="min-w-full divide-y divide-slate-200">
+            <thead className="bg-gradient-to-r from-slate-100 to-slate-50 border-b-2 border-blue-600">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">
                   Sản phẩm
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">
                   Danh mục
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">
                   Người tạo
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">
                   Giá
                 </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                <th className="px-6 py-4 text-left text-xs font-bold text-slate-800 uppercase tracking-widest">
                   Tồn kho
                 </th>
-
               </tr>
             </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
+            <tbody className="bg-white divide-y divide-slate-200">
               {products.map((product) => (
-                <tr key={product._id} className="hover:bg-gray-50">
+                <tr key={product._id} className="hover:bg-blue-50 transition-colors duration-150">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <div className="w-12 h-12 bg-gray-200 rounded-lg flex items-center justify-center mr-3">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-100 to-slate-100 rounded-xl flex items-center justify-center shadow-md flex-shrink-0 overflow-hidden border-2 border-blue-200">
                         {product.images && product.images[0] ? (
                           <img
                             src={product.images[0]}
                             alt={product.name}
-                            className="w-12 h-12 object-cover rounded-lg"
+                            className="w-14 h-14 object-cover"
                           />
                         ) : (
-                          <span className="text-gray-400 text-lg">📦</span>
+                          <span className="text-slate-400 text-xl">📦</span>
                         )}
                       </div>
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{product.name}</div>
-                        <div className="text-sm text-gray-500 truncate max-w-xs">
-                          {product.description}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-bold text-slate-900 truncate">{product.name}</div>
+                        <div className="text-xs text-slate-500 truncate max-w-xs">
+                          {product.description?.substring(0, 40)}...
                         </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className="inline-flex px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full">
-                      {product.category || 'Chưa phân loại'}
+                    <span className="inline-flex px-3 py-1 text-xs font-bold bg-gradient-to-r from-blue-100 to-blue-50 text-blue-800 rounded-lg border border-blue-200">
+                      {product.category || 'N/A'}
                     </span>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">
+                    <div className="text-sm font-bold text-slate-900">
                       {product.createdBy?.name || 'N/A'}
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs text-slate-500">
                       {product.createdBy?.email || ''}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900">
+                    <div className="text-sm font-bold text-blue-600 text-lg">
                       {product.price?.toLocaleString()}₫
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                    <span className={`inline-flex px-3 py-1 text-xs font-bold rounded-lg ${
                       product.stock > 10
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-emerald-200 text-emerald-900'
                         : product.stock > 0
-                        ? 'bg-yellow-100 text-yellow-800'
-                        : 'bg-red-100 text-red-800'
+                        ? 'bg-amber-200 text-amber-900'
+                        : 'bg-red-200 text-red-900'
                     }`}>
-                      {product.stock}
+                      {product.stock} sản phẩm
                     </span>
                   </td>
-
                 </tr>
               ))}
             </tbody>
@@ -129,35 +127,36 @@ export default function AdminProducts() {
         </div>
 
         {products.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-gray-400 text-6xl mb-4">📦</div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Chưa có sản phẩm nào</h3>
-            <p className="text-gray-500">Các sản phẩm từ shop đã đăng ký sẽ hiển thị ở đây</p>
+          <div className="text-center py-16">
+            <div className="text-slate-300 text-7xl mb-4">📦</div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">Chưa có sản phẩm nào</h3>
+            <p className="text-slate-600">Các sản phẩm từ shop đã đăng ký sẽ hiển thị ở đây</p>
           </div>
         )}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex justify-between items-center">
+        <div className="flex justify-between items-center bg-white rounded-2xl shadow-sm border-2 border-slate-200 p-6">
           <button
             onClick={() => setPage(page - 1)}
             disabled={page === 1}
-            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             ← Trước
           </button>
-          <span className="text-sm text-gray-700">
-            Trang {page} / {totalPages}
+          <span className="text-sm font-bold text-slate-800">
+            Trang <span className="text-blue-600">{page}</span> / <span className="text-slate-600">{totalPages}</span>
           </span>
           <button
             onClick={() => setPage(page + 1)}
             disabled={page === totalPages}
-            className="px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-6 py-2 text-sm font-bold text-white bg-gradient-to-r from-blue-600 to-blue-700 rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all duration-200"
           >
             Sau →
           </button>
         </div>
+      )}
       )}
     </div>
   );
