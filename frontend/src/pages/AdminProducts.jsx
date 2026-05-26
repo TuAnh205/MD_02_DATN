@@ -157,7 +157,7 @@ export default function AdminProducts() {
           </button>
         </div>
       )}
-      )}
+      
     </div>
   );
 }

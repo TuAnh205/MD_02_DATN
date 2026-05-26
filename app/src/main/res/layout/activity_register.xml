@@ -56,6 +56,41 @@
             android:paddingStart="12dp"
             android:paddingEnd="12dp"
             android:gravity="center_vertical"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Loại tài khoản"
+            android:textColor="#383838"
+            android:textSize="14sp"
+            android:layout_marginTop="16dp"/>
+
+        <RadioGroup
+            android:id="@+id/rgRole"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp">
+
+            <RadioButton
+                android:id="@+id/rbCustomer"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Khách hàng"
+                android:checked="true"
+                android:textColor="#383838"
+                android:textSize="14sp"/>
+
+            <RadioButton
+                android:id="@+id/rbShop"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Shop"
+                android:layout_marginStart="24dp"
+                android:textColor="#383838"
+                android:textSize="14sp"/>
+        </RadioGroup>
+
         <!-- Email -->
         <EditText
 

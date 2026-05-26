@@ -268,13 +268,14 @@ exports.verifyGoogleRegistrationCode = async (req, res) => {
 // ================= REGISTER =================
 exports.register = async (req, res) => {
   try {
-    const { name, email, password, phone } = req.body;
+    const { name, email, password, phone, role = "user" } = req.body;
 
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Missing data" });
     }
 
     const normalizedEmail = email.trim().toLowerCase();
+    const normalizedRole = role === "shop" ? "shop" : "user";
 
     const exist = await User.findOne({ email: normalizedEmail });
     if (exist) {
@@ -288,7 +289,7 @@ exports.register = async (req, res) => {
       email: normalizedEmail,
       password: hashed,
       phone,
-      role: "user",
+      role: normalizedRole,
     });
 
     await user.save();

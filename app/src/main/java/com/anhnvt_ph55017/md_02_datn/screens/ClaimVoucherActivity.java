@@ -88,10 +88,10 @@ public class ClaimVoucherActivity extends AppCompatActivity {
                             for (Voucher v : vouchers) {
                                 if (v.getCode() == null) continue;
                                 String codeUpper = v.getCode().toUpperCase();
-                                // skip vouchers already claimed by this user (received or used)
-                                if (claimedCodes.contains(codeUpper)) continue;
-                                // skip vouchers that have exhausted usage limits
-                                if (v.getUsageLimit() > 0 && v.getUsedCount() >= v.getUsageLimit()) continue;
+                                boolean isClaimed = claimedCodes.contains(codeUpper);
+                                // Keep vouchers that are already claimed so they can show "Đã nhận" state.
+                                // Skip unclaimed vouchers that have exhausted usage limits.
+                                if (!isClaimed && v.getUsageLimit() > 0 && v.getUsedCount() >= v.getUsageLimit()) continue;
                                 availableList.add(v);
                             }
                             adapter.setClaimedCodes(claimedCodes);

@@ -60,9 +60,11 @@ public class NotificationAdapter extends RecyclerView.Adapter<NotificationAdapte
     private String formatDate(String isoDate) {
         try {
             SimpleDateFormat iso = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.getDefault());
+            iso.setTimeZone(java.util.TimeZone.getTimeZone("UTC"));
             Date date = iso.parse(isoDate);
 
             SimpleDateFormat out = new SimpleDateFormat("dd/MM HH:mm", Locale.getDefault());
+            out.setTimeZone(java.util.TimeZone.getDefault());
             return out.format(date);
         } catch (Exception e) {
             return "";

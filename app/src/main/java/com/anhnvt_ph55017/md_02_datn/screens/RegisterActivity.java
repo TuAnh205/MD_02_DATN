@@ -14,7 +14,6 @@ import com.android.volley.toolbox.Volley;
 
 import com.anhnvt_ph55017.md_02_datn.R;
 import com.anhnvt_ph55017.md_02_datn.utils.NetworkConstants;
-import com.google.firebase.auth.FirebaseAuth;
 
 import org.json.JSONObject;
 
@@ -22,6 +21,8 @@ import org.json.JSONObject;
 public class RegisterActivity extends AppCompatActivity {
 
     EditText edtName, edtEmail, edtPass, edtConfirm;
+    RadioGroup rgRole;
+    RadioButton rbCustomer, rbShop;
     AppCompatButton btnRegister;
     ImageView btnBack;
     TextView tvLogin;
@@ -37,6 +38,9 @@ public class RegisterActivity extends AppCompatActivity {
         edtEmail = findViewById(R.id.edtEmail);
         edtPass = findViewById(R.id.edtPass1);
         edtConfirm = findViewById(R.id.edtPass2);
+        rgRole = findViewById(R.id.rgRole);
+        rbCustomer = findViewById(R.id.rbCustomer);
+        rbShop = findViewById(R.id.rbShop);
         btnRegister = findViewById(R.id.btnRegister);
 
         // Ánh xạ icon back (ImageView đầu tiên)
@@ -82,44 +86,22 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        FirebaseAuth auth = FirebaseAuth.getInstance();
-
+        boolean isShop = rbShop.isChecked();
         btnRegister.setEnabled(false);
-
-        auth.createUserWithEmailAndPassword(email, pass)
-                .addOnCompleteListener(task -> {
-
-                    btnRegister.setEnabled(true);
-
-                    if (task.isSuccessful()) {
-
-                        auth.signOut();
-
-                        registerToServer(name, email, pass);
-
-                    } else {
-
-                        auth.signOut();
-
-                        Toast.makeText(
-                                this,
-                                "Firebase lỗi: " + task.getException().getMessage(),
-                                Toast.LENGTH_LONG
-                        ).show();
-                    }
-                });
+        registerToServer(name, email, pass, isShop);
     }
 
-    private void registerToServer(String name, String email, String password) {
+    private void registerToServer(String name, String email, String password, boolean isShop) {
 
         try {
             JSONObject body = new JSONObject();
             body.put("name", name);
             body.put("email", email);
             body.put("password", password);
+            body.put("role", isShop ? "shop" : "user");
             // ❌ KHÔNG GỬI PHONE
 
-            String url = BASE_URL + "/auth/register";
+            String url = BASE_URL + (isShop ? "/auth/register-shop" : "/auth/register");
 
             JsonObjectRequest request = new JsonObjectRequest(
                     Request.Method.POST,
@@ -127,7 +109,11 @@ public class RegisterActivity extends AppCompatActivity {
                     body,
                     response -> {
 
-                        Toast.makeText(this, "Đăng ký thành công", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(
+                            this,
+                            isShop ? "Đăng ký shop thành công" : "Đăng ký thành công",
+                            Toast.LENGTH_SHORT
+                    ).show();
 
                         Intent intent = new Intent(this, LoginActivity.class);
                         intent.putExtra("prefill_email", email);
@@ -143,6 +129,7 @@ public class RegisterActivity extends AppCompatActivity {
                         }
 
                         Toast.makeText(this, "Email đã tồn tại hoặc lỗi server", Toast.LENGTH_LONG).show();
+                    btnRegister.setEnabled(true);
                     }
             );
 
@@ -150,6 +137,7 @@ public class RegisterActivity extends AppCompatActivity {
 
         } catch (Exception e) {
             e.printStackTrace();
+            btnRegister.setEnabled(true);
         }
     }
 }

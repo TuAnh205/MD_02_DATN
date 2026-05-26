@@ -633,7 +633,7 @@ exports.replyShopReview = async (req, res) => {
       return res.status(400).json({ message: "Reply text is required" });
     }
 
-    const review = await Review.findById(id).populate("product", "shopId");
+    const review = await Review.findById(id).populate("product", "shopId name");
     if (!review) return res.status(404).json({ message: "Review not found" });
 
     if (!review.product || review.product.shopId.toString() !== shopId) {
@@ -650,6 +650,18 @@ exports.replyShopReview = async (req, res) => {
 
     await review.save();
     await review.populate("response.respondedBy", "name");
+
+    await Notification.create({
+      user: review.user,
+      type: "review_response",
+      title: "Shop đã trả lời đánh giá của bạn",
+      message: `Shop đã phản hồi đánh giá về sản phẩm ${review.product?.name || "của bạn"}`,
+      data: {
+        reviewId: review._id,
+        productId: review.product?._id,
+        shopId,
+      },
+    });
 
     res.json({ review });
   } catch (err) {

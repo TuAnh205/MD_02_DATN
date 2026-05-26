@@ -28,6 +28,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -115,7 +116,11 @@ public class LoginActivity extends AppCompatActivity {
                         String userId = userObj.optString("_id", "");
                         String userName = userObj.optString("name", "User");
                         String userEmail = userObj.optString("email", email);
-                        String role = userObj.optString("role", "user");
+                        String role = userObj.optString("role", "").trim();
+                        if (role.isEmpty()) {
+                            role = response.optString("role", "user").trim();
+                        }
+                        role = role.isEmpty() ? "user" : role.toLowerCase(Locale.ROOT);
 
                         SessionManager.saveToken(this, token);
                         SessionManager.saveUserSession(this, userId, userEmail, userName, role);
@@ -143,7 +148,8 @@ public class LoginActivity extends AppCompatActivity {
 
                         Toast.makeText(this, "Đăng nhập thành công", Toast.LENGTH_SHORT).show();
 
-                        if ("shop".equals(role)) {
+                        boolean isShop = "shop".equalsIgnoreCase(role) || "seller".equalsIgnoreCase(role);
+                        if (isShop) {
                             startActivity(new Intent(this, ShopMainActivity.class));
                         } else {
                             startActivity(new Intent(this, MainActivity.class));

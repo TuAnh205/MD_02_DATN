@@ -46,6 +46,9 @@
             android:name=".screens.ResetPass"
             android:exported="false" />
         <activity
+            android:name=".screens.ResetPasswordActivity"
+            android:exported="false" />
+        <activity
             android:name=".screens.NotificationActivity"
             android:exported="false" />
         <activity
