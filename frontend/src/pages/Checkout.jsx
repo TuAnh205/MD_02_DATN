@@ -72,6 +72,7 @@ export default function Checkout() {
   ];
 
   const navigate = useNavigate();
+  const [provinceCodes, setProvinceCodes] = useState([]);
   const [provinceOptions, setProvinceOptions] = useState(
     vietnamProvinces.map((name) => ({ name, code: null }))
   );
@@ -125,31 +126,36 @@ export default function Checkout() {
   }, []);
 
   React.useEffect(() => {
-    const fetchProvinces = async () => {
-      try {
-        const res = await fetch('https://provinces.open-api.vn/api/p/');
-        if (!res.ok) return;
-        const data = await res.json();
-        if (!Array.isArray(data) || data.length === 0) return;
+   const loadProvinceCodes = async () => {
+  try {
+    const res = await fetch('https://provinces.open-api.vn/api/p/');
 
-        const mapped = data
-          .map((p) => ({
-            name: p.name,
-            code: p.code
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+    if (!res.ok) return;
 
-        setProvinceOptions(mapped);
-      } catch (err) {
-        // Keep fallback province list if API is unavailable
-      }
-    };
+    const data = await res.json();
 
-    fetchProvinces();
+    if (!Array.isArray(data)) return;
+
+    const provinces = data.map((province) => ({
+      name: province.name,
+      code: province.code
+    }));
+
+    setProvinceCodes(provinces);
+
+    // THÊM DÒNG NÀY
+    setProvinceOptions(provinces);
+
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+    loadProvinceCodes();
   }, []);
 
   React.useEffect(() => {
-    const selectedProvince = provinceOptions.find((p) => p.name === formData.city);
+    const selectedProvince = provinceCodes.find((p) => p.name === formData.city);
 
     if (!selectedProvince?.code) {
       setDistrictOptions([]);
@@ -163,15 +169,15 @@ export default function Checkout() {
         const res = await fetch(`https://provinces.open-api.vn/api/p/${selectedProvince.code}?depth=2`);
         if (!res.ok) {
           setDistrictOptions([]);
+          setWardOptions([]);
           return;
         }
 
         const data = await res.json();
         const districts = Array.isArray(data.districts)
-          ? data.districts
-            .map((d) => ({ name: d.name, code: d.code }))
-            .sort((a, b) => a.name.localeCompare(b.name, 'vi'))
+          ? data.districts.map((d) => ({ name: d.name, code: d.code }))
           : [];
+
         setDistrictOptions(districts);
         setWardOptions([]);
       } catch (err) {
@@ -183,7 +189,7 @@ export default function Checkout() {
     };
 
     fetchDistricts();
-  }, [formData.city, provinceOptions]);
+  }, [formData.city, provinceCodes]);
 
   React.useEffect(() => {
     const selectedDistrict = districtOptions.find((d) => d.name === formData.district);
@@ -206,6 +212,7 @@ export default function Checkout() {
         const wards = Array.isArray(data.wards)
           ? data.wards.map((w) => w.name).sort((a, b) => a.localeCompare(b, 'vi'))
           : [];
+
         setWardOptions(wards);
       } catch (err) {
         setWardOptions([]);
@@ -215,7 +222,7 @@ export default function Checkout() {
     };
 
     fetchWards();
-  }, [formData.district, districtOptions]);
+  }, [formData.city, formData.district, districtOptions]);
 
   const fetchCart = async () => {
     try {
