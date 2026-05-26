@@ -148,7 +148,7 @@ export default function AdminUsers() {
               <div className={`${col.headerBg} text-white px-6 py-5 flex items-center justify-between bg-gradient-to-r`}>
                 <div className="flex items-center gap-3 font-bold text-lg">
                   <span className="text-3xl">{col.icon}</span>
-                  <span>{col.label}</span>
+                  <span className="text-black">{col.label}</span>
                 </div>
                 <span className="bg-white bg-opacity-30 text-white text-sm font-bold px-3 py-1 rounded-full border-2 border-white border-opacity-40">
                   {colUsers.length}
