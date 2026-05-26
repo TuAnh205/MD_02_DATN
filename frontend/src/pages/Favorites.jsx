@@ -78,7 +78,7 @@ export default function Favorites() {
                       className="w-full h-48 object-cover"
                     />
                     <div className="p-4">
-                      <h2 className="font-semibold text-lg text-dark line-clamp-2">{product.name}</h2>
+                      <h2 className="font-semibold text-lg text-dark line-clamp-2 min-h-14">{product.name}</h2>
                       <p className="text-sm text-gray-500 mt-2">{product.category}</p>
                       <div className="mt-4 flex items-center justify-between gap-3">
                         <p className="font-bold text-primary">₫{product.price?.toLocaleString('vi-VN')}</p>

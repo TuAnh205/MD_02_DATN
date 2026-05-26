@@ -147,7 +147,7 @@ export default function FeaturedProducts() {
                         className="w-full aspect-square object-cover rounded-t mb-4"
                       />
                       <div className="px-4 flex-1 flex flex-col">
-                        <h3 className="font-semibold text-dark mb-2 line-clamp-2 h-14 flex items-start">
+                        <h3 className="font-semibold text-dark mb-2 line-clamp-2 min-h-14 flex items-start">
                           {product.name}
                         </h3>
                         <div className="flex items-center gap-2 text-sm mb-2">

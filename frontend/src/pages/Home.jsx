@@ -440,7 +440,7 @@ export default function Home() {
                         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors" />
                       </div>
                       <div className="p-4 flex-1 flex flex-col">
-                        <h3 className="font-semibold text-dark mb-2 line-clamp-2 group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-dark mb-2 line-clamp-2 min-h-14 group-hover:text-primary transition-colors">
                           {product.name}
                         </h3>
                         <div className="flex items-center gap-2 text-sm mb-2">
@@ -707,7 +707,7 @@ export default function Home() {
                             />
                           );
                         })()}
-                        <h3 className="font-semibold text-dark mb-2 line-clamp-2">
+                        <h3 className="font-semibold text-dark mb-2 line-clamp-2 min-h-14">
                           {product.name}
                         </h3>
                         <div className="flex items-center gap-2 text-sm mb-2">
