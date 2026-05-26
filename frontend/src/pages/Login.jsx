@@ -22,6 +22,12 @@ export default function Login() {
         return;
       }
 
+      // Check if account is locked
+      if (user.isLocked) {
+        navigate('/account-locked', { replace: true });
+        return;
+      }
+
       const target =
         redirectPath ||
         (user.role === 'admin'

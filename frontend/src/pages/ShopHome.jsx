@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import api from "../services/api";
 import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export default function ShopHome() {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState({
     totalRevenue: 0,
     totalOrders: 0,
@@ -11,6 +13,13 @@ export default function ShopHome() {
   });
   const [loading, setLoading] = useState(true);
   const [billingSummary, setBillingSummary] = useState(null);
+
+  // Check if account is locked
+  useEffect(() => {
+    if (user && user.isLocked) {
+      navigate('/account-locked', { replace: true });
+    }
+  }, [user, navigate]);
 
   useEffect(() => {
     fetchDashboardData();

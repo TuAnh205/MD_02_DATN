@@ -11,6 +11,8 @@ router.use(adminAuth);
 router.get('/users', adminController.getUsers);
 router.get('/users/count', adminController.getUserCount);
 router.put('/users/:id/role', adminController.updateUserRole);
+router.put('/users/:id/lock', adminController.lockUser);
+router.delete('/users/:id/unlock', adminController.unlockUser);
 router.delete('/users/:id', adminController.deleteUser);
 
 // Shop management routes

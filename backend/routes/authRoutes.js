@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ctrl = require("../controllers/authController");
-const auth = require("../middleware/auth");
+const { auth, checkAccountLocked } = require("../middleware/auth");
 
 router.post("/register", ctrl.register);
 router.post("/register-shop", ctrl.registerShop);
@@ -14,8 +14,8 @@ router.post("/google-login", ctrl.googleLogin);
 router.post("/forgot-password", ctrl.forgotPassword);
 router.post("/reset-password", ctrl.resetPassword);
 router.get("/me", auth, ctrl.me);
-router.put("/me", auth, ctrl.updateProfile);
+router.put("/me", auth, checkAccountLocked, ctrl.updateProfile);
 router.post("/firebase-sync", ctrl.firebaseSync);
 router.post("/set-password", auth, ctrl.setPassword);
-router.put("/change-password", auth, ctrl.changePassword);
+router.put("/change-password", auth, checkAccountLocked, ctrl.changePassword);
 module.exports = router;

@@ -99,6 +99,61 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
+// Lock account
+exports.lockUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { reason } = req.body;
+
+    if (!reason || reason.trim() === '') {
+      return res.status(400).json({ message: 'Lock reason is required' });
+    }
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        isLocked: true,
+        lockReason: reason.trim(),
+        lockedAt: new Date(),
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User account locked successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
+// Unlock account
+exports.unlockUser = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      {
+        isLocked: false,
+        lockReason: '',
+        lockedAt: null,
+      },
+      { new: true }
+    ).select('-password');
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.json({ message: 'User account unlocked successfully', user });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+};
+
 // Shop management
 exports.getShops = async (req, res) => {
   try {

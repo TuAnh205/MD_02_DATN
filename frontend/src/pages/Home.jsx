@@ -113,6 +113,13 @@ export default function Home() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
+  // Check if account is locked
+  useEffect(() => {
+    if (user && user.isLocked) {
+      navigate('/account-locked', { replace: true });
+    }
+  }, [user, navigate]);
+
   useEffect(() => {
     fetchCategories();
     fetchBrands();

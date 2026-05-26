@@ -1,11 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { auth, shopAuth, ensureShopCanSell } = require("../middleware/auth");
+const { auth, shopAuth, ensureShopCanSell, checkAccountLocked } = require("../middleware/auth");
 const shopController = require("../controllers/shopController");
 
 // Apply auth and shopAuth to all routes
 router.use(auth);
 router.use(shopAuth);
+router.use(checkAccountLocked);
 
 // Profile management routes
 router.put("/profile", shopController.updateShopProfile);

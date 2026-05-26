@@ -1,10 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/cartController');
-const auth = require('../middleware/auth');
+const { auth, checkAccountLocked } = require('../middleware/auth');
 
-// Protect all cart routes with auth middleware
+// Protect all cart routes with auth middleware and account lock check
 router.use(auth);
+router.use(checkAccountLocked);
 
 router.get('/', ctrl.getCart);
 router.post('/', ctrl.addToCart);

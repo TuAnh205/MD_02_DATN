@@ -73,6 +73,9 @@ const userSchema = new mongoose.Schema({
   shopStatus: { type: String, enum: ['active', 'frozen'], default: 'active' },
   shopStatusReason: { type: String, default: '' },
   shopFrozenAt: { type: Date },
+  isLocked: { type: Boolean, default: false },
+  lockReason: { type: String, default: '' },
+  lockedAt: { type: Date },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 });

@@ -38,9 +38,25 @@ export default function ShopDashboard() {
   const [revenueSummary, setRevenueSummary] = useState(null);
   const [showPolicyNotice, setShowPolicyNotice] = useState(true);
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [isAccountLocked, setIsAccountLocked] = useState(false);
+  const [lockReason, setLockReason] = useState('');
   const profileDropdownRef = React.useRef(null);
 
   useEffect(() => {
+    const checkAccountStatus = async () => {
+      try {
+        const profile = await api.get('/auth/profile');
+        if (profile.data.user.isLocked) {
+          setIsAccountLocked(true);
+          setLockReason(profile.data.user.lockReason);
+        }
+      } catch (err) {
+        console.error('Error checking account status:', err);
+      }
+    };
+
+    checkAccountStatus();
+
     const loadNotifications = async () => {
       try {
         const items = await notificationService.getNotifications();
@@ -179,6 +195,12 @@ export default function ShopDashboard() {
             </div>
 
             <div className="flex items-center gap-3 sm:gap-6">
+              {isAccountLocked && (
+                <span className="hidden sm:inline-flex rounded-full bg-red-100 px-4 py-2 text-xs font-bold text-red-700 border border-red-300">
+                  🔒 Tài khoản bị khóa
+                </span>
+              )}
+
               {billingSummary?.isFrozen && (
                 <span className="hidden sm:inline-flex rounded-full bg-rose-100 px-4 py-2 text-xs font-bold text-rose-700 border border-rose-300">
                   ⚠️ Đóng băng bán hàng
@@ -464,6 +486,32 @@ export default function ShopDashboard() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
+                </div>
+              </section>
+            )}
+
+            {/* Locked Account Alert */}
+            {isAccountLocked && (
+              <section className="rounded-2xl border-2 border-red-300 bg-gradient-to-br from-red-50 to-red-100 p-6 shadow-sm">
+                <div className="flex items-start gap-4">
+                  <span className="text-3xl mt-1">🔒</span>
+                  <div className="flex-1">
+                    <h3 className="text-lg font-bold text-red-900 mb-2">
+                      Tài khoản của bạn đã bị khóa
+                    </h3>
+                    <p className="text-sm text-red-800 mb-3">
+                      Tài khoản này không thể sử dụng bất kỳ tính năng nào trong hệ thống.
+                    </p>
+                    {lockReason && (
+                      <div className="bg-white rounded-xl p-4 border-2 border-red-200 mb-4">
+                        <p className="text-xs font-bold text-red-700 uppercase tracking-widest">Lý do khóa tài khoản</p>
+                        <p className="text-sm text-slate-900 mt-2 font-medium">{lockReason}</p>
+                      </div>
+                    )}
+                    <p className="text-xs text-red-700 font-semibold italic">
+                      📌 Vui lòng liên hệ với đội hỗ trợ của chúng tôi để giải quyết vấn đề này.
+                    </p>
+                  </div>
                 </div>
               </section>
             )}

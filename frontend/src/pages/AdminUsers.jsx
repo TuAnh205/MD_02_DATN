@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
+import LockAccountModal from '../components/LockAccountModal';
 
 const COLUMNS = [
   {
@@ -35,6 +36,9 @@ export default function AdminUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [lockModalOpen, setLockModalOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [isLocking, setIsLocking] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -57,9 +61,48 @@ export default function AdminUsers() {
     try {
       await api.delete(`/admin/users/${userId}`);
       fetchUsers();
+      alert('Xóa người dùng thành công');
     } catch (error) {
       console.error('Error deleting user:', error);
       alert('Có lỗi xảy ra khi xóa người dùng');
+    }
+  };
+
+  const openLockModal = (user) => {
+    setSelectedUser(user);
+    setLockModalOpen(true);
+  };
+
+  const closeLockModal = () => {
+    setSelectedUser(null);
+    setLockModalOpen(false);
+  };
+
+  const lockUser = async (reason) => {
+    if (!selectedUser) return;
+    try {
+      setIsLocking(true);
+      await api.put(`/admin/users/${selectedUser._id}/lock`, { reason });
+      fetchUsers();
+      closeLockModal();
+      alert('Khóa tài khoản thành công');
+    } catch (error) {
+      console.error('Error locking user:', error);
+      alert('Có lỗi xảy ra khi khóa tài khoản');
+    } finally {
+      setIsLocking(false);
+    }
+  };
+
+  const unlockUser = async (userId) => {
+    if (!window.confirm('Bạn có chắc muốn mở khóa tài khoản này?')) return;
+    try {
+      await api.delete(`/admin/users/${userId}/unlock`);
+      fetchUsers();
+      alert('Mở khóa tài khoản thành công');
+    } catch (error) {
+      console.error('Error unlocking user:', error);
+      alert('Có lỗi xảy ra khi mở khóa tài khoản');
     }
   };
 
@@ -121,26 +164,51 @@ export default function AdminUsers() {
                   </div>
                 ) : (
                   colUsers.map((user) => (
-                    <div key={user._id} className="bg-white px-5 py-4 hover:bg-gradient-to-r hover:from-blue-50 hover:to-slate-50 transition-all duration-200 border-b border-slate-200 last:border-b-0">
+                    <div key={user._id} className={`px-5 py-4 transition-all duration-200 border-b border-slate-200 last:border-b-0 ${user.isLocked ? 'bg-red-50' : 'bg-white hover:bg-gradient-to-r hover:from-blue-50 hover:to-slate-50'}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-center gap-3 flex-1 min-w-0">
                           <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0 ${col.avatarBg} shadow-md border-2 ${col.border}`}>
                             {col.role === 'shop' ? '🏪' : user.name?.charAt(0)?.toUpperCase()}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <div className="text-sm font-bold text-slate-900 truncate">{user.name}</div>
+                            <div className="text-sm font-bold text-slate-900 truncate">
+                              {user.name}
+                              {user.isLocked && <span className="ml-2 text-xs bg-red-100 text-red-700 px-2 py-1 rounded font-bold">🔒 Đã khóa</span>}
+                            </div>
                             <div className="text-xs text-slate-500 truncate">{user.email}</div>
+                            {user.isLocked && (
+                              <div className="text-xs text-red-600 mt-1 font-semibold">
+                                Lý do: {user.lockReason}
+                              </div>
+                            )}
                             <div className="text-xs text-slate-400 mt-1 font-medium">
                               📅 {new Date(user.createdAt).toLocaleDateString('vi-VN')}
                             </div>
                           </div>
                         </div>
-                        <button
-                          onClick={() => deleteUser(user._id)}
-                          className="text-xs text-white font-bold bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition-all duration-200 flex-shrink-0 hover:shadow-md"
-                        >
-                          Xóa
-                        </button>
+                        <div className="flex gap-2 flex-shrink-0">
+                          {user.isLocked ? (
+                            <button
+                              onClick={() => unlockUser(user._id)}
+                              className="text-xs text-white font-bold bg-green-500 hover:bg-green-600 px-3 py-2 rounded-lg transition-all duration-200 hover:shadow-md"
+                            >
+                              Mở khóa
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => openLockModal(user)}
+                              className="text-xs text-white font-bold bg-yellow-500 hover:bg-yellow-600 px-3 py-2 rounded-lg transition-all duration-200 hover:shadow-md"
+                            >
+                              Khóa
+                            </button>
+                          )}
+                          <button
+                            onClick={() => deleteUser(user._id)}
+                            className="text-xs text-white font-bold bg-red-500 hover:bg-red-600 px-3 py-2 rounded-lg transition-all duration-200 hover:shadow-md"
+                          >
+                            Xóa
+                          </button>
+                        </div>
                       </div>
                     </div>
                   ))
@@ -150,6 +218,15 @@ export default function AdminUsers() {
           );
         })}
       </div>
+
+      {/* Lock Account Modal */}
+      <LockAccountModal
+        isOpen={lockModalOpen}
+        user={selectedUser}
+        onClose={closeLockModal}
+        onConfirm={lockUser}
+        isLoading={isLocking}
+      />
     </div>
   );
 }

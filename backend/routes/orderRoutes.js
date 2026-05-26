@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const ctrl = require('../controllers/orderController');
-const auth = require('../middleware/auth');
+const { auth, checkAccountLocked } = require('../middleware/auth');
 
 router.use(auth);
+router.use(checkAccountLocked);
 router.post('/', ctrl.createOrder);
 router.get('/', ctrl.getOrders);
 router.get('/:id', ctrl.getOrderById);

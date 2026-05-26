@@ -46,6 +46,16 @@ const shopAuth = async (req, res, next) => {
     }
 
     try {
+        // Check if shop account is locked
+        const shopUser = await User.findById(req.user.id);
+        if (shopUser && shopUser.isLocked) {
+            return res.status(423).json({
+                message: 'Shop account has been locked',
+                code: 'ACCOUNT_LOCKED',
+                lockReason: shopUser.lockReason,
+            });
+        }
+
         const synced = await syncShopBilling(req.user.id, { createNotifications: true });
         if (!synced?.shop) {
             return res.status(404).json({ message: 'Shop not found' });
@@ -71,8 +81,29 @@ const ensureShopCanSell = (req, res, next) => {
     next();
 };
 
+const checkAccountLocked = async (req, res, next) => {
+    if (!req.user) {
+        return next();
+    }
+
+    try {
+        const user = await User.findById(req.user.id);
+        if (user && user.isLocked) {
+            return res.status(423).json({
+                message: 'Account has been locked',
+                code: 'ACCOUNT_LOCKED',
+                lockReason: user.lockReason,
+            });
+        }
+        next();
+    } catch (err) {
+        next();
+    }
+};
+
 module.exports = auth;
 module.exports.auth = auth;
 module.exports.adminAuth = adminAuth;
 module.exports.shopAuth = shopAuth;
 module.exports.ensureShopCanSell = ensureShopCanSell;
+module.exports.checkAccountLocked = checkAccountLocked;

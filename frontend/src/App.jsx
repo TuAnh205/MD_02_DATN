@@ -10,6 +10,7 @@ import Header from "./components/Header";
 import Footer from "./components/Footer";
 import ErrorBoundary from "./components/ErrorBoundary";
 import Login from "./pages/Login";
+import AccountLockedPage from "./pages/AccountLockedPage";
 import Register from "./pages/Register";
 import Home from "./pages/Home";
 import Products from "./pages/Products";
@@ -95,11 +96,15 @@ function ShopProtectedRoute({ children }) {
 }
 
 function AppContent() {
+  const { user } = useAuth();
+  const isLockedPage = user && user.isLocked;
+
   return (
     <Router>
-      <Header />
+      {!isLockedPage && <Header />}
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/account-locked" element={<AccountLockedPage />} />
         <Route
           path="/register"
           element={<Navigate to="/register/user" replace />}
@@ -218,7 +223,7 @@ function AppContent() {
           <Route path="vouchers" element={<AdminVouchers />} />
         </Route>
       </Routes>
-      <Footer />
+      {!isLockedPage && <Footer />}
     </Router>
   );
 }
