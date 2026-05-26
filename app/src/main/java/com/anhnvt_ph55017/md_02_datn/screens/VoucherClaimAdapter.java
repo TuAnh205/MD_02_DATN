@@ -23,10 +23,22 @@ public class VoucherClaimAdapter extends RecyclerView.Adapter<VoucherClaimAdapte
 
     private List<Voucher> list;
     private OnClaimListener listener;
+    private java.util.Set<String> claimedCodes = new java.util.HashSet<>();
 
     public VoucherClaimAdapter(List<Voucher> list, OnClaimListener listener) {
         this.list = list;
         this.listener = listener;
+    }
+
+    public void setClaimedCodes(java.util.Set<String> codes) {
+        this.claimedCodes = codes != null ? codes : new java.util.HashSet<>();
+        notifyDataSetChanged();
+    }
+
+    public void addClaimedCode(String code) {
+        if (code == null) return;
+        this.claimedCodes.add(code.toUpperCase());
+        notifyDataSetChanged();
     }
 
     @NonNull
@@ -42,9 +54,20 @@ public class VoucherClaimAdapter extends RecyclerView.Adapter<VoucherClaimAdapte
         holder.tvName.setText(v.getName() != null ? v.getName() : v.getCode());
         holder.tvDesc.setText(v.getDescription() != null ? v.getDescription() : "");
         holder.tvCode.setText(v.getCode() != null ? v.getCode() : "");
-        holder.btnClaim.setOnClickListener(view -> {
-            if (listener != null) listener.onClaim(v);
-        });
+        boolean isClaimed = v.getCode() != null && claimedCodes.contains(v.getCode().toUpperCase());
+        if (isClaimed) {
+            holder.btnClaim.setText("Đã nhận");
+            holder.btnClaim.setEnabled(false);
+            holder.btnClaim.setAlpha(0.5f);
+            holder.btnClaim.setOnClickListener(null);
+        } else {
+            holder.btnClaim.setText("NHẬN");
+            holder.btnClaim.setEnabled(true);
+            holder.btnClaim.setAlpha(1f);
+            holder.btnClaim.setOnClickListener(view -> {
+                if (listener != null) listener.onClaim(v);
+            });
+        }
     }
 
     @Override
