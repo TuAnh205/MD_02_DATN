@@ -113,7 +113,9 @@ export default function OrderSuccess() {
                     <div className="bg-white rounded p-4 mb-3 space-y-2">
                       <div className="flex justify-between">
                         <span className="text-gray-600">Người thanh toán:</span>
-                        <span className="font-semibold">{order.payment.cardholderName}</span>
+                        <span className="font-semibold">
+                          {order.payment.cardholderName || order.shipping.address.name || 'Không xác định'}
+                        </span>
                       </div>
                       {order.payment.cardLastFour && (
                         <div className="flex justify-between">
@@ -155,7 +157,9 @@ export default function OrderSuccess() {
                       </div>
                       <div className="flex justify-between">
                         <span className="text-gray-600">Chủ tài khoản:</span>
-                        <span className="font-semibold">{order.payment.accountHolder}</span>
+                        <span className="font-semibold">
+                          {order.payment.accountHolder || order.shipping.address.name || 'Không xác định'}
+                        </span>
                       </div>
                       <div className="flex justify-between border-t pt-2 font-bold">
                         <span>Số tiền:</span>
