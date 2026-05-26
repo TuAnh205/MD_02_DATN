@@ -28,6 +28,8 @@ public class CartLocalManager {
                 obj.put("imageUrl", p.getImageUrl());
                 obj.put("description", p.getDescription());
                 obj.put("stock", p.getStock());
+                obj.put("shopId", p.getShopId());
+                obj.put("shopName", p.getShopName());
                 obj.put("selected", p.isSelected());
                 obj.put("quantity", p.getQuantity());
                 arr.put(obj);
@@ -54,6 +56,8 @@ public class CartLocalManager {
                         obj.optString("description", ""),
                         obj.optInt("stock", 0)
                 );
+                p.setShopId(obj.optString("shopId", ""));
+                p.setShopName(obj.optString("shopName", ""));
                 p.setSelected(obj.optBoolean("selected", false));
                 p.setQuantity(obj.optInt("quantity", 1));
                 list.add(p);

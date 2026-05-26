@@ -367,51 +367,57 @@ exports.createOrder = async (req, res) => {
         }
 
         const subtotalAmount = subtotal || 0;
-        if (subtotalAmount < voucherFromDb.minOrderValue) {
+        const applicableProducts = voucherFromDb.applicableProducts || [];
+        const applicableCategories = voucherFromDb.applicableCategories || [];
+        let applicableSubtotal = 0;
+
+        for (const item of items) {
+          const product = productMap[item.product];
+          if (!product) continue;
+
+          const matchesShop = !voucherFromDb.shop ||
+            (product.shopId && String(product.shopId) === String(voucherFromDb.shop));
+          const matchesProduct =
+            applicableProducts.length === 0 ||
+            applicableProducts.map((id) => id.toString()).includes(product._id.toString());
+          const matchesCategory =
+            applicableCategories.length === 0 ||
+            applicableCategories.includes(product.category);
+
+          if (!matchesShop || !matchesProduct || !matchesCategory) continue;
+
+          const lineTotal = (item.price || 0) * (item.qty || 1);
+          applicableSubtotal += lineTotal;
+        }
+
+        const thresholdAmount = voucherFromDb.shop ? applicableSubtotal : subtotalAmount;
+        if (thresholdAmount < voucherFromDb.minOrderValue) {
           return res.status(400).json({
             message: `Giá trị đơn hàng phải lớn hơn hoặc bằng ${voucherFromDb.minOrderValue}`,
           });
         }
 
-        if (finalDiscountAmount === 0) {
-          let applicableSubtotal = 0;
-
-          for (const item of items) {
-            const product = productMap[item.product];
-            if (!product) continue;
-
-            const itemApplicable =
-              (!voucherFromDb.applicableProducts ||
-                voucherFromDb.applicableProducts.length === 0 ||
-                voucherFromDb.applicableProducts
-                  .map((id) => id.toString())
-                  .includes(product._id.toString())) &&
-              (!voucherFromDb.applicableCategories ||
-                voucherFromDb.applicableCategories.length === 0 ||
-                voucherFromDb.applicableCategories.includes(product.category));
-
-            if (!itemApplicable) continue;
-
-            const lineTotal = (item.price || 0) * (item.qty || 1);
-            applicableSubtotal += lineTotal;
-          }
-
-          if (voucherFromDb.type === "percentage") {
-            let computedDiscount =
-              (applicableSubtotal * voucherFromDb.value) / 100;
-            if (
-              voucherFromDb.maxDiscount &&
-              computedDiscount > voucherFromDb.maxDiscount
-            ) {
-              computedDiscount = voucherFromDb.maxDiscount;
-            }
-            finalDiscountAmount = roundCurrency(computedDiscount);
-          } else {
-            finalDiscountAmount = roundCurrency(voucherFromDb.value);
-          }
+        if (voucherFromDb.shop && applicableSubtotal === 0) {
+          return res.status(400).json({
+            message: 'Voucher không áp dụng cho sản phẩm trong giỏ hàng',
+          });
         }
 
-        finalDiscountType = finalDiscountType || voucherFromDb.type;
+        if (voucherFromDb.type === "percentage") {
+          let computedDiscount =
+            (applicableSubtotal * voucherFromDb.value) / 100;
+          if (
+            voucherFromDb.maxDiscount &&
+            computedDiscount > voucherFromDb.maxDiscount
+          ) {
+            computedDiscount = voucherFromDb.maxDiscount;
+          }
+          finalDiscountAmount = roundCurrency(computedDiscount);
+        } else {
+          finalDiscountAmount = roundCurrency(Math.min(voucherFromDb.value, applicableSubtotal));
+        }
+
+        finalDiscountType = voucherFromDb.type;
       }
     }
 

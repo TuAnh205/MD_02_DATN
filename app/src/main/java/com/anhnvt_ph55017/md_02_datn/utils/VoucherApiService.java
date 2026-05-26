@@ -38,6 +38,46 @@ public class VoucherApiService {
         return available;
     }
 
+    private static Voucher parseVoucherJson(JSONObject v) throws Exception {
+        Voucher voucher = new Voucher();
+        java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
+        for (java.lang.reflect.Field f : fields) {
+            f.setAccessible(true);
+            if ("shopId".equals(f.getName()) || "shopName".equals(f.getName())) {
+                continue;
+            }
+            if (v.has(f.getName())) {
+                Object value = v.get(f.getName());
+                f.set(voucher, value);
+            }
+        }
+
+        if (v.has("shop")) {
+            JSONObject shopObj = v.optJSONObject("shop");
+            if (shopObj != null) {
+                voucher.setShopId(shopObj.optString("_id", shopObj.optString("id", "")));
+                voucher.setShopName(shopObj.optString("name", shopObj.optString("shopName", "")));
+            } else {
+                voucher.setShopId(v.optString("shop", voucher.getShopId()));
+            }
+        }
+
+        if (v.has("shopId")) {
+            JSONObject shopIdObj = v.optJSONObject("shopId");
+            if (shopIdObj != null) {
+                voucher.setShopId(shopIdObj.optString("_id", shopIdObj.optString("id", "")));
+                voucher.setShopName(shopIdObj.optString("name", shopIdObj.optString("shopName", "")));
+            } else {
+                voucher.setShopId(v.optString("shopId", voucher.getShopId()));
+            }
+        }
+
+        if (v.has("shopName")) {
+            voucher.setShopName(v.optString("shopName", voucher.getShopName()));
+        }
+        return voucher;
+    }
+
     public static void getVouchers(Context context, VoucherListCallback callback) {
         new Thread(() -> {
             try {
@@ -62,15 +102,7 @@ public class VoucherApiService {
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject v = arr.getJSONObject(i);
                                 android.util.Log.d("VOUCHER_API", "Parsing voucher object: " + v.toString());
-                                Voucher voucher = new Voucher();
-                                java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
-                                for (java.lang.reflect.Field f : fields) {
-                                    f.setAccessible(true);
-                                    if (v.has(f.getName())) {
-                                        Object value = v.get(f.getName());
-                                        f.set(voucher, value);
-                                    }
-                                }
+                                Voucher voucher = parseVoucherJson(v);
                                 vouchers.add(voucher);
                             }
                             callback.onSuccess(vouchers);
@@ -82,15 +114,7 @@ public class VoucherApiService {
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject v = arr.getJSONObject(i);
                                 android.util.Log.d("VOUCHER_API", "Parsing voucher object (array): " + v.toString());
-                                Voucher voucher = new Voucher();
-                                java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
-                                for (java.lang.reflect.Field f : fields) {
-                                    f.setAccessible(true);
-                                    if (v.has(f.getName())) {
-                                        Object value = v.get(f.getName());
-                                        f.set(voucher, value);
-                                    }
-                                }
+                                Voucher voucher = parseVoucherJson(v);
                                 vouchers.add(voucher);
                             }
                             callback.onSuccess(vouchers);
@@ -136,15 +160,7 @@ public class VoucherApiService {
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject v = arr.getJSONObject(i);
                                 android.util.Log.d("VOUCHER_API", "Parsing my voucher object: " + v.toString());
-                                Voucher voucher = new Voucher();
-                                java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
-                                for (java.lang.reflect.Field f : fields) {
-                                    f.setAccessible(true);
-                                    if (v.has(f.getName())) {
-                                        Object value = v.get(f.getName());
-                                        f.set(voucher, value);
-                                    }
-                                }
+                                Voucher voucher = parseVoucherJson(v);
                                 vouchers.add(voucher);
                             }
                             callback.onSuccess(filterAvailableVouchers(vouchers));
@@ -155,15 +171,7 @@ public class VoucherApiService {
                             JSONArray arr = new JSONArray(response);
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject v = arr.getJSONObject(i);
-                                Voucher voucher = new Voucher();
-                                java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
-                                for (java.lang.reflect.Field f : fields) {
-                                    f.setAccessible(true);
-                                    if (v.has(f.getName())) {
-                                        Object value = v.get(f.getName());
-                                        f.set(voucher, value);
-                                    }
-                                }
+                                Voucher voucher = parseVoucherJson(v);
                                 vouchers.add(voucher);
                             }
                             callback.onSuccess(filterAvailableVouchers(vouchers));
@@ -208,15 +216,7 @@ public class VoucherApiService {
                         if (arr != null) {
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject v = arr.getJSONObject(i);
-                                Voucher voucher = new Voucher();
-                                java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
-                                for (java.lang.reflect.Field f : fields) {
-                                    f.setAccessible(true);
-                                    if (v.has(f.getName())) {
-                                        Object value = v.get(f.getName());
-                                        f.set(voucher, value);
-                                    }
-                                }
+                                Voucher voucher = parseVoucherJson(v);
                                 vouchers.add(voucher);
                             }
                             callback.onSuccess(vouchers);
@@ -227,15 +227,7 @@ public class VoucherApiService {
                             JSONArray arr = new JSONArray(response);
                             for (int i = 0; i < arr.length(); i++) {
                                 JSONObject v = arr.getJSONObject(i);
-                                Voucher voucher = new Voucher();
-                                java.lang.reflect.Field[] fields = Voucher.class.getDeclaredFields();
-                                for (java.lang.reflect.Field f : fields) {
-                                    f.setAccessible(true);
-                                    if (v.has(f.getName())) {
-                                        Object value = v.get(f.getName());
-                                        f.set(voucher, value);
-                                    }
-                                }
+                                Voucher voucher = parseVoucherJson(v);
                                 vouchers.add(voucher);
                             }
                             callback.onSuccess(vouchers);

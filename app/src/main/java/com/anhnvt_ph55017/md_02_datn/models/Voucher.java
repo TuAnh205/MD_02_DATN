@@ -18,6 +18,8 @@ public class Voucher implements Serializable {
     private boolean isConsumed;
     private String startDate;
     private String endDate;
+    private String shopId;
+    private String shopName;
 
     public String get_id() { return _id; }
     public String getCode() { return code; }
@@ -34,6 +36,11 @@ public class Voucher implements Serializable {
     public boolean isConsumed() { return isConsumed; }
     public String getStartDate() { return startDate; }
     public String getEndDate() { return endDate; }
+    public String getShopId() { return shopId; }
+    public String getShopName() { return shopName; }
+
+    public void setShopId(String shopId) { this.shopId = shopId; }
+    public void setShopName(String shopName) { this.shopName = shopName; }
 
     // Setters omitted for brevity (add if needed)
 }

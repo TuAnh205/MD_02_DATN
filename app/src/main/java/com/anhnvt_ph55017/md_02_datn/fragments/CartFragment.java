@@ -31,7 +31,7 @@ import java.util.List;
 public class CartFragment extends Fragment {
 
     RecyclerView rvCart;
-    TextView tvSubtotal, tvTax, tvTotal;
+    TextView tvSubtotal, tvTotal;
     CheckBox cbAll;
     AppCompatButton btnCheckOut;
 
@@ -49,7 +49,6 @@ public class CartFragment extends Fragment {
         // ánh xạ view
         rvCart = view.findViewById(R.id.rvCart);
         tvSubtotal = view.findViewById(R.id.tvSubtotal);
-        tvTax = view.findViewById(R.id.tvTax);
         tvTotal = view.findViewById(R.id.tvTotal);
         cbAll = view.findViewById(R.id.cbAll);
         btnCheckOut = view.findViewById(R.id.btnCheckOut);
@@ -230,6 +229,28 @@ public class CartFragment extends Fragment {
                             p.setQty(qty);
                             p.setCartItemId(obj.optString("_id"));
 
+                            String productShopId = "";
+                            String productShopName = "";
+                            if (prod.has("shopId")) {
+                                org.json.JSONObject shopObj = prod.optJSONObject("shopId");
+                                if (shopObj != null) {
+                                    productShopId = shopObj.optString("_id", shopObj.optString("id", ""));
+                                    productShopName = shopObj.optString("name", shopObj.optString("shopName", ""));
+                                } else {
+                                    productShopId = prod.optString("shopId", "");
+                                }
+                            } else if (prod.has("shop")) {
+                                org.json.JSONObject shopObj = prod.optJSONObject("shop");
+                                if (shopObj != null) {
+                                    productShopId = shopObj.optString("_id", shopObj.optString("id", ""));
+                                    productShopName = shopObj.optString("name", shopObj.optString("shopName", ""));
+                                } else {
+                                    productShopId = prod.optString("shop", "");
+                                }
+                            }
+                            p.setShopId(productShopId);
+                            p.setShopName(productShopName);
+
                             cartList.add(p);
                         }
                     }
@@ -259,11 +280,9 @@ public class CartFragment extends Fragment {
             }
         }
 
-        double tax = subtotal * 0.1;
-        double total = subtotal + tax;
+        double total = subtotal;
 
         tvSubtotal.setText("Tạm tính: " + String.format("%,.0f đ", subtotal));
-        tvTax.setText("Thuế: " + String.format("%,.0f đ", tax));
         tvTotal.setText("Tổng cộng: " + String.format("%,.0f đ", total));
     }
 }

@@ -59,9 +59,12 @@ public class ClaimVoucherActivity extends AppCompatActivity {
             public void onSuccess(java.util.List<Voucher> myVouchers) {
                 runOnUiThread(() -> {
                     myList.clear();
-                    // Filter out consumed vouchers
+                    // Filter out consumed vouchers and vouchers đã hết lượt
                     for (Voucher v : myVouchers) {
-                        if (v != null && !v.isConsumed()) {
+                        if (v == null) continue;
+                        boolean userLimitOk = v.getUserLimit() <= 0 || v.getUsedCount() < v.getUserLimit();
+                        boolean usageLimitOk = v.getUsageLimit() <= 0 || v.getUsedCount() < v.getUsageLimit();
+                        if (!v.isConsumed() && userLimitOk && usageLimitOk) {
                             myList.add(v);
                         }
                     }
@@ -75,13 +78,15 @@ public class ClaimVoucherActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
                             setLoading(false);
                             java.util.Set<String> claimedCodes = new java.util.HashSet<>();
-                            for (Voucher mv : myList) {
-                                if (mv.getCode() != null) claimedCodes.add(mv.getCode());
+                            for (Voucher mv : myVouchers) {
+                                if (mv != null && mv.getCode() != null) {
+                                    claimedCodes.add(mv.getCode().toUpperCase());
+                                }
                             }
                             availableList.clear();
                             for (Voucher v : vouchers) {
                                 if (v.getCode() == null) continue;
-                                if (!claimedCodes.contains(v.getCode())) {
+                                if (!claimedCodes.contains(v.getCode().toUpperCase())) {
                                     availableList.add(v);
                                 }
                             }
@@ -128,23 +133,29 @@ public class ClaimVoucherActivity extends AppCompatActivity {
                 runOnUiThread(() -> {
                     setLoading(false);
                     Toast.makeText(ClaimVoucherActivity.this, message, Toast.LENGTH_LONG).show();
-                    // Remove claimed voucher from available list
+
+                    Voucher claimedVoucher = null;
                     for (int i = availableList.size() - 1; i >= 0; i--) {
                         Voucher v = availableList.get(i);
                         if (v.getCode() != null && v.getCode().equalsIgnoreCase(code)) {
-                            availableList.remove(i);
+                            claimedVoucher = availableList.remove(i);
                         }
                     }
                     adapter.notifyDataSetChanged();
-                    
-                    // Also remove from my vouchers list if it was there temporarily
-                    for (int i = myList.size() - 1; i >= 0; i--) {
-                        Voucher v = myList.get(i);
-                        if (v.getCode() != null && v.getCode().equalsIgnoreCase(code)) {
-                            myList.remove(i);
+
+                    if (claimedVoucher != null) {
+                        boolean alreadyInMyList = false;
+                        for (Voucher v : myList) {
+                            if (v.getCode() != null && v.getCode().equalsIgnoreCase(code)) {
+                                alreadyInMyList = true;
+                                break;
+                            }
                         }
+                        if (!alreadyInMyList) {
+                            myList.add(0, claimedVoucher);
+                        }
+                        myAdapter.notifyDataSetChanged();
                     }
-                    myAdapter.notifyDataSetChanged();
                 });
             }
 

@@ -6,6 +6,7 @@ import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatButton;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -14,7 +15,7 @@ import com.anhnvt_ph55017.md_02_datn.R;
 
 public class ThanhCongScreen extends AppCompatActivity {
 
-    Button btnBackHome;
+    AppCompatButton btnBackHome;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

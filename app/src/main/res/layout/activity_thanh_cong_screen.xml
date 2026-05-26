@@ -52,21 +52,20 @@
             android:layout_marginTop="18dp"
             android:gravity="center"
             android:lineSpacingExtra="4dp"
-            android:text="Cảm ơn bạn vì đã đặt hàng. Đơn hàng của bạn đang được chuẩn bị và sẽ giao đến cho bạn từ 3-7 ngày.\nVui lòng chú ý điện thoại."
+            android:text="Cảm ơn bạn đã tin tưởng và mua sắm tại cửa hàng của chúng tôi.\nĐơn hàng của bạn đang được xử lý, vui lòng chú ý điện thoại để nhận thông tin mới nhất."
             android:textColor="#444444"
             android:textSize="15sp"
             android:fontFamily="sans-serif-medium" />
-
     </LinearLayout>
 
     <!-- Button -->
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:id="@+id/btnBackHome"
         android:layout_width="match_parent"
         android:layout_height="58dp"
         android:layout_marginHorizontal="32dp"
         android:layout_marginBottom="32dp"
-        android:background="@drawable/bg_btn_success"
+        android:background="@drawable/bg_btn_blue"
         android:text="Quay lại trang chủ"
         android:textAllCaps="false"
         android:textColor="@android:color/white"

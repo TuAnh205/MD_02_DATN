@@ -173,27 +173,47 @@ exports.applyVoucher = async (req, res) => {
             return res.status(400).json({ message: 'Cart is empty' });
         }
 
-        // Calculate subtotal
-        let subtotal = cart.items.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        const applicableProductIds = (voucher.applicableProducts || []).map((id) => id.toString());
+        const applicableCategories = voucher.applicableCategories || [];
 
-        if (subtotal < voucher.minOrderValue) {
+        const applicableSubtotal = cart.items.reduce((sum, item) => {
+            const product = item.product;
+            if (!product) return sum;
+
+            const matchesShop = !voucher.shop ||
+                (product.shopId && String(product.shopId) === String(voucher.shop));
+            const matchesProduct = applicableProductIds.length === 0 ||
+                applicableProductIds.includes(product._id.toString());
+            const matchesCategory = applicableCategories.length === 0 ||
+                applicableCategories.includes(product.category);
+
+            if (!matchesShop || !matchesProduct || !matchesCategory) return sum;
+            return sum + (item.price * item.qty);
+        }, 0);
+
+        if (voucher.shop && applicableSubtotal === 0) {
+            return res.status(400).json({ message: 'Voucher không áp dụng cho sản phẩm trong giỏ hàng' });
+        }
+
+        if (applicableSubtotal < voucher.minOrderValue) {
             return res.status(400).json({ message: `Minimum order value is ${voucher.minOrderValue}` });
         }
 
         let discount = 0;
         if (voucher.type === 'percentage') {
-            discount = (subtotal * voucher.value) / 100;
+            discount = (applicableSubtotal * voucher.value) / 100;
             if (voucher.maxDiscount && discount > voucher.maxDiscount) {
                 discount = voucher.maxDiscount;
             }
         } else {
-            discount = voucher.value;
+            discount = Math.min(voucher.value, applicableSubtotal);
         }
 
         cart.voucher = {
             code: voucher.code,
             discount,
-            type: voucher.type
+            type: voucher.type,
+            shopId: voucher.shop ? String(voucher.shop) : undefined
         };
 
         await cart.save();

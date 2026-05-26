@@ -26,7 +26,7 @@ import java.util.List;
 public class CartActivity extends AppCompatActivity {
 
     RecyclerView rvCart;
-    TextView tvSubtotal, tvTax, tvTotal;
+    TextView tvSubtotal, tvTotal;
     CheckBox cbAll;
     AppCompatButton btnCheckOut;
 
@@ -49,7 +49,6 @@ public class CartActivity extends AppCompatActivity {
         // ánh xạ view
         rvCart = findViewById(R.id.rvCart);
         tvSubtotal = findViewById(R.id.tvSubtotal);
-        tvTax = findViewById(R.id.tvTax);
         tvTotal = findViewById(R.id.tvTotal);
         cbAll = findViewById(R.id.cbAll);
         btnCheckOut = findViewById(R.id.btnCheckOut);
@@ -213,6 +212,28 @@ public class CartActivity extends AppCompatActivity {
                                 String cartItemId = obj.optString("_id");
                                 p.setCartItemId(cartItemId);
 
+                                String productShopId = "";
+                                String productShopName = "";
+                                if (prod.has("shopId")) {
+                                    org.json.JSONObject shopObj = prod.optJSONObject("shopId");
+                                    if (shopObj != null) {
+                                        productShopId = shopObj.optString("_id", shopObj.optString("id", ""));
+                                        productShopName = shopObj.optString("name", shopObj.optString("shopName", ""));
+                                    } else {
+                                        productShopId = prod.optString("shopId", "");
+                                    }
+                                } else if (prod.has("shop")) {
+                                    org.json.JSONObject shopObj = prod.optJSONObject("shop");
+                                    if (shopObj != null) {
+                                        productShopId = shopObj.optString("_id", shopObj.optString("id", ""));
+                                        productShopName = shopObj.optString("name", shopObj.optString("shopName", ""));
+                                    } else {
+                                        productShopId = prod.optString("shop", "");
+                                    }
+                                }
+                                p.setShopId(productShopId);
+                                p.setShopName(productShopName);
+
                                 cartList.add(p);
 
                                 android.util.Log.d("CART_PARSE_DEBUG",
@@ -253,11 +274,9 @@ public class CartActivity extends AppCompatActivity {
             }
         }
 
-        double tax = subtotal * 0.1;
-        double total = subtotal + tax;
+        double total = subtotal;
 
         tvSubtotal.setText("Tạm tính: " + String.format("%,.0f đ", subtotal));
-        tvTax.setText("Thuế: " + String.format("%,.0f đ", tax));
         tvTotal.setText("Tổng cộng: " + String.format("%,.0f đ", total));
     }
 }

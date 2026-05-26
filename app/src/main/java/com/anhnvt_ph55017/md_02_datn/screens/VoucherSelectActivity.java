@@ -52,20 +52,18 @@ public class VoucherSelectActivity extends AppCompatActivity {
             return;
         }
 
-        // Load only vouchers the user has already claimed
         VoucherApiService.getMyVouchers(this, new VoucherApiService.VoucherListCallback() {
             @Override
-            public void onSuccess(List<Voucher> vouchers) {
+            public void onSuccess(List<Voucher> myVouchers) {
                 runOnUiThread(() -> {
                     progressBar.setVisibility(View.GONE);
                     voucherList.clear();
-                    // Filter out vouchers that the user has already used up
-                    for (Voucher v : vouchers) {
+                    for (Voucher v : myVouchers) {
+                        if (v == null || v.getCode() == null) continue;
                         boolean userLimitOk = v.getUserLimit() <= 0 || v.getUsedCount() < v.getUserLimit();
                         boolean usageLimitOk = v.getUsageLimit() <= 0 || v.getUsedCount() < v.getUsageLimit();
-                        if (userLimitOk && usageLimitOk) {
-                            voucherList.add(v);
-                        }
+                        if (!userLimitOk || !usageLimitOk) continue;
+                        voucherList.add(v);
                     }
                     adapter.notifyDataSetChanged();
                 });

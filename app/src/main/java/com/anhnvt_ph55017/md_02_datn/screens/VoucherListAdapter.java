@@ -71,7 +71,9 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
         holder.tvCode.setText(voucher.getCode() != null ? voucher.getCode() : "");
         holder.tvDiscount.setText(formatDiscount(voucher));
         holder.tvDate.setText(formatDateRange(voucher));
-        holder.tvUsage.setText(buildUsageText(voucher));
+        String usageText = buildUsageText(voucher);
+        holder.tvUsage.setText(usageText);
+        holder.tvUsage.setVisibility(usageText.isEmpty() ? View.GONE : View.VISIBLE);
 
         String status = buildStatus(voucher);
         holder.tvStatus.setText(status);
@@ -137,11 +139,29 @@ public class VoucherListAdapter extends RecyclerView.Adapter<VoucherListAdapter.
 
     private String buildUsageText(Voucher voucher) {
         int used = voucher.getUsedCount();
-        int limit = voucher.getUsageLimit();
-        if (limit <= 0) {
-            return "Đã dùng " + used + " lượt";
+        int usageLimit = voucher.getUsageLimit();
+        int userLimit = voucher.getUserLimit();
+
+        // Shop/Admin mode
+        if (showActions) {
+            if (usageLimit <= 0) {
+                return "Đã dùng " + used + " lượt";
+            }
+            return "Đã dùng " + used + "/" + usageLimit + " lượt";
         }
-        return "Đã dùng " + used + "/" + limit + " lượt";
+
+        // User mode: prefer per-user limit, fallback to total usage limit
+        int limit = userLimit > 0 ? userLimit : usageLimit;
+        if (limit <= 0) {
+            return "";
+        }
+
+        int remaining = Math.max(0, limit - used);
+        if (remaining <= 0) {
+            return "Đã hết lượt";
+        }
+
+        return "Còn " + remaining + " lần";
     }
 
     private String buildStatus(Voucher voucher) {

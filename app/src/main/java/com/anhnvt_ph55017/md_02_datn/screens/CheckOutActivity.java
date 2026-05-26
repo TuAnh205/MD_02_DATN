@@ -41,7 +41,7 @@ public class CheckOutActivity extends AppCompatActivity {
     int previousPaymentId = -1;
     boolean isProgrammaticPaymentChange = false;
 
-    TextView tvSubtotal, tvTax, tvTotal, tvVoucher;
+    TextView tvSubtotal, tvTotal, tvVoucher;
     TextView tvShipName, tvShipPhone, tvShipAddress;
     TextView tvVoucherTitle, tvVoucherValue;
 
@@ -87,7 +87,6 @@ public class CheckOutActivity extends AppCompatActivity {
         payCard = findViewById(R.id.payCard);
 
         tvSubtotal = findViewById(R.id.tvSubtotal);
-        tvTax = findViewById(R.id.tvTax);
         tvTotal = findViewById(R.id.tvTotal);
         tvVoucher = findViewById(R.id.tvVoucher);
 
@@ -142,15 +141,12 @@ public class CheckOutActivity extends AppCompatActivity {
         }
 
         double discount = calculateDiscount(subtotal);
-        double tax = subtotal * 0.1;
-        double total = subtotal + tax - discount;
+        double total = subtotal - discount;
 
         String subtotalText = String.format("Tạm tính: %,.0f đ", subtotal);
-        String taxText = String.format("Thuế: %,.0f đ", tax);
         String totalText = String.format("Tổng thanh toán: %,.0f đ", total);
 
         tvSubtotal.setText(subtotalText);
-        tvTax.setText(taxText);
         tvTotal.setText(totalText);
 
         if (discount > 0) {
@@ -164,16 +160,32 @@ public class CheckOutActivity extends AppCompatActivity {
     private double calculateDiscount(double subtotal) {
         if (selectedVoucher == null) return 0;
 
-        if (subtotal < selectedVoucher.getMinOrderValue()) return 0;
+        double applicableSubtotal = getApplicableVoucherSubtotal();
+        if (applicableSubtotal <= 0) return 0;
+        if (applicableSubtotal < selectedVoucher.getMinOrderValue()) return 0;
 
         if ("percentage".equals(selectedVoucher.getType())) {
-            double d = subtotal * selectedVoucher.getValue() / 100;
+            double d = applicableSubtotal * selectedVoucher.getValue() / 100;
             return selectedVoucher.getMaxDiscount() > 0
                     ? Math.min(d, selectedVoucher.getMaxDiscount())
                     : d;
         } else {
-            return selectedVoucher.getValue();
+            return Math.min(selectedVoucher.getValue(), applicableSubtotal);
         }
+    }
+
+    private double getApplicableVoucherSubtotal() {
+        if (selectedVoucher == null) return 0;
+
+        String voucherShopId = selectedVoucher.getShopId();
+        double subtotal = 0;
+        for (Product p : cartList) {
+            if (p == null) continue;
+            if (voucherShopId == null || voucherShopId.isEmpty() || voucherShopId.equals(p.getShopId())) {
+                subtotal += p.getPrice() * p.getQty();
+            }
+        }
+        return subtotal;
     }
 
     // ================= ORDER =================
@@ -259,6 +271,18 @@ public class CheckOutActivity extends AppCompatActivity {
             }
 
             double discount = calculateDiscount(subtotal);
+            if (selectedVoucher != null && discount <= 0) {
+                double applicableSubtotal = getApplicableVoucherSubtotal();
+                if (applicableSubtotal <= 0) {
+                    Toast.makeText(CheckOutActivity.this, "Voucher không áp dụng cho sản phẩm trong giỏ hàng", Toast.LENGTH_LONG).show();
+                    return;
+                }
+                if (applicableSubtotal < selectedVoucher.getMinOrderValue()) {
+                    Toast.makeText(CheckOutActivity.this, "Giá trị sản phẩm của shop voucher chưa đạt điều kiện", Toast.LENGTH_LONG).show();
+                    return;
+                }
+            }
+
             double total = subtotal - discount;
 
             JSONObject addressObj = new JSONObject();
@@ -512,6 +536,17 @@ public class CheckOutActivity extends AppCompatActivity {
                 } else {
                     tvVoucherValue.setText("-" + (int) selectedVoucher.getValue() + "đ");
                 }
+
+                // Show max discount cap if present (helps user understand applied cap)
+                if (selectedVoucher.getMaxDiscount() > 0) {
+                    try {
+                        tvVoucherValue.append(" • Tối đa " + String.format("%,.0f đ", selectedVoucher.getMaxDiscount()));
+                    } catch (Exception ex) {
+                        tvVoucherValue.append(" • Tối đa " + (long) selectedVoucher.getMaxDiscount() + " đ");
+                    }
+                }
+
+                android.util.Log.d("CHECKOUT_DEBUG", "Selected voucher: code=" + selectedVoucher.getCode() + ", type=" + selectedVoucher.getType() + ", value=" + selectedVoucher.getValue() + ", maxDiscount=" + selectedVoucher.getMaxDiscount());
 
                 calculateTotals();
             }
