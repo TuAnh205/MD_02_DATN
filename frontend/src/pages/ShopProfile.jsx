@@ -30,9 +30,31 @@ export default function ShopProfile() {
   const [editing, setEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState('');
+  const [billingSummary, setBillingSummary] = useState(null);
+  const [revenueSummary, setRevenueSummary] = useState(null);
+  const [showDepositModal, setShowDepositModal] = useState(false);
+  const [showWithdrawModal, setShowWithdrawModal] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [withdrawAmount, setWithdrawAmount] = useState('');
+  const [withdrawBank, setWithdrawBank] = useState('');
+  const [withdrawAccountNumber, setWithdrawAccountNumber] = useState('');
+  const [withdrawAccountName, setWithdrawAccountName] = useState('');
+  const [transactionMessage, setTransactionMessage] = useState('');
 
   useEffect(() => {
-    // Not needed for basic profile info
+    const loadData = async () => {
+      try {
+        const [billResponse, revenueResponse] = await Promise.all([
+          api.get('/shop/billing-summary'),
+          api.get('/shop/revenue?period=month')
+        ]);
+        setBillingSummary(billResponse.data.summary || null);
+        setRevenueSummary(revenueResponse.data.summary || null);
+      } catch (err) {
+        console.error('Lỗi khi tải dữ liệu:', err);
+      }
+    };
+    loadData();
   }, []);
 
   const handleSaveName = async () => {
@@ -55,6 +77,87 @@ export default function ShopProfile() {
   const handleCancel = () => {
     setShopName(user?.name || '');
     setEditing(false);
+  };
+
+  const handleDeposit = async () => {
+    if (!depositAmount || isNaN(depositAmount) || depositAmount <= 0) {
+      setTransactionMessage('Vui lòng nhập số tiền hợp lệ');
+      return;
+    }
+
+    try {
+      // Gọi API nạp tiền (cần setup endpoint trên backend)
+      await api.post('/shop/wallet/deposit', {
+        amount: parseFloat(depositAmount)
+      });
+      setTransactionMessage('✓ Nạp tiền thành công!');
+      setDepositAmount('');
+      setShowDepositModal(false);
+      // Reload billing summary
+      const response = await api.get('/shop/billing-summary');
+      setBillingSummary(response.data.summary || null);
+      setTimeout(() => setTransactionMessage(''), 3000);
+    } catch (error) {
+      console.error('Lỗi nạp tiền:', error);
+      setTransactionMessage(error.response?.data?.message || 'Lỗi khi nạp tiền');
+      setTimeout(() => setTransactionMessage(''), 3000);
+    }
+  };
+
+  const handleWithdraw = async () => {
+    if (!withdrawAmount || isNaN(withdrawAmount) || withdrawAmount <= 0) {
+      setTransactionMessage('Vui lòng nhập số tiền hợp lệ');
+      return;
+    }
+
+    if (!withdrawBank || !withdrawAccountNumber || !withdrawAccountName) {
+      setTransactionMessage('Vui lòng điền đầy đủ thông tin ngân hàng');
+      return;
+    }
+
+    if (withdrawAmount > billingSummary.walletBalance) {
+      setTransactionMessage('Số tiền rút vượt quá số dư ví');
+      return;
+    }
+
+    try {
+      // Gọi API rút tiền (cần setup endpoint trên backend)
+      await api.post('/shop/wallet/withdraw', {
+        amount: parseFloat(withdrawAmount),
+        bank: withdrawBank,
+        accountNumber: withdrawAccountNumber,
+        accountName: withdrawAccountName
+      });
+      setTransactionMessage('✓ Yêu cầu rút tiền thành công! Vui lòng chờ xác nhận.');
+      setWithdrawAmount('');
+      setWithdrawBank('');
+      setWithdrawAccountNumber('');
+      setWithdrawAccountName('');
+      setShowWithdrawModal(false);
+      // Reload billing summary
+      const response = await api.get('/shop/billing-summary');
+      setBillingSummary(response.data.summary || null);
+      setTimeout(() => setTransactionMessage(''), 4000);
+    } catch (error) {
+      console.error('Lỗi rút tiền:', error);
+      setTransactionMessage(error.response?.data?.message || 'Lỗi khi rút tiền');
+      setTimeout(() => setTransactionMessage(''), 3000);
+    }
+  };
+
+  const resetDepositForm = () => {
+    setDepositAmount('');
+    setShowDepositModal(false);
+    setTransactionMessage('');
+  };
+
+  const resetWithdrawForm = () => {
+    setWithdrawAmount('');
+    setWithdrawBank('');
+    setWithdrawAccountNumber('');
+    setWithdrawAccountName('');
+    setShowWithdrawModal(false);
+    setTransactionMessage('');
   };
 
   if (loading) {
@@ -214,6 +317,316 @@ export default function ShopProfile() {
           </div>
         </div>
       </div>
+
+      {/* Wallet Information Section */}
+      {billingSummary && (
+        <div className="rounded-2xl overflow-hidden shadow-sm border-2 border-slate-200 bg-white">
+          <div className="bg-gradient-to-r from-slate-100 to-slate-50 px-6 py-4 border-b-2 border-slate-200">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <span>💰</span> Thông Tin Ví Shop
+            </h2>
+            <p className="text-sm text-slate-600 mt-1">Quản lý số dư ví và công nợ của shop</p>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Main Stats Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Wallet Balance */}
+              <div className="rounded-xl bg-gradient-to-br from-blue-50 to-cyan-50 border-2 border-blue-200 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-blue-700 uppercase tracking-widest">💳 Số Dư Ví</p>
+                  <span className="text-2xl">🏦</span>
+                </div>
+                <p className="text-3xl font-bold text-blue-900">
+                  {Number(billingSummary.walletBalance || 0).toLocaleString("vi-VN")}đ
+                </p>
+                <p className="text-xs text-blue-600 mt-2 font-medium">Số tiền hiện có trong ví shop</p>
+              </div>
+
+              {/* Monthly Revenue */}
+              <div className="rounded-xl bg-gradient-to-br from-green-50 to-emerald-50 border-2 border-green-200 p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-bold text-green-700 uppercase tracking-widest">📈 Doanh Thu Tháng</p>
+                  <span className="text-2xl">📊</span>
+                </div>
+                <p className="text-3xl font-bold text-green-900">
+                  {Number(revenueSummary?.totalRevenue || 0).toLocaleString("vi-VN")}đ
+                </p>
+                <p className="text-xs text-green-600 mt-2 font-medium">Tổng doanh thu tháng này</p>
+              </div>
+
+              {/* Outstanding Debt */}
+              <div className={`rounded-xl bg-gradient-to-br border-2 p-5 ${
+                billingSummary.outstandingAmount > 0
+                  ? 'from-rose-50 to-pink-50 border-rose-200'
+                  : 'from-emerald-50 to-green-50 border-emerald-200'
+              }`}>
+                <div className="flex items-center justify-between mb-3">
+                  <p className={`text-xs font-bold uppercase tracking-widest ${
+                    billingSummary.outstandingAmount > 0
+                      ? 'text-rose-700'
+                      : 'text-emerald-700'
+                  }`}>
+                    {billingSummary.outstandingAmount > 0 ? '⚠️ Công Nợ' : '✓ Không Có Công Nợ'}
+                  </p>
+                  <span className="text-2xl">{billingSummary.outstandingAmount > 0 ? '💸' : '✅'}</span>
+                </div>
+                <p className={`text-3xl font-bold ${
+                  billingSummary.outstandingAmount > 0
+                    ? 'text-rose-900'
+                    : 'text-emerald-900'
+                }`}>
+                  {Number(billingSummary.outstandingAmount || 0).toLocaleString("vi-VN")}đ
+                </p>
+                <p className={`text-xs mt-2 font-medium ${
+                  billingSummary.outstandingAmount > 0
+                    ? 'text-rose-600'
+                    : 'text-emerald-600'
+                }`}>
+                  {billingSummary.outstandingAmount > 0 ? 'Phí sàn chưa thanh toán' : 'Tài khoản thanh toán đầy đủ'}
+                </p>
+              </div>
+            </div>
+
+            {/* Status and Details */}
+            <div className="border-t-2 border-slate-200 pt-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Account Status */}
+                <div className="rounded-xl bg-slate-50 border-2 border-slate-200 p-4">
+                  <p className="text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">🔐 Trạng Thái Tài Khoản</p>
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1 px-3 py-2 rounded-lg font-bold text-sm ${
+                      billingSummary.isFrozen
+                        ? 'bg-rose-100 text-rose-900 border border-rose-300'
+                        : 'bg-green-100 text-green-900 border border-green-300'
+                    }`}>
+                      <span>{billingSummary.isFrozen ? '🔒' : '✓'}</span>
+                      {billingSummary.isFrozen ? 'Bị khóa' : 'Hoạt động bình thường'}
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-2">
+                    {billingSummary.isFrozen ? 'Vui lòng thanh toán công nợ để mở khóa tài khoản' : 'Tài khoản đang hoạt động bình thường'}
+                  </p>
+                </div>
+
+                {/* Payment Policy */}
+                <div className="rounded-xl bg-blue-50 border-2 border-blue-200 p-4">
+                  <p className="text-xs font-bold text-blue-700 uppercase tracking-widest mb-2">📋 Chính Sách Phí</p>
+                  <div className="text-sm text-blue-900 space-y-1">
+                    <p className="flex items-start gap-2">
+                      <span className="font-bold">✓</span>
+                      <span>Phí sàn: <span className="font-bold">5%</span> trên mỗi đơn hàng</span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="font-bold">✓</span>
+                      <span>Tính khi khách hàng <span className="font-bold">thanh toán thành công</span></span>
+                    </p>
+                    <p className="flex items-start gap-2">
+                      <span className="font-bold">✓</span>
+                      <span>Tự động trừ từ ví shop của bạn</span>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Detailed Info Table */}
+            <div className="border-t-2 border-slate-200 pt-6">
+              <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest mb-4">Chi Tiết Tài Chính</h3>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                <div className="rounded-lg bg-slate-50 border-2 border-slate-200 p-3 text-center">
+                  <p className="text-xs text-slate-600 font-semibold mb-1">Lần Thanh Toán Gần Nhất</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {billingSummary.lastPaymentDate ? new Date(billingSummary.lastPaymentDate).toLocaleDateString('vi-VN') : 'Chưa thanh toán'}
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 border-2 border-slate-200 p-3 text-center">
+                  <p className="text-xs text-slate-600 font-semibold mb-1">Tổng Phí Đã Trừ</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {Number(billingSummary.totalFeesPaid || 0).toLocaleString("vi-VN")}đ
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 border-2 border-slate-200 p-3 text-center">
+                  <p className="text-xs text-slate-600 font-semibold mb-1">Số Đơn Hàng Tháng Này</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {revenueSummary?.totalOrders || 0} đơn
+                  </p>
+                </div>
+                <div className="rounded-lg bg-slate-50 border-2 border-slate-200 p-3 text-center">
+                  <p className="text-xs text-slate-600 font-semibold mb-1">Phí Trung Bình/Đơn</p>
+                  <p className="text-sm font-bold text-slate-900">
+                    {Number((revenueSummary?.totalRevenue || 0) * 0.05 / Math.max(1, revenueSummary?.totalOrders || 1)).toLocaleString("vi-VN")}đ
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="border-t-2 border-slate-200 pt-6 flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={() => setShowDepositModal(true)}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 font-bold hover:shadow-lg transition-all duration-200"
+              >
+                <span>💳</span> Nạp Tiền
+              </button>
+              <button
+                onClick={() => setShowWithdrawModal(true)}
+                disabled={!billingSummary.walletBalance || billingSummary.walletBalance <= 0}
+                className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-6 py-3 font-bold hover:shadow-lg transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span>🏦</span> Rút Tiền
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Transaction Message Alert */}
+      {transactionMessage && (
+        <div className={`fixed bottom-4 right-4 rounded-xl px-6 py-4 font-bold shadow-lg border-2 z-50 animate-pulse ${
+          transactionMessage.includes('✓') || transactionMessage.includes('thành công')
+            ? 'bg-gradient-to-r from-green-50 to-emerald-50 border-green-300 text-green-900'
+            : 'bg-gradient-to-r from-rose-50 to-pink-50 border-rose-300 text-rose-900'
+        }`}>
+          {transactionMessage}
+        </div>
+      )}
+
+      {/* Deposit Modal */}
+      {showDepositModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border-2 border-blue-200">
+            <div className="bg-gradient-to-r from-blue-100 to-cyan-100 px-6 py-4 border-b-2 border-blue-200">
+              <h3 className="text-xl font-bold text-blue-900 flex items-center gap-2">
+                <span>💳</span> Nạp Tiền Vào Ví
+              </h3>
+              <p className="text-sm text-blue-700 mt-1">Điền số tiền bạn muốn nạp</p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-900 mb-2">Số Tiền *</label>
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="VD: 500000"
+                  className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  min="0"
+                  step="1000"
+                />
+                <p className="text-xs text-slate-500 mt-2">Số tiền tối thiểu: 10.000đ</p>
+              </div>
+
+              <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                <p className="text-sm text-blue-900">
+                  <span className="font-bold">📌 Lưu ý:</span> Hệ thống sẽ chuyển hướng bạn tới cổng thanh toán an toàn
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t-2 border-slate-200">
+                <button
+                  onClick={resetDepositForm}
+                  className="flex-1 rounded-xl bg-slate-100 text-slate-900 px-4 py-3 font-bold hover:bg-slate-200 transition-colors"
+                >
+                  ✕ Hủy
+                </button>
+                <button
+                  onClick={handleDeposit}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-3 font-bold hover:shadow-lg transition-all duration-200"
+                >
+                  ✓ Nạp Tiền
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw Modal */}
+      {showWithdrawModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full border-2 border-emerald-200">
+            <div className="bg-gradient-to-r from-emerald-100 to-green-100 px-6 py-4 border-b-2 border-emerald-200">
+              <h3 className="text-xl font-bold text-emerald-900 flex items-center gap-2">
+                <span>🏦</span> Rút Tiền Từ Ví
+              </h3>
+              <p className="text-sm text-emerald-700 mt-1">Điền thông tin tài khoản ngân hàng</p>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-bold text-slate-900 mb-2">Số Tiền *</label>
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  placeholder="VD: 500000"
+                  max={billingSummary.walletBalance}
+                  className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
+                  min="0"
+                  step="1000"
+                />
+                <p className="text-xs text-slate-500 mt-2">Số dư hiện tại: {Number(billingSummary.walletBalance || 0).toLocaleString("vi-VN")}đ</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-900 mb-2">Tên Ngân Hàng *</label>
+                <input
+                  type="text"
+                  value={withdrawBank}
+                  onChange={(e) => setWithdrawBank(e.target.value)}
+                  placeholder="VD: Techcombank"
+                  className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-900 mb-2">Số Tài Khoản *</label>
+                <input
+                  type="text"
+                  value={withdrawAccountNumber}
+                  onChange={(e) => setWithdrawAccountNumber(e.target.value)}
+                  placeholder="VD: 1234567890"
+                  className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-bold text-slate-900 mb-2">Tên Chủ Tài Khoản *</label>
+                <input
+                  type="text"
+                  value={withdrawAccountName}
+                  onChange={(e) => setWithdrawAccountName(e.target.value)}
+                  placeholder="VD: Nguyễn Văn A"
+                  className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:border-transparent"
+                />
+              </div>
+
+              <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                <p className="text-sm text-amber-900">
+                  <span className="font-bold">⏱️ Thời gian xử lý:</span> 1-3 ngày làm việc
+                </p>
+              </div>
+
+              <div className="flex gap-3 pt-4 border-t-2 border-slate-200">
+                <button
+                  onClick={resetWithdrawForm}
+                  className="flex-1 rounded-xl bg-slate-100 text-slate-900 px-4 py-3 font-bold hover:bg-slate-200 transition-colors"
+                >
+                  ✕ Hủy
+                </button>
+                <button
+                  onClick={handleWithdraw}
+                  className="flex-1 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-white px-4 py-3 font-bold hover:shadow-lg transition-all duration-200"
+                >
+                  ✓ Rút Tiền
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
