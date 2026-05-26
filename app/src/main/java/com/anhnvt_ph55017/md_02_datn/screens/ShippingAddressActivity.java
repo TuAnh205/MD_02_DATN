@@ -253,7 +253,7 @@ public class ShippingAddressActivity extends AppCompatActivity {
         final String editDistrict = isEdit ? editing.getDistrict() : null;
         final String editWard = isEdit ? editing.getWard() : null;
 
-        LocationApiService.getLocations(new LocationApiService.LocationCallback() {
+        LocationApiService.getLocations(ShippingAddressActivity.this,new LocationApiService.LocationCallback() {
             @Override
             public void onSuccess(JSONArray locations) {
                 ArrayAdapter<String> cityAdapter = new ArrayAdapter<>(ShippingAddressActivity.this, R.layout.spinner_item);
